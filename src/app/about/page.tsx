@@ -95,7 +95,7 @@ export default function AboutPage() {
               <div className="rounded-2xl overflow-hidden aspect-[4/3] shadow-2xl">
                 <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=600&q=80" alt="KT Bank mission" className="w-full h-full object-cover" />
               </div>
-              <div className="absolute -bottom-5 -left-5 card px-5 py-4 shadow-xl">
+              <div className="hidden md:block absolute -bottom-5 -left-5 card px-5 py-4 shadow-xl">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold"
                     style={{ background: "var(--green-700)" }}>✓</div>

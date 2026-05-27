@@ -68,8 +68,8 @@ export default function GiroKontoPage() {
 
             {/* Card visual */}
             <div className="flex justify-center lg:justify-end animate-fade-up delay-200">
-              <div className="relative">
-                <div className="w-[340px] h-[200px] rounded-2xl p-7 flex flex-col justify-between shadow-2xl"
+              <div className="relative w-full sm:w-auto">
+                <div className="w-full sm:w-[340px] h-[200px] rounded-2xl p-5 sm:p-7 flex flex-col justify-between shadow-2xl"
                   style={{ background: "linear-gradient(135deg, var(--green-800), #007A3D)", border: "1px solid rgba(201,146,26,0.4)" }}>
                   <div className="flex justify-between items-start">
                     <div>
@@ -90,7 +90,7 @@ export default function GiroKontoPage() {
                     <span className="text-white font-black text-lg tracking-widest">VISA</span>
                   </div>
                 </div>
-                <div className="absolute -bottom-3 -right-3 w-[320px] h-[185px] rounded-2xl -z-10"
+                <div className="hidden sm:block absolute -bottom-3 -right-3 w-[320px] h-[185px] rounded-2xl -z-10"
                   style={{ background: "linear-gradient(135deg, var(--gold-400), var(--gold-200))", opacity: 0.18 }} />
               </div>
             </div>

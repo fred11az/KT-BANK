@@ -74,7 +74,7 @@ export default function IslamicBankingPage() {
               <div className="rounded-2xl overflow-hidden aspect-[4/3] shadow-2xl">
                 <img src="https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&q=80" alt="Finance islamique" className="w-full h-full object-cover" />
               </div>
-              <div className="absolute -top-4 -right-4 card px-4 py-3 shadow-xl text-center">
+              <div className="hidden md:block absolute -top-4 -right-4 card px-4 py-3 shadow-xl text-center">
                 <div className="text-2xl font-black" style={{ color: "var(--green-700)" }}>1,8Mrd</div>
                 <div className="text-xs" style={{ color: "var(--gray-500)" }}>musulmans dans le monde</div>
               </div>

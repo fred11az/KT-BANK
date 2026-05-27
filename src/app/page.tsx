@@ -117,7 +117,7 @@ function Hero() {
               </div>
 
               {/* Floating stat — top right */}
-              <div className="absolute -top-3 -right-3 sm:-right-6 card rounded-xl px-4 py-3 shadow-xl animate-fade-up delay-400">
+              <div className="hidden sm:block absolute -top-3 -right-3 sm:-right-6 card rounded-xl px-4 py-3 shadow-xl animate-fade-up delay-400">
                 <div className="text-xs font-medium mb-0.5" style={{ color: "var(--gray-500)" }}>GoldKonto</div>
                 <div className="text-xl font-black" style={{ color: "var(--gold-400)" }}>+4.2 %</div>
                 <div className="flex items-center gap-1 text-xs font-medium mt-0.5" style={{ color: "var(--green-600)" }}>
@@ -126,7 +126,7 @@ function Hero() {
               </div>
 
               {/* Floating stat — bottom left */}
-              <div className="absolute -bottom-3 -left-3 sm:-left-6 card rounded-xl px-4 py-3 shadow-xl animate-fade-up delay-500">
+              <div className="hidden sm:block absolute -bottom-3 -left-3 sm:-left-6 card rounded-xl px-4 py-3 shadow-xl animate-fade-up delay-500">
                 <div className="text-xs font-medium mb-0.5" style={{ color: "var(--gray-500)" }}>Zakat 2024</div>
                 <div className="text-xl font-black" style={{ color: "var(--green-700)" }}>€ 620</div>
                 <div className="text-xs" style={{ color: "var(--gray-400)" }}>Auto-calculé</div>
@@ -288,7 +288,7 @@ function IslamicSection() {
               </div>
             </div>
 
-            <div className="absolute -bottom-5 -left-5 card rounded-2xl p-4 shadow-xl">
+            <div className="hidden md:block absolute -bottom-5 -left-5 card rounded-2xl p-4 shadow-xl">
               <div className="text-2xl mb-1">☪️</div>
               <div className="font-bold text-sm" style={{ color: "var(--gray-900)" }}>100 % Halal</div>
               <div className="text-xs mt-0.5" style={{ color: "var(--gray-500)" }}>Académie Islamique Fiqh</div>

@@ -73,8 +73,8 @@ export default function JetzzCardPage() {
 
             {/* Card CSS visual */}
             <div className="flex justify-center lg:justify-end animate-fade-up delay-200">
-              <div className="relative animate-float">
-                <div className="w-[360px] h-[220px] rounded-3xl p-8 flex flex-col justify-between relative overflow-hidden"
+              <div className="relative animate-float w-full sm:w-auto">
+                <div className="w-full sm:w-[360px] h-[220px] rounded-3xl p-5 sm:p-8 flex flex-col justify-between relative overflow-hidden"
                   style={{ background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%)", boxShadow: "0 30px 80px rgba(99,102,241,0.5), 0 0 0 1px rgba(255,255,255,0.1)" }}>
                   {/* Sheen */}
                   <div className="absolute inset-0 rounded-3xl pointer-events-none"
