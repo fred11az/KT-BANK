@@ -374,7 +374,7 @@ export default function PersonalLoansPage() {
       </section>
 
       {/* Features */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-black text-gray-900 mb-4">Vorteile des KT Kredits</h2>
@@ -382,16 +382,16 @@ export default function PersonalLoansPage() {
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { icon: <Shield size={28}/>, title: "100% Scharia-konform", desc: "Kein Riba. Basiert auf dem islamischen Murabaha-Prinzip: Fester Aufpreis statt Zinsen — von Anfang an bekannt." },
-              { icon: <Zap size={28}/>, title: "Online-Entscheidung", desc: "Antrag stellen und innerhalb von 24 Stunden eine Vorentscheidung erhalten — kein Filialbesuch nötig." },
-              { icon: <Clock size={28}/>, title: "Flexible Laufzeiten", desc: "Von 6 bis 84 Monate — Sie wählen die Laufzeit, die zu Ihrem Budget passt. Feste, unveränderliche Rate." },
-              { icon: <FileText size={28}/>, title: "Minimale Unterlagen", desc: "Nur Personalausweis, 3 Gehaltsabrechnungen und Kontoauszug. Keine aufwändige Bürokratie." },
-              { icon: <Star size={28}/>, title: "Bis zu 50.000 €", desc: "Von 1.000 bis 50.000 € — für alle persönlichen Projekte frei verwendbar (Halal-Zwecke)." },
-              { icon: <CheckCircle size={28}/>, title: "Vorzeitige Rückzahlung", desc: "Jederzeit ohne Vorfälligkeitsentschädigung. Der Aufpreis wird anteilig reduziert." },
+              { icon: <Shield size={28}/>, title: "100% Scharia-konform", desc: "Kein Riba. Basiert auf dem islamischen Murabaha-Prinzip: Fester Aufpreis statt Zinsen — von Anfang an bekannt.", col: PRIMARY },
+              { icon: <Zap size={28}/>, title: "Online-Entscheidung", desc: "Antrag stellen und innerhalb von 24 Stunden eine Vorentscheidung erhalten — kein Filialbesuch nötig.", col: GOLD },
+              { icon: <Clock size={28}/>, title: "Flexible Laufzeiten", desc: "Von 6 bis 84 Monate — Sie wählen die Laufzeit, die zu Ihrem Budget passt. Feste, unveränderliche Rate.", col: PRIMARY },
+              { icon: <FileText size={28}/>, title: "Minimale Unterlagen", desc: "Nur Personalausweis, 3 Gehaltsabrechnungen und Kontoauszug. Keine aufwändige Bürokratie.", col: GOLD },
+              { icon: <Star size={28}/>, title: "Bis zu 50.000 €", desc: "Von 1.000 bis 50.000 € — für alle persönlichen Projekte frei verwendbar (Halal-Zwecke).", col: PRIMARY },
+              { icon: <CheckCircle size={28}/>, title: "Vorzeitige Rückzahlung", desc: "Jederzeit ohne Vorfälligkeitsentschädigung. Der Aufpreis wird anteilig reduziert.", col: GOLD },
             ].map((f) => (
-              <div key={f.title} className="flex gap-4 p-6 bg-gray-50 rounded-2xl border border-gray-100 hover:border-purple-200 transition-colors">
+              <div key={f.title} className="flex gap-4 p-6 bg-white rounded-2xl border border-gray-100 hover:border-green-200 transition-colors hover:-translate-y-1 duration-300">
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: "rgba(124,58,237,0.1)", color: "#7C3AED" }}>
+                  style={{ background: `${f.col}15`, color: f.col }}>
                   {f.icon}
                 </div>
                 <div>
@@ -414,46 +414,26 @@ export default function PersonalLoansPage() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-16 bg-white">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-6">
-            {[
-              { name: "Karim B.", role: "Kunde seit 2021", text: "15.000 € für meine Hochzeit — ohne einen Cent Zinsen. Der Murabaha-Aufpreis war von Anfang an klar. Sehr empfehlenswert!" },
-              { name: "Laila A.", role: "Kundin seit 2023", text: "8.000 € für mein Studium. Online beantragt, innerhalb von 2 Tagen auf dem Konto. Alles halal — ich bin sehr zufrieden." },
-            ].map((t) => (
-              <div key={t.name} className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
-                <div className="flex gap-1 mb-3">
-                  {[1,2,3,4,5].map(i => <Star key={i} size={16} fill="#7C3AED" color="#7C3AED" />)}
-                </div>
-                <p className="text-gray-700 text-sm leading-relaxed mb-4 italic">"{t.text}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white"
-                    style={{ background: "#7C3AED" }}>{t.name[0]}</div>
-                  <div>
-                    <div className="font-bold text-gray-900 text-sm">{t.name}</div>
-                    <div className="text-gray-400 text-xs">{t.role}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA */}
-      <section className="py-24" style={{ background: "linear-gradient(135deg, #2e0766, #4c1d95)" }}>
+      <section className="py-24" style={{ background: `linear-gradient(135deg, #003D1C, ${PRIMARY})` }}>
         <div className="max-w-4xl mx-auto px-4 text-center">
           <div className="text-5xl mb-6">💰</div>
-          <h2 className="text-4xl font-black text-white mb-4">Ihre Projekte — halal finanziert</h2>
-          <p className="text-purple-200 text-lg mb-8 max-w-2xl mx-auto">
-            Bis zu 50.000 € ohne einen Cent Zinsen. Online beantragen, in 24h erhalten.
+          <h2 className="text-4xl font-black text-white mb-4">Ihr Traum verdient eine halale Finanzierung</h2>
+          <p className="text-green-100 text-lg mb-8 max-w-2xl mx-auto">
+            Bis zu 50.000 € ohne einen Cent Zinsen. Online beantragen, in 24h Entscheidung erhalten.
           </p>
-          <Link href="/client/register"
-            className="inline-flex items-center gap-2 px-10 py-4 rounded-xl font-bold text-lg transition-all hover:-translate-y-1 hover:shadow-2xl"
-            style={{ background: "linear-gradient(135deg, #C9A84C, #E8C96B)", boxShadow: "0 8px 30px rgba(201,168,76,0.4)", color: "#2e0766" }}>
-            Jetzt beantragen <ArrowRight size={20} />
-          </Link>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link href="/client/register"
+              className="inline-flex items-center gap-2 px-10 py-4 rounded-xl font-bold text-lg transition-all hover:-translate-y-1 hover:shadow-2xl"
+              style={{ background: `linear-gradient(135deg, ${GOLD}, #E8C96B)`, color: "#003D1C" }}>
+              Jetzt beantragen <ArrowRight size={20} />
+            </Link>
+            <Link href="/contact"
+              className="inline-flex items-center gap-2 px-10 py-4 rounded-xl font-bold border text-white hover:bg-white/10 transition"
+              style={{ borderColor: "rgba(255,255,255,0.4)" }}>
+              Beratung anfragen
+            </Link>
+          </div>
         </div>
       </section>
     </>
