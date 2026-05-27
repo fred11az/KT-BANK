@@ -1,151 +1,149 @@
+"use client";
 import Link from "next/link";
 import { Mail, Phone, MapPin } from "lucide-react";
 
+const LINKS = {
+  Produits: [
+    { label: "KT GiroKonto",          href: "/products/giro-konto" },
+    { label: "KT GoldKonto",           href: "/products/gold-konto" },
+    { label: "KT Jetzz Card",          href: "/products/jetzz-card" },
+    { label: "Crédit Personnel",       href: "/products/personal-loans" },
+    { label: "Financement Auto",       href: "/products/vehicle-financing" },
+    { label: "KT FestgeldKonto",       href: "/products/festgeld-konto" },
+    { label: "🤲 Donation & Zakat",    href: "/products/donation" },
+    { label: "🏢 Crédit Pro & PME",    href: "/products/corporate-credit" },
+    { label: "🌱 KT JugendKonto",      href: "/products/youth-savings" },
+    { label: "🏠 Financement Immo.",   href: "/products/real-estate" },
+  ],
+  "La Banque": [
+    { label: "À propos",               href: "/about" },
+    { label: "Finance islamique",      href: "/islamic-banking" },
+    { label: "Entreprises",            href: "/corporate" },
+    { label: "Nos agences",            href: "/branches" },
+    { label: "Contact",                href: "/contact" },
+    { label: "Carrières",              href: "/careers" },
+  ],
+};
+
 export default function Footer() {
   return (
-    <footer className="text-white" style={{ background: "linear-gradient(180deg, #004020 0%, #002010 100%)" }}>
+    <footer style={{ background: "var(--green-900)" }}>
       {/* Newsletter */}
-      <div style={{ background: "linear-gradient(135deg, #005F2D, #007A3D)" }} className="py-12">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <h3 className="text-2xl font-bold text-white">Restez informé</h3>
-            <p className="text-green-200 mt-1">Recevez nos dernières offres et actualités islamiques</p>
-          </div>
-          <div className="flex gap-3 w-full md:w-auto">
-            <input
-              type="email"
-              placeholder="Votre adresse email"
-              className="flex-1 md:w-72 px-4 py-3 rounded-xl text-gray-800 text-sm outline-none focus:ring-2 ring-yellow-400"
-            />
-            <button className="px-6 py-3 rounded-xl font-semibold text-white transition-all hover:opacity-90"
-              style={{ background: "linear-gradient(135deg, #C9A84C, #E8C96B)" }}>
-              S'inscrire
-            </button>
+      <div className="border-b" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+              <h3 className="text-xl font-bold text-white mb-1">Restez informé</h3>
+              <p className="text-small" style={{ color: "rgba(255,255,255,0.55)" }}>
+                Offres, actualités et conseils en finance islamique.
+              </p>
+            </div>
+            <div className="flex w-full md:w-auto gap-2">
+              <input type="email" placeholder="votre@email.com"
+                className="input flex-1 md:w-72 text-sm"
+                style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", color: "white" }}/>
+              <button className="btn btn-gold flex-shrink-0">S'inscrire</button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Main footer */}
-      <div className="max-w-7xl mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
+      {/* Main */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-10">
           {/* Brand */}
-          <div className="lg:col-span-2">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-xl bg-white/20">
-                KT
-              </div>
+          <div className="col-span-2 lg:col-span-1">
+            <Link href="/" className="flex items-center gap-2.5 mb-5">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black"
+                style={{ background: "rgba(255,255,255,0.15)" }}>KT</div>
               <div>
-                <div className="font-bold text-xl">KT Bank AG</div>
-                <div className="text-green-300 text-sm">Meine Werte, meine Bank.</div>
+                <div className="font-bold text-sm text-white">KT Bank AG</div>
+                <div className="text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>Meine Werte, meine Bank.</div>
               </div>
-            </div>
-            <p className="text-gray-300 text-sm leading-relaxed mb-6">
-              KT Bank AG est la première banque islamique d'Allemagne, filiale de Kuveyt Türk.
-              Nous offrons des produits financiers conformes à la charia depuis 2015, régulés par la BaFin.
+            </Link>
+            <p className="text-xs leading-relaxed mb-5" style={{ color: "rgba(255,255,255,0.5)" }}>
+              Première banque islamique agréée en Allemagne depuis 2015. Filiale de Kuveyt Türk, régulée BaFin.
             </p>
-            <div className="flex gap-3">
-              {["f", "t", "ig", "in", "yt"].map((Icon, i) => (
-                <a key={i} href="#"
-                  className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all hover:-translate-y-1 text-white text-xs font-bold">
-                  {Icon.toUpperCase()}
-                </a>
-              ))}
-            </div>
-
-            {/* Certifications */}
-            <div className="mt-6 flex flex-wrap gap-2">
-              {["BaFin Régulée", "Dépôts Garantis", "Certifié Halal", "ISO 27001"].map((cert) => (
-                <span key={cert} className="px-3 py-1 rounded-full text-xs font-medium bg-white/10 text-green-200 border border-white/10">
-                  ✓ {cert}
+            <div className="flex flex-wrap gap-2">
+              {["BaFin", "Halal", "ISO 27001", "AAOIFI"].map(c => (
+                <span key={c} className="text-xs px-2.5 py-1 rounded-full font-medium"
+                  style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                  ✓ {c}
                 </span>
               ))}
             </div>
           </div>
 
-          {/* Products */}
-          <div>
-            <h4 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">Produits</h4>
-            <ul className="space-y-2">
-              {[
-                { label: "KT GiroKonto", href: "/products/giro-konto" },
-                { label: "KT GoldKonto", href: "/products/gold-konto" },
-                { label: "KT Jetzz Card", href: "/products/jetzz-card" },
-                { label: "Financement Auto", href: "/products/vehicle-financing" },
-                { label: "Crédit Personnel", href: "/products/personal-loans" },
-                { label: "KT FestgeldKonto", href: "/products/festgeld-konto" },
-                { label: "🤲 Donation & Zakat", href: "/products/donation" },
-                { label: "🏢 Crédit Pro & PME", href: "/products/corporate-credit" },
-                { label: "🌱 KT JugendKonto", href: "/products/youth-savings" },
-                { label: "🏠 Financement Immobilier", href: "/products/real-estate" },
-              ].map((item) => (
-                <li key={item.href}>
-                  <Link href={item.href} className="text-gray-300 hover:text-white text-sm transition-colors hover:translate-x-1 inline-block">
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div>
-            <h4 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">La Banque</h4>
-            <ul className="space-y-2">
-              {[
-                { label: "À propos de nous", href: "/about" },
-                { label: "Finance islamique", href: "/islamic-banking" },
-                { label: "Entreprises", href: "/corporate" },
-                { label: "Nos agences", href: "/branches" },
-                { label: "Carrières", href: "/careers" },
-                { label: "Presse", href: "/press" },
-                { label: "Blog & Actualités", href: "/blog" },
-              ].map((item) => (
-                <li key={item.href}>
-                  <Link href={item.href} className="text-gray-300 hover:text-white text-sm transition-colors">
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Links */}
+          {Object.entries(LINKS).map(([title, links]) => (
+            <div key={title} className="col-span-1">
+              <h4 className="text-xs font-bold uppercase tracking-wider mb-4" style={{ color: "rgba(255,255,255,0.4)" }}>
+                {title}
+              </h4>
+              <ul className="space-y-2.5">
+                {links.map(l => (
+                  <li key={l.href}>
+                    <Link href={l.href} className="text-xs transition-colors"
+                      style={{ color: "rgba(255,255,255,0.55)" }}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = "white")}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.55)")}>
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
 
           {/* Contact */}
-          <div>
-            <h4 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">Contact</h4>
+          <div className="col-span-2 md:col-span-1">
+            <h4 className="text-xs font-bold uppercase tracking-wider mb-4" style={{ color: "rgba(255,255,255,0.4)" }}>
+              Contact
+            </h4>
             <ul className="space-y-3">
-              <li className="flex items-start gap-2 text-gray-300 text-sm">
-                <MapPin size={16} className="mt-0.5 flex-shrink-0 text-green-400"/>
-                <span>Bockenheimer Landstraße 33<br/>60325 Frankfurt am Main</span>
+              <li className="flex items-start gap-2.5">
+                <MapPin size={14} className="mt-0.5 flex-shrink-0" style={{ color: "var(--green-400)" }}/>
+                <span className="text-xs" style={{ color: "rgba(255,255,255,0.55)" }}>
+                  Bockenheimer Landstraße 33<br/>60325 Frankfurt am Main
+                </span>
               </li>
-              <li className="flex items-center gap-2 text-gray-300 text-sm">
-                <Phone size={16} className="text-green-400"/>
-                <a href="tel:+4969247517000" className="hover:text-white transition">+49 69 2475 1700</a>
+              <li className="flex items-center gap-2.5">
+                <Phone size={14} className="flex-shrink-0" style={{ color: "var(--green-400)" }}/>
+                <a href="tel:+4969247517000" className="text-xs transition-colors"
+                  style={{ color: "rgba(255,255,255,0.55)" }}>
+                  +49 69 2475 1700
+                </a>
               </li>
-              <li className="flex items-center gap-2 text-gray-300 text-sm">
-                <Mail size={16} className="text-green-400"/>
-                <a href="mailto:info@kt-bank.de" className="hover:text-white transition">info@kt-bank.de</a>
+              <li className="flex items-center gap-2.5">
+                <Mail size={14} className="flex-shrink-0" style={{ color: "var(--green-400)" }}/>
+                <a href="mailto:info@kt-bank.de" className="text-xs transition-colors"
+                  style={{ color: "rgba(255,255,255,0.55)" }}>
+                  info@kt-bank.de
+                </a>
               </li>
             </ul>
 
-            <div className="mt-6 p-4 rounded-xl bg-white/5 border border-white/10">
-              <div className="text-xs text-green-300 font-medium mb-1">Service client</div>
-              <div className="text-white font-bold">Lun–Ven: 9h–17h</div>
-              <div className="text-gray-300 text-xs mt-1">Assistance disponible en DE, EN, TR, AR</div>
+            <div className="mt-5 p-3.5 rounded-xl" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <div className="text-xs font-semibold text-white mb-0.5">Lun–Ven : 9 h – 17 h</div>
+              <div className="text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>
+                Conseil en DE · EN · TR · AR
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Bottom bar */}
-      <div className="border-t border-white/10">
-        <div className="max-w-7xl mx-auto px-4 py-5 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="text-gray-400 text-xs">
-            © 2024 KT Bank AG. Tous droits réservés. Régulée par la BaFin (Bundesanstalt für Finanzdienstleistungsaufsicht).
-          </div>
+      {/* Bottom */}
+      <div className="border-t" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col md:flex-row justify-between items-center gap-3">
+          <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
+            © 2024 KT Bank AG · Régulée par la BaFin (Bundesanstalt für Finanzdienstleistungsaufsicht).
+          </p>
           <div className="flex flex-wrap gap-4">
-            {["Mentions légales", "Politique de confidentialité", "CGU", "Cookies", "Imprint"].map((link) => (
-              <a key={link} href="#" className="text-gray-400 hover:text-white text-xs transition-colors">
-                {link}
+            {["Mentions légales", "Confidentialité", "CGU", "Cookies", "Imprint"].map(l => (
+              <a key={l} href="#" className="text-xs transition-colors"
+                style={{ color: "rgba(255,255,255,0.35)" }}>
+                {l}
               </a>
             ))}
           </div>
