@@ -161,91 +161,215 @@ export default function PersonalLoansPage() {
       </section>
 
       {/* Simulator */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-2xl mx-auto px-4">
-          <h2 className="text-4xl font-black text-center text-gray-900 mb-10">Simulez votre crédit</h2>
-          <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
-            <div className="space-y-6 mb-8">
-              <div>
-                <div className="flex justify-between mb-2">
-                  <label className="text-sm font-semibold text-gray-700">Montant souhaité</label>
-                  <span className="font-black text-lg" style={{ color: "#7C3AED" }}>€{amount.toLocaleString("fr-FR")}</span>
-                </div>
-                <input type="range" min={1000} max={50000} step={500} value={amount}
-                  onChange={e => setAmount(Number(e.target.value))}
-                  className="w-full accent-purple-600"/>
-                <div className="flex justify-between text-xs text-gray-400 mt-1"><span>€1 000</span><span>€50 000</span></div>
+      <section id="simulator" className="py-20 bg-gray-50">
+        <div className="max-w-3xl mx-auto px-4">
+          <div className="text-center mb-10">
+            <h2 className="text-4xl font-black text-gray-900 mb-3">Kreditrechner</h2>
+            <p className="text-gray-500 text-lg">Berechnen Sie Ihre monatliche Rate — zinslos nach Murabaha</p>
+          </div>
+          <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-lg">
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-sm font-semibold text-gray-700">Kreditbetrag</label>
+                <span className="text-xl font-black" style={{ color: PRIMARY }}>€{amount.toLocaleString("de-DE")}</span>
               </div>
-              <div>
-                <div className="flex justify-between mb-2">
-                  <label className="text-sm font-semibold text-gray-700">Durée</label>
-                  <span className="font-black text-lg" style={{ color: "#7C3AED" }}>{months} mois</span>
-                </div>
-                <input type="range" min={6} max={60} step={6} value={months}
-                  onChange={e => setMonths(Number(e.target.value))}
-                  className="w-full accent-purple-600"/>
-                <div className="flex justify-between text-xs text-gray-400 mt-1"><span>6 mois</span><span>60 mois</span></div>
+              <input type="range" min={1000} max={50000} step={500} value={amount}
+                onChange={(e) => setAmount(Number(e.target.value))}
+                className="w-full h-2 rounded-full appearance-none cursor-pointer"
+                style={{ accentColor: PRIMARY }} />
+              <div className="flex justify-between text-xs text-gray-400 mt-1">
+                <span>€1.000</span><span>€50.000</span>
               </div>
             </div>
-            <div className="bg-purple-50 rounded-2xl p-6 border border-purple-100">
+            <div className="mb-8">
+              <label className="block text-sm font-semibold text-gray-700 mb-3">Laufzeit</label>
+              <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+                {[6, 12, 24, 36, 60, 84].map((m) => (
+                  <button key={m} onClick={() => setMonths(m)}
+                    className="py-2.5 rounded-xl text-sm font-bold transition-all"
+                    style={months === m
+                      ? { background: PRIMARY, color: "white", boxShadow: `0 4px 12px ${PRIMARY}50` }
+                      : { background: "#F3F4F6", color: "#374151" }}>
+                    {m} Mo.
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-2xl p-6 mb-6"
+              style={{ background: `linear-gradient(135deg, ${PRIMARY}10, ${GOLD}10)` }}>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
-                  <div className="text-xs text-gray-500">Montant total</div>
-                  <div className="text-xl font-black text-gray-900">€{totalCost.toFixed(0)}</div>
+                  <p className="text-xs text-gray-500 mb-1">Finanzierungsbetrag</p>
+                  <p className="text-lg font-black text-gray-900">€{amount.toLocaleString("de-DE")}</p>
                 </div>
                 <div>
-                  <div className="text-xs text-gray-500">Marge fixe</div>
-                  <div className="text-xl font-black text-gray-900">4%</div>
+                  <p className="text-xs text-gray-500 mb-1">Monatliche Rate</p>
+                  <p className="text-2xl font-black" style={{ color: PRIMARY }}>€{monthly}</p>
                 </div>
                 <div>
-                  <div className="text-xs text-gray-500">Mensualité</div>
-                  <div className="text-2xl font-black" style={{ color: "#7C3AED" }}>€{monthly}</div>
+                  <p className="text-xs text-gray-500 mb-1">Gesamtbetrag (4% Festgebühr)</p>
+                  <p className="text-lg font-black text-gray-900">€{totalCost.toFixed(0)}</p>
                 </div>
               </div>
+              <p className="text-center text-xs text-gray-400 mt-3">
+                * Festgebühr (Murabaha): 4% — kein variabler Zins, kein Riba. Simulation — unverbindlich.
+              </p>
             </div>
             <Link href="/client/register"
-              className="mt-6 w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-white"
-              style={{ background: "linear-gradient(135deg, #7C3AED, #8B5CF6)" }}>
-              Faire ma demande <ArrowRight size={18}/>
+              className="block w-full py-4 rounded-xl font-bold text-white text-center flex items-center justify-center gap-2 hover:opacity-90 transition-all"
+              style={{ background: `linear-gradient(135deg, ${PRIMARY}, #007A3D)` }}>
+              Jetzt beantragen <ArrowRight size={20} />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Eligibility */}
+      {/* Eligibility + Testimonial */}
       <section className="py-20 bg-white">
-        <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-4xl font-black text-center text-gray-900 mb-12">Conditions d'éligibilité</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[
-              "Résidence en Allemagne",
-              "Âge minimum : 18 ans",
-              "Revenus stables (CDI, indépendant, retraite)",
-              "Compte KT Bank (ouverture possible lors de la demande)",
-              "Pas de fichage négatif (SCHUFA)",
-              "Durée de résidence minimum : 1 an",
-            ].map((c) => (
-              <div key={c} className="flex items-center gap-3 p-4 rounded-2xl border border-gray-100 bg-gray-50">
-                <CheckCircle size={18} style={{ color: "#005F2D" }}/>
-                <span className="text-gray-700 text-sm">{c}</span>
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
+            <div>
+              <h2 className="text-3xl font-black text-gray-900 mb-4">Voraussetzungen</h2>
+              <p className="text-gray-500 mb-6">Wir prüfen jeden Antrag individuell — diese Grundvoraussetzungen erhöhen Ihre Chancen erheblich.</p>
+              <div className="space-y-3">
+                {eligibilityItems.map((item) => (
+                  <div key={item} className="flex items-start gap-3">
+                    <CheckCircle size={18} className="flex-shrink-0 mt-0.5" style={{ color: PRIMARY }} />
+                    <span className="text-gray-700">{item}</span>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+            <div className="rounded-2xl p-8 border border-gray-100 shadow-md"
+              style={{ background: "linear-gradient(135deg, #f0fdf4, #fafafa)" }}>
+              <div className="flex gap-1 mb-4">
+                {[1,2,3,4,5].map((i) => <Star key={i} size={18} fill={GOLD} color={GOLD} />)}
+              </div>
+              <p className="text-gray-700 text-lg leading-relaxed italic mb-6">
+                "Ich brauchte 15.000 € für die Renovierung meines Hauses. Innerhalb von 2 Tagen hatte ich die
+                Genehmigung und das Geld auf dem Konto — ohne Zinsen und vollständig halal."
+              </p>
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full flex items-center justify-center font-black text-white text-xl"
+                  style={{ background: `linear-gradient(135deg, ${PRIMARY}, #007A3D)` }}>R</div>
+                <div>
+                  <div className="font-black text-gray-900">Rachid B.</div>
+                  <div className="text-gray-500 text-sm">Frankfurt am Main</div>
+                  <div className="text-xs font-semibold" style={{ color: PRIMARY }}>Kredit: 15.000 €</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Use cases */}
       <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl font-black text-center text-gray-900 mb-10">Pour quels projets ?</h2>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
-            {[{ i: "🏠", l: "Travaux" }, { i: "💍", l: "Mariage" }, { i: "📚", l: "Études" }, { i: "✈️", l: "Voyage" }, { i: "🚑", l: "Médical" }, { i: "🎓", l: "Formation" }].map((p) => (
-              <div key={p.l} className="text-center p-4 bg-white rounded-2xl border border-gray-100 hover:shadow-md transition-all">
-                <div className="text-3xl mb-1">{p.i}</div>
-                <div className="text-sm font-medium text-gray-700">{p.l}</div>
+        <div className="max-w-4xl mx-auto px-4">
+          <h2 className="text-3xl font-black text-center text-gray-900 mb-3">Wofür können Sie den Kredit nutzen?</h2>
+          <p className="text-gray-500 text-center mb-10">Ohne Verwendungsnachweis — für jeden halal zulässigen Zweck.</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {purposes.map((p) => (
+              <div key={p.label} className="flex items-center gap-3 p-5 rounded-2xl border border-gray-100 hover:border-green-300 bg-white transition-colors">
+                <div className="text-3xl">{p.icon}</div>
+                <span className="font-semibold text-gray-700">{p.label}</span>
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Application Form */}
+      <section className="py-20 bg-white">
+        <div className="max-w-2xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-black text-gray-900 mb-4">Antrag stellen</h2>
+            <p className="text-gray-500 text-lg">Antwort innerhalb von 24 Stunden.</p>
+          </div>
+          {submitted ? (
+            <div className="rounded-2xl p-12 text-center border-2 border-green-300"
+              style={{ background: "linear-gradient(135deg, #f0fdf4, #ecfdf5)" }}>
+              <CheckCircle size={56} style={{ color: PRIMARY }} className="mx-auto mb-4" />
+              <h3 className="text-2xl font-black text-gray-900 mb-3">Antrag eingegangen!</h3>
+              <p className="text-gray-600 text-lg">
+                Hallo <strong>{formData.name}</strong>, Ihr Antrag wurde übermittelt.
+                Wir melden uns innerhalb von 24 Stunden bei {formData.email}.
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-8 border border-gray-100 shadow-lg space-y-5">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-2 text-sm">Vollständiger Name *</label>
+                  <input type="text" required placeholder="Max Mustermann"
+                    value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-green-400 text-sm" />
+                </div>
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-2 text-sm">E-Mail *</label>
+                  <input type="email" required placeholder="max@beispiel.de"
+                    value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-green-400 text-sm" />
+                </div>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-2 text-sm">Telefon *</label>
+                  <input type="tel" required placeholder="+49 170 1234567"
+                    value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-green-400 text-sm" />
+                </div>
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-2 text-sm">Monatliches Nettoeinkommen *</label>
+                  <select required value={formData.income} onChange={(e) => setFormData({ ...formData, income: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-green-400 text-sm bg-white">
+                    <option value="">Bitte wählen...</option>
+                    <option>Unter €1.000</option>
+                    <option>€1.000 – €2.000</option>
+                    <option>€2.000 – €3.500</option>
+                    <option>€3.500 – €5.000</option>
+                    <option>Über €5.000</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-2 text-sm">Kreditbetrag</label>
+                  <select value={formData.requestedAmount} onChange={(e) => setFormData({ ...formData, requestedAmount: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-green-400 text-sm bg-white">
+                    <option value="">Bitte wählen...</option>
+                    <option>bis 5.000 €</option>
+                    <option>5.000 – 10.000 €</option>
+                    <option>10.000 – 20.000 €</option>
+                    <option>20.000 – 35.000 €</option>
+                    <option>35.000 – 50.000 €</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-2 text-sm">Verwendungszweck</label>
+                  <select value={formData.purpose} onChange={(e) => setFormData({ ...formData, purpose: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-green-400 text-sm bg-white">
+                    <option value="">Bitte wählen...</option>
+                    <option>Renovierung</option>
+                    <option>Bildung</option>
+                    <option>Hochzeit</option>
+                    <option>Fahrzeug</option>
+                    <option>Selbstständigkeit</option>
+                    <option>Sonstiges</option>
+                  </select>
+                </div>
+              </div>
+              <button type="submit"
+                className="w-full py-4 rounded-xl font-bold text-lg text-white transition-all hover:-translate-y-0.5 hover:shadow-lg flex items-center justify-center gap-2"
+                style={{ background: `linear-gradient(135deg, ${PRIMARY}, #007A3D)` }}>
+                Antrag absenden <ArrowRight size={20} />
+              </button>
+              <p className="text-center text-gray-400 text-xs">
+                <Clock size={12} className="inline mr-1" />
+                Antwort innerhalb von 24 Stunden — vertraulich &amp; unverbindlich
+              </p>
+            </form>
+          )}
         </div>
       </section>
 
