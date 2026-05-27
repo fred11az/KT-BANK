@@ -1,156 +1,213 @@
 "use client";
 import Link from "next/link";
-import { ArrowRight, CheckCircle } from "lucide-react";
+import { ArrowRight, CheckCircle, Shield, BookOpen, Users } from "lucide-react";
+
+const principles = [
+  { ar: "الرِّبَا", fr: "Riba (Intérêts)", desc: "Tout intérêt ou surplus fixe est interdit. L'argent ne peut pas générer de l'argent par lui-même.", icon: "⚖️", forbidden: true },
+  { ar: "الغَرَر", fr: "Gharar (Spéculation)", desc: "Les transactions incertaines, ambiguës ou hautement spéculatives sont prohibées.", icon: "🎲", forbidden: true },
+  { ar: "المُضَارَبَة", fr: "Mudaraba", desc: "Partenariat où l'un apporte le capital, l'autre l'expertise. Les profits et pertes sont partagés.", icon: "🤝", forbidden: false },
+  { ar: "المُشَارَكَة", fr: "Musharaka", desc: "Coentreprise où plusieurs parties partagent capital, gestion, profits et risques.", icon: "🏗️", forbidden: false },
+  { ar: "المُرَابَحَة", fr: "Murabaha", desc: "Vente à coût majoré transparent. La banque achète le bien puis le revend à prix fixe convenu.", icon: "🏠", forbidden: false },
+  { ar: "الإِجَارَة", fr: "Ijara", desc: "Contrat de location-vente islamique. Équivalent au leasing, sans intérêts.", icon: "🔑", forbidden: false },
+];
+
+const prohibited = [
+  { icon: "🍷", label: "Alcool & tabac" },
+  { icon: "🎰", label: "Jeux d'argent" },
+  { icon: "💣", label: "Armement" },
+  { icon: "📺", label: "Divertissement illicite" },
+  { icon: "🏦", label: "Banque conventionnelle" },
+  { icon: "🐷", label: "Industrie porcine" },
+];
+
+const boardMembers = [
+  { name: "Prof. Dr. Hassan Al-Amin", role: "Président du Shariah Board", desc: "Docteur en droit islamique, consultant AAOIFI. 30 ans d'expertise en finance halal." },
+  { name: "Dr. Yusuf Ibrahim", role: "Membre Senior", desc: "Spécialiste en jurisprudence islamique des contrats financiers modernes." },
+  { name: "Sheikh Omar Farouq", role: "Expert Fiqh Al-Muamalat", desc: "Autorité reconnue en droit des transactions islamiques en Europe." },
+];
 
 export default function IslamicBankingPage() {
-  const principles = [
-    { arabic: "ربا", title: "Prohibition du Riba (Intérêts)", icon: "🚫", desc: "L'islam interdit strictement les intérêts (riba) sous toutes leurs formes. Chez KT Bank, aucun produit ne génère ou ne requiert d'intérêts." },
-    { arabic: "غرر", title: "Prohibition du Gharar (Incertitude)", icon: "⚖️", desc: "Les contrats ambigus ou spéculatifs sont prohibés. Nos produits sont clairs, transparents et sans clauses cachées." },
-    { arabic: "مضاربة", title: "Mudaraba — Partage des profits", icon: "🤝", desc: "Contrat de partenariat où KT Bank apporte les fonds et le client apporte l'expertise. Les profits sont partagés selon un ratio convenu." },
-    { arabic: "مشاركة", title: "Musharaka — Participation conjointe", icon: "🏦", desc: "Les deux parties contribuent en capital. Les profits et pertes sont partagés proportionnellement à la participation de chacun." },
-    { arabic: "مرابحة", title: "Murabaha — Vente à marge", icon: "💱", desc: "KT Bank achète un bien et le revend au client avec une marge bénéficiaire fixe et transparente. Utilisé pour l'auto et l'immobilier." },
-    { arabic: "إجارة", title: "Ijara — Crédit-bail islamique", icon: "🏗️", desc: "Contrat de location avec option d'achat. La banque achète l'actif et le loue au client, qui peut ensuite en devenir propriétaire." },
-  ];
-
-  const prohibited = [
-    { icon: "🍺", label: "Alcool & Tabac" },
-    { icon: "🎰", label: "Jeux de hasard" },
-    { icon: "🐷", label: "Produits porcins" },
-    { icon: "⚔️", label: "Armement" },
-    { icon: "🏦", label: "Banques conventionnelles" },
-    { icon: "🎭", label: "Divertissement illicite" },
-  ];
-
   return (
     <>
-      {/* Hero */}
-      <section className="relative py-28 text-white overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #004020 0%, #005F2D 60%, #007A3D 100%)" }}>
-        <div className="absolute inset-0 opacity-10"
-          style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cpolygon fill='white' points='50,0 100,25 100,75 50,100 0,75 0,25'/%3E%3C/svg%3E\")", backgroundSize: "80px" }}></div>
-        <div className="relative max-w-7xl mx-auto px-4 text-center">
-          <div className="text-6xl mb-6">☪️</div>
-          <h1 className="text-5xl lg:text-6xl font-black mb-6">
-            Finance Islamique :{" "}
-            <span style={{ color: "#E8C96B" }}>La Voie Éthique</span>
+      {/* HERO */}
+      <section
+        className="relative py-28 lg:py-36 text-white overflow-hidden hero-grid"
+        style={{ background: "linear-gradient(160deg, var(--green-900) 0%, var(--green-800) 50%, var(--green-700) 100%)" }}
+      >
+        <div className="absolute inset-0 pointer-events-none opacity-20"
+          style={{ backgroundImage: "radial-gradient(circle at 70% 50%, var(--gold-400), transparent 60%)" }} />
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center">
+          <div className="animate-fade-up">
+            <span className="section-label" style={{ background: "rgba(201,168,76,0.15)", border: "1px solid rgba(201,168,76,0.3)", color: "#E8C96B" }}>
+              ☪️ Finance Islamique
+            </span>
+          </div>
+          <div className="text-7xl lg:text-9xl mb-4 animate-fade-up delay-100 opacity-20 font-arabic select-none" aria-hidden="true">
+            ﷽
+          </div>
+          <h1 className="text-display mb-6 animate-fade-up delay-200">
+            Finance Islamique :<br />
+            <span className="text-gradient-gold">La Voie Éthique</span>
           </h1>
-          <p className="text-green-200 text-xl max-w-3xl mx-auto leading-relaxed">
-            Comprendre les principes fondamentaux de la finance islamique et comment
-            KT Bank AG les applique dans chacun de ses produits.
+          <p className="text-body-lg mb-10 animate-fade-up delay-300" style={{ color: "rgba(255,255,255,0.78)" }}>
+            La finance islamique n'est pas une contrainte — c'est une vision du monde où l'argent
+            sert l'économie réelle, le partage des risques et la justice sociale.
           </p>
-          <div className="mt-8 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
-            style={{ background: "rgba(201,168,76,0.2)", border: "1px solid rgba(201,168,76,0.4)", color: "#E8C96B" }}>
-            Certifié AAOIFI · Shariah Board indépendant · Validé BaFin
+          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-up delay-400">
+            <Link href="/client/register" className="btn btn-gold btn-xl">
+              Ouvrir un compte halal <ArrowRight size={18} />
+            </Link>
+            <Link href="/products" className="btn btn-outline-white btn-xl">
+              Nos produits
+            </Link>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 60" fill="none"><path d="M0,60 C360,0 1080,60 1440,15 L1440,60 Z" fill="#FAFAFA"/></svg>
-        </div>
+        <div className="absolute bottom-0 left-0 right-0 h-12 pointer-events-none"
+          style={{ background: "linear-gradient(to top, #FAFAFA, transparent)" }} />
       </section>
 
-      {/* What is Islamic Banking */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-16 items-center">
-          <div>
-            <h2 className="text-4xl font-black text-gray-900 mb-6">
-              Qu'est-ce que la{" "}
-              <span style={{ color: "#005F2D" }}>Finance Islamique ?</span>
-            </h2>
-            <p className="text-gray-600 leading-relaxed mb-6 text-lg">
-              La finance islamique est un système financier fondé sur les principes de la loi islamique (charia).
-              Elle repose sur l'interdiction de l'intérêt (riba), le partage équitable des risques et des profits,
-              et l'investissement uniquement dans des activités licites.
-            </p>
-            <p className="text-gray-600 leading-relaxed mb-8">
-              Contrairement à la banque conventionnelle qui prête de l'argent contre intérêts,
-              la banque islamique crée une relation de partenariat réel entre la banque et ses clients.
-              Les gains sont légitimes car ils découlent d'un commerce réel ou d'un service effectif.
-            </p>
-            <div className="space-y-3">
-              {["Aucun intérêt sur les prêts ni sur les dépôts", "Partage équitable des profits ET des pertes", "Investissements uniquement dans secteurs éthiques", "Transparence totale des contrats", "Supervision d'un Shariah Board indépendant"].map((item) => (
-                <div key={item} className="flex items-center gap-3">
-                  <CheckCircle size={18} style={{ color: "#005F2D" }}/>
-                  <span className="text-gray-700">{item}</span>
-                </div>
-              ))}
+      {/* WHAT IS ISLAMIC BANKING */}
+      <section className="py-20 lg:py-28" style={{ background: "white" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <div className="order-2 lg:order-1 relative">
+              <div className="rounded-2xl overflow-hidden aspect-[4/3] shadow-2xl">
+                <img src="https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&q=80" alt="Finance islamique" className="w-full h-full object-cover" />
+              </div>
+              <div className="absolute -top-4 -right-4 card px-4 py-3 shadow-xl text-center">
+                <div className="text-2xl font-black" style={{ color: "var(--green-700)" }}>1,8Mrd</div>
+                <div className="text-xs" style={{ color: "var(--gray-500)" }}>musulmans dans le monde</div>
+              </div>
+            </div>
+            <div className="order-1 lg:order-2">
+              <span className="section-label">Comprendre</span>
+              <h2 className="text-heading mt-2 mb-6">
+                Qu'est-ce que la<br />
+                <span className="text-gradient">finance islamique ?</span>
+              </h2>
+              <p className="text-body-lg mb-5" style={{ color: "var(--gray-600)" }}>
+                La finance islamique est un système financier fondé sur les principes de la charia (loi islamique).
+                Elle interdit le riba (intérêts), le gharar (incertitude excessive) et les investissements dans des
+                secteurs jugés nuisibles.
+              </p>
+              <p className="text-body mb-8" style={{ color: "var(--gray-500)" }}>
+                À la place, elle promeut le partage équitable des profits et des pertes, l'adossement
+                à des actifs réels et la transparence totale dans chaque transaction.
+              </p>
+              <div className="flex flex-col gap-3">
+                {["Pas d'intérêts (riba)", "Actifs réels obligatoires", "Partage des risques & profits", "Transparence contractuelle"].map((item) => (
+                  <div key={item} className="flex items-center gap-3">
+                    <CheckCircle size={17} style={{ color: "var(--green-700)", flexShrink: 0 }} />
+                    <span className="text-body" style={{ color: "var(--gray-700)" }}>{item}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-          <div className="rounded-3xl overflow-hidden shadow-2xl">
-            <img src="https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&q=80" alt="Finance islamique" className="w-full h-96 object-cover"/>
-          </div>
         </div>
       </section>
 
-      {/* Principles */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-black text-gray-900 mb-4">
-              Les Principes Fondamentaux
-            </h2>
-            <div className="w-20 h-1 mx-auto rounded-full" style={{ background: "linear-gradient(135deg, #C9A84C, #E8C96B)" }}></div>
+      {/* 6 PRINCIPLES */}
+      <section className="py-20 lg:py-28" style={{ background: "var(--gray-50)" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-14">
+            <span className="section-label">Les fondements</span>
+            <h2 className="text-heading mt-4 mb-2">6 principes <span className="text-gradient">essentiels</span></h2>
+            <div className="divider-gold" />
+            <p className="text-body mt-6 max-w-2xl mx-auto" style={{ color: "var(--gray-500)" }}>
+              Deux principes prohibés, quatre modes de financement licites — voici l'architecture de la finance halal.
+            </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {principles.map((p) => (
-              <div key={p.title} className="p-6 rounded-2xl border border-gray-100 hover:border-green-200 hover:shadow-lg transition-all">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {principles.map((p, i) => (
+              <div key={p.fr} className="card card-interactive p-6 animate-fade-up" style={{ animationDelay: `${i * 60}ms`, borderLeft: `3px solid ${p.forbidden ? "#EF4444" : "var(--green-700)"}` }}>
                 <div className="flex items-start justify-between mb-4">
-                  <div className="text-3xl">{p.icon}</div>
-                  <div className="text-2xl font-bold" style={{ color: "#C9A84C", fontFamily: "serif" }}>{p.arabic}</div>
+                  <div>
+                    <div className="text-2xl mb-1">{p.icon}</div>
+                    <div className="text-xl font-bold" style={{ fontFamily: "serif", color: p.forbidden ? "#EF4444" : "var(--green-700)" }}>{p.ar}</div>
+                  </div>
+                  {p.forbidden ? (
+                    <span className="badge" style={{ background: "#FEE2E2", color: "#DC2626" }}>Interdit</span>
+                  ) : (
+                    <span className="badge badge-green">Licite</span>
+                  )}
                 </div>
-                <h3 className="font-bold text-gray-900 mb-3">{p.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{p.desc}</p>
+                <h3 className="font-bold text-sm mb-2" style={{ color: "var(--gray-900)" }}>{p.fr}</h3>
+                <p className="text-small" style={{ color: "var(--gray-500)" }}>{p.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Prohibited sectors */}
-      <section className="py-20" style={{ background: "linear-gradient(135deg, #004020, #005F2D)" }}>
-        <div className="max-w-7xl mx-auto px-4">
+      {/* PROHIBITED SECTORS */}
+      <section className="py-20" style={{ background: "var(--gray-900)" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-black text-white mb-4">Secteurs Exclus de nos Investissements</h2>
-            <p className="text-green-200 text-lg">KT Bank n'investit jamais dans ces secteurs contraires à l'éthique islamique</p>
+            <span className="section-label" style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.3)", color: "#FCA5A5" }}>
+              Secteurs prohibés
+            </span>
+            <h2 className="text-heading mt-4 mb-2" style={{ color: "white" }}>
+              Ce que nous ne <span style={{ color: "#FCA5A5" }}>finançons pas</span>
+            </h2>
+            <p className="text-body max-w-xl mx-auto mt-4" style={{ color: "rgba(255,255,255,0.5)" }}>
+              Notre Shariah Board vérifie chaque investissement. Ces secteurs sont catégoriquement exclus.
+            </p>
           </div>
-          <div className="grid grid-cols-3 lg:grid-cols-6 gap-4">
-            {prohibited.map((item) => (
-              <div key={item.label} className="text-center p-4 rounded-2xl"
-                style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)" }}>
-                <div className="text-4xl mb-2">{item.icon}</div>
-                <div className="text-white text-sm font-medium">{item.label}</div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            {prohibited.map((item, i) => (
+              <div key={item.label} className="card-glass p-5 text-center animate-fade-up" style={{ animationDelay: `${i * 60}ms`, border: "1px solid rgba(239,68,68,0.2)" }}>
+                <div className="text-3xl mb-3">{item.icon}</div>
+                <p className="text-small font-medium" style={{ color: "rgba(255,255,255,0.7)" }}>{item.label}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Shariah Board */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="text-5xl mb-6">⚖️</div>
-          <h2 className="text-4xl font-black text-gray-900 mb-6">Notre Shariah Board</h2>
-          <p className="text-gray-600 text-lg leading-relaxed mb-8">
-            Notre conseil de conformité islamique est composé de 5 érudits islamiques indépendants,
-            experts en fiqh muamalat (jurisprudence des transactions commerciales). Ils examinent
-            et certifient chaque produit avant son lancement.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            {[
-              { title: "Révision annuelle", desc: "Tous nos produits sont révisés annuellement pour garantir leur conformité" },
-              { title: "Certification AAOIFI", desc: "Conformité aux normes de l'Accounting and Auditing Organization for Islamic Financial Institutions" },
-              { title: "Fatwa documentée", desc: "Chaque produit dispose d'une fatwa écrite et publiée pour la transparence" },
-            ].map((item) => (
-              <div key={item.title} className="bg-white rounded-2xl p-6 border border-gray-100">
-                <div className="font-bold text-gray-900 mb-2">{item.title}</div>
-                <div className="text-gray-500 text-sm">{item.desc}</div>
+      {/* SHARIAH BOARD */}
+      <section className="py-20 lg:py-28" style={{ background: "white" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-14">
+            <span className="section-label">Garantie de conformité</span>
+            <h2 className="text-heading mt-4 mb-2">Notre <span className="text-gradient">Shariah Board</span></h2>
+            <div className="divider-gold" />
+            <p className="text-body mt-6 max-w-2xl mx-auto" style={{ color: "var(--gray-500)" }}>
+              Un comité indépendant d'experts en droit islamique supervise chaque produit et transaction.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-3 gap-6">
+            {boardMembers.map((member, i) => (
+              <div key={member.name} className="card p-7 text-center animate-fade-up" style={{ animationDelay: `${i * 80}ms` }}>
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl mx-auto mb-4"
+                  style={{ background: "linear-gradient(135deg, var(--green-800), var(--green-600))" }}>
+                  ☪️
+                </div>
+                <h3 className="font-bold text-sm mb-1" style={{ color: "var(--gray-900)" }}>{member.name}</h3>
+                <p className="text-xs font-semibold mb-3" style={{ color: "var(--green-700)" }}>{member.role}</p>
+                <p className="text-xs leading-relaxed" style={{ color: "var(--gray-500)" }}>{member.desc}</p>
               </div>
             ))}
           </div>
-          <Link href="/products"
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-white transition-all hover:-translate-y-1"
-            style={{ background: "linear-gradient(135deg, #005F2D, #007A3D)" }}>
-            Découvrir nos produits halal <ArrowRight size={18}/>
-          </Link>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-20" style={{ background: "linear-gradient(135deg, var(--gold-500), var(--gold-300))" }}>
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+          <BookOpen size={36} className="mx-auto mb-5 opacity-80" style={{ color: "white" }} />
+          <h2 className="text-heading mb-4" style={{ color: "white" }}>Commencez votre parcours halal</h2>
+          <p className="text-body-lg mb-8" style={{ color: "rgba(255,255,255,0.85)" }}>
+            Ouvrez votre compte KT Bank en 10 minutes. 100% certifié, 100% en ligne.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/client/register" className="btn btn-primary btn-xl">
+              Ouvrir un compte <ArrowRight size={18} />
+            </Link>
+            <Link href="/contact" className="btn btn-outline-white btn-xl">
+              Poser une question
+            </Link>
+          </div>
         </div>
       </section>
     </>

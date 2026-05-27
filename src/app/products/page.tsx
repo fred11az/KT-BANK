@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CheckCircle, ChevronRight, Search, Filter } from "lucide-react";
+import { ArrowRight, CheckCircle, Search } from "lucide-react";
 import { products } from "@/lib/utils";
 
 const categories = ["Tous", "Comptes", "Investissement", "Financement", "Épargne", "Cartes", "Solidarité", "Entreprise", "Jeunesse", "Immobilier"];
@@ -20,164 +20,142 @@ export default function ProductsPage() {
 
   return (
     <>
-      {/* Hero */}
+      {/* HERO */}
       <section
-        className="relative py-28 text-white overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #004020 0%, #005F2D 50%, #007A3D 100%)" }}
+        className="relative py-24 lg:py-32 text-white overflow-hidden hero-grid"
+        style={{ background: "linear-gradient(160deg, var(--green-900) 0%, var(--green-700) 100%)" }}
       >
-        <div
-          className="absolute inset-0 opacity-5"
-          style={{
-            backgroundImage:
-              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cpolygon fill='white' points='50,0 100,25 100,75 50,100 0,75 0,25'/%3E%3C/svg%3E\")",
-            backgroundSize: "80px 80px",
-          }}
-        />
-        <div className="absolute top-10 right-20 w-80 h-80 rounded-full opacity-10"
-          style={{ background: "radial-gradient(circle, #C9A84C, transparent)" }} />
-        <div className="relative max-w-7xl mx-auto px-4 text-center">
-          <div
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-6"
-            style={{ background: "rgba(201,168,76,0.2)", border: "1px solid rgba(201,168,76,0.4)", color: "#E8C96B" }}
-          >
-            🌙 Finance Islamique — 100% Halal
+        <div className="absolute top-0 right-0 w-96 h-96 rounded-full pointer-events-none opacity-10"
+          style={{ background: "radial-gradient(circle, var(--gold-300), transparent)", transform: "translate(30%, -30%)" }} />
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center">
+          <div className="animate-fade-up">
+            <span className="section-label" style={{ background: "rgba(201,168,76,0.15)", border: "1px solid rgba(201,168,76,0.3)", color: "#E8C96B" }}>
+              ☪️ Finance islamique — 100% Halal
+            </span>
           </div>
-          <h1 className="text-5xl lg:text-6xl font-black mb-6 leading-tight">
-            Nos Produits & Services
-            <br />
-            <span style={{ color: "#E8C96B" }}>Conformes à la Charia</span>
+          <h1 className="text-display mt-4 mb-4 animate-fade-up delay-100">
+            Tous nos produits<br />
+            <span className="text-gradient-gold">& services</span>
           </h1>
-          <p className="text-green-100 text-xl max-w-3xl mx-auto mb-10 leading-relaxed">
-            Découvrez notre gamme complète de produits financiers islamiques. Comptes, épargne,
-            financement, cartes — tout sans intérêts (riba), certifié par notre Shariah Board.
+          <p className="text-body-lg mb-8 animate-fade-up delay-200" style={{ color: "rgba(255,255,255,0.78)" }}>
+            Comptes, épargne, financement, cartes — tout sans intérêts (riba), certifié par notre Shariah Board.
           </p>
 
-          {/* Search */}
-          <div className="max-w-xl mx-auto relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+          {/* SEARCH */}
+          <div className="max-w-xl mx-auto relative animate-fade-up delay-300">
+            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "var(--gray-400)" }} />
             <input
               type="text"
-              placeholder="Rechercher un produit..."
+              placeholder="Rechercher un produit…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 rounded-2xl text-gray-900 text-base focus:outline-none focus:ring-2 shadow-xl"
-              style={{ focusRingColor: "#C9A84C" }}
+              className="input pl-11 shadow-xl"
+              style={{ borderColor: "transparent" }}
             />
           </div>
 
-          {/* Stats band */}
-          <div className="flex flex-wrap justify-center gap-8 mt-12">
-            {[
-              { val: "10", label: "Produits islamiques" },
-              { val: "50K+", label: "Clients satisfaits" },
-              { val: "100%", label: "Halal certifié" },
-              { val: "BaFin", label: "Réglementé" },
-            ].map((s) => (
+          <div className="flex flex-wrap justify-center gap-8 mt-10 animate-fade-up delay-400">
+            {[{ val: "10", label: "Produits islamiques" }, { val: "50K+", label: "Clients" }, { val: "100%", label: "Halal certifié" }, { val: "BaFin", label: "Agréée" }].map((s) => (
               <div key={s.label} className="text-center">
-                <div className="text-3xl font-black" style={{ color: "#E8C96B" }}>{s.val}</div>
-                <div className="text-green-200 text-sm">{s.label}</div>
+                <div className="text-2xl font-black" style={{ color: "#E8C96B" }}>{s.val}</div>
+                <div className="text-small" style={{ color: "rgba(255,255,255,0.55)" }}>{s.label}</div>
               </div>
             ))}
           </div>
         </div>
-
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0,60 C360,0 1080,60 1440,20 L1440,60 Z" fill="#F9FAFB" />
-          </svg>
-        </div>
+        <div className="absolute bottom-0 left-0 right-0 h-12 pointer-events-none"
+          style={{ background: "linear-gradient(to top, #FAFAFA, transparent)" }} />
       </section>
 
-      {/* Category Filter */}
-      <section className="py-8 bg-gray-50 sticky top-[104px] z-20 border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-hide">
-            <Filter size={18} className="text-gray-400 flex-shrink-0" />
+      {/* FILTER + GRID */}
+      <section className="py-16 lg:py-24" style={{ background: "white" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          {/* Category filters */}
+          <div className="flex flex-wrap gap-2 mb-10">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className="flex-shrink-0 px-5 py-2 rounded-full text-sm font-semibold transition-all"
-                style={
-                  activeCategory === cat
-                    ? { background: "#005F2D", color: "white" }
-                    : { background: "white", color: "#374151", border: "1px solid #E5E7EB" }
-                }
+                className={`btn btn-sm ${activeCategory === cat ? "btn-primary" : "btn-outline"}`}
               >
                 {cat}
               </button>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* Products Grid */}
-      <section className="py-16 bg-gray-50 min-h-[60vh]">
-        <div className="max-w-7xl mx-auto px-4">
+          {/* Results count */}
           <div className="flex items-center justify-between mb-8">
-            <p className="text-gray-500 text-sm">
-              <span className="font-bold text-gray-900">{filtered.length}</span> produit{filtered.length !== 1 ? "s" : ""} trouvé{filtered.length !== 1 ? "s" : ""}
+            <p className="text-small" style={{ color: "var(--gray-500)" }}>
+              {filtered.length} produit{filtered.length !== 1 ? "s" : ""} trouvé{filtered.length !== 1 ? "s" : ""}
             </p>
+            {(activeCategory !== "Tous" || searchQuery) && (
+              <button onClick={() => { setActiveCategory("Tous"); setSearchQuery(""); }} className="text-small font-medium"
+                style={{ color: "var(--green-700)" }}>
+                Réinitialiser les filtres
+              </button>
+            )}
           </div>
 
+          {/* Product grid */}
           {filtered.length === 0 ? (
-            <div className="text-center py-24">
-              <div className="text-6xl mb-4">🔍</div>
-              <h3 className="text-xl font-bold text-gray-700 mb-2">Aucun produit trouvé</h3>
-              <p className="text-gray-500">Essayez un autre terme de recherche ou catégorie.</p>
+            <div className="text-center py-20">
+              <div className="text-5xl mb-4">🔍</div>
+              <h3 className="text-subheading mb-2" style={{ color: "var(--gray-700)" }}>Aucun résultat</h3>
+              <p className="text-body" style={{ color: "var(--gray-500)" }}>Essayez un autre terme ou réinitialisez les filtres.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filtered.map((product) => (
-                <Link key={product.id} href={`/products/${product.id}`} className="group">
-                  <div className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-green-300 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl h-full relative overflow-hidden flex flex-col">
-                    <div
-                      className="absolute top-0 left-0 right-0 h-1 rounded-t-2xl"
-                      style={{ background: `linear-gradient(90deg, ${product.color}, ${product.color}88)` }}
-                    />
-                    {(product as { isNew?: boolean }).isNew && (
-                      <div
-                        className="absolute top-4 right-4 px-2 py-0.5 rounded-full text-xs font-bold text-white"
-                        style={{ background: "linear-gradient(135deg, #C9A84C, #E8C96B)" }}
-                      >
-                        Nouveau
-                      </div>
-                    )}
-                    {product.popular && (
-                      <div className="absolute top-4 right-4 px-2 py-0.5 rounded-full text-xs font-bold text-white bg-green-600">
-                        ⭐ Populaire
-                      </div>
-                    )}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {filtered.map((product, i) => (
+                <Link
+                  key={product.id}
+                  href={`/products/${product.id}`}
+                  className="card card-interactive flex flex-col overflow-hidden animate-fade-up"
+                  style={{ animationDelay: `${Math.min(i * 40, 400)}ms` }}
+                >
+                  {/* Accent top bar */}
+                  <div className="h-1 w-full" style={{ background: product.color }} />
 
-                    <div className="text-4xl mb-4">{product.icon}</div>
-                    <div
-                      className="text-xs font-semibold px-3 py-1 rounded-full inline-block mb-3 self-start"
-                      style={{ background: `${product.color}15`, color: product.color }}
-                    >
-                      {product.category}
+                  <div className="p-5 flex flex-col flex-1">
+                    {/* Header */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="w-11 h-11 rounded-xl flex items-center justify-center text-xl"
+                        style={{ background: `${product.color}15` }}>
+                        {product.icon}
+                      </div>
+                      <div className="flex gap-1.5">
+                        {product.popular && <span className="badge badge-green">Populaire</span>}
+                        {(product as any).isNew && <span className="badge badge-new">Nouveau</span>}
+                        {!product.popular && !(product as any).isNew && product.badge && (
+                          <span className="badge badge-gold">{product.badge}</span>
+                        )}
+                      </div>
                     </div>
-                    <h3 className="font-black text-lg text-gray-900 mb-2 group-hover:text-green-800 transition-colors">
-                      {product.name}
-                    </h3>
-                    <p className="text-sm text-gray-500 mb-4 leading-relaxed flex-1">{product.tagline}</p>
-                    <div className="space-y-1.5 mb-4">
-                      {product.features.slice(0, 3).map((feat) => (
-                        <div key={feat} className="flex items-center gap-2 text-xs text-gray-600">
-                          <CheckCircle size={12} className="text-green-500 flex-shrink-0" />
-                          {feat}
+
+                    {/* Info */}
+                    <div className="mb-3">
+                      <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--gray-400)" }}>
+                        {product.category}
+                      </span>
+                      <h3 className="font-black text-base mt-0.5 mb-1" style={{ color: "var(--gray-900)" }}>{product.name}</h3>
+                      <p className="text-small" style={{ color: "var(--gray-500)" }}>{product.tagline}</p>
+                    </div>
+
+                    {/* Features */}
+                    <div className="flex flex-col gap-1.5 flex-1 mb-5">
+                      {product.features.map((f) => (
+                        <div key={f} className="flex items-center gap-2">
+                          <CheckCircle size={12} style={{ color: product.color, flexShrink: 0 }} />
+                          <span className="text-xs" style={{ color: "var(--gray-600)" }}>{f}</span>
                         </div>
                       ))}
                     </div>
-                    <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-auto">
-                      <span
-                        className="text-xs font-bold px-3 py-1 rounded-full"
-                        style={{ background: `${product.color}10`, color: product.color }}
-                      >
-                        {product.badge}
+
+                    {/* CTA */}
+                    <div className="flex items-center justify-between pt-4" style={{ borderTop: "1px solid var(--gray-100)" }}>
+                      <span className="text-small font-semibold" style={{ color: product.color }}>
+                        {product.cta}
                       </span>
-                      <span className="text-xs font-semibold flex items-center gap-1 group-hover:gap-2 transition-all" style={{ color: "#005F2D" }}>
-                        En savoir plus <ChevronRight size={12} />
-                      </span>
+                      <ArrowRight size={15} style={{ color: product.color }} />
                     </div>
                   </div>
                 </Link>
@@ -187,32 +165,41 @@ export default function ProductsPage() {
         </div>
       </section>
 
+      {/* TRUST BAR */}
+      <section className="py-14" style={{ background: "var(--gray-50)" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+            {[
+              { icon: "🛡️", title: "BaFin agréée", sub: "Réglementée en Allemagne" },
+              { icon: "☪️", title: "Shariah Board", sub: "Certification indépendante" },
+              { icon: "✅", title: "AAOIFI", sub: "Standards internationaux" },
+              { icon: "🔒", title: "Dépôts garantis", sub: "Jusqu'à 100 000€" },
+            ].map((item) => (
+              <div key={item.title} className="card p-5">
+                <div className="text-3xl mb-3">{item.icon}</div>
+                <h3 className="font-bold text-sm mb-1" style={{ color: "var(--gray-900)" }}>{item.title}</h3>
+                <p className="text-xs" style={{ color: "var(--gray-500)" }}>{item.sub}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
-      <section
-        className="py-20"
-        style={{ background: "linear-gradient(135deg, #004020, #005F2D)" }}
-      >
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-4xl font-black text-white mb-4">
-            Vous ne savez pas quel produit choisir ?
+      <section className="py-20" style={{ background: "linear-gradient(135deg, var(--gold-500), var(--gold-300))" }}>
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-heading mb-4" style={{ color: "white" }}>
+            Pas sûr de quel produit choisir ?
           </h2>
-          <p className="text-green-200 text-lg mb-8">
-            Nos conseillers islamiques sont disponibles pour vous guider vers la solution adaptée.
+          <p className="text-body-lg mb-8" style={{ color: "rgba(255,255,255,0.85)" }}>
+            Nos conseillers vous orientent gratuitement. Ouvrez votre compte en 10 minutes.
           </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Link
-              href="/client/register"
-              className="flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-white transition-all hover:-translate-y-1 hover:shadow-2xl"
-              style={{ background: "linear-gradient(135deg, #C9A84C, #E8C96B)", boxShadow: "0 8px 30px rgba(201,168,76,0.4)" }}
-            >
-              Ouvrir un compte gratuit <ArrowRight size={18} />
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/client/register" className="btn btn-primary btn-xl">
+              Ouvrir un compte <ArrowRight size={18} />
             </Link>
-            <Link
-              href="/contact"
-              className="flex items-center gap-2 px-8 py-4 rounded-xl font-semibold transition-all"
-              style={{ border: "2px solid rgba(255,255,255,0.5)", color: "white" }}
-            >
-              Contacter un conseiller
+            <Link href="/contact" className="btn btn-outline-white btn-xl">
+              Parler à un conseiller
             </Link>
           </div>
         </div>

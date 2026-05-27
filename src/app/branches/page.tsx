@@ -1,72 +1,146 @@
 "use client";
-import { MapPin, Phone, Clock, Mail, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { branches } from "@/lib/utils";
+import { MapPin, Phone, Clock, ArrowRight, Globe, Calendar } from "lucide-react";
+
+const branches = [
+  {
+    city: "Frankfurt",
+    subtitle: "Siège social",
+    address: "Bockenheimer Landstraße 33, 60325 Frankfurt am Main",
+    phone: "+49 69 2475 1700",
+    hours: "Lun–Ven : 9h–17h",
+    image: "https://images.unsplash.com/photo-1533929736458-ca588d08c8be?w=400&q=80",
+    mapsUrl: "https://maps.google.com/?q=Bockenheimer+Landstraße+33+Frankfurt",
+    badge: "Siège",
+  },
+  {
+    city: "Berlin",
+    subtitle: "Agence principale",
+    address: "Wilmersdorfer Str. 50/51, 10627 Berlin",
+    phone: "+49 30 3150 0450",
+    hours: "Lun–Ven : 9h–17h",
+    image: "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=400&q=80",
+    mapsUrl: "https://maps.google.com/?q=Wilmersdorfer+Str+50+Berlin",
+    badge: null,
+  },
+  {
+    city: "Cologne",
+    subtitle: "Agence régionale",
+    address: "Venloer Str. 24, 50672 Cologne",
+    phone: "+49 221 2758 5310",
+    hours: "Lun–Ven : 9h–17h",
+    image: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=400&q=80",
+    mapsUrl: "https://maps.google.com/?q=Venloer+Str+24+Köln",
+    badge: null,
+  },
+  {
+    city: "Munich",
+    subtitle: "Agence régionale",
+    address: "Landsberger Str. 110, 80339 Munich",
+    phone: "+49 89 4520 5700",
+    hours: "Lun–Ven : 9h–17h",
+    image: "https://images.unsplash.com/photo-1549921296-3b0f9a35af35?w=400&q=80",
+    mapsUrl: "https://maps.google.com/?q=Landsberger+Str+110+München",
+    badge: "Nouveau",
+  },
+];
+
+const services = [
+  { icon: "💳", label: "Ouverture de compte" },
+  { icon: "🏠", label: "Financement immobilier" },
+  { icon: "🚗", label: "Financement auto" },
+  { icon: "🤝", label: "Conseil entreprise" },
+  { icon: "🥇", label: "Investissement or" },
+  { icon: "💰", label: "Crédit personnel" },
+  { icon: "🤲", label: "Zakat & donations" },
+  { icon: "📱", label: "Support application" },
+];
+
+const languages = [
+  { flag: "🇩🇪", lang: "Deutsch", code: "DE" },
+  { flag: "🇬🇧", lang: "English", code: "EN" },
+  { flag: "🇹🇷", lang: "Türkçe", code: "TR" },
+  { flag: "🇸🇦", lang: "العربية", code: "AR" },
+];
 
 export default function BranchesPage() {
   return (
     <>
-      {/* Hero */}
-      <section className="relative py-24 text-white overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #004020 0%, #005F2D 60%, #007A3D 100%)" }}>
-        <div className="relative max-w-7xl mx-auto px-4 text-center">
-          <div className="text-5xl mb-6">🏦</div>
-          <h1 className="text-5xl font-black mb-4">
-            Nos <span style={{ color: "#E8C96B" }}>Agences</span>
+      {/* HERO */}
+      <section
+        className="relative py-24 lg:py-32 text-white overflow-hidden hero-grid"
+        style={{ background: "linear-gradient(160deg, var(--green-900) 0%, var(--green-700) 100%)" }}
+      >
+        <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full pointer-events-none opacity-10"
+          style={{ background: "radial-gradient(circle, var(--gold-300), transparent)", transform: "translate(20%, 20%)" }} />
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center">
+          <div className="animate-fade-up">
+            <span className="section-label" style={{ background: "rgba(201,168,76,0.15)", border: "1px solid rgba(201,168,76,0.3)", color: "#E8C96B" }}>
+              🗺️ Nos Agences
+            </span>
+          </div>
+          <h1 className="text-display mt-4 mb-6 animate-fade-up delay-100">
+            Près de vous, <span className="text-gradient-gold">partout</span>
           </h1>
-          <p className="text-green-200 text-xl max-w-2xl mx-auto">
-            4 agences en Allemagne pour vous accueillir. Des conseillers dédiés parlant
-            l'allemand, l'anglais, le turc et l'arabe.
+          <p className="text-body-lg mb-8 animate-fade-up delay-200" style={{ color: "rgba(255,255,255,0.78)" }}>
+            4 agences à travers l'Allemagne. Chaque conseiller parle votre langue et connaît vos valeurs.
           </p>
+          <div className="flex flex-wrap justify-center gap-8 animate-fade-up delay-300">
+            {[{ val: "4", label: "Agences" }, { val: "4", label: "Langues" }, { val: "9h–17h", label: "Horaires" }, { val: "Sur RDV", label: "Aussi dispo" }].map((s) => (
+              <div key={s.label} className="text-center">
+                <div className="text-2xl font-black" style={{ color: "#E8C96B" }}>{s.val}</div>
+                <div className="text-small" style={{ color: "rgba(255,255,255,0.55)" }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 60" fill="none"><path d="M0,60 C360,0 1080,60 1440,15 L1440,60 Z" fill="#FAFAFA"/></svg>
-        </div>
+        <div className="absolute bottom-0 left-0 right-0 h-12 pointer-events-none"
+          style={{ background: "linear-gradient(to top, #FAFAFA, transparent)" }} />
       </section>
 
-      {/* Branches Grid */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {branches.map((branch) => (
-              <div key={branch.city} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-all hover:-translate-y-1">
-                <img src={branch.image} alt={branch.city} className="w-full h-52 object-cover"/>
-                <div className="p-6">
-                  <h2 className="text-2xl font-black text-gray-900 mb-4 flex items-center gap-2">
-                    🏦 {branch.city}
-                  </h2>
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-3 text-gray-600">
-                      <MapPin size={16} style={{ color: "#005F2D" }} className="mt-0.5 flex-shrink-0"/>
-                      <span className="text-sm">{branch.address}</span>
+      {/* BRANCH CARDS */}
+      <section className="py-20 lg:py-28" style={{ background: "white" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-14">
+            <span className="section-label">Nos Agences</span>
+            <h2 className="text-heading mt-4 mb-2">Trouvez votre <span className="text-gradient">agence</span></h2>
+            <div className="divider-gold" />
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {branches.map((branch, i) => (
+              <div key={branch.city} className="card card-interactive overflow-hidden animate-fade-up" style={{ animationDelay: `${i * 70}ms` }}>
+                <div className="relative h-44 overflow-hidden">
+                  <img src={branch.image} alt={branch.city} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.5), transparent)" }} />
+                  <div className="absolute bottom-3 left-3">
+                    <h3 className="text-white font-black text-xl">{branch.city}</h3>
+                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.7)" }}>{branch.subtitle}</p>
+                  </div>
+                  {branch.badge && (
+                    <div className="absolute top-3 right-3 badge badge-gold">{branch.badge}</div>
+                  )}
+                </div>
+                <div className="p-5">
+                  <div className="flex flex-col gap-2 mb-5">
+                    <div className="flex items-start gap-2">
+                      <MapPin size={14} style={{ color: "var(--green-700)", flexShrink: 0, marginTop: 2 }} />
+                      <span className="text-xs leading-relaxed" style={{ color: "var(--gray-600)" }}>{branch.address}</span>
                     </div>
-                    <div className="flex items-center gap-3 text-gray-600">
-                      <Phone size={16} style={{ color: "#005F2D" }}/>
-                      <a href={`tel:${branch.phone.replace(/\s/g, "")}`} className="text-sm hover:text-green-700 transition">{branch.phone}</a>
+                    <div className="flex items-center gap-2">
+                      <Phone size={14} style={{ color: "var(--green-700)", flexShrink: 0 }} />
+                      <span className="text-xs" style={{ color: "var(--gray-600)" }}>{branch.phone}</span>
                     </div>
-                    <div className="flex items-center gap-3 text-gray-600">
-                      <Clock size={16} style={{ color: "#005F2D" }}/>
-                      <span className="text-sm">{branch.hours}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-gray-600">
-                      <Mail size={16} style={{ color: "#005F2D" }}/>
-                      <a href={`mailto:${branch.city.toLowerCase()}@kt-bank.de`}
-                        className="text-sm hover:text-green-700 transition">
-                        {branch.city.toLowerCase()}@kt-bank.de
-                      </a>
+                    <div className="flex items-center gap-2">
+                      <Clock size={14} style={{ color: "var(--green-700)", flexShrink: 0 }} />
+                      <span className="text-xs" style={{ color: "var(--gray-600)" }}>{branch.hours}</span>
                     </div>
                   </div>
-                  <div className="mt-6 pt-4 border-t border-gray-100 flex gap-3">
-                    <a href={`https://maps.google.com/?q=${encodeURIComponent(branch.address)}`}
-                      target="_blank" rel="noopener noreferrer"
-                      className="flex-1 text-center py-2 px-4 rounded-xl text-sm font-medium border-2 transition-all hover:bg-green-50"
-                      style={{ borderColor: "#005F2D", color: "#005F2D" }}>
-                      📍 Voir sur Maps
+                  <div className="flex gap-2">
+                    <a href={branch.mapsUrl} target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-sm flex-1 justify-center">
+                      <Globe size={13} /> Voir
                     </a>
-                    <Link href="/contact"
-                      className="flex-1 text-center py-2 px-4 rounded-xl text-sm font-medium text-white transition-all hover:opacity-90"
-                      style={{ background: "linear-gradient(135deg, #005F2D, #007A3D)" }}>
-                      Prendre RDV
+                    <Link href="/contact" className="btn btn-primary btn-sm flex-1 justify-center">
+                      <Calendar size={13} /> RDV
                     </Link>
                   </div>
                 </div>
@@ -76,54 +150,69 @@ export default function BranchesPage() {
         </div>
       </section>
 
-      {/* Services in branch */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-black text-gray-900 mb-4">Services disponibles en agence</h2>
-            <div className="w-20 h-1 mx-auto rounded-full" style={{ background: "linear-gradient(135deg, #C9A84C, #E8C96B)" }}></div>
+      {/* SERVICES IN-BRANCH */}
+      <section className="py-20" style={{ background: "var(--gray-50)" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-14">
+            <span className="section-label">En agence</span>
+            <h2 className="text-heading mt-4 mb-2">Services <span className="text-gradient">disponibles</span></h2>
+            <div className="divider-gold" />
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { icon: "💳", label: "Ouverture de compte" },
-              { icon: "🏠", label: "Conseil immobilier" },
-              { icon: "🚗", label: "Financement auto" },
-              { icon: "📈", label: "Conseil investissement" },
-              { icon: "🤲", label: "Conseil Zakat" },
-              { icon: "🏢", label: "Crédit entreprise" },
-              { icon: "📱", label: "Assistance app mobile" },
-              { icon: "🌱", label: "Compte jeunesse" },
-            ].map((s) => (
-              <div key={s.label} className="p-5 rounded-2xl border border-gray-100 text-center hover:border-green-200 hover:shadow-md transition-all">
-                <div className="text-3xl mb-2">{s.icon}</div>
-                <div className="text-sm font-medium text-gray-700">{s.label}</div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
+            {services.map((svc, i) => (
+              <div key={svc.label} className="card p-4 text-center animate-fade-up" style={{ animationDelay: `${i * 40}ms` }}>
+                <div className="text-2xl mb-2">{svc.icon}</div>
+                <p className="text-xs font-medium leading-tight" style={{ color: "var(--gray-700)" }}>{svc.label}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Languages */}
-      <section className="py-16" style={{ background: "linear-gradient(135deg, #C9A84C, #E8C96B)" }}>
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-black text-white mb-4">Nous parlons votre langue</h2>
-          <div className="flex flex-wrap justify-center gap-4 mt-6">
-            {[
-              { flag: "🇩🇪", lang: "Deutsch" },
-              { flag: "🇬🇧", lang: "English" },
-              { flag: "🇹🇷", lang: "Türkçe" },
-              { flag: "🇸🇦", lang: "العربية" },
-            ].map((l) => (
-              <div key={l.lang} className="px-6 py-3 rounded-full bg-white/20 text-white font-semibold flex items-center gap-2">
-                <span className="text-2xl">{l.flag}</span> {l.lang}
-              </div>
-            ))}
+      {/* LANGUAGES */}
+      <section className="py-20" style={{ background: "white" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <span className="section-label">Multilinguisme</span>
+              <h2 className="text-heading mt-4 mb-5">
+                Votre langue,<br /><span className="text-gradient">notre priorité</span>
+              </h2>
+              <p className="text-body-lg mb-8" style={{ color: "var(--gray-600)" }}>
+                Nos conseillers parlent allemand, anglais, turc et arabe. Parce que la communication
+                claire est au cœur de la confiance.
+              </p>
+              <Link href="/contact" className="btn btn-primary btn-lg">
+                Prendre rendez-vous <ArrowRight size={16} />
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {languages.map((l, i) => (
+                <div key={l.code} className="card p-6 text-center animate-fade-up" style={{ animationDelay: `${i * 60}ms` }}>
+                  <div className="text-4xl mb-3">{l.flag}</div>
+                  <div className="font-bold text-sm mb-1" style={{ color: "var(--gray-900)" }}>{l.lang}</div>
+                  <div className="badge badge-green">{l.code}</div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="mt-8">
-            <Link href="/contact"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-white transition-all hover:-translate-y-1"
-              style={{ background: "linear-gradient(135deg, #005F2D, #007A3D)" }}>
-              Prendre rendez-vous <ArrowRight size={18}/>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-20" style={{ background: "linear-gradient(135deg, var(--gold-500), var(--gold-300))" }}>
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+          <MapPin size={36} className="mx-auto mb-5 opacity-80" style={{ color: "white" }} />
+          <h2 className="text-heading mb-4" style={{ color: "white" }}>Venez nous rencontrer</h2>
+          <p className="text-body-lg mb-8" style={{ color: "rgba(255,255,255,0.85)" }}>
+            Nos conseillers vous accueillent sur rendez-vous ou ouvrez votre compte en ligne en 10 minutes.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/client/register" className="btn btn-primary btn-xl">
+              Ouvrir en ligne <ArrowRight size={18} />
+            </Link>
+            <Link href="/contact" className="btn btn-outline-white btn-xl">
+              Prendre RDV
             </Link>
           </div>
         </div>

@@ -1,469 +1,237 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import {
-  ArrowRight,
-  CheckCircle,
-  Clock,
-  Shield,
-  Zap,
-  FileText,
-  Star,
-  ChevronDown,
-  Euro,
-  Home,
-} from "lucide-react";
-
-const PRIMARY = "#005F2D";
-const GOLD = "#C9A84C";
+import { ArrowRight, CheckCircle, Clock, Shield, Zap, FileText, Users, Banknote } from "lucide-react";
 
 const features = [
-  {
-    icon: <Euro size={26} />,
-    title: "Bis zu 50.000 €",
-    desc: "Finanzieren Sie Ihre persönlichen Vorhaben — ohne Zinsen, ohne Riba. Transparente Festgebühr nach Murabaha-Prinzip.",
-    color: PRIMARY,
-  },
-  {
-    icon: <Clock size={26} />,
-    title: "Antwort in 24 Stunden",
-    desc: "Nach vollständiger Einreichung Ihrer Unterlagen erhalten Sie eine Vorentscheidung innerhalb eines Arbeitstages.",
-    color: GOLD,
-  },
-  {
-    icon: <Shield size={26} />,
-    title: "100% Scharia-konform",
-    desc: "Kein Riba. Unser Shariah Board zertifiziert alle Finanzierungsprodukte gemäß islamischen Finanzprinzipien.",
-    color: PRIMARY,
-  },
-  {
-    icon: <Zap size={26} />,
-    title: "Flexible Laufzeiten",
-    desc: "Wählen Sie Laufzeiten von 6 bis 84 Monaten. Die monatliche Rate bleibt konstant und unveränderlich.",
-    color: GOLD,
-  },
-  {
-    icon: <FileText size={26} />,
-    title: "Minimale Unterlagen",
-    desc: "Nur 3 Gehaltsabrechnungen, Personalausweis und Kontoauszug. Keine aufwändige Bürokratie.",
-    color: PRIMARY,
-  },
-  {
-    icon: <Home size={26} />,
-    title: "Vielseitig verwendbar",
-    desc: "Renovierung, Bildung, Hochzeit, Reise oder unvorhergesehene Ausgaben — ohne Verwendungsnachweis.",
-    color: GOLD,
-  },
+  { icon: Zap, title: "Réponse en 24h", desc: "Décision rapide, fonds disponibles en 48h après validation." },
+  { icon: Shield, title: "Sans intérêts (Riba)", desc: "Marge fixe transparente, aucun intérêt composé — conforme Sharia." },
+  { icon: FileText, title: "Zéro paperasse", desc: "Processus 100% digital. Signez en ligne depuis chez vous." },
+  { icon: Clock, title: "Jusqu'à 84 mois", desc: "Remboursez à votre rythme avec des mensualités fixes." },
+  { icon: Users, title: "Dédié aux résidents", desc: "Ouvert à tous les résidents allemands, quelle que soit leur origine." },
+  { icon: Banknote, title: "Jusqu'à 50 000 €", desc: "Financez vos projets personnels avec jusqu'à 50 000 €." },
 ];
 
-const eligibilityItems = [
-  "Mindestalter 18 Jahre, Wohnsitz in Deutschland",
-  "Regelmäßiges monatliches Nettoeinkommen (mind. 800 €)",
-  "Positiver Schufa-Score (oder individuelle Prüfung möglich)",
-  "Gültige IBAN bei KT Bank oder Bereitschaft zur Kontoeröffnung",
-  "Mindestens 3 Monate am aktuellen Arbeitsplatz tätig",
-  "Kein laufendes Insolvenzverfahren",
+const eligibility = [
+  "Résident en Allemagne depuis au moins 12 mois",
+  "Revenu mensuel net minimum 1 200 €",
+  "Âge : 21 à 65 ans",
+  "Pas d'insolvabilité déclarée (Schufa)",
+  "Compte bancaire allemand actif",
+  "Pièce d'identité valide (passeport ou carte nationale)",
 ];
 
-const processSteps = [
-  { n: "01", title: "Online-Antrag stellen", desc: "Formular in weniger als 5 Minuten ausfüllen — kein Filialbesuch nötig." },
-  { n: "02", title: "Dokumente hochladen", desc: "Personalausweis, Gehaltsabrechnungen und Kontoauszug digital einreichen." },
-  { n: "03", title: "Prüfung & Entscheidung", desc: "Unser Team prüft Ihren Antrag und gibt eine Vorentscheidung innerhalb von 24h." },
-  { n: "04", title: "Angebot unterzeichnen", desc: "Digitale Vertragsunterzeichnung — einfach, sicher und vollständig papierlos." },
-  { n: "05", title: "Auszahlung", desc: "Nach Unterzeichnung wird der Betrag innerhalb von 48 Stunden überwiesen." },
-];
+const MONTHS_OPTIONS = [6, 12, 24, 36, 60, 84];
 
-const purposes = [
-  { icon: "🏠", label: "Renovierung" },
-  { icon: "💍", label: "Hochzeit" },
-  { icon: "📚", label: "Bildung" },
-  { icon: "✈️", label: "Reise" },
-  { icon: "🚑", label: "Medizinisch" },
-  { icon: "💼", label: "Selbstständigkeit" },
-];
+interface FormData {
+  name: string;
+  email: string;
+  phone: string;
+  income: string;
+  purpose: string;
+  amount: string;
+}
 
 export default function PersonalLoansPage() {
-  const [amount, setAmount] = useState(15000);
-  const [months, setMonths] = useState(36);
-  const [formData, setFormData] = useState({ name: "", email: "", phone: "", income: "", purpose: "", requestedAmount: "" });
+  const [amount, setAmount] = useState(10000);
+  const [months, setMonths] = useState(24);
+  const [form, setForm] = useState<FormData>({ name: "", email: "", phone: "", income: "", purpose: "", amount: "" });
   const [submitted, setSubmitted] = useState(false);
-  const margin = 0.04;
 
-  const totalCost = amount * (1 + margin);
-  const monthly = (totalCost / months).toFixed(2);
+  const totalRepayment = amount * (1 + (0.04 * months) / 12);
+  const monthly = totalRepayment / months;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitted(true);
-  };
+  }
 
   return (
     <>
-      <section className="relative py-28 text-white overflow-hidden"
-        style={{ background: `linear-gradient(135deg, #003D1C 0%, ${PRIMARY} 55%, #007A3D 100%)` }}>
-        <div className="absolute inset-0 opacity-5"
-          style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='20' fill='none' stroke='white' stroke-width='1'/%3E%3C/svg%3E\")", backgroundSize: "60px 60px" }} />
-        <div className="relative max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold mb-6"
-              style={{ background: "rgba(201,168,76,0.2)", border: "1px solid rgba(201,168,76,0.4)", color: "#E8C96B" }}>
-              💰 Islamischer Kredit Personnel
-            </div>
-            <h1 className="text-5xl lg:text-6xl font-black mb-6 leading-tight">
-              Persönlicher Kredit<br />
-              <span style={{ color: GOLD }}>bis zu 50.000 €</span><br />
-              <span className="text-3xl font-bold text-green-200">100% Zinsfrei & Halal</span>
+      {/* Hero */}
+      <section
+        className="relative pt-28 pb-32 text-white overflow-hidden hero-grid"
+        style={{ background: "linear-gradient(135deg, #1e003d 0%, #3b0764 50%, #581c87 100%)" }}
+      >
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: "radial-gradient(ellipse at 60% 20%, rgba(0,95,45,0.15) 0%, transparent 55%)" }} />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="max-w-3xl animate-fade-up">
+            <span className="badge mb-6" style={{ background: "rgba(168,85,247,0.2)", color: "#d8b4fe", border: "1px solid rgba(168,85,247,0.35)" }}>
+              Financement personnel · Halal
+            </span>
+            <h1 className="text-display text-white mb-6">
+              Prêt personnel<br />
+              <span style={{ background: "linear-gradient(135deg, #a855f7, #7c3aed)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                sans intérêts
+              </span>
             </h1>
-            <p className="text-green-100 text-xl leading-relaxed mb-8">
-              Finanzieren Sie Ihre Träume nach islamischen Prinzipien. Kein Riba, keine versteckten Kosten —
-              transparente Festgebühr nach Murabaha, zertifiziert vom Shariah Board.
+            <p className="text-body-lg mb-8" style={{ color: "rgba(255,255,255,0.78)" }}>
+              Jusqu&apos;à 50 000 € avec une marge fixe et transparente. Zéro Riba, zéro surprise — financement islamique certifié.
             </p>
-            <div className="flex flex-wrap gap-3 mb-8">
-              {["Bis 50.000 €", "Antwort in 24h", "0% Zinsen", "Laufzeit 6–84 Monate"].map((tag) => (
-                <span key={tag} className="px-4 py-2 rounded-full text-sm font-medium"
-                  style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)" }}>
-                  ✓ {tag}
-                </span>
-              ))}
-            </div>
             <div className="flex flex-wrap gap-4">
-              <Link href="#simulator"
-                className="flex items-center gap-2 px-8 py-4 rounded-xl font-bold transition-all hover:-translate-y-1"
-                style={{ background: `linear-gradient(135deg, ${GOLD}, #E8C96B)`, color: "#003D1C" }}>
-                Simulieren <ArrowRight size={18} />
+              <Link href="#simulator" className="btn btn-xl flex items-center gap-2 text-white"
+                style={{ background: "linear-gradient(135deg, #9333ea, #7c3aed)", boxShadow: "0 8px 30px rgba(147,51,234,0.4)" }}>
+                Simuler mon prêt <ArrowRight size={20} />
               </Link>
-              <Link href="/contact"
-                className="flex items-center gap-2 px-8 py-4 rounded-xl font-semibold transition-all hover:bg-white/10"
-                style={{ border: "2px solid rgba(255,255,255,0.4)", color: "white" }}>
-                Berater sprechen
-              </Link>
+              <Link href="#apply" className="btn btn-outline-white btn-xl">Postuler</Link>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            {[
-              { val: "50.000 €", label: "Max. Kreditbetrag", icon: "💰" },
-              { val: "24h", label: "Entscheidungszeit", icon: "⚡" },
-              { val: "84 Monate", label: "Max. Laufzeit", icon: "📅" },
-              { val: "0%", label: "Zinsen (Riba)", icon: "🕌" },
-            ].map((s) => (
-              <div key={s.label} className="rounded-2xl p-5"
-                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                <div className="text-3xl mb-2">{s.icon}</div>
-                <div className="text-2xl font-black" style={{ color: GOLD }}>{s.val}</div>
-                <div className="text-green-200 text-sm">{s.label}</div>
-              </div>
-            ))}
-          </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 60" fill="none"><path d="M0,60 C360,0 1080,60 1440,20 L1440,60 Z" fill="#F9FAFB" /></svg>
-        </div>
+        <div className="absolute bottom-0 inset-x-0 h-10" style={{ background: "linear-gradient(to top, #FAFAFA, transparent)" }} />
       </section>
 
       {/* Simulator */}
-      <section id="simulator" className="py-20 bg-gray-50">
-        <div className="max-w-3xl mx-auto px-4">
-          <div className="text-center mb-10">
-            <h2 className="text-4xl font-black text-gray-900 mb-3">Kreditrechner</h2>
-            <p className="text-gray-500 text-lg">Berechnen Sie Ihre monatliche Rate — zinslos nach Murabaha</p>
+      <section id="simulator" className="py-20 lg:py-24 bg-white">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12">
+            <span className="section-label">Simulateur</span>
+            <h2 className="text-heading" style={{ color: "var(--gray-900)" }}>Calculez votre mensualité</h2>
+            <p className="text-body mt-3" style={{ color: "var(--gray-500)" }}>Marge fixe de 4% — transparente et sans intérêts composés.</p>
           </div>
-          <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-lg">
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-2">
-                <label className="text-sm font-semibold text-gray-700">Kreditbetrag</label>
-                <span className="text-xl font-black" style={{ color: PRIMARY }}>€{amount.toLocaleString("de-DE")}</span>
+
+          <div className="card p-8">
+            <div className="mb-8">
+              <div className="flex justify-between items-center mb-3">
+                <label className="label mb-0">Montant emprunté</label>
+                <span className="font-black text-2xl" style={{ color: "#9333ea" }}>{amount.toLocaleString("fr-FR")} €</span>
               </div>
               <input type="range" min={1000} max={50000} step={500} value={amount}
                 onChange={(e) => setAmount(Number(e.target.value))}
                 className="w-full h-2 rounded-full appearance-none cursor-pointer"
-                style={{ accentColor: PRIMARY }} />
-              <div className="flex justify-between text-xs text-gray-400 mt-1">
-                <span>€1.000</span><span>€50.000</span>
+                style={{ accentColor: "#9333ea", background: `linear-gradient(to right, #9333ea ${((amount - 1000) / 49000) * 100}%, var(--gray-200) 0%)` }} />
+              <div className="flex justify-between text-small mt-1" style={{ color: "var(--gray-400)" }}>
+                <span>1 000 €</span><span>50 000 €</span>
               </div>
             </div>
+
             <div className="mb-8">
-              <label className="block text-sm font-semibold text-gray-700 mb-3">Laufzeit</label>
-              <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-                {[6, 12, 24, 36, 60, 84].map((m) => (
+              <label className="label mb-3">Durée de remboursement</label>
+              <div className="flex flex-wrap gap-3">
+                {MONTHS_OPTIONS.map((m) => (
                   <button key={m} onClick={() => setMonths(m)}
-                    className="py-2.5 rounded-xl text-sm font-bold transition-all"
+                    className="px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
                     style={months === m
-                      ? { background: PRIMARY, color: "white", boxShadow: `0 4px 12px ${PRIMARY}50` }
-                      : { background: "#F3F4F6", color: "#374151" }}>
-                    {m} Mo.
+                      ? { background: "#9333ea", color: "white", boxShadow: "0 4px 16px rgba(147,51,234,0.35)" }
+                      : { background: "var(--gray-100)", color: "var(--gray-600)" }}>
+                    {m} mois
                   </button>
                 ))}
               </div>
             </div>
-            <div className="rounded-2xl p-6 mb-6"
-              style={{ background: `linear-gradient(135deg, ${PRIMARY}10, ${GOLD}10)` }}>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Finanzierungsbetrag</p>
-                  <p className="text-lg font-black text-gray-900">€{amount.toLocaleString("de-DE")}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Monatliche Rate</p>
-                  <p className="text-2xl font-black" style={{ color: PRIMARY }}>€{monthly}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Gesamtbetrag (4% Festgebühr)</p>
-                  <p className="text-lg font-black text-gray-900">€{totalCost.toFixed(0)}</p>
-                </div>
-              </div>
-              <p className="text-center text-xs text-gray-400 mt-3">
-                * Festgebühr (Murabaha): 4% — kein variabler Zins, kein Riba. Simulation — unverbindlich.
-              </p>
-            </div>
-            <Link href="/client/register"
-              className="block w-full py-4 rounded-xl font-bold text-white text-center flex items-center justify-center gap-2 hover:opacity-90 transition-all"
-              style={{ background: `linear-gradient(135deg, ${PRIMARY}, #007A3D)` }}>
-              Jetzt beantragen <ArrowRight size={20} />
-            </Link>
-          </div>
-        </div>
-      </section>
 
-      {/* Eligibility + Testimonial */}
-      <section className="py-20 bg-white">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-start">
-            <div>
-              <h2 className="text-3xl font-black text-gray-900 mb-4">Voraussetzungen</h2>
-              <p className="text-gray-500 mb-6">Wir prüfen jeden Antrag individuell — diese Grundvoraussetzungen erhöhen Ihre Chancen erheblich.</p>
-              <div className="space-y-3">
-                {eligibilityItems.map((item) => (
-                  <div key={item} className="flex items-start gap-3">
-                    <CheckCircle size={18} className="flex-shrink-0 mt-0.5" style={{ color: PRIMARY }} />
-                    <span className="text-gray-700">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="rounded-2xl p-8 border border-gray-100 shadow-md"
-              style={{ background: "linear-gradient(135deg, #f0fdf4, #fafafa)" }}>
-              <div className="flex gap-1 mb-4">
-                {[1,2,3,4,5].map((i) => <Star key={i} size={18} fill={GOLD} color={GOLD} />)}
-              </div>
-              <p className="text-gray-700 text-lg leading-relaxed italic mb-6">
-                "Ich brauchte 15.000 € für die Renovierung meines Hauses. Innerhalb von 2 Tagen hatte ich die
-                Genehmigung und das Geld auf dem Konto — ohne Zinsen und vollständig halal."
+            <div className="p-6 rounded-2xl text-center"
+              style={{ background: "linear-gradient(135deg, rgba(147,51,234,0.08), rgba(124,58,237,0.05))", border: "1px solid rgba(147,51,234,0.2)" }}>
+              <p className="text-small mb-2" style={{ color: "var(--gray-500)" }}>Mensualité estimée</p>
+              <p className="font-black mb-2" style={{ color: "#9333ea", fontSize: "3.5rem", lineHeight: 1 }}>
+                {monthly.toFixed(2)} €
               </p>
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full flex items-center justify-center font-black text-white text-xl"
-                  style={{ background: `linear-gradient(135deg, ${PRIMARY}, #007A3D)` }}>R</div>
-                <div>
-                  <div className="font-black text-gray-900">Rachid B.</div>
-                  <div className="text-gray-500 text-sm">Frankfurt am Main</div>
-                  <div className="text-xs font-semibold" style={{ color: PRIMARY }}>Kredit: 15.000 €</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Use cases */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-3xl font-black text-center text-gray-900 mb-3">Wofür können Sie den Kredit nutzen?</h2>
-          <p className="text-gray-500 text-center mb-10">Ohne Verwendungsnachweis — für jeden halal zulässigen Zweck.</p>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {purposes.map((p) => (
-              <div key={p.label} className="flex items-center gap-3 p-5 rounded-2xl border border-gray-100 hover:border-green-300 bg-white transition-colors">
-                <div className="text-3xl">{p.icon}</div>
-                <span className="font-semibold text-gray-700">{p.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Application Form */}
-      <section className="py-20 bg-white">
-        <div className="max-w-2xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-black text-gray-900 mb-4">Antrag stellen</h2>
-            <p className="text-gray-500 text-lg">Antwort innerhalb von 24 Stunden.</p>
-          </div>
-          {submitted ? (
-            <div className="rounded-2xl p-12 text-center border-2 border-green-300"
-              style={{ background: "linear-gradient(135deg, #f0fdf4, #ecfdf5)" }}>
-              <CheckCircle size={56} style={{ color: PRIMARY }} className="mx-auto mb-4" />
-              <h3 className="text-2xl font-black text-gray-900 mb-3">Antrag eingegangen!</h3>
-              <p className="text-gray-600 text-lg">
-                Hallo <strong>{formData.name}</strong>, Ihr Antrag wurde übermittelt.
-                Wir melden uns innerhalb von 24 Stunden bei {formData.email}.
+              <p className="text-small" style={{ color: "var(--gray-400)" }}>
+                Total remboursé : {totalRepayment.toFixed(2)} € — Marge totale : {(totalRepayment - amount).toFixed(2)} €
               </p>
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-8 border border-gray-100 shadow-lg space-y-5">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-2 text-sm">Vollständiger Name *</label>
-                  <input type="text" required placeholder="Max Mustermann"
-                    value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-green-400 text-sm" />
-                </div>
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-2 text-sm">E-Mail *</label>
-                  <input type="email" required placeholder="max@beispiel.de"
-                    value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-green-400 text-sm" />
-                </div>
-              </div>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-2 text-sm">Telefon *</label>
-                  <input type="tel" required placeholder="+49 170 1234567"
-                    value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-green-400 text-sm" />
-                </div>
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-2 text-sm">Monatliches Nettoeinkommen *</label>
-                  <select required value={formData.income} onChange={(e) => setFormData({ ...formData, income: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-green-400 text-sm bg-white">
-                    <option value="">Bitte wählen...</option>
-                    <option>Unter €1.000</option>
-                    <option>€1.000 – €2.000</option>
-                    <option>€2.000 – €3.500</option>
-                    <option>€3.500 – €5.000</option>
-                    <option>Über €5.000</option>
-                  </select>
-                </div>
-              </div>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-2 text-sm">Kreditbetrag</label>
-                  <select value={formData.requestedAmount} onChange={(e) => setFormData({ ...formData, requestedAmount: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-green-400 text-sm bg-white">
-                    <option value="">Bitte wählen...</option>
-                    <option>bis 5.000 €</option>
-                    <option>5.000 – 10.000 €</option>
-                    <option>10.000 – 20.000 €</option>
-                    <option>20.000 – 35.000 €</option>
-                    <option>35.000 – 50.000 €</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-2 text-sm">Verwendungszweck</label>
-                  <select value={formData.purpose} onChange={(e) => setFormData({ ...formData, purpose: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-green-400 text-sm bg-white">
-                    <option value="">Bitte wählen...</option>
-                    <option>Renovierung</option>
-                    <option>Bildung</option>
-                    <option>Hochzeit</option>
-                    <option>Fahrzeug</option>
-                    <option>Selbstständigkeit</option>
-                    <option>Sonstiges</option>
-                  </select>
-                </div>
-              </div>
-              <button type="submit"
-                className="w-full py-4 rounded-xl font-bold text-lg text-white transition-all hover:-translate-y-0.5 hover:shadow-lg flex items-center justify-center gap-2"
-                style={{ background: `linear-gradient(135deg, ${PRIMARY}, #007A3D)` }}>
-                Antrag absenden <ArrowRight size={20} />
-              </button>
-              <p className="text-center text-gray-400 text-xs">
-                <Clock size={12} className="inline mr-1" />
-                Antwort innerhalb von 24 Stunden — vertraulich &amp; unverbindlich
-              </p>
-            </form>
-          )}
+          </div>
         </div>
       </section>
 
       {/* Features */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-black text-gray-900 mb-4">Vorteile des KT Kredits</h2>
-            <p className="text-gray-500 text-lg">Transparent, zinsfrei, Scharia-konform.</p>
+      <section className="py-20 lg:py-24" style={{ background: "var(--gray-50)" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-14">
+            <span className="section-label">Avantages</span>
+            <h2 className="text-heading" style={{ color: "var(--gray-900)" }}>Pourquoi KT Personal Loan ?</h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              { icon: <Shield size={28}/>, title: "100% Scharia-konform", desc: "Kein Riba. Basiert auf dem islamischen Murabaha-Prinzip: Fester Aufpreis statt Zinsen — von Anfang an bekannt.", col: PRIMARY },
-              { icon: <Zap size={28}/>, title: "Online-Entscheidung", desc: "Antrag stellen und innerhalb von 24 Stunden eine Vorentscheidung erhalten — kein Filialbesuch nötig.", col: GOLD },
-              { icon: <Clock size={28}/>, title: "Flexible Laufzeiten", desc: "Von 6 bis 84 Monate — Sie wählen die Laufzeit, die zu Ihrem Budget passt. Feste, unveränderliche Rate.", col: PRIMARY },
-              { icon: <FileText size={28}/>, title: "Minimale Unterlagen", desc: "Nur Personalausweis, 3 Gehaltsabrechnungen und Kontoauszug. Keine aufwändige Bürokratie.", col: GOLD },
-              { icon: <Star size={28}/>, title: "Bis zu 50.000 €", desc: "Von 1.000 bis 50.000 € — für alle persönlichen Projekte frei verwendbar (Halal-Zwecke).", col: PRIMARY },
-              { icon: <CheckCircle size={28}/>, title: "Vorzeitige Rückzahlung", desc: "Jederzeit ohne Vorfälligkeitsentschädigung. Der Aufpreis wird anteilig reduziert.", col: GOLD },
-            ].map((f) => (
-              <div key={f.title} className="flex gap-4 p-6 bg-white rounded-2xl border border-gray-100 hover:border-green-200 transition-colors hover:-translate-y-1 duration-300">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: `${f.col}15`, color: f.col }}>
-                  {f.icon}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="card p-7">
+                <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-5"
+                  style={{ background: "rgba(147,51,234,0.1)", color: "#9333ea" }}>
+                  <Icon size={26} />
                 </div>
-                <div>
-                  <h3 className="font-black text-gray-900 mb-1">{f.title}</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">{f.desc}</p>
-                </div>
+                <h3 className="font-bold text-lg mb-2" style={{ color: "var(--gray-900)" }}>{title}</h3>
+                <p className="text-small leading-relaxed" style={{ color: "var(--gray-500)" }}>{desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* FAQ */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-3xl mx-auto px-4">
+      {/* Eligibility */}
+      <section className="py-20 lg:py-24 bg-white">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-black text-gray-900 mb-4">Häufige Fragen</h2>
+            <span className="section-label">Éligibilité</span>
+            <h2 className="text-heading" style={{ color: "var(--gray-900)" }}>Critères d&apos;éligibilité</h2>
           </div>
-          <FaqSection />
+          <div className="card p-8">
+            <div className="grid sm:grid-cols-2 gap-4">
+              {eligibility.map((item) => (
+                <div key={item} className="flex items-start gap-3">
+                  <CheckCircle size={20} className="flex-shrink-0 mt-0.5" style={{ color: "#9333ea" }} />
+                  <span className="text-body" style={{ color: "var(--gray-700)" }}>{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-24" style={{ background: `linear-gradient(135deg, #003D1C, ${PRIMARY})` }}>
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="text-5xl mb-6">💰</div>
-          <h2 className="text-4xl font-black text-white mb-4">Ihr Traum verdient eine halale Finanzierung</h2>
-          <p className="text-green-100 text-lg mb-8 max-w-2xl mx-auto">
-            Bis zu 50.000 € ohne einen Cent Zinsen. Online beantragen, in 24h Entscheidung erhalten.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/client/register"
-              className="inline-flex items-center gap-2 px-10 py-4 rounded-xl font-bold text-lg transition-all hover:-translate-y-1 hover:shadow-2xl"
-              style={{ background: `linear-gradient(135deg, ${GOLD}, #E8C96B)`, color: "#003D1C" }}>
-              Jetzt beantragen <ArrowRight size={20} />
-            </Link>
-            <Link href="/contact"
-              className="inline-flex items-center gap-2 px-10 py-4 rounded-xl font-bold border text-white hover:bg-white/10 transition"
-              style={{ borderColor: "rgba(255,255,255,0.4)" }}>
-              Beratung anfragen
-            </Link>
+      {/* Application form */}
+      <section id="apply" className="py-20 lg:py-24" style={{ background: "var(--gray-50)" }}>
+        <div className="max-w-xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-10">
+            <span className="section-label">Demande</span>
+            <h2 className="text-heading" style={{ color: "var(--gray-900)" }}>Postulez en ligne</h2>
           </div>
+          {submitted ? (
+            <div className="card p-10 text-center">
+              <div className="w-16 h-16 rounded-full mx-auto mb-5 flex items-center justify-center"
+                style={{ background: "rgba(147,51,234,0.15)" }}>
+                <CheckCircle size={32} style={{ color: "#9333ea" }} />
+              </div>
+              <h3 className="font-bold text-xl mb-3" style={{ color: "var(--gray-900)" }}>Dossier soumis avec succès !</h3>
+              <p className="text-body" style={{ color: "var(--gray-500)" }}>
+                Un conseiller vous contactera sous 24h pour finaliser votre demande.
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="card p-8 space-y-5">
+              {[
+                { key: "name", label: "Nom complet", type: "text", placeholder: "Mohammed Al-Rashid" },
+                { key: "email", label: "E-mail", type: "email", placeholder: "vous@exemple.com" },
+                { key: "phone", label: "Téléphone", type: "tel", placeholder: "+49 151 0000 0000" },
+                { key: "income", label: "Revenu mensuel net (€)", type: "number", placeholder: "2 500" },
+              ].map(({ key, label, type, placeholder }) => (
+                <div key={key}>
+                  <label className="label">{label}</label>
+                  <input className="input" type={type} placeholder={placeholder} required
+                    value={form[key as keyof FormData]}
+                    onChange={(e) => setForm({ ...form, [key]: e.target.value })} />
+                </div>
+              ))}
+              <div>
+                <label className="label">Objet du prêt</label>
+                <select className="input" value={form.purpose}
+                  onChange={(e) => setForm({ ...form, purpose: e.target.value })} required>
+                  <option value="">Sélectionnez...</option>
+                  {["Rénovation domicile", "Achat véhicule", "Mariage", "Études", "Autre"].map((o) => (
+                    <option key={o} value={o}>{o}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="label">Montant souhaité (€)</label>
+                <input className="input" type="number" min={1000} max={50000} placeholder="10 000" required
+                  value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
+              </div>
+              <button type="submit" className="btn btn-xl w-full flex items-center justify-center gap-2 text-white"
+                style={{ background: "linear-gradient(135deg, #9333ea, #7c3aed)", boxShadow: "0 8px 24px rgba(147,51,234,0.35)" }}>
+                Envoyer ma demande <ArrowRight size={20} />
+              </button>
+            </form>
+          )}
         </div>
       </section>
     </>
-  );
-}
-
-function FaqSection() {
-  const [open, setOpen] = useState<number | null>(null);
-  const faqs = [
-    { q: "Wie funktioniert der zinsfreie Kredit?", a: "Basiert auf dem islamischen Murabaha-Modell. KT Bank kauft das gewünschte Gut für Sie und verkauft es zu einem vereinbarten Gesamtpreis auf Raten. Kein Zins — nur ein transparenter Aufpreis." },
-    { q: "Wie schnell erhalte ich das Geld?", a: "Nach Genehmigung erfolgt die Auszahlung innerhalb von 24-48 Stunden auf Ihr KT Bank Konto." },
-    { q: "Welche Dokumente brauche ich?", a: "Personalausweis, Gehaltsnachweis (letzte 3 Monate), Kontoauszüge (letzte 3 Monate). Selbstständige: Steuerbescheid der letzten 2 Jahre." },
-    { q: "Kann ich vorzeitig zurückzahlen?", a: "Ja — jederzeit ohne Vorfälligkeitsentschädigung. Der ausstehende Aufpreis wird anteilig reduziert." },
-    { q: "Ist der Kredit wirklich Scharia-konform?", a: "Absolut. Unser Shariah Board prüft und zertifiziert alle Produkte. Basiert auf Murabaha — keine Zinsen, nur ein transparenter, vorab festgelegter Aufpreis." },
-  ];
-  return (
-    <div className="space-y-3">
-      {faqs.map((faq, i) => (
-        <div key={i} className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-          <button className="w-full flex items-center justify-between px-6 py-5 text-left"
-            onClick={() => setOpen(open === i ? null : i)}>
-            <span className="font-bold text-gray-900 pr-4">{faq.q}</span>
-            <ChevronDown size={20} className="text-gray-400 flex-shrink-0 transition-transform duration-200"
-              style={{ transform: open === i ? "rotate(180deg)" : "rotate(0deg)" }} />
-          </button>
-          {open === i && (
-            <div className="px-6 pb-5 text-gray-600 leading-relaxed border-t border-gray-50 pt-3">{faq.a}</div>
-          )}
-        </div>
-      ))}
-    </div>
   );
 }

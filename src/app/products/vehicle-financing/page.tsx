@@ -1,135 +1,156 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CheckCircle, Car, Calculator } from "lucide-react";
+import { ArrowRight, CheckCircle, Shield, Clock, FileText, Car, Banknote } from "lucide-react";
+
+const processSteps = [
+  { num: "01", title: "Simulation en ligne", desc: "Calculez votre mensualité en quelques secondes avec notre simulateur." },
+  { num: "02", title: "Sélection du véhicule", desc: "Choisissez votre voiture chez un concessionnaire partenaire ou trouvez-la vous-même." },
+  { num: "03", title: "Dossier digital", desc: "Soumettez vos documents en ligne — carte d'identité, revenus, permis de conduire." },
+  { num: "04", title: "Achat Murabaha", desc: "KT Bank achète le véhicule, puis vous le revend avec une marge fixe transparente." },
+  { num: "05", title: "Livraison & conduite", desc: "Recevez votre véhicule et commencez à rouler en conformité avec vos valeurs." },
+];
+
+const features = [
+  { icon: Shield, title: "Contrat Murabaha", desc: "KT Bank achète et revend — pas d'intérêts, marge fixe déclarée." },
+  { icon: Car, title: "Neuf & occasion", desc: "Tous types de véhicules : voitures, utilitaires, motos." },
+  { icon: Banknote, title: "Jusqu'à 100% financement", desc: "Apport optionnel — financez l'intégralité du prix si éligible." },
+  { icon: Clock, title: "Jusqu'à 84 mois", desc: "Mensualités adaptées à votre budget sur 12 à 84 mois." },
+  { icon: FileText, title: "Processus digital", desc: "Aucun déplacement requis. Signature électronique incluse." },
+  { icon: CheckCircle, title: "Halal certifié", desc: "Conformité Sharia vérifiée par notre Shariah Board." },
+];
+
+const MONTHS = [12, 24, 36, 48, 60, 84];
 
 export default function VehicleFinancingPage() {
-  const [price, setPrice] = useState("20000");
-  const [down, setDown] = useState("5000");
-  const [months, setMonths] = useState("60");
-  const [margin] = useState(0.035); // 3.5% margin (halal, no interest)
+  const [price, setPrice] = useState(20000);
+  const [down, setDown] = useState(4000);
+  const [months, setMonths] = useState(36);
 
-  const totalFinanced = Math.max(0, parseFloat(price || "0") - parseFloat(down || "0"));
-  const totalCost = totalFinanced * (1 + margin);
-  const monthly = months ? (totalCost / parseFloat(months)).toFixed(2) : "0.00";
-
-  const steps = [
-    { n: "01", title: "Simulez en ligne", desc: "Utilisez notre calculateur pour estimer vos mensualités" },
-    { n: "02", title: "Choisissez votre véhicule", desc: "Neuf ou occasion, tous types de véhicules acceptés" },
-    { n: "03", title: "Soumettez votre dossier", desc: "100% en ligne, réponse en 24h" },
-    { n: "04", title: "KT Bank achète le véhicule", desc: "La banque achète le véhicule au concessionnaire (Murabaha)" },
-    { n: "05", title: "Vous devenez propriétaire", desc: "KT Bank vous revend le véhicule avec une marge fixe et transparente" },
-  ];
+  const financed = Math.max(0, price - down);
+  const margin = 0.04;
+  const total = financed * (1 + (margin * months) / 12);
+  const monthly = months > 0 ? total / months : 0;
 
   return (
     <>
-      <section className="relative py-28 text-white overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #1E3A5F 0%, #1E40AF 60%, #2563EB 100%)" }}>
-        <div className="absolute inset-0 opacity-10"
-          style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cpolygon fill='white' points='50,0 100,25 100,75 50,100 0,75 0,25'/%3E%3C/svg%3E\")", backgroundSize: "80px" }}></div>
-        <div className="relative max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-6"
-              style={{ background: "rgba(255,255,255,0.2)", color: "white" }}>
-              🚗 Financement Automobile
-            </div>
-            <h1 className="text-5xl font-black mb-6">
-              Votre véhicule{" "}
-              <span style={{ color: "#FCD34D" }}>sans intérêts</span>
+      {/* Hero */}
+      <section
+        className="relative pt-28 pb-32 text-white overflow-hidden hero-grid"
+        style={{ background: "linear-gradient(135deg, #020617 0%, #0c1a3d 50%, #1e3a8a 100%)" }}
+      >
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: "radial-gradient(ellipse at 70% 30%, rgba(59,130,246,0.2) 0%, transparent 60%)" }} />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="max-w-3xl animate-fade-up">
+            <span className="badge mb-6" style={{ background: "rgba(59,130,246,0.2)", color: "#93c5fd", border: "1px solid rgba(59,130,246,0.35)" }}>
+              Murabaha · Financement véhicule
+            </span>
+            <h1 className="text-display text-white mb-6">
+              Votre voiture,<br />
+              <span style={{ background: "linear-gradient(135deg, #60a5fa, #3b82f6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                sans intérêts
+              </span>
             </h1>
-            <p className="text-blue-100 text-lg leading-relaxed mb-8">
-              Financement halal via le contrat Murabaha. KT Bank achète le véhicule et vous le revend
-              avec une marge fixe et transparente. Aucun intérêt, accord en 24h, jusqu'à 100 mois.
+            <p className="text-body-lg mb-10" style={{ color: "rgba(255,255,255,0.78)" }}>
+              Financement islamique Murabaha pour votre véhicule. Marge fixe transparente, zéro Riba. Roulez halal.
             </p>
-            <div className="flex flex-wrap gap-3">
-              {["✅ Accord en 24h", "🚗 Neuf & Occasion", "📅 Jusqu'à 100 mois", "0% Intérêt"].map((i) => (
-                <span key={i} className="px-4 py-2 rounded-full text-sm" style={{ background: "rgba(255,255,255,0.2)" }}>{i}</span>
-              ))}
-            </div>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20">
-            <div className="text-center text-white text-6xl mb-4">🚗</div>
-            <div className="text-center text-white">
-              <div className="font-bold text-xl mb-1">Contrat Murabaha</div>
-              <div className="text-blue-200 text-sm">KT Bank achète → vous revend → vous remboursez</div>
+            <div className="flex flex-wrap gap-4">
+              <Link href="#calculator" className="btn btn-xl flex items-center gap-2 text-white"
+                style={{ background: "linear-gradient(135deg, #2563eb, #1d4ed8)", boxShadow: "0 8px 30px rgba(37,99,235,0.4)" }}>
+                Calculer ma mensualité <ArrowRight size={20} />
+              </Link>
+              <Link href="#process" className="btn btn-outline-white btn-xl">Comment ça marche</Link>
             </div>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 60" fill="none"><path d="M0,60 C360,0 1080,60 1440,15 L1440,60 Z" fill="#FAFAFA"/></svg>
-        </div>
+        <div className="absolute bottom-0 inset-x-0 h-10" style={{ background: "linear-gradient(to top, #FAFAFA, transparent)" }} />
       </section>
 
-      {/* Calculator */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-2xl mx-auto px-4">
-          <div className="text-center mb-10">
-            <Calculator size={40} className="mx-auto mb-4" style={{ color: "#1E40AF" }}/>
-            <h2 className="text-4xl font-black text-gray-900 mb-2">Simulateur de financement</h2>
-            <p className="text-gray-500">Estimez vos mensualités (contrat Murabaha — sans intérêts)</p>
+      {/* Murabaha Calculator */}
+      <section id="calculator" className="py-20 lg:py-24 bg-white">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12">
+            <span className="section-label">Simulateur Murabaha</span>
+            <h2 className="text-heading" style={{ color: "var(--gray-900)" }}>Calculez votre financement</h2>
           </div>
-          <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
-            <div className="space-y-4 mb-8">
-              <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-2">Prix du véhicule (€)</label>
-                <input type="number" value={price} onChange={e => setPrice(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 outline-none text-sm focus:border-blue-500 transition" />
+          <div className="card p-8 space-y-7">
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="label mb-0">Prix du véhicule</label>
+                <span className="font-black text-xl" style={{ color: "#2563eb" }}>{price.toLocaleString("fr-FR")} €</span>
               </div>
-              <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-2">Apport personnel (€)</label>
-                <input type="number" value={down} onChange={e => setDown(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 outline-none text-sm focus:border-blue-500 transition" />
-              </div>
-              <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-2">Durée (mois)</label>
-                <select value={months} onChange={e => setMonths(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 outline-none text-sm focus:border-blue-500 transition bg-white">
-                  {[12,24,36,48,60,72,84,96,100].map(m => <option key={m} value={m}>{m} mois</option>)}
-                </select>
+              <input type="range" min={2000} max={150000} step={1000} value={price}
+                onChange={(e) => setPrice(Number(e.target.value))}
+                className="w-full h-2 rounded-full appearance-none cursor-pointer"
+                style={{ accentColor: "#2563eb" }} />
+              <div className="flex justify-between text-small mt-1" style={{ color: "var(--gray-400)" }}>
+                <span>2 000 €</span><span>150 000 €</span>
               </div>
             </div>
-            <div className="bg-blue-50 rounded-2xl p-6 border border-blue-100">
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <div className="text-xs text-gray-500 mb-1">Montant financé</div>
-                  <div className="text-xl font-black text-gray-900">€{totalFinanced.toLocaleString("fr-FR")}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-gray-500 mb-1">Coût total (marge fixe)</div>
-                  <div className="text-xl font-black text-gray-900">€{totalCost.toFixed(0)}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-gray-500 mb-1">Mensualité estimée</div>
-                  <div className="text-2xl font-black" style={{ color: "#1E40AF" }}>€{monthly}</div>
-                </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="label mb-0">Apport personnel</label>
+                <span className="font-black text-xl" style={{ color: "var(--green-700)" }}>{down.toLocaleString("fr-FR")} €</span>
               </div>
-              <p className="text-xs text-gray-400 mt-3 text-center">
-                * Simulation indicative. Marge fixe de 3.5%. Pas d'intérêts variables. Offre sous réserve d'acceptation.
+              <input type="range" min={0} max={price} step={500} value={down}
+                onChange={(e) => setDown(Number(e.target.value))}
+                className="w-full h-2 rounded-full appearance-none cursor-pointer"
+                style={{ accentColor: "var(--green-700)" }} />
+              <div className="flex justify-between text-small mt-1" style={{ color: "var(--gray-400)" }}>
+                <span>0 €</span><span>{price.toLocaleString("fr-FR")} €</span>
+              </div>
+            </div>
+
+            <div>
+              <label className="label mb-3">Durée</label>
+              <div className="flex flex-wrap gap-3">
+                {MONTHS.map((m) => (
+                  <button key={m} onClick={() => setMonths(m)}
+                    className="px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
+                    style={months === m
+                      ? { background: "#2563eb", color: "white", boxShadow: "0 4px 16px rgba(37,99,235,0.35)" }
+                      : { background: "var(--gray-100)", color: "var(--gray-600)" }}>
+                    {m} mois
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-6 rounded-2xl text-center"
+              style={{ background: "linear-gradient(135deg, rgba(37,99,235,0.07), rgba(29,78,216,0.04))", border: "1px solid rgba(37,99,235,0.2)" }}>
+              <p className="text-small mb-2" style={{ color: "var(--gray-500)" }}>Mensualité estimée</p>
+              <p className="font-black mb-2" style={{ color: "#2563eb", fontSize: "3.5rem", lineHeight: 1 }}>
+                {monthly.toFixed(2)} €
+              </p>
+              <p className="text-small" style={{ color: "var(--gray-400)" }}>
+                Montant financé : {financed.toLocaleString("fr-FR")} € — Total : {total.toFixed(2)} €
               </p>
             </div>
-            <Link href="/client/register"
-              className="mt-6 w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-white transition-all hover:opacity-90"
-              style={{ background: "linear-gradient(135deg, #1E40AF, #2563EB)" }}>
-              Faire ma demande <ArrowRight size={18}/>
-            </Link>
           </div>
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="py-20 bg-white">
-        <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-4xl font-black text-gray-900 text-center mb-12">Comment ça marche ?</h2>
-          <div className="space-y-6">
-            {steps.map((s) => (
-              <div key={s.n} className="flex items-start gap-6 p-5 rounded-2xl border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-black flex-shrink-0"
-                  style={{ background: "linear-gradient(135deg, #1E40AF, #2563EB)" }}>
-                  {s.n}
+      {/* 5-step process */}
+      <section id="process" className="py-20 lg:py-24"
+        style={{ background: "linear-gradient(135deg, #020617, #0c1a3d)" }}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-14">
+            <span className="badge mb-4" style={{ background: "rgba(59,130,246,0.2)", color: "#93c5fd" }}>Processus</span>
+            <h2 className="text-heading text-white">5 étapes vers votre véhicule</h2>
+          </div>
+          <div className="space-y-4">
+            {processSteps.map((step, i) => (
+              <div key={step.num} className="flex items-start gap-6 p-6 rounded-2xl"
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(59,130,246,0.2)" }}>
+                <div className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center font-black"
+                  style={{ background: i === 2 ? "#2563eb" : "rgba(37,99,235,0.2)", color: i === 2 ? "white" : "#60a5fa" }}>
+                  {step.num}
                 </div>
                 <div>
-                  <div className="font-bold text-gray-900 text-lg">{s.title}</div>
-                  <div className="text-gray-500 text-sm mt-1">{s.desc}</div>
+                  <h3 className="font-bold text-white mb-1">{step.title}</h3>
+                  <p className="text-small" style={{ color: "rgba(255,255,255,0.6)" }}>{step.desc}</p>
                 </div>
               </div>
             ))}
@@ -138,118 +159,38 @@ export default function VehicleFinancingPage() {
       </section>
 
       {/* Features */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-            {[
-              { icon: "🕌", feat: "100% Halal certifié — Murabaha" },
-              { icon: "⚡", feat: "Accord en 24h garantis" },
-              { icon: "📅", feat: "Jusqu'à 100 mois de remboursement" },
-              { icon: "🚗", feat: "Véhicules neufs et d'occasion" },
-              { icon: "💯", feat: "Financement jusqu'à 100% du prix" },
-              { icon: "🔐", feat: "Marge fixe, jamais variable" },
-            ].map((f) => (
-              <div key={f.feat} className="flex items-center gap-3 bg-white p-4 rounded-2xl border border-gray-100">
-                <span className="text-2xl">{f.icon}</span>
-                <span className="text-sm font-medium text-gray-700">{f.feat}</span>
+      <section className="py-20 lg:py-24" style={{ background: "var(--gray-50)" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-14">
+            <span className="section-label">Avantages</span>
+            <h2 className="text-heading" style={{ color: "var(--gray-900)" }}>Pourquoi KT Vehicle ?</h2>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="card p-7">
+                <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-5"
+                  style={{ background: "rgba(37,99,235,0.1)", color: "#2563eb" }}>
+                  <Icon size={26} />
+                </div>
+                <h3 className="font-bold text-lg mb-2" style={{ color: "var(--gray-900)" }}>{title}</h3>
+                <p className="text-small leading-relaxed" style={{ color: "var(--gray-500)" }}>{desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Shariah Explanation */}
-      <section className="py-16 bg-white">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="text-5xl mb-4">☽</div>
-              <h2 className="text-3xl font-black text-gray-900 mb-4">Murabaha Auto — Wie es funktioniert</h2>
-              <p className="text-gray-600 text-lg leading-relaxed mb-5">
-                Beim islamischen Murabaha-Autokredit kauft KT Bank das Fahrzeug in Ihrem Auftrag direkt vom Händler.
-                Dann verkauft die Bank es zu einem transparent vereinbarten Gesamtpreis an Sie.
-                Sie zahlen in monatlichen Raten — ohne einen einzigen Cent Zinsen.
-              </p>
-              <div className="space-y-3">
-                {[
-                  "KT Bank kauft das Fahrzeug vom Händler",
-                  "Sie einigen sich auf Gesamtpreis & Laufzeit",
-                  "Feste monatliche Rate — keine Überraschungen",
-                  "Kein Zins (Riba) — nur ein transparenter Aufpreis",
-                  "Fahrzeug gehört sofort Ihnen",
-                ].map((item) => (
-                  <div key={item} className="flex items-center gap-3">
-                    <CheckCircle size={16} style={{ color: "#1E40AF" }} className="flex-shrink-0" />
-                    <span className="text-gray-700 text-sm">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { icon: "🏎️", title: "Alle Fahrzeugarten", sub: "PKW, SUV, Van, Elektro" },
-                { icon: "🔑", title: "Neu & Gebraucht", sub: "Bis 100% Finanzierung" },
-                { icon: "📅", title: "Bis 100 Monate", sub: "Flexible Laufzeit" },
-                { icon: "⚡", title: "Entscheid in 24h", sub: "Schnelle Bearbeitung" },
-              ].map((c) => (
-                <div key={c.title} className="bg-gray-50 rounded-xl p-5 border border-gray-100">
-                  <div className="text-3xl mb-2">{c.icon}</div>
-                  <div className="font-black text-gray-900 text-sm">{c.title}</div>
-                  <div className="text-gray-500 text-xs">{c.sub}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-6">
-            {[
-              { name: "Hassan M.", role: "Kunde seit 2022", text: "Mein neues Elektroauto — finanziert ohne Zinsen über KT Bank. Der Prozess war einfach und transparent. Ich bin sehr zufrieden." },
-              { name: "Sara K.", role: "Kundin seit 2021", text: "Gebrauchtwagen für meine Familie, 48 Monate, kein Zinsen. KT Bank hat das hervorragend abgewickelt. Empfehlung!" },
-            ].map((t) => (
-              <div key={t.name} className="bg-white rounded-2xl p-6 border border-gray-100">
-                <div className="flex gap-1 mb-3">
-                  {[1,2,3,4,5].map(i => <span key={i} style={{ color: "#1E40AF" }}>★</span>)}
-                </div>
-                <p className="text-gray-700 text-sm leading-relaxed mb-4 italic">"{t.text}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white"
-                    style={{ background: "#1E40AF" }}>{t.name[0]}</div>
-                  <div>
-                    <div className="font-bold text-gray-900 text-sm">{t.name}</div>
-                    <div className="text-gray-400 text-xs">{t.role}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-24" style={{ background: "linear-gradient(135deg, #1E3A5F, #1E40AF)" }}>
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="text-5xl mb-6">🚗</div>
-          <h2 className="text-4xl font-black text-white mb-4">Ihr Fahrzeug — halal finanziert</h2>
-          <p className="text-blue-200 text-lg mb-8 max-w-2xl mx-auto">
-            Neues oder gebrauchtes Fahrzeug, bis zu 100 Monate, ohne Zinsen.
-            Online beantragen und Entscheid in 24h erhalten.
+      {/* CTA */}
+      <section className="py-24" style={{ background: "linear-gradient(135deg, #020617, #0c1a3d)" }}>
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-heading text-white mb-4">Prêt à rouler halal ?</h2>
+          <p className="text-body-lg mb-10" style={{ color: "rgba(255,255,255,0.72)" }}>
+            Démarrez votre demande en ligne. Réponse sous 48h.
           </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Link href="/client/register"
-              className="flex items-center gap-2 px-8 py-4 rounded-xl font-bold transition-all hover:-translate-y-1 hover:shadow-2xl"
-              style={{ background: "linear-gradient(135deg, #C9A84C, #E8C96B)", boxShadow: "0 8px 30px rgba(201,168,76,0.4)", color: "#1E3A5F" }}>
-              Finanzierung beantragen <ArrowRight size={18}/>
-            </Link>
-            <Link href="/contact"
-              className="flex items-center gap-2 px-8 py-4 rounded-xl font-semibold"
-              style={{ border: "2px solid rgba(255,255,255,0.4)", color: "white" }}>
-              Berater kontaktieren
-            </Link>
-          </div>
+          <Link href="/client/register" className="btn btn-xl flex items-center gap-2 mx-auto w-fit text-white"
+            style={{ background: "linear-gradient(135deg, #2563eb, #1d4ed8)", boxShadow: "0 8px 30px rgba(37,99,235,0.4)" }}>
+            Financer mon véhicule <ArrowRight size={20} />
+          </Link>
         </div>
       </section>
     </>
