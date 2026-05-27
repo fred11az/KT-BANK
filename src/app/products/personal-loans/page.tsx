@@ -1,7 +1,88 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CheckCircle } from "lucide-react";
+import {
+  ArrowRight,
+  CheckCircle,
+  Euro,
+  Clock,
+  Shield,
+  Zap,
+  FileText,
+  Home,
+  Briefcase,
+  Star,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+
+const PRIMARY = "#005F2D";
+const GOLD = "#C9A84C";
+
+const features = [
+  {
+    icon: <Euro size={26} />,
+    title: "Bis zu 50.000 €",
+    desc: "Finanzieren Sie Ihre persönlichen Vorhaben — ohne Zinsen, ohne Riba. Transparente Festgebühr nach Murabaha-Prinzip.",
+    color: PRIMARY,
+  },
+  {
+    icon: <Clock size={26} />,
+    title: "Antwort in 24 Stunden",
+    desc: "Nach vollständiger Einreichung Ihrer Unterlagen erhalten Sie eine Vorentscheidung innerhalb eines Arbeitstages.",
+    color: GOLD,
+  },
+  {
+    icon: <Shield size={26} />,
+    title: "100% Scharia-konform",
+    desc: "Kein Riba. Unser Shariah Board zertifiziert alle Finanzierungsprodukte gemäß islamischen Finanzprinzipien.",
+    color: PRIMARY,
+  },
+  {
+    icon: <Zap size={26} />,
+    title: "Flexible Laufzeiten",
+    desc: "Wählen Sie Laufzeiten von 6 bis 84 Monaten. Die monatliche Rate bleibt konstant und unveränderlich.",
+    color: GOLD,
+  },
+  {
+    icon: <FileText size={26} />,
+    title: "Minimale Unterlagen",
+    desc: "Nur 3 Gehaltsabrechnungen, Personalausweis und Kontoauszug. Keine aufwändige Bürokratie.",
+    color: PRIMARY,
+  },
+  {
+    icon: <Home size={26} />,
+    title: "Vielseitig verwendbar",
+    desc: "Renovierung, Bildung, Hochzeit, Reise oder unvorhergesehene Ausgaben — ohne Verwendungsnachweis.",
+    color: GOLD,
+  },
+];
+
+const eligibilityItems = [
+  "Mindestalter 18 Jahre, Wohnsitz in Deutschland",
+  "Regelmäßiges monatliches Nettoeinkommen (mind. 800 €)",
+  "Positiver Schufa-Score (oder individuelle Prüfung möglich)",
+  "Gültige IBAN bei KT Bank oder Bereitschaft zur Kontoeröffnung",
+  "Mindestens 3 Monate am aktuellen Arbeitsplatz tätig",
+  "Kein laufendes Insolvenzverfahren",
+];
+
+const processSteps = [
+  { n: "01", title: "Online-Antrag stellen", desc: "Formular in weniger als 5 Minuten ausfüllen — kein Filialbesuch nötig." },
+  { n: "02", title: "Dokumente hochladen", desc: "Personalausweis, Gehaltsabrechnungen und Kontoauszug digital einreichen." },
+  { n: "03", title: "Prüfung & Entscheidung", desc: "Unser Team prüft Ihren Antrag und gibt eine Vorentscheidung innerhalb von 24h." },
+  { n: "04", title: "Angebot unterzeichnen", desc: "Digitale Vertragsunterzeichnung — einfach, sicher und vollständig papierlos." },
+  { n: "05", title: "Auszahlung", desc: "Nach Unterzeichnung wird der Betrag innerhalb von 48 Stunden überwiesen." },
+];
+
+const purposes = [
+  { icon: "🏠", label: "Renovierung" },
+  { icon: "💍", label: "Hochzeit" },
+  { icon: "📚", label: "Bildung" },
+  { icon: "✈️", label: "Reise" },
+  { icon: "🚑", label: "Medizinisch" },
+  { icon: "💼", label: "Selbstständigkeit" },
+];
 
 export default function PersonalLoansPage() {
   const [amount, setAmount] = useState(15000);
