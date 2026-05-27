@@ -161,6 +161,94 @@ export default function FestgeldKontoPage() {
           ))}
         </div>
       </section>
+
+      {/* Mudaraba Explanation */}
+      <section className="py-20 bg-white">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <div className="text-5xl mb-4">📜</div>
+              <h2 className="text-3xl font-black text-gray-900 mb-4">Mudaraba — Das islamische Gewinnbeteiligungsmodell</h2>
+              <p className="text-gray-600 text-lg leading-relaxed mb-5">
+                Das KT FestgeldKonto basiert auf dem islamischen Mudaraba-Prinzip. Sie als Kapitalgeber
+                (Rabb al-Maal) stellen Ihr Geld zur Verfügung. KT Bank (Mudarib) investiert es
+                in halale, Scharia-konforme Projekte. Der vorab vereinbarte Profit wird transparent
+                zwischen Ihnen und der Bank aufgeteilt.
+              </p>
+              <div className="space-y-3">
+                {[
+                  "Vorab vereinbarte, transparente Profitrate",
+                  "Investition ausschließlich in Halal-Projekte",
+                  "Keine Zinsen (Riba) — echter Gewinn aus realer Wirtschaft",
+                  "Jährliche Shariah-Board-Zertifizierung",
+                  "Einlagensicherung bis 100.000 € (EDB)",
+                ].map((item) => (
+                  <div key={item} className="flex items-center gap-3">
+                    <CheckCircle size={16} style={{ color: "#059669" }} className="flex-shrink-0" />
+                    <span className="text-gray-700 text-sm">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-4">
+              {[
+                { step: "1", title: "Sie einzahlen", desc: "Mindestens 1.000 €, Laufzeit 3, 6 oder 12 Monate." },
+                { step: "2", title: "KT Bank investiert", desc: "Ihr Kapital wird in Scharia-konforme Projekte investiert." },
+                { step: "3", title: "Gewinn wird verteilt", desc: "Der vorab vereinbarte Profit wird Ihrem Konto gutgeschrieben." },
+                { step: "4", title: "Rückzahlung", desc: "Am Ende der Laufzeit erhalten Sie Ihr Kapital + Profit zurück." },
+              ].map((s) => (
+                <div key={s.step} className="flex gap-4 p-5 bg-gray-50 rounded-xl border border-gray-100">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center font-black text-white flex-shrink-0"
+                    style={{ background: "#059669" }}>{s.step}</div>
+                  <div>
+                    <div className="font-black text-gray-900 mb-1">{s.title}</div>
+                    <div className="text-gray-500 text-sm">{s.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Who is it for */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-black text-gray-900 mb-3">Für wen ist das FestgeldKonto?</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { icon: "👨‍👩‍👧", title: "Familien", desc: "Sichern Sie das Ersparte für Ihre Familie — mit garantierter Rendite und islamischen Prinzipien." },
+              { icon: "🏢", title: "Selbstständige", desc: "Parken Sie Unternehmensgewinne sicher und profitabel — ohne Zinsen." },
+              { icon: "🎓", title: "Junge Sparer", desc: "Beginnen Sie schon ab 1.000 € Ihrem langfristigen Sparziel entgegenzuarbeiten." },
+            ].map((p) => (
+              <div key={p.title} className="bg-white rounded-2xl p-6 border border-gray-100 hover:-translate-y-1 transition-all duration-300">
+                <div className="text-4xl mb-3">{p.icon}</div>
+                <h3 className="font-black text-gray-900 mb-2">{p.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{p.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-24" style={{ background: "linear-gradient(135deg, #064E3B, #059669)" }}>
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <div className="text-5xl mb-6">📈</div>
+          <h2 className="text-4xl font-black text-white mb-4">Lassen Sie Ihr Geld für Sie arbeiten</h2>
+          <p className="text-green-100 text-lg mb-8 max-w-2xl mx-auto">
+            Bis zu 4,5% garantierter Profit pro Jahr. Halal, sicher, transparent.
+            Ab 1.000 € Mindesteinlage.
+          </p>
+          <Link href="/client/register"
+            className="inline-flex items-center gap-2 px-10 py-4 rounded-xl font-bold text-lg transition-all hover:-translate-y-1 hover:shadow-2xl"
+            style={{ background: "linear-gradient(135deg, #C9A84C, #E8C96B)", boxShadow: "0 8px 30px rgba(201,168,76,0.4)", color: "#064E3B" }}>
+            FestgeldKonto eröffnen <ArrowRight size={20}/>
+          </Link>
+        </div>
+      </section>
     </>
   );
 }
