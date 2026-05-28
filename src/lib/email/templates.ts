@@ -411,6 +411,92 @@ export function transferStatusEmail(opts: {
   };
 }
 
+/* ─── Transfer pending fee (client notification) ─── */
+export function transferPendingFeeEmail(opts: {
+  prenom: string;
+  amount: number;
+  currency: string;
+  to_name: string;
+  to_iban: string;
+  reference?: string;
+  fee_amount: number;
+  fee_currency: string;
+  fee_payment: { name?: string; iban?: string; bic?: string; bank?: string; reference?: string };
+  transfer_id: string;
+  lang?: "de" | "fr";
+}) {
+  const { prenom, amount, currency, to_name, to_iban, reference, fee_amount, fee_currency, fee_payment, transfer_id, lang = "de" } = opts;
+  const PAYMENT_URL = `https://kt-bank-ag.com/client/transfer-payment?id=${transfer_id}`;
+  const s = lang === "fr" ? {
+    subject: `Action requise : réglez les frais de traitement (${fee_amount.toFixed(2)} ${fee_currency})`,
+    title: `Frais de traitement requis, ${prenom}`,
+    intro: `Votre demande de virement est en attente. Pour la traiter, veuillez régler les frais de dossier ci-dessous dans les <strong>24 heures</strong>. Passé ce délai, la demande sera automatiquement annulée.`,
+    summaryTitle: "Récapitulatif du virement",
+    feeTitle: "Coordonnées pour le règlement des frais",
+    amountLabel: "Montant", toLabel: "Bénéficiaire", ibanLabel: "IBAN bénéficiaire", refLabel: "Référence",
+    feeAmountLabel: "Frais de traitement",
+    bankNameLabel: "Banque / Titulaire", feeIbanLabel: "IBAN", feeBicLabel: "BIC", feeRefLabel: "Référence",
+    warning: "⚠ Délai : 24 heures. Passé ce délai, votre virement sera automatiquement annulé.",
+    cta: "Régler les frais maintenant",
+  } : {
+    subject: `Gebühr erforderlich: Bearbeitungsgebühr zahlen (${fee_amount.toFixed(2)} ${fee_currency})`,
+    title: `Bearbeitungsgebühr erforderlich, ${prenom}`,
+    intro: `Ihre Überweisung liegt zur Bearbeitung bereit. Um sie auszuführen, überweisen Sie bitte die Bearbeitungsgebühr innerhalb von <strong>24 Stunden</strong>. Danach wird der Auftrag automatisch storniert.`,
+    summaryTitle: "Zusammenfassung Ihrer Überweisung",
+    feeTitle: "Bankdaten für die Gebührenzahlung",
+    amountLabel: "Betrag", toLabel: "Empfänger", ibanLabel: "IBAN Empfänger", refLabel: "Verwendungszweck",
+    feeAmountLabel: "Bearbeitungsgebühr",
+    bankNameLabel: "Bank / Inhaber", feeIbanLabel: "IBAN", feeBicLabel: "BIC", feeRefLabel: "Referenz",
+    warning: "⚠ Frist: 24 Stunden. Danach wird Ihre Überweisung automatisch storniert.",
+    cta: "Gebühr jetzt bezahlen",
+  };
+
+  const summaryRows = [
+    [s.amountLabel, `${amount.toFixed(2)} ${currency}`],
+    [s.toLabel, to_name],
+    [s.ibanLabel, to_iban],
+    ...(reference ? [[s.refLabel, reference]] : []),
+  ];
+  const feeRows = [
+    ...(fee_payment.name ? [[s.bankNameLabel, fee_payment.name]] : []),
+    ...(fee_payment.iban ? [[s.feeIbanLabel, fee_payment.iban]] : []),
+    ...(fee_payment.bic ? [[s.feeBicLabel, fee_payment.bic]] : []),
+    ...(fee_payment.reference ? [[s.feeRefLabel, fee_payment.reference]] : []),
+    [s.feeAmountLabel, `${fee_amount.toFixed(2)} ${fee_currency}`],
+  ];
+  const makeRows = (rows: string[][]) => rows.map(([k, v]) => `
+    <tr>
+      <td style="padding:8px 12px;font-size:12px;color:#999999;border-bottom:1px solid #eeeeee;white-space:nowrap;">${k}</td>
+      <td style="padding:8px 12px;font-size:13px;color:#111111;border-bottom:1px solid #eeeeee;font-weight:600;font-family:'Courier New',monospace;">${v}</td>
+    </tr>`).join("");
+
+  return {
+    subject: s.subject,
+    html: base(`
+<h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:#111111;">${s.title}</h1>
+<p style="margin:0 0 24px;font-size:14px;color:#555555;line-height:1.6;">${s.intro}</p>
+
+<p style="margin:0 0 8px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#666666;">${s.summaryTitle}</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eeeeee;border-radius:6px;overflow:hidden;margin:0 0 20px;">
+  ${makeRows(summaryRows)}
+</table>
+
+<p style="margin:0 0 8px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#d97706;">${s.feeTitle}</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:2px solid #fde68a;border-radius:6px;overflow:hidden;margin:0 0 20px;background:#fffbf0;">
+  ${makeRows(feeRows)}
+</table>
+
+<div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;padding:12px 16px;margin:0 0 24px;">
+  <p style="margin:0;font-size:13px;color:#92400e;font-weight:600;">${s.warning}</p>
+</div>
+
+<div style="text-align:center;">
+  <a href="${PAYMENT_URL}" style="display:inline-block;background:#d97706;color:#ffffff;font-weight:700;font-size:14px;padding:13px 28px;border-radius:6px;text-decoration:none;">${s.cta}</a>
+</div>
+`, lang),
+  };
+}
+
 /* ─── Security alert ─── */
 export function securityAlertEmail(prenom: string, reason: string, lang: "de" | "fr" = "de") {
   const s = lang === "fr" ? {

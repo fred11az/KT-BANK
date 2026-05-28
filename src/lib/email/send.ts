@@ -5,6 +5,7 @@ import {
   welcomeEmail,
   transactionEmail,
   transferStatusEmail,
+  transferPendingFeeEmail,
   bankMessageEmail,
   securityAlertEmail,
   adminNewClientEmail,
@@ -79,6 +80,26 @@ export async function sendTransferStatus(
   }
 ) {
   const { subject, html } = transferStatusEmail(opts);
+  return send(email, subject, html);
+}
+
+export async function sendTransferPendingFee(
+  email: string,
+  opts: {
+    prenom: string;
+    amount: number;
+    currency: string;
+    to_name: string;
+    to_iban: string;
+    reference?: string;
+    fee_amount: number;
+    fee_currency: string;
+    fee_payment: { name?: string; iban?: string; bic?: string; bank?: string; reference?: string };
+    transfer_id: string;
+    lang?: Lang;
+  }
+) {
+  const { subject, html } = transferPendingFeeEmail(opts);
   return send(email, subject, html);
 }
 

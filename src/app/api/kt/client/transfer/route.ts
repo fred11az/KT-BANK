@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
-import { sendTransferStatus } from "@/lib/email/send";
+import { sendTransferStatus, sendTransferPendingFee } from "@/lib/email/send";
 
 async function getSessionEmail(req: NextRequest): Promise<string | null> {
   const auth = req.headers.get("Authorization");
@@ -109,6 +109,30 @@ export async function POST(req: NextRequest) {
     })
     .select("id")
     .single();
+
+  // Send pending-fee email to client (fire-and-forget)
+  if (transfer?.id) {
+    const { data: profileData } = await supabase
+      .from("kt_profiles")
+      .select("email, prenom, lang")
+      .eq("id", profile.id)
+      .single();
+    if (profileData?.email) {
+      sendTransferPendingFee(profileData.email, {
+        prenom: profileData.prenom ?? "Client",
+        amount: Number(amount),
+        currency: "EUR",
+        to_name,
+        to_iban,
+        reference: reference || undefined,
+        fee_amount: Number(fee.amount),
+        fee_currency: fee.currency ?? "EUR",
+        fee_payment: feePayment as Record<string, string>,
+        transfer_id: transfer.id,
+        lang: (profileData.lang as "de" | "fr") ?? "de",
+      }).catch(() => {/* ignore email errors */});
+    }
+  }
 
   return NextResponse.json({
     ok: true,
