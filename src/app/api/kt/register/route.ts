@@ -19,7 +19,6 @@ export async function POST(req: NextRequest) {
     const { error } = await supabase.from("kt_profiles").update({
       pays_residence: fields.pays_residence,
       date_naissance: fields.date_naissance,
-      source_revenus: fields.source_revenus,
       code_promo: fields.code_promo || null,
       is_fatca: fields.is_fatca ?? false,
       registration_step: 2,
@@ -66,25 +65,35 @@ export async function POST(req: NextRequest) {
     if (error) return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 
-  /* ── Step 6 : Famille & Ayants droit ── */
+  /* ── Step 6 : Situation financière (crédits en cours) ── */
   if (step === 6) {
     const { error } = await supabase.from("kt_profiles").update({
-      nombre_enfants: fields.nombre_enfants ?? 0,
-      personnes_a_charge: fields.personnes_a_charge ?? 0,
-      ayants_droit: fields.ayants_droit ?? [],
+      a_credits_en_cours: fields.a_credits_en_cours ?? false,
+      credits_details: fields.credits_details ?? [],
       registration_step: 6,
     }).eq("email", email);
     if (error) return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 
-  /* ── Step 7 : Téléphone → finalisation ── */
+  /* ── Step 7 : Famille & Ayants droit ── */
   if (step === 7) {
+    const { error } = await supabase.from("kt_profiles").update({
+      nombre_enfants: fields.nombre_enfants ?? 0,
+      personnes_a_charge: fields.personnes_a_charge ?? 0,
+      ayants_droit: fields.ayants_droit ?? [],
+      registration_step: 7,
+    }).eq("email", email);
+    if (error) return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+  }
+
+  /* ── Step 8 : Téléphone → finalisation ── */
+  if (step === 8) {
     const { data: profile, error: profileErr } = await supabase
       .from("kt_profiles")
       .update({
         telephone: fields.telephone,
         phone_verified: true,
-        registration_step: 7,
+        registration_step: 8,
         status: "active",
       })
       .eq("email", email)
