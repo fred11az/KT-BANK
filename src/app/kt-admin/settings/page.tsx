@@ -6,6 +6,18 @@ import { Settings, Save, Euro, Building2, RefreshCw, Check } from "lucide-react"
 type FeePayment = { name: string; iban: string; bic: string; bank: string; reference: string };
 type TransferFee = { amount: number; currency: string };
 
+function Field({ label, value, onChange, type = "text", mono = false }: {
+  label: string; value: string; onChange: (v: string) => void; type?: string; mono?: boolean;
+}) {
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <label style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.72rem", fontWeight: 600, display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</label>
+      <input type={type} value={value} onChange={(e) => onChange(e.target.value)}
+        style={{ width: "100%", height: 44, background: "#252836", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "white", fontSize: "0.9rem", padding: "0 14px", boxSizing: "border-box", outline: "none", fontFamily: mono ? "monospace" : "inherit" }} />
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   const { token } = useAdmin();
   const [loading, setLoading] = useState(true);
@@ -35,18 +47,6 @@ export default function SettingsPage() {
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
-  }
-
-  function Field({ label, value, onChange, type = "text", mono = false }: {
-    label: string; value: string; onChange: (v: string) => void; type?: string; mono?: boolean;
-  }) {
-    return (
-      <div style={{ marginBottom: 14 }}>
-        <label style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.72rem", fontWeight: 600, display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</label>
-        <input type={type} value={value} onChange={(e) => onChange(e.target.value)}
-          style={{ width: "100%", height: 44, background: "#252836", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "white", fontSize: "0.9rem", padding: "0 14px", boxSizing: "border-box", outline: "none", fontFamily: mono ? "monospace" : "inherit" }} />
-      </div>
-    );
   }
 
   if (loading) return <div style={{ padding: 32, color: "rgba(255,255,255,0.4)" }}>Chargement…</div>;
