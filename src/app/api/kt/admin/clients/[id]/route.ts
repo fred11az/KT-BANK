@@ -7,33 +7,35 @@ function auth(req: NextRequest) {
   return key && req.headers.get("Authorization") === `Bearer ${key}`;
 }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const { id } = await params;
   const supabase = getSupabase();
 
   const { data: profile, error } = await supabase
     .from("kt_profiles")
     .select("*")
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
   if (error || !profile) return NextResponse.json({ error: "Introuvable" }, { status: 404 });
 
   const { data: accounts } = await supabase
     .from("kt_accounts")
     .select("*, kt_cards(*), kt_transactions(*)")
-    .eq("profile_id", params.id);
+    .eq("profile_id", id);
 
   const { data: transfers } = await supabase
     .from("kt_transfer_requests")
     .select("*")
-    .eq("profile_id", params.id)
+    .eq("profile_id", id)
     .order("created_at", { ascending: false });
 
   return NextResponse.json({ profile, accounts: accounts ?? [], transfers: transfers ?? [] });
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const { id } = await params;
   const supabase = getSupabase();
   const body = await req.json();
 
@@ -41,14 +43,14 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const { data: profile } = await supabase
     .from("kt_profiles")
     .select("email, prenom, lang, status")
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
 
   // Profile fields (status, kyc_status)
   const profileFields = ["status", "kyc_status"];
   const profileUpdate = Object.fromEntries(Object.entries(body).filter(([k]) => profileFields.includes(k)));
   if (Object.keys(profileUpdate).length > 0) {
-    const { error } = await supabase.from("kt_profiles").update(profileUpdate).eq("id", params.id);
+    const { error } = await supabase.from("kt_profiles").update(profileUpdate).eq("id", id);
     if (error) return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 
@@ -57,7 +59,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const { data: account } = await supabase
       .from("kt_accounts")
       .select("id, balance")
-      .eq("profile_id", params.id)
+      .eq("profile_id", id)
       .single();
     if (account) {
       const delta = Number(body.credit_amount);
