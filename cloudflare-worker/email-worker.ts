@@ -16,15 +16,6 @@
 interface Env {
   WEBHOOK_URL: string;
   WEBHOOK_SECRET: string;
-  SEND_EMAIL: {
-    send: (msg: {
-      from: string;
-      to: string;
-      subject: string;
-      text?: string;
-      html?: string;
-    }) => Promise<void>;
-  };
 }
 
 interface EmailMessage {
@@ -33,7 +24,84 @@ interface EmailMessage {
   headers: Map<string, string>;
   raw: ReadableStream;
   forward: (address: string) => Promise<void>;
-  reply: (msg: { subject: string; text?: string; html?: string }) => Promise<void>;
+}
+
+function decodeQuotedPrintable(input: string): string {
+  return input
+    .replace(/=\r\n/g, "")
+    .replace(/=\n/g, "")
+    .replace(/=([0-9A-Fa-f]{2})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+}
+
+function decodeBase64(input: string): string {
+  try {
+    return atob(input.replace(/\s+/g, ""));
+  } catch {
+    return input;
+  }
+}
+
+function parseMime(raw: string): { bodyText: string; bodyHtml: string } {
+  // Normalize line endings
+  const text = raw.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+
+  let bodyText = "";
+  let bodyHtml = "";
+
+  // Check for multipart boundary in the top-level headers
+  const boundaryMatch = text.match(/^Content-Type:[^\n]*?boundary=["']?([^"'\n\s;]+)["']?/im);
+
+  if (boundaryMatch) {
+    const boundary = boundaryMatch[1].trim();
+    const escaped = boundary.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    // Split on --boundary (not the closing --)
+    const parts = text.split(new RegExp(`\n--${escaped}(?:--)?(?:\n|$)`));
+
+    for (const part of parts) {
+      if (!part.trim()) continue;
+
+      // Each part: headers block + blank line + body
+      const divider = part.indexOf("\n\n");
+      if (divider === -1) continue;
+
+      const headers = part.slice(0, divider);
+      const body = part.slice(divider + 2);
+
+      const ctMatch = headers.match(/Content-Type:\s*([^;\n]+)/i);
+      const ceMatch = headers.match(/Content-Transfer-Encoding:\s*(\S+)/i);
+      const contentType = (ctMatch?.[1] ?? "").trim().toLowerCase();
+      const encoding = (ceMatch?.[1] ?? "").trim().toLowerCase();
+
+      let decoded = body.trim();
+      if (encoding === "quoted-printable") decoded = decodeQuotedPrintable(decoded);
+      else if (encoding === "base64") decoded = decodeBase64(decoded);
+
+      // Recurse into nested multipart (e.g. multipart/alternative inside multipart/mixed)
+      if (contentType.startsWith("multipart/") && !bodyText && !bodyHtml) {
+        const sub = parseMime(headers + "\n\n" + body);
+        if (sub.bodyText) bodyText = sub.bodyText;
+        if (sub.bodyHtml) bodyHtml = sub.bodyHtml;
+      } else if (contentType === "text/plain" && !bodyText) {
+        bodyText = decoded;
+      } else if (contentType === "text/html" && !bodyHtml) {
+        bodyHtml = decoded;
+      }
+    }
+  } else {
+    // Simple (non-multipart) email: everything after the first blank line is the body
+    const split = text.indexOf("\n\n");
+    if (split !== -1) {
+      const headers = text.slice(0, split);
+      const body = text.slice(split + 2).trim();
+      const ceMatch = headers.match(/Content-Transfer-Encoding:\s*(\S+)/i);
+      const encoding = (ceMatch?.[1] ?? "").trim().toLowerCase();
+      if (encoding === "quoted-printable") bodyText = decodeQuotedPrintable(body);
+      else if (encoding === "base64") bodyText = decodeBase64(body);
+      else bodyText = body;
+    }
+  }
+
+  return { bodyText, bodyHtml };
 }
 
 export default {
@@ -45,8 +113,9 @@ export default {
     const inReplyTo = message.headers.get("in-reply-to") ?? undefined;
     const references = message.headers.get("references") ?? undefined;
 
-    // Read raw body (text)
     let bodyText = "";
+    let bodyHtml = "";
+
     try {
       const reader = message.raw.getReader();
       const decoder = new TextDecoder();
@@ -57,36 +126,28 @@ export default {
         chunks.push(decoder.decode(value, { stream: true }));
       }
       const raw = chunks.join("");
-      // Extract plain text body (basic MIME parsing)
-      const textMatch = raw.match(/Content-Type: text\/plain[\s\S]*?\r?\n\r?\n([\s\S]*?)(?:\r?\n--|\s*$)/i);
-      bodyText = textMatch ? textMatch[1].trim() : raw.slice(raw.lastIndexOf("\r\n\r\n") + 4).trim();
-    } catch {
+      const parsed = parseMime(raw);
+      bodyText = parsed.bodyText;
+      bodyHtml = parsed.bodyHtml;
+    } catch (err) {
+      console.error("[KT Email Worker] MIME parse error:", err);
       bodyText = "(contenu non lisible)";
     }
 
-    // Store in Next.js app via webhook
     try {
       await fetch(env.WEBHOOK_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-webhook-secret": env.WEBHOOK_SECRET,
+          "x-webhook-secret": env.WEBHOOK_SECRET ?? "",
         },
-        body: JSON.stringify({
-          from,
-          to,
-          subject,
-          bodyText,
-          messageId,
-          inReplyTo,
-          references,
-        }),
+        body: JSON.stringify({ from, to, subject, bodyText, bodyHtml, messageId, inReplyTo, references }),
       });
     } catch (err) {
       console.error("[KT Email Worker] Webhook failed:", err);
     }
 
-    // Auto-forward backup to Gmail
+    // Forward backup to Gmail
     try {
       await message.forward("KTBANKAGDE@GMAIL.COM");
     } catch {

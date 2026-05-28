@@ -19,11 +19,18 @@ export default function InboxPage() {
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  function load() {
+  function load(keepSelected = false) {
     setLoading(true);
     fetch("/api/kt/admin/inbox", { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
-      .then((d) => { setThreads(d.threads ?? []); setLoading(false); });
+      .then((d) => {
+        const fetched: Thread[] = d.threads ?? [];
+        setThreads(fetched);
+        setLoading(false);
+        if (keepSelected) {
+          setSelected((prev) => prev ? (fetched.find((t) => t.id === prev.id) ?? prev) : null);
+        }
+      });
   }
 
   useEffect(() => { load(); }, []);
@@ -40,7 +47,7 @@ export default function InboxPage() {
     });
     setSending(false);
     setReplyText("");
-    load();
+    load(true);
   }
 
   async function sendCompose() {
@@ -53,7 +60,7 @@ export default function InboxPage() {
     });
     setSending(false);
     setComposing(false); setCompTo(""); setCompSubject(""); setCompBody("");
-    load();
+    load(true);
   }
 
   const selectedMsgs = selected?.kt_email_messages?.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) ?? [];
