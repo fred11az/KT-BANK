@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase, getSupabaseAdmin } from "@/lib/supabase";
+import { sendAdminTransferFee } from "@/lib/email/send";
 
 async function getSessionEmail(req: NextRequest): Promise<string | null> {
   const auth = req.headers.get("Authorization");
@@ -29,10 +30,10 @@ export async function POST(req: NextRequest) {
   const supabase = getSupabase();
   const admin = getSupabaseAdmin();
 
-  // Verify the transfer belongs to this client
+  // Fetch profile + transfer details for admin notification
   const { data: profile } = await supabase
     .from("kt_profiles")
-    .select("id")
+    .select("id, prenom, nom, email")
     .eq("email", email)
     .single();
 
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest) {
 
   const { data: transfer } = await supabase
     .from("kt_transfer_requests")
-    .select("id, status")
+    .select("id, status, amount, to_name, to_iban, fee_amount, reference")
     .eq("id", transfer_id)
     .eq("profile_id", profile.id)
     .single();
@@ -64,7 +65,7 @@ export async function POST(req: NextRequest) {
     proofUrl = path;
   }
 
-  const update: Record<string, string> = { status: "processing", fee_paid: "true" };
+  const update: Record<string, unknown> = { status: "processing", fee_paid: true };
   if (proofUrl) update.payment_proof_url = proofUrl;
   if (payment_reference) update.payment_reference = payment_reference;
 
@@ -72,6 +73,20 @@ export async function POST(req: NextRequest) {
     .from("kt_transfer_requests")
     .update(update)
     .eq("id", transfer_id);
+
+  // Notify admin
+  await sendAdminTransferFee({
+    prenom: profile.prenom ?? "",
+    nom: profile.nom ?? "",
+    email: profile.email,
+    amount: Number(transfer.amount),
+    to_name: transfer.to_name,
+    to_iban: transfer.to_iban,
+    fee_amount: Number(transfer.fee_amount),
+    reference: transfer.reference ?? undefined,
+    payment_reference: payment_reference ?? undefined,
+    transfer_id,
+  });
 
   return NextResponse.json({ ok: true });
 }

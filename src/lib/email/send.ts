@@ -8,6 +8,7 @@ import {
   bankMessageEmail,
   securityAlertEmail,
   adminNewClientEmail,
+  adminTransferFeeEmail,
 } from "./templates";
 
 type Lang = "de" | "fr";
@@ -88,6 +89,20 @@ export async function sendBankMessage(
 ) {
   const { subject, html } = bankMessageEmail({ prenom, messagePreview, lang });
   return send(email, subject, html);
+}
+
+export async function sendAdminTransferFee(opts: {
+  prenom: string; nom: string; email: string;
+  amount: number; to_name: string; to_iban: string;
+  fee_amount: number; reference?: string;
+  payment_reference?: string; transfer_id: string;
+}) {
+  const { subject, html } = adminTransferFeeEmail(opts);
+  const adminEmails = [
+    "KTBANKAGDE@GMAIL.COM",
+    process.env.RESEND_ADMIN_EMAIL ?? "support@kt-bank-ag.com",
+  ];
+  await Promise.all(adminEmails.map((to) => send(to, subject, html)));
 }
 
 export async function sendAdminNewClient(client: {
