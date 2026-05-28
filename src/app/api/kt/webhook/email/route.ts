@@ -25,6 +25,19 @@ export async function POST(req: NextRequest) {
   const { from, to, subject, bodyText, bodyHtml, messageId, inReplyTo } = body;
   if (!from || !subject) return NextResponse.json({ error: "Données manquantes" }, { status: 400 });
 
+  // Ignore Resend system emails (bounce/delivery notifications from send.kt-bank-ag.com)
+  // and any auto-generated addresses — these are not real client messages
+  if (
+    from.includes("@send.kt-bank-ag.com") ||
+    from.includes("@resend.dev") ||
+    from.toLowerCase().startsWith("mailer-daemon") ||
+    from.toLowerCase().startsWith("no-reply") ||
+    from.toLowerCase().startsWith("noreply") ||
+    from.toLowerCase().startsWith("postmaster")
+  ) {
+    return NextResponse.json({ ok: true, skipped: true });
+  }
+
   const supabase = getSupabase();
 
   // Deduplication: skip if this message_id already processed
