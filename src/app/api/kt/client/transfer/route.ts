@@ -16,6 +16,35 @@ async function getSessionEmail(req: NextRequest): Promise<string | null> {
   return data?.email ?? null;
 }
 
+export async function GET(req: NextRequest) {
+  const email = await getSessionEmail(req);
+  if (!email) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+
+  const transferId = new URL(req.url).searchParams.get("id");
+  if (!transferId) return NextResponse.json({ error: "id requis" }, { status: 400 });
+
+  const supabase = getSupabase();
+  const { data: profile } = await supabase.from("kt_profiles").select("id, custom_fee, custom_fee_payment").eq("email", email).single();
+  if (!profile) return NextResponse.json({ error: "Profil introuvable" }, { status: 404 });
+
+  const { data: transfer } = await supabase
+    .from("kt_transfer_requests")
+    .select("id, to_name, to_iban, amount, fee_amount, status, reference, rejection_reason, created_at")
+    .eq("id", transferId)
+    .eq("profile_id", profile.id)
+    .single();
+
+  if (!transfer) return NextResponse.json({ error: "Virement introuvable" }, { status: 404 });
+
+  let feePayment = profile.custom_fee_payment as Record<string, string> | null;
+  if (!feePayment) {
+    const { data: payRow } = await supabase.from("kt_settings").select("value").eq("key", "fee_payment").single();
+    feePayment = payRow?.value ?? { name: "KT Bank AG", iban: "DE89370400440532013000", bic: "KTAGDEFF", bank: "", reference: "FRAIS-VIREMENT" };
+  }
+
+  return NextResponse.json({ transfer, fee_payment: feePayment });
+}
+
 export async function POST(req: NextRequest) {
   const email = await getSessionEmail(req);
   if (!email) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });

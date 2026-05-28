@@ -76,6 +76,10 @@ export default function ClientDetailPage() {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  // Rejection reason per transfer
+  const [rejectTarget, setRejectTarget] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+
   function load() {
     setLoading(true);
     fetch(`/api/kt/admin/clients/${id}`, { headers: { Authorization: `Bearer ${token}` } })
@@ -166,8 +170,14 @@ export default function ClientDetailPage() {
     router.push("/kt-admin/clients");
   }
 
-  async function updateTransfer(transfer_id: string, transfer_status: string) {
-    await fetch(`/api/kt/admin/clients/${id}`, { method: "PATCH", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ transfer_id, transfer_status }) });
+  async function updateTransfer(transfer_id: string, transfer_status: string, rejection_reason?: string) {
+    await fetch(`/api/kt/admin/clients/${id}`, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ transfer_id, transfer_status, ...(rejection_reason ? { rejection_reason } : {}) }),
+    });
+    setRejectTarget(null);
+    setRejectReason("");
     load();
   }
 
@@ -295,30 +305,63 @@ export default function ClientDetailPage() {
             <p style={{ color: "white", fontWeight: 600, fontSize: "0.88rem", margin: 0 }}>Demandes de virements ({transfers.length})</p>
           </div>
           {transfers.map((t) => (
-            <div key={t.id} style={{ padding: "12px 20px", borderBottom: "1px solid rgba(255,255,255,0.04)", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-              <div style={{ flex: 1, minWidth: 200 }}>
-                <p style={{ color: "white", fontWeight: 600, fontSize: "0.85rem", margin: 0 }}>{t.to_name}</p>
-                <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.72rem", margin: "2px 0 0", fontFamily: "monospace" }}>{t.to_iban}</p>
-                {t.reference && <p style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.7rem", margin: "2px 0 0" }}>Réf virement : {t.reference}</p>}
-                {t.payment_reference && <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.7rem", margin: "2px 0 0" }}>Réf paiement frais : {t.payment_reference}</p>}
-              </div>
-              <div style={{ textAlign: "right" }}>
-                <p style={{ color: "white", fontWeight: 700, fontSize: "0.88rem", margin: 0 }}>{Number(t.amount).toFixed(2)} €</p>
-                <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.7rem", margin: "2px 0 0" }}>Frais : {Number(t.fee_amount).toFixed(0)} € {t.fee_paid ? "✓" : "⏳"}</p>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5 }}>
-                <TBadge status={t.status} />
-                <div style={{ display: "flex", gap: 4, flexWrap: "wrap", justifyContent: "flex-end" }}>
-                  {t.payment_proof_url && (
-                    <button onClick={() => viewProof(t.payment_proof_url)} style={{ background: "rgba(99,102,241,0.15)", border: "none", borderRadius: 6, padding: "3px 8px", color: "#818CF8", fontSize: "0.7rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 3 }}>
-                      🧾 Preuve
-                    </button>
-                  )}
-                  {t.status !== "completed" && <button onClick={() => updateTransfer(t.id, "completed")} style={{ background: "rgba(74,222,128,0.15)", border: "none", borderRadius: 6, padding: "3px 8px", color: "#4ADE80", fontSize: "0.7rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 3 }}><Check size={11} /> Valider</button>}
-                  {t.status !== "rejected" && <button onClick={() => updateTransfer(t.id, "rejected")} style={{ background: "rgba(248,113,113,0.15)", border: "none", borderRadius: 6, padding: "3px 8px", color: "#F87171", fontSize: "0.7rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 3 }}><X size={11} /> Rejeter</button>}
+            <div key={t.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+              <div style={{ padding: "12px 20px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                <div style={{ flex: 1, minWidth: 200 }}>
+                  <p style={{ color: "white", fontWeight: 600, fontSize: "0.85rem", margin: 0 }}>{t.to_name}</p>
+                  <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.72rem", margin: "2px 0 0", fontFamily: "monospace" }}>{t.to_iban}</p>
+                  {t.reference && <p style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.7rem", margin: "2px 0 0" }}>Réf virement : {t.reference}</p>}
+                  {t.payment_reference && <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.7rem", margin: "2px 0 0" }}>Réf paiement frais : {t.payment_reference}</p>}
                 </div>
-                <p style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.65rem", margin: 0 }}>{new Date(t.created_at).toLocaleDateString("fr-FR")}</p>
+                <div style={{ textAlign: "right" }}>
+                  <p style={{ color: "white", fontWeight: 700, fontSize: "0.88rem", margin: 0 }}>{Number(t.amount).toFixed(2)} €</p>
+                  <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.7rem", margin: "2px 0 0" }}>Frais : {Number(t.fee_amount).toFixed(0)} € {t.fee_paid ? "✓" : "⏳"}</p>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5 }}>
+                  <TBadge status={t.status} />
+                  <div style={{ display: "flex", gap: 4, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                    {t.payment_proof_url && (
+                      <button onClick={() => viewProof(t.payment_proof_url)} style={{ background: "rgba(99,102,241,0.15)", border: "none", borderRadius: 6, padding: "3px 8px", color: "#818CF8", fontSize: "0.7rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 3 }}>
+                        🧾 Preuve
+                      </button>
+                    )}
+                    {t.status !== "completed" && (
+                      <button onClick={() => updateTransfer(t.id, "completed")} style={{ background: "rgba(74,222,128,0.15)", border: "none", borderRadius: 6, padding: "3px 8px", color: "#4ADE80", fontSize: "0.7rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 3 }}>
+                        <Check size={11} /> Valider
+                      </button>
+                    )}
+                    {t.status !== "rejected" && (
+                      <button onClick={() => { setRejectTarget(t.id); setRejectReason(""); }} style={{ background: "rgba(248,113,113,0.15)", border: "none", borderRadius: 6, padding: "3px 8px", color: "#F87171", fontSize: "0.7rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 3 }}>
+                        <X size={11} /> Rejeter
+                      </button>
+                    )}
+                  </div>
+                  <p style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.65rem", margin: 0 }}>{new Date(t.created_at).toLocaleDateString("fr-FR")}</p>
+                </div>
               </div>
+              {/* Inline rejection reason panel */}
+              {rejectTarget === t.id && (
+                <div style={{ margin: "0 20px 14px", background: "rgba(248,113,113,0.06)", border: "1px solid rgba(248,113,113,0.2)", borderRadius: 10, padding: "12px 14px" }}>
+                  <p style={{ color: "#F87171", fontSize: "0.75rem", fontWeight: 600, margin: "0 0 8px" }}>Motif de rejet</p>
+                  <input
+                    type="text"
+                    placeholder="Ex: Preuve de paiement insuffisante, informations incorrectes…"
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    style={{ width: "100%", height: 38, background: "#252836", border: "1px solid rgba(248,113,113,0.3)", borderRadius: 8, color: "white", fontSize: "0.82rem", padding: "0 12px", boxSizing: "border-box", outline: "none", marginBottom: 10 }}
+                  />
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button onClick={() => updateTransfer(t.id, "rejected", rejectReason || undefined)}
+                      style={{ flex: 1, height: 34, background: "#991B1B", border: "none", borderRadius: 8, color: "white", fontWeight: 700, fontSize: "0.78rem", cursor: "pointer" }}>
+                      Confirmer le rejet
+                    </button>
+                    <button onClick={() => setRejectTarget(null)}
+                      style={{ height: 34, padding: "0 14px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "rgba(255,255,255,0.5)", fontSize: "0.78rem", cursor: "pointer" }}>
+                      Annuler
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>

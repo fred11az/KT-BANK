@@ -74,6 +74,7 @@ export async function sendTransferStatus(
     to_name: string;
     reference?: string;
     balance?: number;
+    rejection_reason?: string;
     lang?: Lang;
   }
 ) {

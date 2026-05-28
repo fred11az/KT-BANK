@@ -333,9 +333,10 @@ export function transferStatusEmail(opts: {
   to_name: string;
   reference?: string;
   balance?: number;
+  rejection_reason?: string;
   lang?: "de" | "fr";
 }) {
-  const { prenom, status, amount, currency, to_name, reference, balance, lang = "de" } = opts;
+  const { prenom, status, amount, currency, to_name, reference, balance, rejection_reason, lang = "de" } = opts;
   type Strings = { subject: string; title: string; intro: string; amountLabel: string; toLabel: string; refLabel: string; balanceLabel: string; cta: string };
   const byStatus: Record<typeof status, { fr: Strings; de: Strings }> = {
     completed: {
@@ -356,13 +357,13 @@ export function transferStatusEmail(opts: {
       fr: {
         subject: `Virement refusé : ${amount.toFixed(2)} ${currency}`,
         title: "Virement refusé",
-        intro: `Votre demande de virement a été refusée, ${prenom}. Contactez votre conseiller pour plus d'informations.`,
+        intro: `Votre demande de virement a été refusée, ${prenom}.${rejection_reason ? ` Motif : ${rejection_reason}` : " Contactez votre conseiller pour plus d'informations."}`,
         amountLabel: "Montant concerné", toLabel: "Bénéficiaire", refLabel: "Référence", balanceLabel: "Solde actuel", cta: "Contacter le support",
       },
       de: {
         subject: `Überweisung abgelehnt: ${amount.toFixed(2)} ${currency}`,
         title: "Überweisung abgelehnt",
-        intro: `Ihr Überweisungsauftrag wurde abgelehnt, ${prenom}. Bitte kontaktieren Sie Ihren Berater für weitere Informationen.`,
+        intro: `Ihr Überweisungsauftrag wurde abgelehnt, ${prenom}.${rejection_reason ? ` Ablehnungsgrund: ${rejection_reason}` : " Bitte kontaktieren Sie Ihren Berater für weitere Informationen."}`,
         amountLabel: "Betroffener Betrag", toLabel: "Empfänger", refLabel: "Verwendungszweck", balanceLabel: "Aktueller Kontostand", cta: "Support kontaktieren",
       },
     },

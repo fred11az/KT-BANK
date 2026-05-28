@@ -12,6 +12,7 @@ import {
 type KtCard = { id: string; last4: string; expiry_month: number; expiry_year: number; type: string; status: string };
 type Account = { id: string; iban: string; bic: string; type: string; currency: string; balance: number; status: string; opened_at: string; created_at: string; kt_cards: KtCard[] };
 type Transaction = { id: string; type: string; amount: number; currency: string; description: string; counterpart_name: string; created_at: string };
+type TransferRequest = { id: string; to_name: string; to_iban: string; amount: number; fee_amount: number; fee_paid: boolean; status: string; reference?: string; rejection_reason?: string; created_at: string };
 type Profile = {
   id: string; prenom: string; nom: string; email: string; telephone: string;
   pays_residence: string; nationalite: string; adresse: string; ville: string;
@@ -156,6 +157,7 @@ export default function ClientDashboard() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transferRequests, setTransferRequests] = useState<TransferRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeNav, setActiveNav] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -176,7 +178,16 @@ export default function ClientDashboard() {
     setToken(t);
     fetch("/api/kt/client/me", { headers: { Authorization: `Bearer ${t}` } })
       .then((r) => { if (r.status === 401) { window.location.href = "/client/login"; return null; } return r.json(); })
-      .then((d) => { if (!d) return; setProfile(d.profile); setAccounts(d.accounts ?? []); setTransactions(d.transactions ?? []); setLoading(false); });
+      .then((d) => {
+        if (!d) return;
+        setProfile(d.profile);
+        setAccounts(d.accounts ?? []);
+        setTransactions(d.transactions ?? []);
+        setTransferRequests(d.transfers ?? []);
+        // Cache profile for payment page
+        if (d.profile) sessionStorage.setItem("kt_profile", JSON.stringify({ prenom: d.profile.prenom, nom: d.profile.nom, email: d.profile.email }));
+        setLoading(false);
+      });
   }, []);
 
   function logout() { sessionStorage.removeItem("kt_token"); sessionStorage.removeItem("kt_email"); window.location.href = "/client/login"; }
@@ -407,28 +418,29 @@ export default function ClientDashboard() {
 
   function TransfersPage() {
     const [form, setForm] = useState({ to: "", iban: "", amount: "", ref: "" });
-    const [phase, setPhase] = useState<"form" | "progress" | "fee" | "done" | "error">("form");
+    const [phase, setPhase] = useState<"form" | "progress" | "fee" | "error">("form");
     const [progress, setProgress] = useState(0);
     const [errorMsg, setErrorMsg] = useState("");
-    const [transferId, setTransferId] = useState("");
-    const [fee, setFee] = useState<{ amount: number; currency: string } | null>(null);
-    const [feePayment, setFeePayment] = useState<Record<string, string>>({});
-    const [feeConfirming, setFeeConfirming] = useState(false);
-    const [proofFile, setProofFile] = useState<File | null>(null);
-    const [paymentRef, setPaymentRef] = useState("");
+    const [feeInfo, setFeeInfo] = useState<{ transferId: string; fee: { amount: number; currency: string }; feePayment: Record<string, string> } | null>(null);
+
+    const statusLabels: Record<string, [string, string, string]> = {
+      pending_fee:  ["#FFFBF0", "#D97706", "Gebühr ausstehend"],
+      processing:   ["#EFF6FF", "#2563EB", "In Bearbeitung"],
+      completed:    ["#F0FDF4", "#16A34A", "Ausgeführt"],
+      rejected:     ["#FEF2F2", "#DC2626", "Abgelehnt"],
+    };
 
     async function submit() {
       if (!form.to || !form.iban || !form.amount) return;
       if (Number(form.amount) <= 0) { setErrorMsg("Ungültiger Betrag"); return; }
-      if (balance <= 0 || Number(form.amount) > balance) {
-        setErrorMsg(`Unzureichendes Guthaben. Ihr verfügbares Guthaben beträgt ${balance.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €.`);
+      if (Number(form.amount) > balance) {
+        setErrorMsg(`Unzureichendes Guthaben. Verfügbar: ${balance.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €`);
         return;
       }
       setErrorMsg("");
       setPhase("progress");
       setProgress(0);
 
-      // POST to API
       const res = await fetch("/api/kt/client/transfer", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
@@ -437,191 +449,176 @@ export default function ClientDashboard() {
       const data = await res.json();
 
       if (!res.ok) {
-        if (data.code === "ACCOUNT_SUSPENDED") {
-          setErrorMsg("Ihr Konto ist deaktiviert. Bitte kontaktieren Sie Ihren Berater.");
-        } else if (data.code === "INSUFFICIENT_FUNDS") {
-          setErrorMsg(`Unzureichendes Guthaben. Aktueller Kontostand: ${Number(data.balance).toLocaleString("de-DE", { minimumFractionDigits: 2 })} €`);
-        } else {
-          setErrorMsg(data.error || "Fehler bei der Bearbeitung.");
-        }
+        setErrorMsg(
+          data.code === "ACCOUNT_SUSPENDED" ? "Ihr Konto ist deaktiviert. Bitte kontaktieren Sie Ihren Berater." :
+          data.code === "INSUFFICIENT_FUNDS" ? `Unzureichendes Guthaben. Kontostand: ${Number(data.balance).toLocaleString("de-DE", { minimumFractionDigits: 2 })} €` :
+          data.error || "Fehler bei der Bearbeitung."
+        );
         setPhase("error");
         return;
       }
 
-      setTransferId(data.transfer_id);
-      setFee(data.fee);
-      setFeePayment(data.fee_payment ?? {});
+      const transferId = data.transfer_id;
+      const fee = data.fee;
+      const feePayment = data.fee_payment ?? {};
+      setFeeInfo({ transferId, fee, feePayment });
 
-      // Animate progress to 68%
+      // Animate to 62% then block
       let p = 0;
       const interval = setInterval(() => {
-        p += 2;
+        p += 1;
         setProgress(p);
-        if (p >= 68) { clearInterval(interval); setPhase("fee"); }
-      }, 60);
+        if (p >= 62) { clearInterval(interval); setPhase("fee"); }
+      }, 30);
     }
 
-    async function confirmFee() {
-      setFeeConfirming(true);
-      const fd = new FormData();
-      fd.append("transfer_id", transferId);
-      if (paymentRef) fd.append("payment_reference", paymentRef);
-      if (proofFile) fd.append("file", proofFile);
-      await fetch("/api/kt/client/transfer/proof", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: fd,
-      });
-      setFeeConfirming(false);
-      setPhase("done");
+    function goToPayment() {
+      if (!feeInfo) return;
+      sessionStorage.setItem("kt_transfer_payment", JSON.stringify({
+        transferId: feeInfo.transferId,
+        feePayment: feeInfo.feePayment,
+      }));
+      window.location.href = `/client/transfer-payment?id=${feeInfo.transferId}`;
     }
 
     function reset() {
-      setPhase("form"); setProgress(0); setForm({ to: "", iban: "", amount: "", ref: "" });
-      setErrorMsg(""); setTransferId(""); setFee(null); setProofFile(null); setPaymentRef("");
+      setPhase("form"); setProgress(0);
+      setForm({ to: "", iban: "", amount: "", ref: "" });
+      setErrorMsg(""); setFeeInfo(null);
     }
 
-    if (phase === "done") return (
-      <div style={{ padding: 24, maxWidth: 560 }}>
-        <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 20px" }}>SEPA-Überweisung</h2>
-        <div style={{ background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 18, padding: 32, textAlign: "center" }}>
-          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#005F2D", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-            <Check size={24} color="white" />
-          </div>
-          <p style={{ color: "#005F2D", fontWeight: 800, fontSize: "1.1rem", margin: "0 0 8px" }}>Überweisung eingereicht</p>
-          <p style={{ color: "#166534", fontSize: "0.85rem", margin: "0 0 20px", lineHeight: 1.6 }}>
-            Ihre Überweisung wird bearbeitet. Unser Team wird sie innerhalb von 24 Arbeitsstunden genehmigen.
-          </p>
-          <button onClick={reset} style={{ padding: "10px 24px", background: "#005F2D", border: "none", borderRadius: 10, color: "white", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer" }}>
-            Neue Überweisung
-          </button>
-        </div>
-      </div>
-    );
-
-    if (phase === "progress" || phase === "fee") return (
-      <div style={{ padding: 24, maxWidth: 560 }}>
-        <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 20px" }}>SEPA-Überweisung</h2>
-        <div style={{ background: "white", borderRadius: 18, border: "1px solid #E9EEF4", padding: 28 }}>
-          <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.92rem", margin: "0 0 6px" }}>
-            {phase === "fee" ? "Aktion erforderlich" : "Bearbeitung läuft…"}
-          </p>
-          <p style={{ color: "#64748B", fontSize: "0.82rem", margin: "0 0 20px" }}>
-            Überweisung von {Number(form.amount).toLocaleString("de-DE", { minimumFractionDigits: 2 })} € an {form.to}
-          </p>
-          {/* Progress bar */}
-          <div style={{ height: 8, background: "#F1F5F9", borderRadius: 99, overflow: "hidden", marginBottom: 8 }}>
-            <div style={{ height: "100%", borderRadius: 99, background: phase === "fee" ? "#D97706" : "#005F2D", width: `${progress}%`, transition: "width 0.06s linear" }} />
-          </div>
-          <p style={{ color: phase === "fee" ? "#D97706" : "#94A3B8", fontSize: "0.75rem", margin: "0 0 24px", fontWeight: phase === "fee" ? 600 : 400 }}>
-            {phase === "fee" ? "⚠ Gebührenzahlung erforderlich um fortzufahren" : `${progress}% — Überprüfung läuft…`}
-          </p>
-
-          {phase === "fee" && fee && (
-            <div>
-              <div style={{ background: "#FFFBF0", border: "1px solid #FDE68A", borderRadius: 14, padding: "18px 20px", marginBottom: 16 }}>
-                <p style={{ color: "#92400E", fontWeight: 700, fontSize: "0.88rem", margin: "0 0 12px" }}>
-                  Überweisungsgebühren — {fee.amount} {fee.currency}
-                </p>
-                <p style={{ color: "#78350F", fontSize: "0.8rem", margin: "0 0 14px", lineHeight: 1.6 }}>
-                  Um Ihre Überweisung abzuschließen, zahlen Sie bitte die Bearbeitungsgebühren durch eine Überweisung an folgende Kontodaten:
-                </p>
-                <div style={{ background: "white", borderRadius: 10, padding: "12px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
-                  {[
-                    ["Begünstigter", feePayment.name],
-                    ["IBAN", feePayment.iban],
-                    ["BIC / SWIFT", feePayment.bic],
-                    ["Bank", feePayment.bank],
-                    ["Verwendungszweck", feePayment.reference],
-                    ["Betrag", `${fee.amount} ${fee.currency}`],
-                  ].filter(([, v]) => v).map(([label, value]) => (
-                    <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ color: "#64748B", fontSize: "0.78rem" }}>{label}</span>
-                      <span style={{ color: "#0F172A", fontWeight: 600, fontSize: "0.82rem", fontFamily: label === "IBAN" || label === "BIC / SWIFT" ? "monospace" : "inherit", wordBreak: "break-all" }}>{value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              {/* Proof of payment */}
-              <div style={{ marginBottom: 12 }}>
-                <label style={{ color: "#374151", fontSize: "0.78rem", fontWeight: 600, display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                  Überweisungsreferenz <span style={{ color: "#9CA3AF", fontWeight: 400 }}>(optional)</span>
-                </label>
-                <input
-                  type="text" placeholder="z.B. GEBUEHREN-UEBERWEISUNG-2024"
-                  value={paymentRef} onChange={(e) => setPaymentRef(e.target.value)}
-                  style={{ width: "100%", height: 42, background: "white", border: "1px solid #D1D5DB", borderRadius: 10, color: "#0F172A", fontSize: "0.85rem", padding: "0 14px", boxSizing: "border-box", outline: "none" }}
-                />
-              </div>
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ color: "#374151", fontSize: "0.78rem", fontWeight: 600, display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                  Zahlungsbeleg hinzufügen <span style={{ color: "#9CA3AF", fontWeight: 400 }}>(optional)</span>
-                </label>
-                <label style={{
-                  display: "flex", alignItems: "center", gap: 10, height: 44,
-                  background: proofFile ? "#F0FDF4" : "white",
-                  border: `1px dashed ${proofFile ? "#16A34A" : "#D1D5DB"}`,
-                  borderRadius: 10, padding: "0 14px", cursor: "pointer", boxSizing: "border-box",
-                }}>
-                  <input type="file" accept="image/*,application/pdf" style={{ display: "none" }}
-                    onChange={(e) => setProofFile(e.target.files?.[0] ?? null)} />
-                  {proofFile
-                    ? <><Check size={15} color="#16A34A" /><span style={{ color: "#16A34A", fontSize: "0.82rem", fontWeight: 600 }}>{proofFile.name}</span></>
-                    : <><FileText size={15} color="#9CA3AF" /><span style={{ color: "#9CA3AF", fontSize: "0.82rem" }}>Datei auswählen (JPG, PNG, PDF · max. 5 MB)</span></>
-                  }
-                </label>
-              </div>
-              <button onClick={confirmFee} disabled={feeConfirming}
-                style={{ width: "100%", height: 48, background: "#005F2D", border: "none", borderRadius: 12, color: "white", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer", opacity: feeConfirming ? 0.7 : 1 }}>
-                {feeConfirming ? "Wird gesendet…" : "Gebührenzahlung bestätigen"}
-              </button>
-              <button onClick={reset} style={{ width: "100%", marginTop: 8, height: 40, background: "transparent", border: "1px solid #E2E8F0", borderRadius: 10, color: "#64748B", fontSize: "0.82rem", cursor: "pointer" }}>
-                Überweisung stornieren
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-
     return (
-      <div style={{ padding: 24, maxWidth: 560 }}>
+      <div style={{ padding: 24, maxWidth: 620 }}>
         <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 20px" }}>SEPA-Überweisung</h2>
-        {(phase === "error" && errorMsg) && (
-          <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 12, padding: "12px 16px", marginBottom: 16, display: "flex", gap: 8, alignItems: "flex-start" }}>
-            <AlertCircle size={16} color="#DC2626" style={{ marginTop: 1, flexShrink: 0 }} />
-            <p style={{ color: "#991B1B", fontSize: "0.82rem", margin: 0 }}>{errorMsg}</p>
+
+        {/* ── PROGRESS / FEE SCREEN ── */}
+        {(phase === "progress" || phase === "fee") && (
+          <div style={{ background: "white", borderRadius: 18, border: "1px solid #E9EEF4", padding: 28, marginBottom: 20 }}>
+            <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.95rem", margin: "0 0 4px" }}>
+              {phase === "fee" ? "Bearbeitungsgebühr erforderlich" : "Prüfung läuft…"}
+            </p>
+            <p style={{ color: "#64748B", fontSize: "0.82rem", margin: "0 0 20px" }}>
+              {Number(form.amount).toLocaleString("de-DE", { minimumFractionDigits: 2 })} € → {form.to}
+            </p>
+
+            {/* Progress bar */}
+            <div style={{ position: "relative", height: 10, background: "#F1F5F9", borderRadius: 99, overflow: "hidden", marginBottom: 6 }}>
+              <div style={{
+                height: "100%", borderRadius: 99,
+                background: phase === "fee"
+                  ? "linear-gradient(90deg,#D97706,#F59E0B)"
+                  : "linear-gradient(90deg,#005F2D,#22C55E)",
+                width: `${progress}%`,
+                transition: "width 0.03s linear",
+              }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
+              <p style={{ color: phase === "fee" ? "#D97706" : "#94A3B8", fontSize: "0.75rem", margin: 0, fontWeight: phase === "fee" ? 700 : 400 }}>
+                {phase === "fee" ? "⚠ Zahlung der Gebühren erforderlich" : `${progress}% — Überprüfung läuft…`}
+              </p>
+              <p style={{ color: "#94A3B8", fontSize: "0.75rem", margin: 0 }}>{progress}%</p>
+            </div>
+
+            {phase === "fee" && feeInfo && (
+              <div>
+                <div style={{ background: "#FFFBF0", border: "1px solid #FDE68A", borderRadius: 14, padding: "16px 18px", marginBottom: 16 }}>
+                  <p style={{ color: "#92400E", fontWeight: 700, fontSize: "0.9rem", margin: "0 0 6px" }}>
+                    Bearbeitungsgebühr: {feeInfo.fee.amount} {feeInfo.fee.currency}
+                  </p>
+                  <p style={{ color: "#78350F", fontSize: "0.8rem", margin: 0, lineHeight: 1.6 }}>
+                    Ihre Überweisung ist blockiert. Zahlen Sie die Bearbeitungsgebühr, um fortzufahren.
+                    Sie werden auf eine sichere Zahlungsseite weitergeleitet, wo Sie die Bankdaten kopieren und Ihren Zahlungsbeleg einreichen können.
+                  </p>
+                </div>
+                <button onClick={goToPayment}
+                  style={{ width: "100%", height: 50, background: "#D97706", border: "none", borderRadius: 12, color: "white", fontWeight: 800, fontSize: "0.95rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                  <Send size={16} /> Gebühr bezahlen →
+                </button>
+                <button onClick={reset} style={{ width: "100%", marginTop: 8, height: 38, background: "transparent", border: "1px solid #E2E8F0", borderRadius: 10, color: "#94A3B8", fontSize: "0.82rem", cursor: "pointer" }}>
+                  Abbrechen
+                </button>
+              </div>
+            )}
           </div>
         )}
-        <div style={{ background: "white", borderRadius: 18, border: "1px solid #E9EEF4", padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
-          {[
-            { label: "Name des Begünstigten", key: "to", placeholder: "Max Mustermann", type: "text" },
-            { label: "IBAN des Begünstigten", key: "iban", placeholder: "DE89 3704 0044 0532 0130 00", type: "text" },
-            { label: "Betrag (€)", key: "amount", placeholder: "0.00", type: "number" },
-            { label: "Verwendungszweck", key: "ref", placeholder: "Miete Mai 2025", type: "text" },
-          ].map(({ label, key, placeholder, type }) => (
-            <div key={key}>
-              <label style={{ color: "#64748B", fontSize: "0.75rem", fontWeight: 600, display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.04em" }}>{label}</label>
-              <input type={type} placeholder={placeholder} value={form[key as keyof typeof form]}
-                onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
-                style={{ width: "100%", height: 46, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#0F172A", fontSize: "0.9rem", padding: "0 14px", boxSizing: "border-box", outline: "none" }} />
+
+        {/* ── FORM ── */}
+        {(phase === "form" || phase === "error") && (
+          <div style={{ background: "white", borderRadius: 18, border: "1px solid #E9EEF4", padding: 24, display: "flex", flexDirection: "column", gap: 16, marginBottom: 24 }}>
+            {phase === "error" && errorMsg && (
+              <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 10, padding: "11px 14px", display: "flex", gap: 8, alignItems: "flex-start" }}>
+                <AlertCircle size={15} color="#DC2626" style={{ marginTop: 1, flexShrink: 0 }} />
+                <p style={{ color: "#991B1B", fontSize: "0.82rem", margin: 0 }}>{errorMsg}</p>
+              </div>
+            )}
+            {[
+              { label: "Name des Begünstigten", key: "to", placeholder: "Max Mustermann", type: "text" },
+              { label: "IBAN des Begünstigten", key: "iban", placeholder: "DE89 3704 0044 0532 0130 00", type: "text" },
+              { label: "Betrag (€)", key: "amount", placeholder: "0.00", type: "number" },
+              { label: "Verwendungszweck", key: "ref", placeholder: "Miete Mai 2025", type: "text" },
+            ].map(({ label, key, placeholder, type }) => (
+              <div key={key}>
+                <label style={{ color: "#64748B", fontSize: "0.75rem", fontWeight: 600, display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.04em" }}>{label}</label>
+                <input type={type} placeholder={placeholder} value={form[key as keyof typeof form]}
+                  onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
+                  style={{ width: "100%", height: 46, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#0F172A", fontSize: "0.9rem", padding: "0 14px", boxSizing: "border-box", outline: "none" }} />
+              </div>
+            ))}
+            {balance <= 0 && (
+              <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 10, padding: "10px 14px", display: "flex", gap: 8 }}>
+                <AlertCircle size={15} color="#DC2626" style={{ marginTop: 1, flexShrink: 0 }} />
+                <p style={{ color: "#991B1B", fontSize: "0.78rem", margin: 0 }}>Ihr Guthaben reicht nicht für eine Überweisung aus.</p>
+              </div>
+            )}
+            <div style={{ background: "#FFFBF0", border: "1px solid #FDE68A", borderRadius: 10, padding: "10px 14px", display: "flex", gap: 8 }}>
+              <AlertCircle size={15} color="#D97706" style={{ marginTop: 1, flexShrink: 0 }} />
+              <p style={{ color: "#92400E", fontSize: "0.78rem", margin: 0, lineHeight: 1.5 }}>Bearbeitungsgebühren werden bei der Einreichung erhoben.</p>
             </div>
-          ))}
-          {balance <= 0 && (
-            <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 10, padding: "10px 14px", display: "flex", gap: 8, alignItems: "flex-start" }}>
-              <AlertCircle size={15} color="#DC2626" style={{ marginTop: 1, flexShrink: 0 }} />
-              <p style={{ color: "#991B1B", fontSize: "0.78rem", margin: 0 }}>Ihr Guthaben reicht nicht für eine Überweisung aus.</p>
-            </div>
-          )}
-          <div style={{ background: "#FFFBF0", border: "1px solid #FDE68A", borderRadius: 10, padding: "10px 14px", display: "flex", gap: 8, alignItems: "flex-start" }}>
-            <AlertCircle size={15} color="#D97706" style={{ marginTop: 1, flexShrink: 0 }} />
-            <p style={{ color: "#92400E", fontSize: "0.78rem", margin: 0, lineHeight: 1.5 }}>Bei der Einreichung der Überweisung werden Bearbeitungsgebühren erhoben.</p>
+            <button onClick={submit} disabled={!form.to || !form.iban || !form.amount || balance <= 0}
+              style={{ height: 48, background: "#005F2D", border: "none", borderRadius: 12, color: "white", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer", opacity: (!form.to || !form.iban || !form.amount || balance <= 0) ? 0.5 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+              <Send size={16} /> Überweisung senden
+            </button>
           </div>
-          <button onClick={submit} disabled={!form.to || !form.iban || !form.amount || balance <= 0}
-            style={{ height: 48, background: "#005F2D", border: "none", borderRadius: 12, color: "white", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer", opacity: (!form.to || !form.iban || !form.amount || balance <= 0) ? 0.5 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-            <Send size={16} /> Überweisung senden
-          </button>
-        </div>
+        )}
+
+        {/* ── TRANSFER HISTORY ── */}
+        {transferRequests.length > 0 && (
+          <div style={{ background: "white", borderRadius: 18, border: "1px solid #E9EEF4", overflow: "hidden" }}>
+            <div style={{ padding: "14px 20px", borderBottom: "1px solid #F1F5F9" }}>
+              <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.88rem", margin: 0 }}>Meine Überweisungsaufträge</p>
+            </div>
+            {transferRequests.map((t) => {
+              const [bg, color, label] = statusLabels[t.status] ?? ["#F8FAFC", "#64748B", t.status];
+              return (
+                <div key={t.id} style={{ padding: "14px 20px", borderBottom: "1px solid #F8FAFC" }}>
+                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ color: "#0F172A", fontWeight: 600, fontSize: "0.85rem", margin: "0 0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.to_name}</p>
+                      <p style={{ color: "#94A3B8", fontFamily: "monospace", fontSize: "0.72rem", margin: "0 0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.to_iban}</p>
+                      {t.reference && <p style={{ color: "#CBD5E1", fontSize: "0.7rem", margin: 0 }}>Ref: {t.reference}</p>}
+                      {t.rejection_reason && (
+                        <div style={{ marginTop: 6, background: "#FEF2F2", borderRadius: 8, padding: "5px 10px", display: "inline-block" }}>
+                          <p style={{ color: "#DC2626", fontSize: "0.72rem", margin: 0 }}>Ablehnungsgrund: {t.rejection_reason}</p>
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ textAlign: "right", flexShrink: 0 }}>
+                      <p style={{ color: "#DC2626", fontWeight: 700, fontSize: "0.88rem", margin: "0 0 4px" }}>−{Number(t.amount).toLocaleString("de-DE", { minimumFractionDigits: 2 })} €</p>
+                      <span style={{ background: bg, color, fontSize: "0.68rem", fontWeight: 700, padding: "2px 8px", borderRadius: 20 }}>{label}</span>
+                      <p style={{ color: "#CBD5E1", fontSize: "0.68rem", margin: "4px 0 0" }}>{fmtDate(t.created_at)}</p>
+                    </div>
+                  </div>
+                  {t.status === "pending_fee" && (
+                    <button onClick={() => { window.location.href = `/client/transfer-payment?id=${t.id}`; }}
+                      style={{ marginTop: 10, height: 34, padding: "0 14px", background: "#D97706", border: "none", borderRadius: 8, color: "white", fontWeight: 700, fontSize: "0.75rem", cursor: "pointer" }}>
+                      Gebühr bezahlen →
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     );
   }

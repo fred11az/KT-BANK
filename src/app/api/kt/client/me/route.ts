@@ -46,5 +46,12 @@ export async function GET(req: NextRequest) {
     transactions = txs ?? [];
   }
 
-  return NextResponse.json({ profile, accounts: accounts ?? [], transactions });
+  const { data: transfers } = await supabase
+    .from("kt_transfer_requests")
+    .select("id, to_name, to_iban, amount, fee_amount, fee_paid, status, reference, rejection_reason, created_at")
+    .eq("profile_id", profile.id)
+    .order("created_at", { ascending: false })
+    .limit(20);
+
+  return NextResponse.json({ profile, accounts: accounts ?? [], transactions, transfers: transfers ?? [] });
 }

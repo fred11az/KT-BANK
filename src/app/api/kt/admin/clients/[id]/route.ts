@@ -102,9 +102,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       .eq("id", body.transfer_id)
       .single();
 
+    const transferUpdate: Record<string, unknown> = { status: body.transfer_status };
+    if (body.rejection_reason) transferUpdate.rejection_reason = body.rejection_reason;
     await supabase
       .from("kt_transfer_requests")
-      .update({ status: body.transfer_status })
+      .update(transferUpdate)
       .eq("id", body.transfer_id);
 
     if (transfer && profile?.email) {
@@ -155,6 +157,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           to_name: transfer.to_name,
           reference: transfer.reference ?? undefined,
           balance: account ? Number(account.balance) : undefined,
+          rejection_reason: body.rejection_reason ?? undefined,
           lang: profile.lang ?? "de",
         });
       }
