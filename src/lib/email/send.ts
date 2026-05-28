@@ -20,7 +20,7 @@ function getResend() {
   return new Resend(key);
 }
 
-const FROM = () => process.env.RESEND_FROM_EMAIL ?? "Digital | KT Bank AG <digital@kt-bank-ag.com>";
+const FROM = () => process.env.RESEND_FROM_EMAIL ?? "KT Bank AG <support@kt-bank-ag.com>";
 
 export async function send(to: string, subject: string, html: string) {
   try {

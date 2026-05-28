@@ -2,10 +2,11 @@
 import { useEffect, useState } from "react";
 import { useAdmin } from "../../layout";
 import { useParams, useRouter } from "next/navigation";
-import { ChevronLeft, User, Briefcase, Home, Heart, Shield, CreditCard, Building, Plus, Minus, PowerOff, Power, ArrowLeftRight, Check, X } from "lucide-react";
+import { ChevronLeft, User, Briefcase, Home, Heart, Shield, CreditCard, Building, Plus, Minus, PowerOff, Power, ArrowLeftRight, Check, X, TrendingUp, TrendingDown, History } from "lucide-react";
 
 type Profile = Record<string, unknown>;
-type Account = { id: string; iban: string; type: string; currency: string; balance: number; status: string; kt_cards: { last4: string; expiry_month: number; expiry_year: number; type: string; status: string }[] };
+type KtTx = { id: string; type: string; amount: number; currency: string; description: string; status: string; created_at: string };
+type Account = { id: string; iban: string; type: string; currency: string; balance: number; status: string; kt_cards: { last4: string; expiry_month: number; expiry_year: number; type: string; status: string }[]; kt_transactions: KtTx[] };
 type Transfer = { id: string; to_name: string; to_iban: string; amount: number; fee_amount: number; fee_paid: boolean; status: string; reference: string; payment_reference: string; payment_proof_url: string; created_at: string };
 
 function Section({ title, icon: Icon, children }: { title: string; icon: React.ElementType; children: React.ReactNode }) {
@@ -263,6 +264,35 @@ export default function ClientDetailPage() {
               </div>
             </div>
           ))}
+
+          {/* Transaction history */}
+          {acc.kt_transactions && acc.kt_transactions.length > 0 && (
+            <div style={{ margin: "0 20px 20px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                <History size={13} color="rgba(255,255,255,0.4)" />
+                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", margin: 0 }}>
+                  Historique ({acc.kt_transactions.length} opérations)
+                </p>
+              </div>
+              {[...acc.kt_transactions]
+                .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                .slice(0, 20)
+                .map((tx) => (
+                  <div key={tx.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                    <div style={{ width: 28, height: 28, borderRadius: 8, background: tx.type === "credit" ? "rgba(74,222,128,0.12)" : "rgba(248,113,113,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      {tx.type === "credit" ? <TrendingUp size={13} color="#4ADE80" /> : <TrendingDown size={13} color="#F87171" />}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ color: "white", fontSize: "0.82rem", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{tx.description || "—"}</p>
+                      <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.7rem", margin: "2px 0 0" }}>{new Date(tx.created_at).toLocaleString("fr-FR")}</p>
+                    </div>
+                    <p style={{ color: tx.type === "credit" ? "#4ADE80" : "#F87171", fontWeight: 700, fontSize: "0.88rem", margin: 0, flexShrink: 0 }}>
+                      {tx.type === "credit" ? "+" : "-"}{Number(tx.amount).toFixed(2)} {tx.currency}
+                    </p>
+                  </div>
+                ))}
+            </div>
+          )}
         </div>
       ))}
     </div>

@@ -1,6 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 
+function stripHtml(html: string): string {
+  return html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 export async function POST(req: NextRequest) {
   const secret = process.env.CF_WEBHOOK_SECRET;
   if (secret && req.headers.get("x-webhook-secret") !== secret) {
@@ -13,7 +27,20 @@ export async function POST(req: NextRequest) {
 
   const supabase = getSupabase();
 
-  // Find existing thread via In-Reply-To or create new
+  // Deduplication: skip if this message_id already processed
+  if (messageId) {
+    const { data: existing } = await supabase
+      .from("kt_email_messages")
+      .select("id")
+      .eq("message_id", messageId)
+      .maybeSingle();
+    if (existing) return NextResponse.json({ ok: true, duplicate: true });
+  }
+
+  // Resolve body text
+  const resolvedBody = bodyText?.trim() || (bodyHtml ? stripHtml(bodyHtml) : "");
+
+  // Find existing thread via In-Reply-To or by client email + subject
   let threadId: string | null = null;
 
   if (inReplyTo) {
@@ -25,9 +52,21 @@ export async function POST(req: NextRequest) {
     if (existing) threadId = existing.thread_id;
   }
 
+  // Also try to find an existing open thread from same sender
+  if (!threadId) {
+    const { data: existingThread } = await supabase
+      .from("kt_email_threads")
+      .select("id")
+      .eq("client_email", from)
+      .eq("status", "open")
+      .eq("subject", subject)
+      .maybeSingle();
+    if (existingThread) threadId = existingThread.id;
+  }
+
   if (!threadId) {
     const clientName = from.includes("<")
-      ? from.split("<")[0].trim()
+      ? from.split("<")[0].trim().replace(/"/g, "")
       : from.split("@")[0];
     const { data: thread } = await supabase
       .from("kt_email_threads")
@@ -41,8 +80,8 @@ export async function POST(req: NextRequest) {
   await supabase.from("kt_email_messages").insert({
     thread_id: threadId, direction: "inbound",
     from_email: from, to_email: to ?? "support@kt-bank-ag.com",
-    subject, body_text: bodyText, body_html: bodyHtml,
-    message_id: messageId, in_reply_to: inReplyTo,
+    subject, body_text: resolvedBody, body_html: bodyHtml ?? null,
+    message_id: messageId ?? null, in_reply_to: inReplyTo ?? null,
   });
 
   await supabase.from("kt_email_threads").update({
