@@ -2,19 +2,24 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAdmin } from "./layout";
-import { Users, TrendingUp, CheckCircle, Clock } from "lucide-react";
+import { Users, TrendingUp, CheckCircle, Clock, ArrowLeftRight, AlertCircle } from "lucide-react";
 
 type Client = { id: string; email: string; prenom: string; nom: string; status: string; registration_step: number; created_at: string };
+type Transfer = { id: string; profile_id: string; to_name: string; amount: number; status: string; created_at: string; kt_profiles: { prenom: string; nom: string } | null };
 
 export default function AdminDashboard() {
   const { token } = useAdmin();
   const [clients, setClients] = useState<Client[]>([]);
+  const [pendingTransfers, setPendingTransfers] = useState<Transfer[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/kt/admin/clients", { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
       .then((d) => { setClients(d.clients ?? []); setLoading(false); });
+    fetch("/api/kt/admin/transfers?status=processing", { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => r.json())
+      .then((d) => setPendingTransfers(d.transfers ?? []));
   }, [token]);
 
   const active = clients.filter((c) => c.status === "active").length;
@@ -24,7 +29,7 @@ export default function AdminDashboard() {
   const stats = [
     { label: "Total clients", value: clients.length, icon: Users, color: "#005F2D" },
     { label: "Comptes actifs", value: active, icon: CheckCircle, color: "#22C55E" },
-    { label: "En cours", value: pending, icon: Clock, color: "#F59E0B" },
+    { label: "Virements à traiter", value: pendingTransfers.length, icon: ArrowLeftRight, color: pendingTransfers.length > 0 ? "#EF4444" : "#F59E0B" },
     { label: "Aujourd'hui", value: today, icon: TrendingUp, color: "#3B82F6" },
   ];
 
@@ -44,6 +49,21 @@ export default function AdminDashboard() {
           </div>
         ))}
       </div>
+
+      {/* Pending transfers alert */}
+      {pendingTransfers.length > 0 && (
+        <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 14, padding: "16px 20px", marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <AlertCircle size={18} color="#EF4444" />
+            <p style={{ color: "white", fontWeight: 600, fontSize: "0.9rem", margin: 0 }}>
+              {pendingTransfers.length} virement{pendingTransfers.length > 1 ? "s" : ""} en attente de validation
+            </p>
+          </div>
+          <Link href="/kt-admin/transfers" style={{ background: "#EF4444", color: "white", borderRadius: 8, padding: "6px 14px", fontSize: "0.8rem", fontWeight: 700, textDecoration: "none", whiteSpace: "nowrap" }}>
+            Traiter maintenant →
+          </Link>
+        </div>
+      )}
 
       <div style={{ background: "#1A1D27", borderRadius: 14, border: "1px solid rgba(255,255,255,0.06)", overflow: "hidden" }}>
         <div style={{ padding: "16px 24px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>

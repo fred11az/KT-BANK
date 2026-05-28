@@ -2,7 +2,7 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, Inbox, LayoutDashboard, LogOut, Lock, Settings } from "lucide-react";
+import { Users, Inbox, LayoutDashboard, LogOut, Lock, Settings, ArrowLeftRight } from "lucide-react";
 
 const AdminCtx = createContext<{ token: string; logout: () => void }>({ token: "", logout: () => {} });
 export const useAdmin = () => useContext(AdminCtx);
@@ -57,6 +57,7 @@ function LoginScreen({ onLogin }: { onLogin: (t: string) => void }) {
 const NAV = [
   { href: "/kt-admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/kt-admin/clients", label: "Clients", icon: Users },
+  { href: "/kt-admin/transfers", label: "Virements", icon: ArrowLeftRight },
   { href: "/kt-admin/inbox", label: "Messagerie", icon: Inbox },
   { href: "/kt-admin/settings", label: "Paramètres", icon: Settings },
 ];
