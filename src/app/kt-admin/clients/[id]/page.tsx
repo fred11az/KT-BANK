@@ -6,7 +6,7 @@ import { ChevronLeft, User, Briefcase, Home, Heart, Shield, CreditCard, Building
 
 type Profile = Record<string, unknown>;
 type Account = { id: string; iban: string; type: string; currency: string; balance: number; status: string; kt_cards: { last4: string; expiry_month: number; expiry_year: number; type: string; status: string }[] };
-type Transfer = { id: string; to_name: string; to_iban: string; amount: number; fee_amount: number; fee_paid: boolean; status: string; reference: string; created_at: string };
+type Transfer = { id: string; to_name: string; to_iban: string; amount: number; fee_amount: number; fee_paid: boolean; status: string; reference: string; payment_reference: string; payment_proof_url: string; created_at: string };
 
 function Section({ title, icon: Icon, children }: { title: string; icon: React.ElementType; children: React.ReactNode }) {
   return (
@@ -96,6 +96,12 @@ export default function ClientDetailPage() {
     setTimeout(() => { setCreditDone(false); load(); }, 2000);
   }
 
+  async function viewProof(path: string) {
+    const res = await fetch(`/api/kt/admin/transfer-proof?path=${encodeURIComponent(path)}`, { headers: { Authorization: `Bearer ${token}` } });
+    const { url } = await res.json();
+    if (url) window.open(url, "_blank");
+  }
+
   async function updateTransfer(transfer_id: string, transfer_status: string) {
     await fetch(`/api/kt/admin/clients/${id}`, { method: "PATCH", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ transfer_id, transfer_status }) });
     load();
@@ -168,7 +174,8 @@ export default function ClientDetailPage() {
               <div style={{ flex: 1, minWidth: 200 }}>
                 <p style={{ color: "white", fontWeight: 600, fontSize: "0.85rem", margin: 0 }}>{t.to_name}</p>
                 <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.72rem", margin: "2px 0 0", fontFamily: "monospace" }}>{t.to_iban}</p>
-                {t.reference && <p style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.7rem", margin: "2px 0 0" }}>Réf : {t.reference}</p>}
+                {t.reference && <p style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.7rem", margin: "2px 0 0" }}>Réf virement : {t.reference}</p>}
+                {t.payment_reference && <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.7rem", margin: "2px 0 0" }}>Réf paiement frais : {t.payment_reference}</p>}
               </div>
               <div style={{ textAlign: "right" }}>
                 <p style={{ color: "white", fontWeight: 700, fontSize: "0.88rem", margin: 0 }}>{Number(t.amount).toFixed(2)} €</p>
@@ -176,7 +183,12 @@ export default function ClientDetailPage() {
               </div>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5 }}>
                 <TBadge status={t.status} />
-                <div style={{ display: "flex", gap: 4 }}>
+                <div style={{ display: "flex", gap: 4, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                  {t.payment_proof_url && (
+                    <button onClick={() => viewProof(t.payment_proof_url)} style={{ background: "rgba(99,102,241,0.15)", border: "none", borderRadius: 6, padding: "3px 8px", color: "#818CF8", fontSize: "0.7rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 3 }}>
+                      🧾 Preuve
+                    </button>
+                  )}
                   {t.status !== "completed" && <button onClick={() => updateTransfer(t.id, "completed")} style={{ background: "rgba(74,222,128,0.15)", border: "none", borderRadius: 6, padding: "3px 8px", color: "#4ADE80", fontSize: "0.7rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 3 }}><Check size={11} /> Valider</button>}
                   {t.status !== "rejected" && <button onClick={() => updateTransfer(t.id, "rejected")} style={{ background: "rgba(248,113,113,0.15)", border: "none", borderRadius: 6, padding: "3px 8px", color: "#F87171", fontSize: "0.7rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 3 }}><X size={11} /> Rejeter</button>}
                 </div>

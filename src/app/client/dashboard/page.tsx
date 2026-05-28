@@ -416,6 +416,8 @@ export default function ClientDashboard() {
     const [fee, setFee] = useState<{ amount: number; currency: string } | null>(null);
     const [feePayment, setFeePayment] = useState<Record<string, string>>({});
     const [feeConfirming, setFeeConfirming] = useState(false);
+    const [proofFile, setProofFile] = useState<File | null>(null);
+    const [paymentRef, setPaymentRef] = useState("");
 
     async function submit() {
       if (!form.to || !form.iban || !form.amount) return;
@@ -463,10 +465,14 @@ export default function ClientDashboard() {
 
     async function confirmFee() {
       setFeeConfirming(true);
-      await fetch("/api/kt/client/transfer", {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ transfer_id: transferId }),
+      const fd = new FormData();
+      fd.append("transfer_id", transferId);
+      if (paymentRef) fd.append("payment_reference", paymentRef);
+      if (proofFile) fd.append("file", proofFile);
+      await fetch("/api/kt/client/transfer/proof", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: fd,
       });
       setFeeConfirming(false);
       setPhase("done");
@@ -474,7 +480,7 @@ export default function ClientDashboard() {
 
     function reset() {
       setPhase("form"); setProgress(0); setForm({ to: "", iban: "", amount: "", ref: "" });
-      setErrorMsg(""); setTransferId(""); setFee(null);
+      setErrorMsg(""); setTransferId(""); setFee(null); setProofFile(null); setPaymentRef("");
     }
 
     if (phase === "done") return (
@@ -538,9 +544,38 @@ export default function ClientDashboard() {
                   ))}
                 </div>
               </div>
+              {/* Proof of payment */}
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ color: "#374151", fontSize: "0.78rem", fontWeight: 600, display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  Référence de votre virement <span style={{ color: "#9CA3AF", fontWeight: 400 }}>(optionnel)</span>
+                </label>
+                <input
+                  type="text" placeholder="Ex: FRAIS-VIREMENT-2024"
+                  value={paymentRef} onChange={(e) => setPaymentRef(e.target.value)}
+                  style={{ width: "100%", height: 42, background: "white", border: "1px solid #D1D5DB", borderRadius: 10, color: "#0F172A", fontSize: "0.85rem", padding: "0 14px", boxSizing: "border-box", outline: "none" }}
+                />
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ color: "#374151", fontSize: "0.78rem", fontWeight: 600, display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  Joindre une preuve de paiement <span style={{ color: "#9CA3AF", fontWeight: 400 }}>(optionnel)</span>
+                </label>
+                <label style={{
+                  display: "flex", alignItems: "center", gap: 10, height: 44,
+                  background: proofFile ? "#F0FDF4" : "white",
+                  border: `1px dashed ${proofFile ? "#16A34A" : "#D1D5DB"}`,
+                  borderRadius: 10, padding: "0 14px", cursor: "pointer", boxSizing: "border-box",
+                }}>
+                  <input type="file" accept="image/*,application/pdf" style={{ display: "none" }}
+                    onChange={(e) => setProofFile(e.target.files?.[0] ?? null)} />
+                  {proofFile
+                    ? <><Check size={15} color="#16A34A" /><span style={{ color: "#16A34A", fontSize: "0.82rem", fontWeight: 600 }}>{proofFile.name}</span></>
+                    : <><FileText size={15} color="#9CA3AF" /><span style={{ color: "#9CA3AF", fontSize: "0.82rem" }}>Choisir un fichier (JPG, PNG, PDF · 5 Mo max)</span></>
+                  }
+                </label>
+              </div>
               <button onClick={confirmFee} disabled={feeConfirming}
                 style={{ width: "100%", height: 48, background: "#005F2D", border: "none", borderRadius: 12, color: "white", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer", opacity: feeConfirming ? 0.7 : 1 }}>
-                {feeConfirming ? "Confirmation…" : "J'ai effectué le paiement des frais"}
+                {feeConfirming ? "Envoi en cours…" : "Confirmer le paiement des frais"}
               </button>
               <button onClick={reset} style={{ width: "100%", marginTop: 8, height: 40, background: "transparent", border: "1px solid #E2E8F0", borderRadius: 10, color: "#64748B", fontSize: "0.82rem", cursor: "pointer" }}>
                 Annuler le virement
