@@ -1,476 +1,71 @@
 "use client";
 import Link from "next/link";
-import { ArrowRight, CheckCircle, Star, Shield, Zap, Globe, TrendingUp, ChevronRight } from "lucide-react";
+import { Store, HandCoins, Layers, ArrowLeftRight } from "lucide-react";
 
 /* ─────────── DATA ─────────── */
-const PRODUCTS = [
-  { id: "giro-konto",       icon: "💳", name: "KT GiroKonto",          cat: "Compte courant",   tag: "Gratuit",    desc: "Compte courant sans frais, IBAN allemand, app mobile.",          color: "#005F2D", popular: false, isNew: false },
-  { id: "gold-konto",       icon: "🥇", name: "KT GoldKonto",          cat: "Investissement",   tag: "+4.2 %/an",  desc: "Investissez dans l'or physique certifié LBMA dès 1 €.",           color: "#B07D12", popular: true,  isNew: false },
-  { id: "jetzz-card",       icon: "💎", name: "KT Jetzz Card",         cat: "Carte",            tag: "0 €/an",     desc: "Carte sans frais, paiement en 3–24 mois sans intérêts.",          color: "#1D4ED8", popular: false, isNew: false },
-  { id: "personal-loans",   icon: "💰", name: "Crédit Personnel",      cat: "Financement",      tag: "50 000 €",   desc: "Financement halal jusqu'à 50 000 €, réponse en 24 h.",            color: "#7C3AED", popular: false, isNew: false },
-  { id: "vehicle-financing",icon: "🚗", name: "Financement Auto",      cat: "Financement",      tag: "100 mois",   desc: "Murabaha auto — neuf & occasion, accord instantané.",             color: "#1E40AF", popular: false, isNew: false },
-  { id: "festgeld-konto",   icon: "📈", name: "KT FestgeldKonto",      cat: "Épargne",          tag: "4.5 %",      desc: "Rendement garanti au-dessus du marché, 3–12 mois.",              color: "#059669", popular: false, isNew: false },
-  { id: "donation",         icon: "🤲", name: "KT Donation & Zakat",   cat: "Solidarité",       tag: "Nouveau",    desc: "Calculateur Zakat intégré, dons certifiés, reçu fiscal.",         color: "#D97706", popular: false, isNew: true  },
-  { id: "corporate-credit", icon: "🏢", name: "Crédit Pro & PME",      cat: "Entreprise",       tag: "5 M€",       desc: "Musharaka, Mudaraba, Ijara pour les entrepreneurs.",              color: "#0F172A", popular: false, isNew: true  },
-  { id: "youth-savings",    icon: "🌱", name: "KT JugendKonto",        cat: "Jeunesse",         tag: "0–25 ans",   desc: "Épargne halal jeunesse, bonus 50 € de bienvenue.",                color: "#10B981", popular: false, isNew: true  },
-  { id: "real-estate",      icon: "🏠", name: "Financement Immobilier",cat: "Immobilier",       tag: "Nouveau",    desc: "Achetez via Murabaha ou Diminishing Musharaka.",                  color: "#B45309", popular: false, isNew: true  },
+const PRODUCTS_GRID = [
+  { icon: Store,          label: "Compte courant",          href: "/products/giro-konto" },
+  { icon: HandCoins,      label: "Compte de participation", href: "/products/festgeld-konto" },
+  { icon: Layers,         label: "Mastercard",              href: "/products/jetzz-card" },
+  { icon: ArrowLeftRight, label: "Compte de devises",       href: "/products/devises" },
 ];
 
-const STATS = [
-  { n: "50 000+", l: "Clients" },
-  { n: "€2.5 Mrd", l: "Actifs gérés" },
-  { n: "4", l: "Agences" },
-  { n: "9 ans", l: "d'excellence" },
-];
-
-const TESTIMONIALS = [
-  { name: "Ahmed K.", role: "Client depuis 2018", text: "Enfin une banque qui respecte mes valeurs. Simple, moderne, et vraiment halal.", rating: 5 },
-  { name: "Fatima M.", role: "Cliente depuis 2020", text: "Le GoldKonto est excellent. J'investis en or en quelques clics, les rendements sont au rendez-vous.", rating: 5 },
-  { name: "Yusuf B.", role: "Client Entreprise",   text: "Le Crédit Pro m'a permis de financer mon expansion. Accompagnement remarquable.", rating: 5 },
-  { name: "Mariam L.", role: "Cliente depuis 2021", text: "Le JugendKonto pour mes enfants — parfait pour les initier à l'épargne halal.", rating: 5 },
-];
-
-/* ─────────── HERO ─────────── */
-function Hero() {
+/* ─────────── HELPERS ─────────── */
+function SectionImage({ src, alt, height = 260 }: { src: string; alt: string; height?: number }) {
   return (
-    <section className="relative overflow-hidden"
-      style={{ background: "linear-gradient(160deg, #002B14 0%, #004020 35%, #005F2D 70%, #007038 100%)" }}>
-
-      {/* Grid pattern */}
-      <div className="absolute inset-0 hero-grid opacity-100 pointer-events-none"/>
-
-      {/* Glow blobs */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full pointer-events-none"
-        style={{ background: "radial-gradient(circle, rgba(201,146,26,0.12) 0%, transparent 65%)" }}/>
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full pointer-events-none"
-        style={{ background: "radial-gradient(circle, rgba(0,133,69,0.2) 0%, transparent 65%)" }}/>
-
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-20 pb-32 lg:pt-28 lg:pb-40">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-
-          {/* Left */}
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-6 animate-fade-up"
-              style={{ background: "rgba(201,146,26,0.15)", border: "1px solid rgba(201,146,26,0.3)", color: "#E8C96B" }}>
-              🌙 Première banque islamique agréée en Allemagne
-            </div>
-
-            <h1 className="text-display text-white mb-5 animate-fade-up delay-100">
-              Mes Valeurs,{" "}
-              <span className="text-gradient-gold">Ma Banque.</span>
-            </h1>
-
-            <p className="text-body-lg mb-8 animate-fade-up delay-200"
-              style={{ color: "rgba(255,255,255,0.72)", maxWidth: "480px" }}>
-              Des services bancaires complets, conformes à la charia.
-              Régulée BaFin, certifiée Sharia Board — pour les 50 000 familles qui nous font confiance.
-            </p>
-
-            <div className="flex flex-wrap gap-3 mb-10 animate-fade-up delay-300">
-              {["✅ 100 % Halal", "🛡️ BaFin régulée", "💰 Dépôts garantis"].map(t => (
-                <span key={t} className="text-small font-medium px-3.5 py-1.5 rounded-full"
-                  style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.85)", border: "1px solid rgba(255,255,255,0.15)" }}>
-                  {t}
-                </span>
-              ))}
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3 animate-fade-up delay-400">
-              <Link href="/client/register" className="btn btn-gold btn-xl">
-                Ouvrir un compte gratuit <ArrowRight size={18}/>
-              </Link>
-              <Link href="/products" className="btn btn-outline-white btn-xl">
-                Nos produits
-              </Link>
-            </div>
-          </div>
-
-          {/* Right — card mockup */}
-          <div className="relative flex justify-center lg:justify-end animate-fade-in delay-300">
-            <div className="relative w-full max-w-sm">
-
-              {/* Main bank card */}
-              <div className="card-glass rounded-2xl p-6 text-white shadow-2xl animate-float">
-                <div className="flex justify-between items-start mb-6">
-                  <div>
-                    <div className="text-xs font-medium mb-1" style={{ color: "rgba(255,255,255,0.6)" }}>KT GiroKonto</div>
-                    <div className="text-2xl font-black tracking-tight">€ 24 850,00</div>
-                  </div>
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black"
-                    style={{ background: "rgba(201,146,26,0.3)", color: "#E8C96B" }}>
-                    KT
-                  </div>
-                </div>
-                <div className="text-sm font-mono mb-5" style={{ color: "rgba(255,255,255,0.5)", letterSpacing: "0.15em" }}>
-                  •••• •••• •••• 8492
-                </div>
-                <div className="flex justify-between items-end">
-                  <div>
-                    <div className="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>Titulaire</div>
-                    <div className="text-sm font-semibold">Ahmed Al-Rashid</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>Expire</div>
-                    <div className="text-sm font-semibold">12/28</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Floating stat — top right */}
-              <div className="hidden sm:block absolute -top-3 -right-3 sm:-right-6 card rounded-xl px-4 py-3 shadow-xl animate-fade-up delay-400">
-                <div className="text-xs font-medium mb-0.5" style={{ color: "var(--gray-500)" }}>GoldKonto</div>
-                <div className="text-xl font-black" style={{ color: "var(--gold-400)" }}>+4.2 %</div>
-                <div className="flex items-center gap-1 text-xs font-medium mt-0.5" style={{ color: "var(--green-600)" }}>
-                  <TrendingUp size={11}/> Ce mois
-                </div>
-              </div>
-
-              {/* Floating stat — bottom left */}
-              <div className="hidden sm:block absolute -bottom-3 -left-3 sm:-left-6 card rounded-xl px-4 py-3 shadow-xl animate-fade-up delay-500">
-                <div className="text-xs font-medium mb-0.5" style={{ color: "var(--gray-500)" }}>Zakat 2024</div>
-                <div className="text-xl font-black" style={{ color: "var(--green-700)" }}>€ 620</div>
-                <div className="text-xs" style={{ color: "var(--gray-400)" }}>Auto-calculé</div>
-              </div>
-
-              {/* Stats row */}
-              <div className="grid grid-cols-2 gap-2 mt-8">
-                {STATS.map(s => (
-                  <div key={s.l} className="card-glass rounded-xl p-3 text-center">
-                    <div className="text-lg font-black text-white">{s.n}</div>
-                    <div className="text-xs" style={{ color: "rgba(255,255,255,0.55)" }}>{s.l}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom wave */}
-      <div className="absolute bottom-0 left-0 right-0 h-12 pointer-events-none"
-        style={{ background: "linear-gradient(to top, #FAFAFA, transparent)" }}/>
-    </section>
+    <img
+      src={src}
+      alt={alt}
+      style={{ width: "100%", height: height, objectFit: "cover", display: "block" }}
+    />
   );
 }
 
-/* ─────────── TRUST BAR ─────────── */
-function TrustBar() {
-  const items = [
-    { icon: "🏛️", text: "Régulée BaFin" },
-    { icon: "🛡️", text: "Dépôts garantis 100 K€" },
-    { icon: "☪️", text: "Certifié Shariah Board" },
-    { icon: "🔐", text: "SSL / 2FA" },
-    { icon: "📱", text: "App Store 4.8 ★" },
-    { icon: "🤝", text: "50 000+ clients" },
-  ];
+function GreenPillButton({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <section className="py-5 border-b" style={{ background: "white", borderColor: "var(--gray-200)" }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex flex-wrap justify-center gap-x-8 gap-y-3">
-          {items.map(i => (
-            <div key={i.text} className="flex items-center gap-2 text-small font-medium" style={{ color: "var(--gray-500)" }}>
-              <span className="text-base">{i.icon}</span>{i.text}
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
+    <Link
+      href={href}
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100%",
+        padding: "18px 24px",
+        borderRadius: 999,
+        background: "#005F2D",
+        color: "white",
+        fontWeight: 700,
+        fontSize: "1rem",
+        textDecoration: "none",
+        boxSizing: "border-box",
+      }}
+    >
+      {children}
+    </Link>
   );
 }
 
-/* ─────────── PRODUCTS ─────────── */
-function Products() {
+function GoldPillButton({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <section className="py-24" style={{ background: "var(--gray-50)" }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-14">
-          <div className="section-label mx-auto inline-flex">Nos Produits</div>
-          <h2 className="text-heading" style={{ color: "var(--gray-900)" }}>
-            Une solution pour{" "}
-            <span className="text-gradient">chaque besoin</span>
-          </h2>
-          <p className="text-body mt-3 mx-auto" style={{ color: "var(--gray-500)", maxWidth: "520px" }}>
-            10 produits 100 % halal — comptes, épargne, financements, investissements et nouvelles offres exclusives.
-          </p>
-          <div className="divider-gold"/>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-5">
-          {PRODUCTS.map((p, i) => (
-            <Link key={p.id} href={`/products/${p.id}`}
-              className="card card-interactive flex flex-col p-5 animate-fade-up"
-              style={{ animationDelay: `${i * 40}ms` }}>
-              {/* accent line */}
-              <div className="h-0.5 w-full rounded-t-xl mb-5 -mx-5 -mt-5 px-0"
-                style={{ background: p.color, width: "calc(100% + 40px)", maxWidth: "none", borderRadius: "var(--radius-xl) var(--radius-xl) 0 0" }}/>
-
-              <div className="flex items-start justify-between mb-3">
-                <span className="text-3xl">{p.icon}</span>
-                <div className="flex gap-1.5">
-                  {p.popular && <span className="badge badge-green">⭐ Top</span>}
-                  {p.isNew && <span className="badge badge-new">Nouveau</span>}
-                </div>
-              </div>
-
-              <div className="text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: p.color }}>{p.cat}</div>
-              <h3 className="font-bold text-base mb-2" style={{ color: "var(--gray-900)" }}>{p.name}</h3>
-              <p className="text-small flex-1 mb-4" style={{ color: "var(--gray-500)" }}>{p.desc}</p>
-
-              <div className="flex items-center justify-between pt-3 border-t mt-auto" style={{ borderColor: "var(--gray-100)" }}>
-                <span className="text-xs font-bold px-2.5 py-1 rounded-lg"
-                  style={{ background: `${p.color}12`, color: p.color }}>
-                  {p.tag}
-                </span>
-                <span className="text-xs font-semibold flex items-center gap-0.5 transition-all group-hover:gap-1.5"
-                  style={{ color: "var(--green-700)" }}>
-                  Voir <ChevronRight size={12}/>
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        <div className="text-center mt-10">
-          <Link href="/products" className="btn btn-outline">
-            Voir tous les produits <ArrowRight size={16}/>
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─────────── ISLAMIC BANKING ─────────── */
-function IslamicSection() {
-  return (
-    <section className="py-24" style={{ background: "white" }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          <div>
-            <div className="section-label">☪️ Finance Islamique</div>
-            <h2 className="text-heading mb-5" style={{ color: "var(--gray-900)" }}>
-              La banque qui{" "}
-              <span className="text-gradient">respecte vos valeurs</span>
-            </h2>
-            <p className="text-body-lg mb-8" style={{ color: "var(--gray-600)" }}>
-              Fondée sur les principes de la charia islamique, KT Bank AG interdit
-              les intérêts (riba), la spéculation (gharar) et n'investit que dans
-              des secteurs licites et éthiques.
-            </p>
-            <div className="grid grid-cols-2 gap-3 mb-8">
-              {[
-                { icon: "🚫", t: "Sans Riba", s: "Zéro intérêt sur tous nos produits" },
-                { icon: "✅", t: "Halal certifié", s: "Validé par le Shariah Board" },
-                { icon: "🌿", t: "Éthique", s: "Investissements responsables" },
-                { icon: "🤝", t: "Partage des profits", s: "Musharaka & Mudaraba" },
-              ].map(x => (
-                <div key={x.t} className="p-4 rounded-2xl border" style={{ borderColor: "var(--gray-200)" }}>
-                  <span className="text-xl">{x.icon}</span>
-                  <div className="font-semibold text-sm mt-2 mb-0.5" style={{ color: "var(--gray-900)" }}>{x.t}</div>
-                  <div className="text-xs" style={{ color: "var(--gray-500)" }}>{x.s}</div>
-                </div>
-              ))}
-            </div>
-            <Link href="/islamic-banking" className="btn btn-primary">
-              En savoir plus <ArrowRight size={16}/>
-            </Link>
-          </div>
-
-          <div className="relative">
-            <div className="rounded-2xl overflow-hidden shadow-2xl">
-              <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=700&q=85"
-                alt="Finance islamique" className="w-full h-80 object-cover"/>
-              <div className="p-6" style={{ background: "var(--green-700)" }}>
-                <div className="text-white font-bold text-lg mb-1">Shariah Board Certifié</div>
-                <div className="text-sm" style={{ color: "rgba(255,255,255,0.72)" }}>
-                  Chaque produit est validé par nos 5 érudits islamiques indépendants.
-                </div>
-              </div>
-            </div>
-
-            <div className="hidden md:block absolute -bottom-5 -left-5 card rounded-2xl p-4 shadow-xl">
-              <div className="text-2xl mb-1">☪️</div>
-              <div className="font-bold text-sm" style={{ color: "var(--gray-900)" }}>100 % Halal</div>
-              <div className="text-xs mt-0.5" style={{ color: "var(--gray-500)" }}>Académie Islamique Fiqh</div>
-              <div className="flex gap-0.5 mt-1.5">
-                {[1,2,3,4,5].map(i => <Star key={i} size={11} style={{ fill: "#FBBF24", color: "#FBBF24" }}/>)}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─────────── NEW PRODUCTS HIGHLIGHT ─────────── */
-function NewProducts() {
-  const items = [
-    { icon: "🤲", t: "KT Donation & Zakat",    d: "Calculateur Zakat, dons certifiés ONG, reçu fiscal automatique.", href: "/products/donation",         col: "#D97706" },
-    { icon: "🏢", t: "Crédit Pro & PME",        d: "Musharaka, Mudaraba, Ijara. De 50 K€ à 5 M€ pour les entrepreneurs.", href: "/products/corporate-credit", col: "#E8C96B" },
-    { icon: "🌱", t: "KT JugendKonto",          d: "Compte jeunesse halal dès la naissance. Bonus de bienvenue 50 €.", href: "/products/youth-savings",    col: "#10B981" },
-    { icon: "🏠", t: "Financement Immobilier",  d: "Achetez via Murabaha ou Diminishing Musharaka — sans intérêts.", href: "/products/real-estate",      col: "#C9A84C" },
-  ];
-  return (
-    <section className="py-24 relative overflow-hidden"
-      style={{ background: "linear-gradient(160deg, var(--green-900) 0%, var(--green-800) 50%, var(--green-700) 100%)" }}>
-      <div className="absolute inset-0 hero-grid pointer-events-none"/>
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-14">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold mb-4"
-            style={{ background: "rgba(201,146,26,0.15)", border: "1px solid rgba(201,146,26,0.3)", color: "#E8C96B" }}>
-            ✦ Nouvelles offres exclusives
-          </div>
-          <h2 className="text-heading text-white mb-3">
-            Des produits qui n'existaient pas.{" "}
-            <span className="text-gradient-gold">Maintenant oui.</span>
-          </h2>
-          <p style={{ color: "rgba(255,255,255,0.6)" }} className="text-body">
-            Nous avons développé des produits islamiques innovants pour vos besoins spécifiques.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
-          {items.map((item, i) => (
-            <Link key={item.href} href={item.href}
-              className="group flex flex-col p-6 rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl animate-fade-up"
-              style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", animationDelay: `${i*80}ms` }}>
-              <span className="text-4xl mb-4">{item.icon}</span>
-              <h3 className="font-bold text-base text-white mb-2">{item.t}</h3>
-              <p className="text-small flex-1 mb-4" style={{ color: "rgba(255,255,255,0.6)" }}>{item.d}</p>
-              <span className="flex items-center gap-1 text-xs font-semibold transition-all group-hover:gap-2"
-                style={{ color: item.col }}>
-                Découvrir <ArrowRight size={12}/>
-              </span>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─────────── STATS ─────────── */
-function Stats() {
-  const items = [
-    { n: "50 000+", l: "Clients satisfaits",    icon: "👥", c: "var(--green-700)" },
-    { n: "€ 2.5 Mrd", l: "Actifs sous gestion", icon: "💰", c: "var(--gold-400)" },
-    { n: "4",          l: "Agences en Allemagne",icon: "🏦", c: "var(--green-700)" },
-    { n: "9+",         l: "Années d'excellence", icon: "⭐", c: "var(--gold-400)" },
-  ];
-  return (
-    <section className="py-20" style={{ background: "white" }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-          {items.map(s => (
-            <div key={s.l} className="card text-center p-6 lg:p-8">
-              <span className="text-3xl mb-3 block">{s.icon}</span>
-              <div className="font-black mb-1.5" style={{ fontSize: "clamp(1.75rem,3vw,2.5rem)", color: s.c }}>{s.n}</div>
-              <div className="text-small font-medium" style={{ color: "var(--gray-500)" }}>{s.l}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─────────── TESTIMONIALS ─────────── */
-function Testimonials() {
-  return (
-    <section className="py-24" style={{ background: "var(--gray-50)" }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-14">
-          <div className="section-label mx-auto inline-flex">Témoignages</div>
-          <h2 className="text-heading" style={{ color: "var(--gray-900)" }}>
-            Ce que disent nos <span className="text-gradient">clients</span>
-          </h2>
-          <div className="divider-gold"/>
-        </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
-          {TESTIMONIALS.map((t, i) => (
-            <div key={t.name} className="card p-6 flex flex-col animate-fade-up" style={{ animationDelay: `${i*80}ms` }}>
-              <div className="flex gap-0.5 mb-4">
-                {[...Array(t.rating)].map((_,j) => <Star key={j} size={13} style={{ fill: "#FBBF24", color: "#FBBF24" }}/>)}
-              </div>
-              <p className="text-small flex-1 mb-5 italic" style={{ color: "var(--gray-600)" }}>
-                "{t.text}"
-              </p>
-              <div className="flex items-center gap-3 pt-4 border-t" style={{ borderColor: "var(--gray-100)" }}>
-                <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
-                  style={{ background: "linear-gradient(135deg, var(--green-700), var(--green-500))" }}>
-                  {t.name[0]}
-                </div>
-                <div>
-                  <div className="font-semibold text-sm" style={{ color: "var(--gray-900)" }}>{t.name}</div>
-                  <div className="text-xs" style={{ color: "var(--gray-400)" }}>{t.role}</div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─────────── WHY US ─────────── */
-function WhyUs() {
-  return (
-    <section className="py-24" style={{ background: "white" }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-14">
-          <h2 className="text-heading" style={{ color: "var(--gray-900)" }}>
-            Pourquoi choisir <span className="text-gradient">KT Bank ?</span>
-          </h2>
-          <div className="divider-gold"/>
-        </div>
-        <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
-          {[
-            { icon: <Shield size={28}/>, t: "Sécurité maximale", d: "BaFin régulée · Dépôts garantis jusqu'à 100 000 € par l'EDB · Certification ISO 27001.", col: "var(--green-700)" },
-            { icon: <Globe size={28}/>, t: "100 % Islamique", d: "Seule banque islamique complète en Allemagne. Certifiée AAOIFI par un Shariah Board indépendant de 5 érudits.", col: "var(--green-700)" },
-            { icon: <Zap size={28}/>, t: "Digital & Moderne", d: "Ouverture de compte en 10 min, app mobile intuitive, virements instantanés, notifications en temps réel.", col: "var(--green-700)" },
-          ].map(x => (
-            <div key={x.t} className="card p-8 text-center group">
-              <div className="w-14 h-14 rounded-2xl mx-auto mb-5 flex items-center justify-center transition-transform group-hover:scale-110"
-                style={{ background: "var(--green-50)", color: x.col }}>
-                {x.icon}
-              </div>
-              <h3 className="font-bold text-lg mb-3" style={{ color: "var(--gray-900)" }}>{x.t}</h3>
-              <p className="text-small" style={{ color: "var(--gray-500)" }}>{x.d}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─────────── CTA ─────────── */
-function CTA() {
-  return (
-    <section className="py-24 relative overflow-hidden"
-      style={{ background: "linear-gradient(135deg, var(--gold-500) 0%, var(--gold-300) 50%, var(--gold-200) 100%)" }}>
-      <div className="absolute inset-0 hero-grid pointer-events-none opacity-40"/>
-      <div className="relative max-w-3xl mx-auto px-4 sm:px-6 text-center">
-        <h2 className="text-heading text-white mb-4">
-          Prêt à rejoindre KT Bank ?
-        </h2>
-        <p className="text-body-lg mb-10" style={{ color: "rgba(255,255,255,0.85)" }}>
-          Ouvrez votre compte en 10 minutes. 100 % en ligne, 100 % halal, 100 % gratuit.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link href="/client/register" className="btn btn-xl"
-            style={{ background: "var(--green-700)", color: "white" }}>
-            Créer mon compte <ArrowRight size={18}/>
-          </Link>
-          <Link href="/contact" className="btn btn-xl"
-            style={{ background: "rgba(255,255,255,0.9)", color: "var(--green-800)" }}>
-            Parler à un conseiller
-          </Link>
-        </div>
-      </div>
-    </section>
+    <Link
+      href={href}
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100%",
+        padding: "18px 24px",
+        borderRadius: 999,
+        background: "#C9921A",
+        color: "#1A1A1A",
+        fontWeight: 700,
+        fontSize: "1rem",
+        textDecoration: "none",
+        boxSizing: "border-box",
+      }}
+    >
+      {children}
+    </Link>
   );
 }
 
@@ -478,15 +73,363 @@ function CTA() {
 export default function HomePage() {
   return (
     <>
-      <Hero/>
-      <TrustBar/>
-      <Products/>
-      <IslamicSection/>
-      <NewProducts/>
-      <Stats/>
-      <Testimonials/>
-      <WhyUs/>
-      <CTA/>
+      {/* ── Section 1: Hero ── */}
+      <section>
+        {/* Full-width phone image */}
+        <SectionImage
+          src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&q=80"
+          alt="KT Bank mobile app"
+          height={300}
+        />
+        {/* Dark green content area */}
+        <div style={{ background: "#005F2D", padding: "32px 24px" }}>
+          <h1
+            style={{
+              color: "white",
+              fontWeight: 800,
+              fontSize: "2.2rem",
+              lineHeight: 1.2,
+              margin: 0,
+              marginBottom: 16,
+            }}
+          >
+            Un compte courant gratuit pour tous. Avec des valeurs.
+          </h1>
+          <p
+            style={{
+              color: "rgba(255,255,255,0.85)",
+              fontSize: "1rem",
+              lineHeight: 1.7,
+              margin: 0,
+              marginBottom: 24,
+            }}
+          >
+            Le compte courant KT n&apos;est pas soumis à des frais mensuels de tenue de compte.
+            Vous maîtrisez vos finances – sans facilité de découvert ni agios.
+          </p>
+          <Link
+            href="/client/register"
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+              padding: "18px 24px",
+              borderRadius: 999,
+              background: "white",
+              color: "#005F2D",
+              fontWeight: 700,
+              fontSize: "1rem",
+              textDecoration: "none",
+              boxSizing: "border-box",
+            }}
+          >
+            Ouvrir un compte
+          </Link>
+        </div>
+      </section>
+
+      {/* ── Section 2: Products 2×2 grid ── */}
+      <section style={{ background: "white", padding: "48px 0" }}>
+        <div style={{ maxWidth: 640, margin: "0 auto", padding: "0 24px" }}>
+          {/* Label */}
+          <div
+            style={{
+              textAlign: "center",
+              color: "#005F2D",
+              fontSize: "0.75rem",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.12em",
+              marginBottom: 24,
+            }}
+          >
+            Nos Produits
+          </div>
+
+          {/* 2×2 grid with cross dividers */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              border: "1px solid #E5E7EB",
+              borderRadius: 16,
+              overflow: "hidden",
+            }}
+          >
+            {PRODUCTS_GRID.map((p, i) => (
+              <Link
+                key={p.href}
+                href={p.href}
+                style={{
+                  padding: "32px 16px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 12,
+                  borderRight: i % 2 === 0 ? "1px solid #E5E7EB" : "none",
+                  borderBottom: i < 2 ? "1px solid #E5E7EB" : "none",
+                  background: "white",
+                  textDecoration: "none",
+                }}
+              >
+                <p.icon size={52} color="#005F2D" strokeWidth={1.5} />
+                <span
+                  style={{
+                    color: "#005F2D",
+                    fontSize: "0.875rem",
+                    textAlign: "center",
+                    fontWeight: 500,
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {p.label}
+                </span>
+              </Link>
+            ))}
+          </div>
+
+          {/* "See all" link */}
+          <div style={{ textAlign: "center", marginTop: 24 }}>
+            <Link
+              href="/products"
+              style={{
+                color: "#005F2D",
+                fontSize: "0.95rem",
+                fontWeight: 600,
+                textDecoration: "underline",
+              }}
+            >
+              Voir tous les produits →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Section 3: Des convictions solides ── */}
+      <section>
+        <SectionImage
+          src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80"
+          alt="Happy family"
+        />
+        <div style={{ background: "white", padding: "32px 24px" }}>
+          <h2
+            style={{
+              color: "#005F2D",
+              fontWeight: 800,
+              fontSize: "1.75rem",
+              lineHeight: 1.25,
+              margin: 0,
+              marginBottom: 16,
+            }}
+          >
+            Des convictions solides, des avantages convaincants.
+          </h2>
+          <p
+            style={{
+              color: "#374151",
+              fontSize: "1rem",
+              lineHeight: 1.7,
+              margin: 0,
+              marginBottom: 16,
+            }}
+          >
+            Nos produits et services sont conformes à l&apos;islam et ne portent pas d&apos;intérêts.
+            Cela signifie qu&apos;ils sont axés sur les principes de la foi islamique. En même temps,
+            ils correspondent à des principes éthiques universellement valables, ce qui rend notre
+            offre attrayante pour toute personne consciente de ses valeurs.
+          </p>
+          <p
+            style={{
+              color: "#374151",
+              fontSize: "1rem",
+              lineHeight: 1.7,
+              margin: 0,
+            }}
+          >
+            Forte de cette conviction, KT Bank AG est ouverte aux clients de toutes les convictions
+            et souhaite être la banque principale et durable de la communauté musulmane et de tous
+            ceux qui souhaitent investir de manière socialement responsable.
+          </p>
+        </div>
+      </section>
+
+      {/* ── Section 4: Compte courant KT ── */}
+      <section>
+        <SectionImage
+          src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80"
+          alt="Finance banking laptop"
+        />
+        <div style={{ background: "#F2EDE4", padding: "32px 24px" }}>
+          <h2
+            style={{
+              color: "#005F2D",
+              fontWeight: 800,
+              fontSize: "1.75rem",
+              lineHeight: 1.25,
+              margin: 0,
+              marginBottom: 16,
+            }}
+          >
+            Compte courant KT gratuit
+          </h2>
+          <p
+            style={{
+              color: "#374151",
+              fontSize: "1rem",
+              lineHeight: 1.7,
+              margin: 0,
+              marginBottom: 24,
+            }}
+          >
+            Le compte courant KT vous offre tous les services d&apos;un compte courant et ce, sans frais.
+            Ouvrez facilement et confortablement votre compte courant KT en ligne et profitez
+            directement de tous les avantages. Pas de frais de tenue de compte et pas de versement
+            minimum, y compris un accès direct à vos services bancaires en ligne et mobiles.
+          </p>
+          <GreenPillButton href="/client/register">Ouvrir un compte maintenant</GreenPillButton>
+          <div style={{ textAlign: "center", marginTop: 16 }}>
+            <Link
+              href="/products/giro-konto"
+              style={{
+                color: "#005F2D",
+                fontSize: "0.9rem",
+                textDecoration: "underline",
+              }}
+            >
+              Plus d&apos;informations
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Section 5: Compte de dépôt à terme ── */}
+      <section>
+        <SectionImage
+          src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800&q=80"
+          alt="Savings coins"
+        />
+        <div style={{ background: "#F2EDE4", padding: "32px 24px" }}>
+          <h2
+            style={{
+              color: "#005F2D",
+              fontWeight: 800,
+              fontSize: "1.75rem",
+              lineHeight: 1.25,
+              margin: 0,
+              marginBottom: 16,
+            }}
+          >
+            Compte de dépôt à terme KT
+          </h2>
+          <p
+            style={{
+              color: "#374151",
+              fontSize: "1rem",
+              lineHeight: 1.7,
+              margin: 0,
+              marginBottom: 24,
+            }}
+          >
+            D&apos;excellentes conditions en toute sécurité&nbsp;: placez votre argent de façon sûre et
+            rentable sur le compte de dépôt à terme KT. Des gains garantis avec un rendement
+            supérieur à la moyenne – sans aucun coût ni frais.
+          </p>
+          <GreenPillButton href="/client/register">Ouvrir un compte maintenant</GreenPillButton>
+          <div style={{ textAlign: "center", marginTop: 16 }}>
+            <Link
+              href="/products/festgeld-konto"
+              style={{
+                color: "#005F2D",
+                fontSize: "0.9rem",
+                textDecoration: "underline",
+              }}
+            >
+              Plus d&apos;informations
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Section 6: Blog ── */}
+      <section>
+        <SectionImage
+          src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"
+          alt="Laptop finance blog"
+        />
+        <div style={{ background: "#F2EDE4", padding: "32px 24px" }}>
+          <h2
+            style={{
+              color: "#005F2D",
+              fontWeight: 800,
+              fontSize: "1.75rem",
+              lineHeight: 1.25,
+              margin: 0,
+              marginBottom: 16,
+            }}
+          >
+            Blog
+          </h2>
+          <p
+            style={{
+              color: "#374151",
+              fontSize: "1rem",
+              lineHeight: 1.7,
+              margin: 0,
+              marginBottom: 24,
+            }}
+          >
+            En tant que première banque de la zone euro à proposer des produits et des services
+            financiers selon les principes de la banque islamique, transparente et axée sur les
+            valeurs, nous sommes ici, sur place, les pionniers d&apos;un secteur d&apos;activité en pleine
+            expansion dans le monde entier.
+          </p>
+          <GoldPillButton href="/about">Découvre les nouveautés</GoldPillButton>
+        </div>
+      </section>
+
+      {/* ── Section 7: Magasins / Agences ── */}
+      <section>
+        <SectionImage
+          src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80"
+          alt="Modern office interior"
+        />
+        <div
+          style={{
+            background: "#F2EDE4",
+            padding: "32px 24px",
+            borderRadius: "16px 16px 0 0",
+          }}
+        >
+          <h2
+            style={{
+              color: "#005F2D",
+              fontWeight: 800,
+              fontSize: "1.75rem",
+              lineHeight: 1.25,
+              margin: 0,
+              marginBottom: 16,
+            }}
+          >
+            Magasins
+          </h2>
+          <p
+            style={{
+              color: "#374151",
+              fontSize: "1rem",
+              lineHeight: 1.7,
+              margin: 0,
+              marginBottom: 24,
+            }}
+          >
+            En tant que première banque de la zone euro à proposer des produits et des services
+            financiers selon les principes de la banque islamique transparente et respectueuse des
+            valeurs, nous sommes ici, sur place, les pionniers d&apos;un secteur d&apos;activité en pleine
+            expansion dans le monde entier.
+          </p>
+          <GoldPillButton href="/branches">Nos magasins</GoldPillButton>
+        </div>
+      </section>
     </>
   );
 }
