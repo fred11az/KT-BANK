@@ -163,3 +163,34 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   return NextResponse.json({ ok: true });
 }
+
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const { id } = await params;
+  const supabase = getSupabase();
+
+  const { data: accounts } = await supabase
+    .from("kt_accounts")
+    .select("id")
+    .eq("profile_id", id);
+
+  const accountIds = (accounts ?? []).map((a: { id: string }) => a.id);
+
+  if (accountIds.length > 0) {
+    await supabase.from("kt_transfer_requests").delete().in("account_id", accountIds);
+    await supabase.from("kt_transactions").delete().in("account_id", accountIds);
+    await supabase.from("kt_cards").delete().in("account_id", accountIds);
+  }
+  await supabase.from("kt_transfer_requests").delete().eq("profile_id", id);
+  await supabase.from("kt_accounts").delete().eq("profile_id", id);
+
+  const { data: profileRow } = await supabase.from("kt_profiles").select("email").eq("id", id).single();
+  if (profileRow?.email) {
+    await supabase.from("kt_sessions").delete().eq("email", profileRow.email);
+  }
+
+  const { error } = await supabase.from("kt_profiles").delete().eq("id", id);
+  if (error) return NextResponse.json({ error: "Erreur suppression" }, { status: 500 });
+
+  return NextResponse.json({ ok: true });
+}

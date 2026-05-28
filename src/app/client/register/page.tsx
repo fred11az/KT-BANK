@@ -382,7 +382,7 @@ export default function RegisterPage() {
             <FInput label="Stadt" placeholder="Berlin" value={ville} onChange={setVille}/>
           </div>
           {error&&<p style={{color:"#FF6B6B",fontSize:"0.85rem"}}>{error}</p>}
-          <Btn onClick={()=>{if(!situationPro||!revenuMensuel||!adresse||!codePostal||!ville){setError("Bitte alle Pflichtfelder ausfüllen");return;}save(5);}} loading={loading}>
+          <Btn onClick={()=>{if(!situationPro||!revenuMensuel||!adresse||!codePostal||!ville||(employeurLabel&&!nomEmployeur)){setError("Bitte alle Pflichtfelder ausfüllen");return;}save(5);}} loading={loading}>
             Weiter <ArrowRight size={18}/>
           </Btn>
         </div>

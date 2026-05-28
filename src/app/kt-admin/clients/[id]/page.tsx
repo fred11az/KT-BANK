@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useAdmin } from "../../layout";
 import { useParams, useRouter } from "next/navigation";
-import { ChevronLeft, User, Briefcase, Home, Heart, Shield, CreditCard, Building, Plus, Minus, PowerOff, Power, ArrowLeftRight, Check, X, TrendingUp, TrendingDown, History, Euro, RotateCcw } from "lucide-react";
+import { ChevronLeft, User, Briefcase, Home, Heart, Shield, CreditCard, Building, Plus, Minus, PowerOff, Power, ArrowLeftRight, Check, X, TrendingUp, TrendingDown, History, Euro, RotateCcw, Trash2 } from "lucide-react";
 
 type Profile = Record<string, unknown>;
 type FeePayment = { name: string; iban: string; bic: string; bank: string; reference: string };
@@ -72,6 +72,9 @@ export default function ClientDetailPage() {
   const [payForm, setPayForm] = useState<FeePayment>({ name: "", iban: "", bic: "", bank: "", reference: "" });
   const [feeSaving, setFeeSaving] = useState(false);
   const [feeSaved, setFeeSaved] = useState(false);
+
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   function load() {
     setLoading(true);
@@ -153,6 +156,16 @@ export default function ClientDetailPage() {
     setFeeSaving(false);
   }
 
+  async function deleteClient() {
+    setDeleting(true);
+    await fetch(`/api/kt/admin/clients/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setDeleting(false);
+    router.push("/kt-admin/clients");
+  }
+
   async function updateTransfer(transfer_id: string, transfer_status: string) {
     await fetch(`/api/kt/admin/clients/${id}`, { method: "PATCH", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ transfer_id, transfer_status }) });
     load();
@@ -177,6 +190,10 @@ export default function ClientDetailPage() {
           {isSuspended && <span style={{ display: "inline-flex", marginTop: 6, background: "rgba(248,113,113,0.15)", color: "#F87171", fontSize: "0.72rem", fontWeight: 700, padding: "3px 10px", borderRadius: 20 }}>⚠ Compte désactivé</span>}
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+          <button onClick={() => setDeleteConfirm(true)}
+            style={{ height: 38, padding: "0 14px", background: "rgba(248,113,113,0.08)", color: "#F87171", border: "1px solid rgba(248,113,113,0.25)", borderRadius: 8, fontSize: "0.82rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+            <Trash2 size={14} /> Supprimer
+          </button>
           <button onClick={toggleAccount} disabled={saving}
             style={{ height: 38, padding: "0 14px", background: isSuspended ? "rgba(74,222,128,0.15)" : "rgba(248,113,113,0.15)", color: isSuspended ? "#4ADE80" : "#F87171", border: `1px solid ${isSuspended ? "rgba(74,222,128,0.3)" : "rgba(248,113,113,0.3)"}`, borderRadius: 8, fontSize: "0.82rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
             {isSuspended ? <><Power size={14} /> Réactiver</> : <><PowerOff size={14} /> Désactiver</>}
@@ -351,6 +368,36 @@ export default function ClientDetailPage() {
         <Field label="KYC" value={profile.kyc_status} /><Field label="Email vérifié" value={profile.email_verified} />
         <Field label="Tél. vérifié" value={profile.phone_verified} /><Field label="Crédits en cours" value={profile.a_credits_en_cours} />
       </Section>
+
+      {/* Delete confirmation modal */}
+      {deleteConfirm && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 24 }}>
+          <div style={{ background: "#1A1D27", borderRadius: 16, border: "1px solid rgba(248,113,113,0.3)", padding: 28, maxWidth: 420, width: "100%" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(248,113,113,0.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Trash2 size={18} color="#F87171" />
+              </div>
+              <div>
+                <p style={{ color: "white", fontWeight: 700, fontSize: "0.95rem", margin: 0 }}>Supprimer ce client ?</p>
+                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.78rem", margin: "3px 0 0" }}>{String(profile.prenom ?? "")} {String(profile.nom ?? "")} — {String(profile.email ?? "")}</p>
+              </div>
+            </div>
+            <p style={{ color: "rgba(255,255,255,0.55)", fontSize: "0.82rem", lineHeight: 1.6, marginBottom: 20 }}>
+              Cette action est <strong style={{ color: "#F87171" }}>irréversible</strong>. Toutes les données seront supprimées : profil, comptes, transactions, virements, cartes et sessions.
+            </p>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={() => setDeleteConfirm(false)} disabled={deleting}
+                style={{ flex: 1, height: 42, background: "#252836", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "rgba(255,255,255,0.6)", fontWeight: 600, fontSize: "0.85rem", cursor: "pointer" }}>
+                Annuler
+              </button>
+              <button onClick={deleteClient} disabled={deleting}
+                style={{ flex: 1, height: 42, background: "#991B1B", border: "none", borderRadius: 10, color: "white", fontWeight: 700, fontSize: "0.85rem", cursor: deleting ? "not-allowed" : "pointer", opacity: deleting ? 0.7 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                {deleting ? "Suppression…" : <><Trash2 size={14} /> Supprimer définitivement</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {accounts.map((acc) => (
         <div key={acc.id} style={{ background: "#1A1D27", borderRadius: 14, border: "1px solid rgba(255,255,255,0.06)", marginBottom: 16 }}>
