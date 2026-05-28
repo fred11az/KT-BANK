@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { data, error } = await supabase
-    .from("otp_tokens")
+    .from("kt_otp_tokens")
     .select("*")
     .eq("email", email)
     .eq("token", code)
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Mark OTP as used
-  await supabase.from("otp_tokens").update({ used: true }).eq("id", data.id);
+  await supabase.from("kt_otp_tokens").update({ used: true }).eq("id", data.id);
 
   // Upsert profile with email_verified = true
   await supabase.from("kt_profiles").upsert(

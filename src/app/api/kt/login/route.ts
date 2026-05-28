@@ -28,13 +28,13 @@ export async function POST(req: NextRequest) {
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
   await supabase
-    .from("otp_tokens")
+    .from("kt_otp_tokens")
     .update({ used: true })
     .eq("email", email)
     .eq("type", "kt_login")
     .eq("used", false);
 
-  await supabase.from("otp_tokens").insert({
+  await supabase.from("kt_otp_tokens").insert({
     email,
     token: code,
     type: "kt_login",

@@ -225,6 +225,42 @@ export function bankMessageEmail(opts: { prenom: string; messagePreview: string;
   };
 }
 
+/* ─── Admin: new client notification ─── */
+export function adminNewClientEmail(client: {
+  prenom: string; nom: string; email: string; telephone: string;
+  pays_residence: string; nationalite: string; situation_professionnelle: string;
+  revenu_mensuel: string; iban: string;
+}) {
+  const rows = [
+    ["Prénom / Nom", `${client.prenom} ${client.nom}`],
+    ["E-mail", client.email],
+    ["Téléphone", client.telephone],
+    ["Pays de résidence", client.pays_residence],
+    ["Nationalité", client.nationalite],
+    ["Situation professionnelle", client.situation_professionnelle],
+    ["Revenu mensuel", client.revenu_mensuel],
+    ["IBAN attribué", client.iban],
+  ];
+  const tableRows = rows.map(([k, v]) => `
+    <tr>
+      <td style="padding:8px 12px;font-size:12px;color:#666666;border-bottom:1px solid #eeeeee;white-space:nowrap;">${k}</td>
+      <td style="padding:8px 12px;font-size:13px;color:#111111;border-bottom:1px solid #eeeeee;font-weight:600;">${v || "—"}</td>
+    </tr>`).join("");
+  return {
+    subject: `Nouveau client inscrit : ${client.prenom} ${client.nom}`,
+    html: base(`
+<h1 style="margin:0 0 6px;font-size:20px;font-weight:700;color:#111111;">Nouveau client inscrit</h1>
+<p style="margin:0 0 20px;font-size:13px;color:#666666;">Un nouveau client vient de finaliser son inscription sur KT Bank.</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eeeeee;border-radius:6px;overflow:hidden;margin:0 0 20px;">
+  ${tableRows}
+</table>
+<div style="text-align:center;">
+  <a href="${DASHBOARD_URL.replace('/client','/kt-admin')}/clients" style="display:inline-block;background:#005F2D;color:#ffffff;font-weight:700;font-size:13px;padding:12px 24px;border-radius:6px;text-decoration:none;">Voir le dossier client</a>
+</div>
+`, "de"),
+  };
+}
+
 /* ─── Security alert ─── */
 export function securityAlertEmail(prenom: string, reason: string, lang: "de" | "fr" = "de") {
   const s = lang === "fr" ? {

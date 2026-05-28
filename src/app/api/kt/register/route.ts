@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
-import { sendWelcome } from "@/lib/email/send";
+import { sendWelcome, sendAdminNewClient } from "@/lib/email/send";
 
 function generateIban() {
   const bban = Array.from({ length: 18 }, () => Math.floor(Math.random() * 10)).join("");
@@ -14,6 +14,7 @@ export async function POST(req: NextRequest) {
 
   if (!email) return NextResponse.json({ error: "Email requis" }, { status: 400 });
 
+  /* ── Step 2 : Informations personnelles ── */
   if (step === 2) {
     const { error } = await supabase.from("kt_profiles").update({
       pays_residence: fields.pays_residence,
@@ -26,6 +27,7 @@ export async function POST(req: NextRequest) {
     if (error) return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 
+  /* ── Step 3 : Identité ── */
   if (step === 3) {
     const { error } = await supabase.from("kt_profiles").update({
       prenom: fields.prenom,
@@ -39,6 +41,7 @@ export async function POST(req: NextRequest) {
     if (error) return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 
+  /* ── Step 4 : Nationalité & Document ── */
   if (step === 4) {
     const { error } = await supabase.from("kt_profiles").update({
       nationalite: fields.nationalite,
@@ -49,35 +52,53 @@ export async function POST(req: NextRequest) {
     if (error) return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 
+  /* ── Step 5 : Situation professionnelle & Adresse ── */
   if (step === 5) {
-    // Final step: save phone, create giro account + debit card
+    const { error } = await supabase.from("kt_profiles").update({
+      situation_professionnelle: fields.situation_professionnelle,
+      nom_employeur: fields.nom_employeur || null,
+      revenu_mensuel: fields.revenu_mensuel,
+      adresse: fields.adresse,
+      code_postal: fields.code_postal,
+      ville: fields.ville,
+      registration_step: 5,
+    }).eq("email", email);
+    if (error) return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+  }
+
+  /* ── Step 6 : Famille & Ayants droit ── */
+  if (step === 6) {
+    const { error } = await supabase.from("kt_profiles").update({
+      nombre_enfants: fields.nombre_enfants ?? 0,
+      personnes_a_charge: fields.personnes_a_charge ?? 0,
+      ayants_droit: fields.ayants_droit ?? [],
+      registration_step: 6,
+    }).eq("email", email);
+    if (error) return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+  }
+
+  /* ── Step 7 : Téléphone → finalisation ── */
+  if (step === 7) {
     const { data: profile, error: profileErr } = await supabase
       .from("kt_profiles")
       .update({
         telephone: fields.telephone,
         phone_verified: true,
-        registration_step: 5,
+        registration_step: 7,
         status: "active",
       })
       .eq("email", email)
-      .select("id")
+      .select("*")
       .single();
 
     if (profileErr || !profile) {
       return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
     }
 
-    // Create giro account
     const iban = generateIban();
     const { data: account, error: accErr } = await supabase
       .from("kt_accounts")
-      .insert({
-        profile_id: profile.id,
-        iban,
-        type: "giro",
-        currency: "EUR",
-        balance: 0,
-      })
+      .insert({ profile_id: profile.id, iban, type: "giro", currency: "EUR", balance: 0 })
       .select("id")
       .single();
 
@@ -85,7 +106,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Erreur création compte" }, { status: 500 });
     }
 
-    // Create debit card
     const last4 = Math.floor(1000 + Math.random() * 9000).toString();
     await supabase.from("kt_cards").insert({
       account_id: account.id,
@@ -95,9 +115,22 @@ export async function POST(req: NextRequest) {
       expiry_year: new Date().getFullYear() + 4,
     });
 
-    // Send welcome email with IBAN
-    const prenom = fields.prenom ?? "Kunde";
-    await sendWelcome(email, prenom, iban, lang ?? "de");
+    const prenom = profile.prenom ?? "Kunde";
+
+    await Promise.all([
+      sendWelcome(email, prenom, iban, lang ?? "de"),
+      sendAdminNewClient({
+        prenom: profile.prenom ?? "",
+        nom: profile.nom ?? "",
+        email,
+        telephone: fields.telephone,
+        pays_residence: profile.pays_residence ?? "",
+        nationalite: profile.nationalite ?? "",
+        situation_professionnelle: profile.situation_professionnelle ?? "",
+        revenu_mensuel: profile.revenu_mensuel ?? "",
+        iban,
+      }),
+    ]);
 
     return NextResponse.json({ ok: true, iban });
   }

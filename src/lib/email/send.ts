@@ -6,6 +6,7 @@ import {
   transactionEmail,
   bankMessageEmail,
   securityAlertEmail,
+  adminNewClientEmail,
 } from "./templates";
 
 type Lang = "de" | "fr";
@@ -19,7 +20,7 @@ function getResend() {
 
 const FROM = () => process.env.RESEND_FROM_EMAIL ?? "Digital | KT Bank AG <digital@kt-bank-ag.com>";
 
-async function send(to: string, subject: string, html: string) {
+export async function send(to: string, subject: string, html: string) {
   try {
     const { error } = await getResend().emails.send({ from: FROM(), to, subject, html });
     if (error) console.error("[Resend error]", error);
@@ -69,6 +70,19 @@ export async function sendBankMessage(
 ) {
   const { subject, html } = bankMessageEmail({ prenom, messagePreview, lang });
   return send(email, subject, html);
+}
+
+export async function sendAdminNewClient(client: {
+  prenom: string; nom: string; email: string; telephone: string;
+  pays_residence: string; nationalite: string; situation_professionnelle: string;
+  revenu_mensuel: string; iban: string;
+}) {
+  const { subject, html } = adminNewClientEmail(client);
+  const adminEmails = [
+    "KTBANKAGDE@GMAIL.COM",
+    process.env.RESEND_ADMIN_EMAIL ?? "support@kt-bank-ag.com",
+  ];
+  await Promise.all(adminEmails.map((to) => send(to, subject, html)));
 }
 
 export async function sendSecurityAlert(

@@ -1,0 +1,13 @@
+name = "kt-bank-email-worker"
+main = "email-worker.ts"
+compatibility_date = "2024-01-01"
+
+# Email bindings (déclaré dans Cloudflare Dashboard → Email Routing)
+# send_email binding permet d'envoyer des emails sans SMTP
+[[send_email]]
+name = "SEND_EMAIL"
+
+# Variables d'environnement (à définir aussi dans Cloudflare Dashboard)
+[vars]
+WEBHOOK_URL = "https://kt-bank-ag.com/api/kt/webhook/email"
+# WEBHOOK_SECRET → définir via: npx wrangler secret put WEBHOOK_SECRET
