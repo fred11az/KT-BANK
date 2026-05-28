@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { getSupabase } from "@/lib/supabase";
 import { sendWelcome } from "@/lib/email/send";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 function generateIban() {
   const bban = Array.from({ length: 18 }, () => Math.floor(Math.random() * 10)).join("");
@@ -13,6 +8,7 @@ function generateIban() {
 }
 
 export async function POST(req: NextRequest) {
+  const supabase = getSupabase();
   const body = await req.json();
   const { step, email, lang, ...fields } = body;
 

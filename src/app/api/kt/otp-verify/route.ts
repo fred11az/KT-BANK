@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { getSupabase } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
+  const supabase = getSupabase();
   const { email, code } = await req.json();
   if (!email || !code) {
     return NextResponse.json({ error: "Paramètres manquants" }, { status: 400 });
