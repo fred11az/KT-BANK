@@ -8,15 +8,26 @@ import {
   securityAlertEmail,
 } from "./templates";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM = process.env.RESEND_FROM_EMAIL ?? "KT Bank <noreply@kt-bank.de>";
-
 type Lang = "de" | "fr";
 
+// Lazy init — Resend is only instantiated at call time, not at build time
+function getResend() {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) throw new Error("RESEND_API_KEY is not set");
+  return new Resend(key);
+}
+
+const FROM = () => process.env.RESEND_FROM_EMAIL ?? "KT Bank <noreply@kt-bank.de>";
+
 async function send(to: string, subject: string, html: string) {
-  const { error } = await resend.emails.send({ from: FROM, to, subject, html });
-  if (error) console.error("[Resend error]", error);
-  return !error;
+  try {
+    const { error } = await getResend().emails.send({ from: FROM(), to, subject, html });
+    if (error) console.error("[Resend error]", error);
+    return !error;
+  } catch (err) {
+    console.error("[Resend send failed]", err);
+    return false;
+  }
 }
 
 export async function sendOtpRegistration(email: string, code: string, lang: Lang = "de") {
