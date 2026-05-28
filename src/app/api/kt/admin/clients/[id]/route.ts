@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
+import { sendTransactionNotification, sendTransferStatus } from "@/lib/email/send";
 
 function auth(req: NextRequest) {
   const key = process.env.KT_ADMIN_KEY;
@@ -36,7 +37,14 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const supabase = getSupabase();
   const body = await req.json();
 
-  // Profile fields
+  // Fetch profile for email/prenom/lang
+  const { data: profile } = await supabase
+    .from("kt_profiles")
+    .select("email, prenom, lang, status")
+    .eq("id", params.id)
+    .single();
+
+  // Profile fields (status, kyc_status)
   const profileFields = ["status", "kyc_status"];
   const profileUpdate = Object.fromEntries(Object.entries(body).filter(([k]) => profileFields.includes(k)));
   if (Object.keys(profileUpdate).length > 0) {
@@ -44,7 +52,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (error) return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 
-  // Credit balance to main account
+  // Credit / debit balance
   if (body.credit_amount !== undefined) {
     const { data: account } = await supabase
       .from("kt_accounts")
@@ -52,27 +60,103 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       .eq("profile_id", params.id)
       .single();
     if (account) {
-      const newBalance = Number(account.balance) + Number(body.credit_amount);
+      const delta = Number(body.credit_amount);
+      const newBalance = Number(account.balance) + delta;
       await supabase.from("kt_accounts").update({ balance: newBalance }).eq("id", account.id);
-      // Log as transaction
-      if (Number(body.credit_amount) !== 0) {
+
+      if (delta !== 0) {
+        const txType = delta > 0 ? "credit" : "debit";
+        const label = body.credit_label || (delta > 0 ? "Crédit administratif" : "Débit administratif");
         await supabase.from("kt_transactions").insert({
           account_id: account.id,
-          type: Number(body.credit_amount) > 0 ? "credit" : "debit",
-          amount: Math.abs(Number(body.credit_amount)),
+          type: txType,
+          amount: Math.abs(delta),
           currency: "EUR",
-          description: body.credit_label || (Number(body.credit_amount) > 0 ? "Crédit administratif" : "Débit administratif"),
+          description: label,
           status: "completed",
         });
+
+        // Email notification to client
+        if (profile?.email) {
+          await sendTransactionNotification(profile.email, {
+            prenom: profile.prenom ?? "Client",
+            type: txType,
+            amount: Math.abs(delta),
+            currency: "EUR",
+            description: label,
+            balance: newBalance,
+            lang: profile.lang ?? "de",
+          });
+        }
       }
     }
   }
 
   // Update transfer request status
   if (body.transfer_id && body.transfer_status) {
-    await supabase.from("kt_transfer_requests")
+    const { data: transfer } = await supabase
+      .from("kt_transfer_requests")
+      .select("*")
+      .eq("id", body.transfer_id)
+      .single();
+
+    await supabase
+      .from("kt_transfer_requests")
       .update({ status: body.transfer_status })
       .eq("id", body.transfer_id);
+
+    if (transfer && profile?.email) {
+      if (body.transfer_status === "completed") {
+        // Deduct balance from account
+        const { data: account } = await supabase
+          .from("kt_accounts")
+          .select("id, balance")
+          .eq("id", transfer.account_id)
+          .single();
+
+        if (account) {
+          const newBalance = Math.max(0, Number(account.balance) - Number(transfer.amount));
+          await supabase.from("kt_accounts").update({ balance: newBalance }).eq("id", account.id);
+          await supabase.from("kt_transactions").insert({
+            account_id: account.id,
+            type: "debit",
+            amount: Number(transfer.amount),
+            currency: "EUR",
+            description: `Virement vers ${transfer.to_name}${transfer.reference ? ` – ${transfer.reference}` : ""}`,
+            status: "completed",
+          });
+
+          await sendTransferStatus(profile.email, {
+            prenom: profile.prenom ?? "Client",
+            status: "completed",
+            amount: Number(transfer.amount),
+            currency: "EUR",
+            to_name: transfer.to_name,
+            reference: transfer.reference ?? undefined,
+            balance: newBalance,
+            lang: profile.lang ?? "de",
+          });
+        }
+      } else if (body.transfer_status === "rejected") {
+        // Get current balance for email
+        const { data: account } = await supabase
+          .from("kt_accounts")
+          .select("balance")
+          .eq("id", transfer.account_id)
+          .single();
+
+        await sendTransferStatus(profile.email, {
+          prenom: profile.prenom ?? "Client",
+          status: "rejected",
+          amount: Number(transfer.amount),
+          currency: "EUR",
+          to_name: transfer.to_name,
+          reference: transfer.reference ?? undefined,
+          balance: account ? Number(account.balance) : undefined,
+          lang: profile.lang ?? "de",
+        });
+      }
+    }
   }
 
   return NextResponse.json({ ok: true });

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
+import { sendTransferStatus } from "@/lib/email/send";
 
 async function getSessionEmail(req: NextRequest): Promise<string | null> {
   const auth = req.headers.get("Authorization");
@@ -96,6 +97,31 @@ export async function PATCH(req: NextRequest) {
     .update({ fee_paid: true, status: "processing" })
     .eq("id", transfer_id)
     .eq("profile_id", profile.id);
+
+  // Send "processing" email to client
+  const { data: transfer } = await supabase
+    .from("kt_transfer_requests")
+    .select("amount, to_name, reference")
+    .eq("id", transfer_id)
+    .single();
+
+  const { data: profileData } = await supabase
+    .from("kt_profiles")
+    .select("email, prenom, lang")
+    .eq("id", profile.id)
+    .single();
+
+  if (transfer && profileData?.email) {
+    await sendTransferStatus(profileData.email, {
+      prenom: profileData.prenom ?? "Client",
+      status: "processing",
+      amount: Number(transfer.amount),
+      currency: "EUR",
+      to_name: transfer.to_name,
+      reference: transfer.reference ?? undefined,
+      lang: profileData.lang ?? "de",
+    });
+  }
 
   return NextResponse.json({ ok: true });
 }

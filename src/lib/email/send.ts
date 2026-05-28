@@ -4,6 +4,7 @@ import {
   otpLoginEmail,
   welcomeEmail,
   transactionEmail,
+  transferStatusEmail,
   bankMessageEmail,
   securityAlertEmail,
   adminNewClientEmail,
@@ -59,6 +60,23 @@ export async function sendTransactionNotification(
   }
 ) {
   const { subject, html } = transactionEmail(opts);
+  return send(email, subject, html);
+}
+
+export async function sendTransferStatus(
+  email: string,
+  opts: {
+    prenom: string;
+    status: "completed" | "rejected" | "processing";
+    amount: number;
+    currency: string;
+    to_name: string;
+    reference?: string;
+    balance?: number;
+    lang?: Lang;
+  }
+) {
+  const { subject, html } = transferStatusEmail(opts);
   return send(email, subject, html);
 }
 

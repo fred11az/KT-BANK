@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
       code_promo: fields.code_promo || null,
       is_fatca: fields.is_fatca ?? false,
       registration_step: 2,
+      ...(lang ? { lang } : {}),
     }).eq("email", email);
     if (error) return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }

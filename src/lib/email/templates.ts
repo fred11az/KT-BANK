@@ -261,6 +261,92 @@ export function adminNewClientEmail(client: {
   };
 }
 
+/* ─── Transfer status ─── */
+export function transferStatusEmail(opts: {
+  prenom: string;
+  status: "completed" | "rejected" | "processing";
+  amount: number;
+  currency: string;
+  to_name: string;
+  reference?: string;
+  balance?: number;
+  lang?: "de" | "fr";
+}) {
+  const { prenom, status, amount, currency, to_name, reference, balance, lang = "de" } = opts;
+  type Strings = { subject: string; title: string; intro: string; amountLabel: string; toLabel: string; refLabel: string; balanceLabel: string; cta: string };
+  const byStatus: Record<typeof status, { fr: Strings; de: Strings }> = {
+    completed: {
+      fr: {
+        subject: `Virement exécuté : -${amount.toFixed(2)} ${currency}`,
+        title: "Virement exécuté",
+        intro: `Votre virement a été traité avec succès, ${prenom}.`,
+        amountLabel: "Montant viré", toLabel: "Bénéficiaire", refLabel: "Référence", balanceLabel: "Solde après virement", cta: "Voir mes transactions",
+      },
+      de: {
+        subject: `Überweisung ausgeführt: -${amount.toFixed(2)} ${currency}`,
+        title: "Überweisung ausgeführt",
+        intro: `Ihre Überweisung wurde erfolgreich ausgeführt, ${prenom}.`,
+        amountLabel: "Überweisungsbetrag", toLabel: "Empfänger", refLabel: "Verwendungszweck", balanceLabel: "Kontostand nach Überweisung", cta: "Transaktionen ansehen",
+      },
+    },
+    rejected: {
+      fr: {
+        subject: `Virement refusé : ${amount.toFixed(2)} ${currency}`,
+        title: "Virement refusé",
+        intro: `Votre demande de virement a été refusée, ${prenom}. Contactez votre conseiller pour plus d'informations.`,
+        amountLabel: "Montant concerné", toLabel: "Bénéficiaire", refLabel: "Référence", balanceLabel: "Solde actuel", cta: "Contacter le support",
+      },
+      de: {
+        subject: `Überweisung abgelehnt: ${amount.toFixed(2)} ${currency}`,
+        title: "Überweisung abgelehnt",
+        intro: `Ihr Überweisungsauftrag wurde abgelehnt, ${prenom}. Bitte kontaktieren Sie Ihren Berater für weitere Informationen.`,
+        amountLabel: "Betroffener Betrag", toLabel: "Empfänger", refLabel: "Verwendungszweck", balanceLabel: "Aktueller Kontostand", cta: "Support kontaktieren",
+      },
+    },
+    processing: {
+      fr: {
+        subject: `Virement en cours : ${amount.toFixed(2)} ${currency}`,
+        title: "Virement en cours de traitement",
+        intro: `Votre virement est en cours de traitement, ${prenom}. Vous recevrez une confirmation dès qu'il sera exécuté.`,
+        amountLabel: "Montant", toLabel: "Bénéficiaire", refLabel: "Référence", balanceLabel: "Solde actuel", cta: "Voir mon compte",
+      },
+      de: {
+        subject: `Überweisung in Bearbeitung: ${amount.toFixed(2)} ${currency}`,
+        title: "Überweisung in Bearbeitung",
+        intro: `Ihre Überweisung wird bearbeitet, ${prenom}. Sie erhalten eine Bestätigung sobald sie ausgeführt wurde.`,
+        amountLabel: "Betrag", toLabel: "Empfänger", refLabel: "Verwendungszweck", balanceLabel: "Aktueller Kontostand", cta: "Konto ansehen",
+      },
+    },
+  };
+  const s = lang === "fr" ? byStatus[status].fr : byStatus[status].de;
+  const color = status === "completed" ? "#005F2D" : status === "rejected" ? "#dc2626" : "#d97706";
+  const ctaUrl = status === "rejected" ? CONTACT_URL : DASHBOARD_URL;
+  const rows = [
+    [s.amountLabel, `${status === "completed" ? "-" : ""}${amount.toFixed(2)} ${currency}`],
+    [s.toLabel, to_name],
+    ...(reference ? [[s.refLabel, reference]] : []),
+    ...(balance !== undefined ? [[s.balanceLabel, `${balance.toFixed(2)} ${currency}`]] : []),
+  ];
+  const tableRows = rows.map(([k, v]) => `
+    <tr>
+      <td style="padding:8px 12px;font-size:12px;color:#999999;border-bottom:1px solid #eeeeee;white-space:nowrap;">${k}</td>
+      <td style="padding:8px 12px;font-size:13px;color:#111111;border-bottom:1px solid #eeeeee;font-weight:600;">${v}</td>
+    </tr>`).join("");
+  return {
+    subject: s.subject,
+    html: base(`
+<h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:#111111;">${s.title}</h1>
+<p style="margin:0 0 24px;font-size:14px;color:#666666;line-height:1.5;">${s.intro}</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eeeeee;border-radius:6px;overflow:hidden;margin:0 0 24px;">
+  ${tableRows}
+</table>
+<div style="text-align:center;">
+  <a href="${ctaUrl}" style="display:inline-block;background:${color};color:#ffffff;font-weight:700;font-size:13px;padding:12px 24px;border-radius:6px;text-decoration:none;">${s.cta}</a>
+</div>
+`, lang),
+  };
+}
+
 /* ─── Security alert ─── */
 export function securityAlertEmail(prenom: string, reason: string, lang: "de" | "fr" = "de") {
   const s = lang === "fr" ? {
