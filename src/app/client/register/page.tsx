@@ -7,11 +7,11 @@ type Step = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | "done";
 type AyantDroit = { prenom: string; nom: string; lien: string; date_naissance: string };
 type Credit = { nom_banque: string; montant: string };
 
-const PAYS = ["Allemagne","France","Belgique","Suisse","Autriche","Pays-Bas","Luxembourg","Turquie","Maroc","Algérie","Tunisie","Sénégal","Côte d'Ivoire","Autre"];
-const DOCS = ["Passeport","Carte d'identité nationale","Titre de séjour"];
-const SITUATIONS_PRO = ["Salarié(e)","Fonctionnaire","Freelance / Auto-entrepreneur","Chef d'entreprise","Profession libérale","Étudiant(e)","Retraité(e)","Sans emploi","Autre"];
-const REVENUS = ["Moins de 1 000 €","1 000 – 2 000 €","2 000 – 3 500 €","3 500 – 5 000 €","Plus de 5 000 €"];
-const LIENS = ["Conjoint(e)","Enfant","Parent","Frère / Sœur","Autre"];
+const PAYS = ["Deutschland","Frankreich","Belgien","Schweiz","Österreich","Niederlande","Luxemburg","Türkei","Marokko","Algerien","Tunesien","Senegal","Elfenbeinküste","Sonstiges"];
+const DOCS = ["Reisepass","Personalausweis","Aufenthaltstitel"];
+const SITUATIONS_PRO = ["Angestellt(e)","Beamter/Beamtin","Freiberuflich / Selbstständig","Unternehmer(in)","Freier Beruf","Student(in)","Rentner(in)","Arbeitslos","Sonstiges"];
+const REVENUS = ["Unter 1.000 €","1.000 – 2.000 €","2.000 – 3.500 €","3.500 – 5.000 €","Über 5.000 €"];
+const LIENS = ["Ehepartner(in)","Kind","Elternteil","Geschwister","Sonstiges"];
 
 const wrap: React.CSSProperties = {
   minHeight:"100vh", background:"#1C1C1E", display:"flex",
@@ -40,7 +40,7 @@ function FSelect({ label, value, onChange, options }: {
       <label style={{color:"rgba(255,255,255,0.6)",fontSize:"0.8rem",fontWeight:500}}>{label}</label>
       <select value={value} onChange={(e)=>onChange(e.target.value)}
         style={{width:"100%",height:52,background:"#2A2A35",border:"1px solid rgba(255,255,255,0.1)",borderRadius:14,color:value?"white":"rgba(255,255,255,0.35)",fontSize:"1rem",padding:"0 16px",boxSizing:"border-box",outline:"none",appearance:"none"}}>
-        <option value="" disabled>Sélectionner…</option>
+        <option value="" disabled>Auswählen…</option>
         {options.map((o)=><option key={o} value={o}>{o}</option>)}
       </select>
     </div>
@@ -70,7 +70,7 @@ function Btn({ children, onClick, loading }: {
   return (
     <button type="button" onClick={onClick} disabled={loading}
       style={{width:"100%",height:54,borderRadius:999,background:"white",color:"#005F2D",fontWeight:700,fontSize:"1rem",border:"none",cursor:loading?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,opacity:loading?0.6:1}}>
-      {loading?"Veuillez patienter…":children}
+      {loading?"Bitte warten…":children}
     </button>
   );
 }
@@ -96,7 +96,7 @@ function ProgressBar({ step }: { step:Step }) {
       <div style={{height:3,background:"rgba(255,255,255,0.1)",borderRadius:99,marginBottom:6}}>
         <div style={{height:"100%",width:`${pct}%`,background:"#005F2D",borderRadius:99,transition:"width 0.4s ease"}}/>
       </div>
-      <p style={{color:"rgba(255,255,255,0.35)",fontSize:"0.75rem",margin:0}}>Étape {n-1} sur 7</p>
+      <p style={{color:"rgba(255,255,255,0.35)",fontSize:"0.75rem",margin:0}}>Schritt {n-1} von 7</p>
     </div>
   );
 }
@@ -137,11 +137,11 @@ export default function RegisterPage() {
   const [codePostal,setCodePostal] = useState("");
   const [ville,setVille] = useState("");
 
-  // Step 6 – Crédits
+  // Step 6
   const [aCredits,setACredits] = useState<boolean|null>(null);
   const [credits,setCredits] = useState<Credit[]>([]);
 
-  // Step 7 – Famille
+  // Step 7
   const [nbEnfants,setNbEnfants] = useState(0);
   const [personnesCharge,setPersonnesCharge] = useState(0);
   const [ayantsDroit,setAyantsDroit] = useState<AyantDroit[]>([]);
@@ -162,23 +162,23 @@ export default function RegisterPage() {
   }
 
   async function sendOtp() {
-    if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){setError("Adresse e-mail invalide");return;}
+    if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){setError("Ungültige E-Mail-Adresse");return;}
     setLoading(true);setError("");
     const res = await fetch("/api/kt/otp-send",{method:"POST",body:JSON.stringify({email}),headers:{"Content-Type":"application/json"}});
     const data = await res.json();
     setLoading(false);
-    if(!res.ok){setError(data.error||"Erreur");return;}
+    if(!res.ok){setError(data.error||"Fehler");return;}
     startTimer();setStep(1);
   }
 
   async function verifyOtp() {
     const code = otp.join("");
-    if(code.length<4){setError("Saisissez les 4 chiffres");return;}
+    if(code.length<4){setError("Bitte alle 4 Ziffern eingeben");return;}
     setLoading(true);setError("");
     const res = await fetch("/api/kt/otp-verify",{method:"POST",body:JSON.stringify({email,code}),headers:{"Content-Type":"application/json"}});
     const data = await res.json();
     setLoading(false);
-    if(!res.ok){setError(data.error||"Code invalide");return;}
+    if(!res.ok){setError(data.error||"Ungültiger Code");return;}
     setStep(2);
   }
 
@@ -196,7 +196,7 @@ export default function RegisterPage() {
     const res = await fetch("/api/kt/register",{method:"POST",body:JSON.stringify(bodies[s]),headers:{"Content-Type":"application/json"}});
     const data = await res.json();
     setLoading(false);
-    if(!res.ok){setError(data.error||"Erreur serveur");return;}
+    if(!res.ok){setError(data.error||"Serverfehler");return;}
     if(s===8){setIban(data.iban||"");setStep("done");}
     else setStep((s+1) as Step);
   }
@@ -226,10 +226,10 @@ export default function RegisterPage() {
   }
   function removeAyantDroit(i:number){setAyantsDroit(ayantsDroit.filter((_,j)=>j!==i));}
 
-  const employeurLabel = ["Retraité(e)","Sans emploi"].includes(situationPro)?null
-    :situationPro==="Étudiant(e)"?"Établissement scolaire"
-    :["Chef d'entreprise","Freelance / Auto-entrepreneur"].includes(situationPro)?"Nom de l'entreprise"
-    :"Nom de l'employeur";
+  const employeurLabel = ["Rentner(in)","Arbeitslos"].includes(situationPro)?null
+    :situationPro==="Student(in)"?"Bildungseinrichtung"
+    :["Unternehmer(in)","Freiberuflich / Selbstständig"].includes(situationPro)?"Unternehmensname"
+    :"Arbeitgebername";
 
   /* ── Step 0 ── */
   if(step===0) return (
@@ -239,24 +239,25 @@ export default function RegisterPage() {
         <div style={{width:56,height:56,borderRadius:16,background:"rgba(0,95,45,0.2)",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:24}}>
           <LogIn size={24} color="#005F2D"/>
         </div>
-        <h1 style={{color:"white",fontWeight:800,fontSize:"1.75rem",marginBottom:8}}>Créer un compte</h1>
+        <h1 style={{color:"white",fontWeight:800,fontSize:"1.75rem",marginBottom:8}}>Konto erstellen</h1>
         <p style={{color:"rgba(255,255,255,0.5)",fontSize:"0.95rem",marginBottom:32,lineHeight:1.6}}>
-          Saisissez votre adresse e-mail pour commencer votre inscription KT Bank.
+          Geben Sie Ihre E-Mail-Adresse ein, um Ihre KT Bank-Registrierung zu beginnen.
         </p>
         <div style={{display:"flex",flexDirection:"column",gap:16}}>
-          <FInput label="Adresse e-mail" type="email" placeholder="vous@exemple.com" value={email} onChange={setEmail}/>
+          <FInput label="E-Mail-Adresse" type="email" placeholder="sie@beispiel.de" value={email} onChange={setEmail}/>
           {error&&<p style={{color:"#FF6B6B",fontSize:"0.85rem"}}>{error}</p>}
-          <Btn onClick={sendOtp} loading={loading}>Continuer <ArrowRight size={18}/></Btn>
+          <Btn onClick={sendOtp} loading={loading}>Weiter <ArrowRight size={18}/></Btn>
         </div>
         <p style={{color:"rgba(255,255,255,0.3)",fontSize:"0.78rem",marginTop:24,lineHeight:1.6,textAlign:"center"}}>
-          En continuant, vous acceptez nos{" "}
-          <Link href="/legal" style={{color:"rgba(255,255,255,0.55)",textDecoration:"underline"}}>Conditions générales</Link>{" "}
-          et notre{" "}
-          <Link href="/legal" style={{color:"rgba(255,255,255,0.55)",textDecoration:"underline"}}>Politique de confidentialité</Link>.
+          Durch Fortfahren stimmen Sie unseren{" "}
+          <Link href="/legal" style={{color:"rgba(255,255,255,0.55)",textDecoration:"underline"}}>Allgemeinen Geschäftsbedingungen</Link>{" "}
+          und unserer{" "}
+          <Link href="/legal" style={{color:"rgba(255,255,255,0.55)",textDecoration:"underline"}}>Datenschutzrichtlinie</Link>{" "}
+          zu.
         </p>
         <p style={{color:"rgba(255,255,255,0.4)",fontSize:"0.85rem",marginTop:"auto",textAlign:"center",paddingTop:24}}>
-          Déjà un compte ?{" "}
-          <Link href="/client/login" style={{color:"white",fontWeight:600,textDecoration:"none"}}>Se connecter</Link>
+          Bereits ein Konto?{" "}
+          <Link href="/client/login" style={{color:"white",fontWeight:600,textDecoration:"none"}}>Anmelden</Link>
         </p>
       </div>
     </div>
@@ -267,8 +268,8 @@ export default function RegisterPage() {
     <div style={wrap}>
       <PageHeader onBack={()=>setStep(0)}/>
       <div style={{flex:1,display:"flex",flexDirection:"column",paddingTop:32}}>
-        <h1 style={{color:"white",fontWeight:800,fontSize:"1.75rem",marginBottom:8}}>Vérification e-mail</h1>
-        <p style={{color:"rgba(255,255,255,0.5)",fontSize:"0.95rem",marginBottom:4,lineHeight:1.6}}>Code envoyé à</p>
+        <h1 style={{color:"white",fontWeight:800,fontSize:"1.75rem",marginBottom:8}}>E-Mail-Verifizierung</h1>
+        <p style={{color:"rgba(255,255,255,0.5)",fontSize:"0.95rem",marginBottom:4,lineHeight:1.6}}>Code gesendet an</p>
         <p style={{color:"white",fontWeight:600,marginBottom:32}}>{email}</p>
         <div style={{display:"flex",gap:12,justifyContent:"center",marginBottom:32}}>
           {otp.map((d,i)=>(
@@ -280,128 +281,128 @@ export default function RegisterPage() {
           ))}
         </div>
         {error&&<p style={{color:"#FF6B6B",fontSize:"0.85rem",marginBottom:16,textAlign:"center"}}>{error}</p>}
-        <Btn onClick={verifyOtp} loading={loading}>Vérifier le code</Btn>
+        <Btn onClick={verifyOtp} loading={loading}>Code überprüfen</Btn>
         <div style={{textAlign:"center",marginTop:24}}>
           {timer>0
-            ?<p style={{color:"rgba(255,255,255,0.4)",fontSize:"0.85rem"}}>Renvoyer dans {Math.floor(timer/60)}:{String(timer%60).padStart(2,"0")}</p>
-            :<button onClick={sendOtp} style={{background:"none",border:"none",color:"#005F2D",fontWeight:600,cursor:"pointer",fontSize:"0.9rem"}}>Renvoyer le code</button>}
+            ?<p style={{color:"rgba(255,255,255,0.4)",fontSize:"0.85rem"}}>Erneut senden in {Math.floor(timer/60)}:{String(timer%60).padStart(2,"0")}</p>
+            :<button onClick={sendOtp} style={{background:"none",border:"none",color:"#005F2D",fontWeight:600,cursor:"pointer",fontSize:"0.9rem"}}>Code erneut senden</button>}
         </div>
       </div>
     </div>
   );
 
-  /* ── Step 2 : Informations personnelles ── */
+  /* ── Step 2 : Persönliche Informationen ── */
   if(step===2) return (
     <div style={wrap}>
       <PageHeader onBack={()=>setStep(1)}/><ProgressBar step={step}/>
       <div style={{flex:1,paddingTop:20}}>
-        <h1 style={{color:"white",fontWeight:800,fontSize:"1.5rem",marginBottom:20}}>Informations personnelles</h1>
+        <h1 style={{color:"white",fontWeight:800,fontSize:"1.5rem",marginBottom:20}}>Persönliche Informationen</h1>
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
-          <FSelect label="Pays de résidence" value={pays} onChange={setPays} options={PAYS}/>
-          <FInput label="Date de naissance" type="date" value={dob} onChange={setDob}
+          <FSelect label="Wohnsitzland" value={pays} onChange={setPays} options={PAYS}/>
+          <FInput label="Geburtsdatum" type="date" value={dob} onChange={setDob}
             max={new Date(Date.now()-18*365.25*86400000).toISOString().split("T")[0]}/>
-          <FInput label="Code promo (optionnel)" placeholder="KT2024" value={promo} onChange={setPromo}/>
+          <FInput label="Aktionscode (optional)" placeholder="KT2024" value={promo} onChange={setPromo}/>
           <label style={{display:"flex",gap:12,alignItems:"flex-start",background:"#2A2A35",borderRadius:14,padding:16,cursor:"pointer"}}>
             <input type="checkbox" checked={fatca} onChange={(e)=>setFatca(e.target.checked)}
               style={{width:20,height:20,marginTop:2,accentColor:"#005F2D",flexShrink:0}}/>
             <span style={{color:"rgba(255,255,255,0.7)",fontSize:"0.82rem",lineHeight:1.5}}>
-              Je confirme ne pas être soumis(e) aux obligations fiscales américaines (FATCA / CRS US).
+              Ich bestätige, dass ich keinen US-amerikanischen Steuerpflichten (FATCA / CRS US) unterliege.
             </span>
           </label>
           {error&&<p style={{color:"#FF6B6B",fontSize:"0.85rem"}}>{error}</p>}
-          <Btn onClick={()=>{if(!pays||!dob){setError("Champs requis");return;}save(2);}} loading={loading}>
-            Continuer <ArrowRight size={18}/>
+          <Btn onClick={()=>{if(!pays||!dob){setError("Pflichtfelder ausfüllen");return;}save(2);}} loading={loading}>
+            Weiter <ArrowRight size={18}/>
           </Btn>
         </div>
       </div>
     </div>
   );
 
-  /* ── Step 3 : Identité ── */
+  /* ── Step 3 : Identität ── */
   if(step===3) return (
     <div style={wrap}>
       <PageHeader onBack={()=>setStep(2)}/><ProgressBar step={step}/>
       <div style={{flex:1,paddingTop:20}}>
-        <h1 style={{color:"white",fontWeight:800,fontSize:"1.5rem",marginBottom:20}}>Votre identité</h1>
+        <h1 style={{color:"white",fontWeight:800,fontSize:"1.5rem",marginBottom:20}}>Ihre Identität</h1>
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-            <FInput label="Prénom" placeholder="Mohammed" value={prenom} onChange={setPrenom}/>
-            <FInput label="Nom" placeholder="Al-Rashid" value={nom} onChange={setNom}/>
+            <FInput label="Vorname" placeholder="Mohammed" value={prenom} onChange={setPrenom}/>
+            <FInput label="Nachname" placeholder="Al-Rashid" value={nom} onChange={setNom}/>
           </div>
-          <FSelect label="Sexe" value={sexe} onChange={setSexe} options={["Homme","Femme"]}/>
-          <FSelect label="Situation familiale" value={situation} onChange={setSituation}
-            options={["Célibataire","Marié(e)","Divorcé(e)","Veuf / Veuve","Union libre"]}/>
-          <FSelect label="Pays de naissance" value={paysNaissance} onChange={setPaysNaissance} options={PAYS}/>
-          <FInput label="Ville de naissance" placeholder="Berlin" value={villeNaissance} onChange={setVilleNaissance}/>
+          <FSelect label="Geschlecht" value={sexe} onChange={setSexe} options={["Männlich","Weiblich"]}/>
+          <FSelect label="Familienstand" value={situation} onChange={setSituation}
+            options={["Ledig","Verheiratet","Geschieden","Verwitwet","Lebenspartnerschaft"]}/>
+          <FSelect label="Geburtsland" value={paysNaissance} onChange={setPaysNaissance} options={PAYS}/>
+          <FInput label="Geburtsort" placeholder="Berlin" value={villeNaissance} onChange={setVilleNaissance}/>
           {error&&<p style={{color:"#FF6B6B",fontSize:"0.85rem"}}>{error}</p>}
-          <Btn onClick={()=>{if(!prenom||!nom||!sexe||!situation||!paysNaissance||!villeNaissance){setError("Tous les champs sont requis");return;}save(3);}} loading={loading}>
-            Continuer <ArrowRight size={18}/>
+          <Btn onClick={()=>{if(!prenom||!nom||!sexe||!situation||!paysNaissance||!villeNaissance){setError("Alle Felder sind erforderlich");return;}save(3);}} loading={loading}>
+            Weiter <ArrowRight size={18}/>
           </Btn>
         </div>
       </div>
     </div>
   );
 
-  /* ── Step 4 : Nationalité & Document ── */
+  /* ── Step 4 : Staatsangehörigkeit & Dokument ── */
   if(step===4) return (
     <div style={wrap}>
       <PageHeader onBack={()=>setStep(3)}/><ProgressBar step={step}/>
       <div style={{flex:1,paddingTop:20}}>
-        <h1 style={{color:"white",fontWeight:800,fontSize:"1.5rem",marginBottom:20}}>Nationalité & Document</h1>
+        <h1 style={{color:"white",fontWeight:800,fontSize:"1.5rem",marginBottom:20}}>Staatsangehörigkeit & Dokument</h1>
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
-          <FSelect label="Nationalité" value={nationalite} onChange={setNationalite} options={PAYS}/>
-          <FSelect label="Type de document d'identité" value={typeDoc} onChange={setTypeDoc} options={DOCS}/>
-          <FInput label="Autorité de délivrance" placeholder="Ministère de l'Intérieur – Allemagne" value={autorite} onChange={setAutorite}/>
+          <FSelect label="Staatsangehörigkeit" value={nationalite} onChange={setNationalite} options={PAYS}/>
+          <FSelect label="Art des Ausweisdokuments" value={typeDoc} onChange={setTypeDoc} options={DOCS}/>
+          <FInput label="Ausstellende Behörde" placeholder="Einwohnermeldeamt – Deutschland" value={autorite} onChange={setAutorite}/>
           {error&&<p style={{color:"#FF6B6B",fontSize:"0.85rem"}}>{error}</p>}
-          <Btn onClick={()=>{if(!nationalite||!typeDoc||!autorite){setError("Tous les champs sont requis");return;}save(4);}} loading={loading}>
-            Continuer <ArrowRight size={18}/>
+          <Btn onClick={()=>{if(!nationalite||!typeDoc||!autorite){setError("Alle Felder sind erforderlich");return;}save(4);}} loading={loading}>
+            Weiter <ArrowRight size={18}/>
           </Btn>
         </div>
       </div>
     </div>
   );
 
-  /* ── Step 5 : Situation professionnelle & Adresse ── */
+  /* ── Step 5 : Berufliche Situation & Adresse ── */
   if(step===5) return (
     <div style={wrap}>
       <PageHeader onBack={()=>setStep(4)}/><ProgressBar step={step}/>
       <div style={{flex:1,paddingTop:20}}>
-        <h1 style={{color:"white",fontWeight:800,fontSize:"1.5rem",marginBottom:20}}>Situation professionnelle</h1>
+        <h1 style={{color:"white",fontWeight:800,fontSize:"1.5rem",marginBottom:20}}>Berufliche Situation</h1>
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
-          <FSelect label="Situation actuelle" value={situationPro} onChange={setSituationPro} options={SITUATIONS_PRO}/>
+          <FSelect label="Aktuelle Situation" value={situationPro} onChange={setSituationPro} options={SITUATIONS_PRO}/>
           {employeurLabel&&(
-            <FInput label={employeurLabel} placeholder="ex. Deutsche Bank AG" value={nomEmployeur} onChange={setNomEmployeur}/>
+            <FInput label={employeurLabel} placeholder="z.B. Deutsche Bank AG" value={nomEmployeur} onChange={setNomEmployeur}/>
           )}
-          <FSelect label="Revenu mensuel net" value={revenuMensuel} onChange={setRevenuMensuel} options={REVENUS}/>
+          <FSelect label="Monatliches Nettoeinkommen" value={revenuMensuel} onChange={setRevenuMensuel} options={REVENUS}/>
           <div style={{height:1,background:"rgba(255,255,255,0.07)",margin:"4px 0"}}/>
-          <p style={{color:"rgba(255,255,255,0.5)",fontSize:"0.82rem",margin:0}}>Adresse de résidence</p>
-          <FInput label="Rue et numéro" placeholder="Musterstraße 12" value={adresse} onChange={setAdresse}/>
+          <p style={{color:"rgba(255,255,255,0.5)",fontSize:"0.82rem",margin:0}}>Wohnadresse</p>
+          <FInput label="Straße und Hausnummer" placeholder="Musterstraße 12" value={adresse} onChange={setAdresse}/>
           <div style={{display:"grid",gridTemplateColumns:"100px 1fr",gap:12}}>
-            <FInput label="Code postal" placeholder="10115" value={codePostal} onChange={setCodePostal}/>
-            <FInput label="Ville" placeholder="Berlin" value={ville} onChange={setVille}/>
+            <FInput label="Postleitzahl" placeholder="10115" value={codePostal} onChange={setCodePostal}/>
+            <FInput label="Stadt" placeholder="Berlin" value={ville} onChange={setVille}/>
           </div>
           {error&&<p style={{color:"#FF6B6B",fontSize:"0.85rem"}}>{error}</p>}
-          <Btn onClick={()=>{if(!situationPro||!revenuMensuel||!adresse||!codePostal||!ville){setError("Veuillez remplir tous les champs obligatoires");return;}save(5);}} loading={loading}>
-            Continuer <ArrowRight size={18}/>
+          <Btn onClick={()=>{if(!situationPro||!revenuMensuel||!adresse||!codePostal||!ville){setError("Bitte alle Pflichtfelder ausfüllen");return;}save(5);}} loading={loading}>
+            Weiter <ArrowRight size={18}/>
           </Btn>
         </div>
       </div>
     </div>
   );
 
-  /* ── Step 6 : Situation financière ── */
+  /* ── Step 6 : Finanzielle Situation ── */
   if(step===6) return (
     <div style={wrap}>
       <PageHeader onBack={()=>setStep(5)}/><ProgressBar step={step}/>
       <div style={{flex:1,paddingTop:20}}>
-        <h1 style={{color:"white",fontWeight:800,fontSize:"1.5rem",marginBottom:6}}>Situation financière</h1>
-        <p style={{color:"rgba(255,255,255,0.4)",fontSize:"0.82rem",marginBottom:24}}>Ces informations sont confidentielles et sécurisées.</p>
+        <h1 style={{color:"white",fontWeight:800,fontSize:"1.5rem",marginBottom:6}}>Finanzielle Situation</h1>
+        <p style={{color:"rgba(255,255,255,0.4)",fontSize:"0.82rem",marginBottom:24}}>Diese Informationen sind vertraulich und sicher.</p>
         <div style={{display:"flex",flexDirection:"column",gap:20}}>
 
           <div>
-            <p style={{color:"rgba(255,255,255,0.6)",fontSize:"0.85rem",fontWeight:500,marginBottom:12}}>Avez-vous des crédits en cours ?</p>
+            <p style={{color:"rgba(255,255,255,0.6)",fontSize:"0.85rem",fontWeight:500,marginBottom:12}}>Haben Sie laufende Kredite?</p>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-              {[{label:"Oui",val:true},{label:"Non",val:false}].map(({label,val})=>(
+              {[{label:"Ja",val:true},{label:"Nein",val:false}].map(({label,val})=>(
                 <button key={label} type="button" onClick={()=>{setACredits(val);if(!val)setCredits([]);}}
                   style={{height:52,borderRadius:14,border:`2px solid ${aCredits===val?"#005F2D":"rgba(255,255,255,0.1)"}`,background:aCredits===val?"rgba(0,95,45,0.2)":"#2A2A35",color:"white",fontWeight:aCredits===val?700:400,fontSize:"0.95rem",cursor:"pointer"}}>
                   {label}
@@ -413,11 +414,11 @@ export default function RegisterPage() {
           {aCredits===true&&(
             <div>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-                <p style={{color:"rgba(255,255,255,0.6)",fontSize:"0.85rem",fontWeight:500,margin:0}}>Détail des crédits</p>
+                <p style={{color:"rgba(255,255,255,0.6)",fontSize:"0.85rem",fontWeight:500,margin:0}}>Kreditdetails</p>
                 {credits.length<5&&(
                   <button type="button" onClick={addCredit}
                     style={{display:"flex",alignItems:"center",gap:6,background:"rgba(0,95,45,0.2)",border:"1px solid rgba(0,95,45,0.4)",borderRadius:10,padding:"6px 12px",color:"#4CAF82",fontSize:"0.8rem",fontWeight:600,cursor:"pointer"}}>
-                    <Plus size={13}/> Ajouter
+                    <Plus size={13}/> Hinzufügen
                   </button>
                 )}
               </div>
@@ -425,19 +426,19 @@ export default function RegisterPage() {
               {credits.length===0&&(
                 <button type="button" onClick={addCredit}
                   style={{width:"100%",height:48,background:"#2A2A35",border:"1px dashed rgba(255,255,255,0.15)",borderRadius:14,color:"rgba(255,255,255,0.35)",fontSize:"0.85rem",cursor:"pointer"}}>
-                  + Ajouter un crédit
+                  + Kredit hinzufügen
                 </button>
               )}
 
               {credits.map((c,i)=>(
                 <div key={i} style={{background:"#2A2A35",borderRadius:14,padding:14,marginBottom:10}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-                    <span style={{color:"rgba(255,255,255,0.5)",fontSize:"0.8rem"}}>Crédit {i+1}</span>
+                    <span style={{color:"rgba(255,255,255,0.5)",fontSize:"0.8rem"}}>Kredit {i+1}</span>
                     <button type="button" onClick={()=>removeCredit(i)} style={{background:"none",border:"none",color:"rgba(255,100,100,0.7)",cursor:"pointer"}}><Trash2 size={15}/></button>
                   </div>
                   <div style={{display:"flex",flexDirection:"column",gap:10}}>
-                    <FInput label="Nom de la banque créditrice" placeholder="ex. Deutsche Bank, Commerzbank…" value={c.nom_banque} onChange={(v)=>updateCredit(i,"nom_banque",v)}/>
-                    <FInput label="Montant total restant dû (€)" placeholder="ex. 12 500" value={c.montant} onChange={(v)=>updateCredit(i,"montant",v)}/>
+                    <FInput label="Name der kreditgebenden Bank" placeholder="z.B. Deutsche Bank, Commerzbank…" value={c.nom_banque} onChange={(v)=>updateCredit(i,"nom_banque",v)}/>
+                    <FInput label="Verbleibender Gesamtbetrag (€)" placeholder="z.B. 12.500" value={c.montant} onChange={(v)=>updateCredit(i,"montant",v)}/>
                   </div>
                 </div>
               ))}
@@ -445,84 +446,84 @@ export default function RegisterPage() {
           )}
 
           {error&&<p style={{color:"#FF6B6B",fontSize:"0.85rem"}}>{error}</p>}
-          <Btn onClick={()=>{if(aCredits===null){setError("Veuillez répondre à la question");return;}save(6);}} loading={loading}>
-            Continuer <ArrowRight size={18}/>
+          <Btn onClick={()=>{if(aCredits===null){setError("Bitte beantworten Sie die Frage");return;}save(6);}} loading={loading}>
+            Weiter <ArrowRight size={18}/>
           </Btn>
         </div>
       </div>
     </div>
   );
 
-  /* ── Step 7 : Famille & Ayants droit ── */
+  /* ── Step 7 : Familiensituation ── */
   if(step===7) return (
     <div style={wrap}>
       <PageHeader onBack={()=>setStep(6)}/><ProgressBar step={step}/>
       <div style={{flex:1,paddingTop:20}}>
-        <h1 style={{color:"white",fontWeight:800,fontSize:"1.5rem",marginBottom:6}}>Situation familiale</h1>
-        <p style={{color:"rgba(255,255,255,0.4)",fontSize:"0.82rem",marginBottom:20}}>Ces informations constituent votre dossier bancaire officiel.</p>
+        <h1 style={{color:"white",fontWeight:800,fontSize:"1.5rem",marginBottom:6}}>Familiensituation</h1>
+        <p style={{color:"rgba(255,255,255,0.4)",fontSize:"0.82rem",marginBottom:20}}>Diese Informationen bilden Ihre offizielle Bankakte.</p>
         <div style={{display:"flex",flexDirection:"column",gap:20}}>
-          <FNumber label="Nombre d'enfants" value={nbEnfants} onChange={setNbEnfants} max={15}/>
-          <FNumber label="Personnes à charge (total)" value={personnesCharge} onChange={setPersonnesCharge} max={20}/>
+          <FNumber label="Anzahl der Kinder" value={nbEnfants} onChange={setNbEnfants} max={15}/>
+          <FNumber label="Unterhaltsberechtigte Personen (gesamt)" value={personnesCharge} onChange={setPersonnesCharge} max={20}/>
 
           <div style={{height:1,background:"rgba(255,255,255,0.07)"}}/>
 
           <div>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
               <div>
-                <p style={{color:"white",fontWeight:600,fontSize:"0.95rem",margin:0}}>Ayants droit</p>
-                <p style={{color:"rgba(255,255,255,0.4)",fontSize:"0.78rem",margin:"4px 0 0"}}>Personnes autorisées à accéder au compte (max. 4)</p>
+                <p style={{color:"white",fontWeight:600,fontSize:"0.95rem",margin:0}}>Berechtigte Personen</p>
+                <p style={{color:"rgba(255,255,255,0.4)",fontSize:"0.78rem",margin:"4px 0 0"}}>Zum Konto zugelassene Personen (max. 4)</p>
               </div>
               {ayantsDroit.length<4&&(
                 <button type="button" onClick={addAyantDroit}
                   style={{display:"flex",alignItems:"center",gap:6,background:"rgba(0,95,45,0.2)",border:"1px solid rgba(0,95,45,0.4)",borderRadius:10,padding:"8px 14px",color:"#4CAF82",fontSize:"0.82rem",fontWeight:600,cursor:"pointer"}}>
-                  <Plus size={14}/> Ajouter
+                  <Plus size={14}/> Hinzufügen
                 </button>
               )}
             </div>
             {ayantsDroit.length===0&&(
               <div style={{background:"#2A2A35",borderRadius:14,padding:16,textAlign:"center"}}>
-                <p style={{color:"rgba(255,255,255,0.3)",fontSize:"0.85rem",margin:0}}>Aucun ayant droit — optionnel</p>
+                <p style={{color:"rgba(255,255,255,0.3)",fontSize:"0.85rem",margin:0}}>Keine berechtigten Personen — optional</p>
               </div>
             )}
             {ayantsDroit.map((ad,i)=>(
               <div key={i} style={{background:"#2A2A35",borderRadius:14,padding:16,marginBottom:10}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-                  <span style={{color:"rgba(255,255,255,0.6)",fontSize:"0.82rem",fontWeight:600}}>Ayant droit {i+1}</span>
+                  <span style={{color:"rgba(255,255,255,0.6)",fontSize:"0.82rem",fontWeight:600}}>Berechtigte Person {i+1}</span>
                   <button type="button" onClick={()=>removeAyantDroit(i)} style={{background:"none",border:"none",color:"rgba(255,100,100,0.7)",cursor:"pointer"}}><Trash2 size={16}/></button>
                 </div>
                 <div style={{display:"flex",flexDirection:"column",gap:10}}>
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-                    <FInput label="Prénom" placeholder="Sarah" value={ad.prenom} onChange={(v)=>updateAyantDroit(i,"prenom",v)}/>
-                    <FInput label="Nom" placeholder="Müller" value={ad.nom} onChange={(v)=>updateAyantDroit(i,"nom",v)}/>
+                    <FInput label="Vorname" placeholder="Sarah" value={ad.prenom} onChange={(v)=>updateAyantDroit(i,"prenom",v)}/>
+                    <FInput label="Nachname" placeholder="Müller" value={ad.nom} onChange={(v)=>updateAyantDroit(i,"nom",v)}/>
                   </div>
-                  <FSelect label="Lien de parenté" value={ad.lien} onChange={(v)=>updateAyantDroit(i,"lien",v)} options={LIENS}/>
-                  <FInput label="Date de naissance" type="date" value={ad.date_naissance} onChange={(v)=>updateAyantDroit(i,"date_naissance",v)}/>
+                  <FSelect label="Verwandtschaftsbeziehung" value={ad.lien} onChange={(v)=>updateAyantDroit(i,"lien",v)} options={LIENS}/>
+                  <FInput label="Geburtsdatum" type="date" value={ad.date_naissance} onChange={(v)=>updateAyantDroit(i,"date_naissance",v)}/>
                 </div>
               </div>
             ))}
           </div>
 
           {error&&<p style={{color:"#FF6B6B",fontSize:"0.85rem"}}>{error}</p>}
-          <Btn onClick={()=>save(7)} loading={loading}>Continuer <ArrowRight size={18}/></Btn>
+          <Btn onClick={()=>save(7)} loading={loading}>Weiter <ArrowRight size={18}/></Btn>
         </div>
       </div>
     </div>
   );
 
-  /* ── Step 8 : Téléphone ── */
+  /* ── Step 8 : Kontaktdaten ── */
   if(step===8) return (
     <div style={wrap}>
       <PageHeader onBack={()=>setStep(7)}/><ProgressBar step={step}/>
       <div style={{flex:1,paddingTop:20}}>
-        <h1 style={{color:"white",fontWeight:800,fontSize:"1.5rem",marginBottom:6}}>Coordonnées</h1>
-        <p style={{color:"rgba(255,255,255,0.4)",fontSize:"0.82rem",marginBottom:20}}>Dernière étape — votre compte sera créé immédiatement.</p>
+        <h1 style={{color:"white",fontWeight:800,fontSize:"1.5rem",marginBottom:6}}>Kontaktdaten</h1>
+        <p style={{color:"rgba(255,255,255,0.4)",fontSize:"0.82rem",marginBottom:20}}>Letzter Schritt — Ihr Konto wird sofort erstellt.</p>
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
           <div style={{display:"flex",flexDirection:"column",gap:6}}>
-            <label style={{color:"rgba(255,255,255,0.6)",fontSize:"0.8rem",fontWeight:500}}>E-mail</label>
+            <label style={{color:"rgba(255,255,255,0.6)",fontSize:"0.8rem",fontWeight:500}}>E-Mail</label>
             <div style={{height:52,background:"#1E1E28",border:"1px solid rgba(255,255,255,0.08)",borderRadius:14,color:"rgba(255,255,255,0.4)",fontSize:"1rem",padding:"0 16px",display:"flex",alignItems:"center"}}>{email}</div>
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:6}}>
-            <label style={{color:"rgba(255,255,255,0.6)",fontSize:"0.8rem",fontWeight:500}}>Numéro de téléphone</label>
+            <label style={{color:"rgba(255,255,255,0.6)",fontSize:"0.8rem",fontWeight:500}}>Telefonnummer</label>
             <div style={{display:"flex",gap:8}}>
               <div style={{height:52,minWidth:76,background:"#2A2A35",border:"1px solid rgba(255,255,255,0.1)",borderRadius:14,display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontSize:"0.9rem",fontWeight:600}}>🇩🇪 +49</div>
               <input type="tel" placeholder="152 345 6789" value={phone} onChange={(e)=>setPhone(e.target.value)}
@@ -531,12 +532,12 @@ export default function RegisterPage() {
           </div>
           <div style={{background:"rgba(0,95,45,0.1)",border:"1px solid rgba(0,95,45,0.25)",borderRadius:14,padding:16}}>
             <p style={{color:"rgba(255,255,255,0.6)",fontSize:"0.8rem",margin:0,lineHeight:1.6}}>
-              En finalisant, votre <strong style={{color:"white"}}>compte courant KT Bank</strong> sera ouvert instantanément. Vous recevrez votre IBAN par e-mail.
+              Mit dem Abschluss wird Ihr <strong style={{color:"white"}}>KT Bank Girokonto</strong> sofort eröffnet. Sie erhalten Ihre IBAN per E-Mail.
             </p>
           </div>
           {error&&<p style={{color:"#FF6B6B",fontSize:"0.85rem"}}>{error}</p>}
-          <Btn onClick={()=>{if(!phone){setError("Téléphone requis");return;}save(8);}} loading={loading}>
-            Finaliser mon inscription <ArrowRight size={18}/>
+          <Btn onClick={()=>{if(!phone){setError("Telefonnummer erforderlich");return;}save(8);}} loading={loading}>
+            Registrierung abschließen <ArrowRight size={18}/>
           </Btn>
         </div>
       </div>
@@ -552,23 +553,23 @@ export default function RegisterPage() {
           <Check size={36} color="#005F2D"/>
         </div>
         <div>
-          <h1 style={{color:"white",fontWeight:800,fontSize:"1.75rem",marginBottom:10}}>Bienvenue chez KT Bank !</h1>
+          <h1 style={{color:"white",fontWeight:800,fontSize:"1.75rem",marginBottom:10}}>Willkommen bei KT Bank!</h1>
           <p style={{color:"rgba(255,255,255,0.55)",fontSize:"0.95rem",lineHeight:1.7}}>
-            Votre compte a été créé avec succès.<br/>Un e-mail de confirmation vous a été envoyé.
+            Ihr Konto wurde erfolgreich erstellt.<br/>Eine Bestätigungs-E-Mail wurde Ihnen gesendet.
           </p>
           {iban&&(
             <div style={{background:"#2A2A35",borderRadius:16,padding:"16px 20px",marginTop:16,textAlign:"left"}}>
-              <p style={{color:"rgba(255,255,255,0.5)",fontSize:"0.75rem",marginBottom:4}}>Votre IBAN</p>
+              <p style={{color:"rgba(255,255,255,0.5)",fontSize:"0.75rem",marginBottom:4}}>Ihre IBAN</p>
               <p style={{color:"white",fontFamily:"monospace",fontSize:"0.9rem",letterSpacing:"0.05em",wordBreak:"break-all"}}>{iban}</p>
               <p style={{color:"rgba(255,255,255,0.4)",fontSize:"0.75rem",marginTop:4}}>BIC: KTAGDEFF</p>
             </div>
           )}
         </div>
         <Link href="/client/dashboard" style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,width:"100%",maxWidth:340,height:54,borderRadius:999,background:"#005F2D",color:"white",fontWeight:700,textDecoration:"none"}}>
-          Accéder à mon espace <ArrowRight size={18}/>
+          Zum Kundenbereich <ArrowRight size={18}/>
         </Link>
         <Link href="/" style={{color:"rgba(255,255,255,0.4)",fontSize:"0.85rem",textDecoration:"none"}}>
-          Retour à l&apos;accueil
+          Zurück zur Startseite
         </Link>
       </div>
     </div>

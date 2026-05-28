@@ -38,7 +38,7 @@ export default function LoginPage() {
 
   async function requestOtp() {
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Adresse e-mail invalide");
+      setError("Ungültige E-Mail-Adresse");
       return;
     }
     setLoading(true);
@@ -50,13 +50,13 @@ export default function LoginPage() {
     });
     const data = await res.json();
     setLoading(false);
-    if (!res.ok) { setError(data.error || "Erreur"); return; }
+    if (!res.ok) { setError(data.error || "Fehler"); return; }
     setStep("otp");
   }
 
   async function verifyLogin() {
     const code = otp.join("");
-    if (code.length < 4) { setError("Saisissez les 4 chiffres"); return; }
+    if (code.length < 4) { setError("Bitte alle 4 Ziffern eingeben"); return; }
     setLoading(true);
     setError("");
     const res = await fetch("/api/kt/client/login-verify", {
@@ -66,7 +66,7 @@ export default function LoginPage() {
     });
     const data = await res.json();
     setLoading(false);
-    if (!res.ok) { setError(data.error || "Code invalide"); return; }
+    if (!res.ok) { setError(data.error || "Ungültiger Code"); return; }
     sessionStorage.setItem("kt_token", data.token);
     sessionStorage.setItem("kt_email", email);
     window.location.href = "/client/dashboard";
@@ -106,18 +106,18 @@ export default function LoginPage() {
           <span style={{ color: "#C9A84C", fontWeight: 900, fontSize: "1.15rem" }}>KT</span>
         </div>
         <h1 style={{ color: "white", fontWeight: 800, fontSize: "1.9rem", marginBottom: 8, lineHeight: 1.2 }}>
-          Bienvenue<br />sur KT Bank
+          Willkommen<br />bei KT Bank
         </h1>
         <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.9rem", marginBottom: 40, lineHeight: 1.6 }}>
-          Connectez-vous à votre espace client sécurisé.
+          Melden Sie sich in Ihrem sicheren Kundenbereich an.
         </p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <label style={{ color: "rgba(255,255,255,0.55)", fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" }}>Adresse e-mail</label>
+            <label style={{ color: "rgba(255,255,255,0.55)", fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" }}>E-Mail-Adresse</label>
             <input
               type="email"
-              placeholder="vous@exemple.com"
+              placeholder="sie@beispiel.de"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") requestOtp(); }}
@@ -130,13 +130,13 @@ export default function LoginPage() {
             disabled={loading}
             style={{ width: "100%", height: 54, borderRadius: 14, background: "#005F2D", color: "white", fontWeight: 700, fontSize: "1rem", border: "none", cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: loading ? 0.7 : 1, boxShadow: "0 4px 16px rgba(0,95,45,0.4)" }}
           >
-            {loading ? "Veuillez patienter…" : <><span>Recevoir un code</span><ArrowRight size={18} /></>}
+            {loading ? "Bitte warten…" : <><span>Code anfordern</span><ArrowRight size={18} /></>}
           </button>
         </div>
 
         <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.85rem", marginTop: "auto", textAlign: "center", paddingTop: 32 }}>
-          Pas encore de compte ?{" "}
-          <Link href="/client/register" style={{ color: "#C9A84C", fontWeight: 600, textDecoration: "none" }}>S&apos;inscrire</Link>
+          Noch kein Konto?{" "}
+          <Link href="/client/register" style={{ color: "#C9A84C", fontWeight: 600, textDecoration: "none" }}>Registrieren</Link>
         </p>
       </div>
     </div>
@@ -146,9 +146,9 @@ export default function LoginPage() {
     <div style={wrap}>
       <Header onBack={() => { setStep("email"); setOtp(["", "", "", ""]); setError(""); }} />
       <div style={{ flex: 1, display: "flex", flexDirection: "column", paddingTop: 32 }}>
-        <h1 style={{ color: "white", fontWeight: 800, fontSize: "1.75rem", marginBottom: 8 }}>Code de connexion</h1>
+        <h1 style={{ color: "white", fontWeight: 800, fontSize: "1.75rem", marginBottom: 8 }}>Anmeldecode</h1>
         <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.9rem", marginBottom: 4, lineHeight: 1.6 }}>
-          Code envoyé à
+          Code gesendet an
         </p>
         <p style={{ color: "white", fontWeight: 600, marginBottom: 36 }}>{email}</p>
 
@@ -174,13 +174,13 @@ export default function LoginPage() {
           disabled={loading}
           style={{ width: "100%", height: 54, borderRadius: 14, background: "#005F2D", color: "white", fontWeight: 700, fontSize: "1rem", border: "none", cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: loading ? 0.7 : 1, marginBottom: 24, boxShadow: "0 4px 16px rgba(0,95,45,0.4)" }}
         >
-          {loading ? "Vérification…" : "Se connecter"}
+          {loading ? "Überprüfung…" : "Anmelden"}
         </button>
 
         <div style={{ textAlign: "center" }}>
           {timer > 0
-            ? <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.85rem" }}>Renvoyer dans {Math.floor(timer / 60)}:{String(timer % 60).padStart(2, "0")}</p>
-            : <button onClick={requestOtp} style={{ background: "none", border: "none", color: "#C9A84C", fontWeight: 600, cursor: "pointer", fontSize: "0.9rem" }}>Renvoyer le code</button>}
+            ? <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.85rem" }}>Erneut senden in {Math.floor(timer / 60)}:{String(timer % 60).padStart(2, "0")}</p>
+            : <button onClick={requestOtp} style={{ background: "none", border: "none", color: "#C9A84C", fontWeight: 600, cursor: "pointer", fontSize: "0.9rem" }}>Code erneut senden</button>}
         </div>
       </div>
     </div>
