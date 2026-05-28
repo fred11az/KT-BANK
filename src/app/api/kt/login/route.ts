@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { sendOtpLogin } from "@/lib/email/send";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,10 +12,9 @@ function randomOtp() {
 }
 
 export async function POST(req: NextRequest) {
-  const { email } = await req.json();
+  const { email, lang } = await req.json();
   if (!email) return NextResponse.json({ error: "Email requis" }, { status: 400 });
 
-  // Check profile exists and is verified
   const { data: profile } = await supabase
     .from("kt_profiles")
     .select("id, email_verified, status")
@@ -24,12 +24,10 @@ export async function POST(req: NextRequest) {
   if (!profile || !profile.email_verified) {
     return NextResponse.json({ error: "Compte non trouvé" }, { status: 404 });
   }
-
   if (profile.status !== "active") {
     return NextResponse.json({ error: "Compte suspendu" }, { status: 403 });
   }
 
-  // Send OTP
   const code = randomOtp();
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
@@ -47,7 +45,7 @@ export async function POST(req: NextRequest) {
     expires_at: expiresAt,
   });
 
-  console.log(`[KT LOGIN OTP] ${email} → ${code}`);
+  await sendOtpLogin(email, code, lang ?? "de");
 
   return NextResponse.json({ ok: true });
 }

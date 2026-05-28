@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { sendOtpRegistration } from "@/lib/email/send";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,7 +12,7 @@ function randomOtp() {
 }
 
 export async function POST(req: NextRequest) {
-  const { email } = await req.json();
+  const { email, lang } = await req.json();
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json({ error: "Email invalide" }, { status: 400 });
   }
@@ -19,7 +20,6 @@ export async function POST(req: NextRequest) {
   const code = randomOtp();
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
-  // Invalidate previous OTPs for this email
   await supabase
     .from("otp_tokens")
     .update({ used: true })
@@ -34,12 +34,9 @@ export async function POST(req: NextRequest) {
     expires_at: expiresAt,
   });
 
-  if (error) {
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
-  }
+  if (error) return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
 
-  // In production: send real email. For now log in dev.
-  console.log(`[KT OTP] ${email} → ${code}`);
+  await sendOtpRegistration(email, code, lang ?? "de");
 
   return NextResponse.json({ ok: true });
 }

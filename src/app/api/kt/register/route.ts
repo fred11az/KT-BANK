@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { sendWelcome } from "@/lib/email/send";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,7 +14,7 @@ function generateIban() {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { step, email, ...fields } = body;
+  const { step, email, lang, ...fields } = body;
 
   if (!email) return NextResponse.json({ error: "Email requis" }, { status: 400 });
 
@@ -97,6 +98,10 @@ export async function POST(req: NextRequest) {
       expiry_month: new Date().getMonth() + 1,
       expiry_year: new Date().getFullYear() + 4,
     });
+
+    // Send welcome email with IBAN
+    const prenom = fields.prenom ?? "Kunde";
+    await sendWelcome(email, prenom, iban, lang ?? "de");
 
     return NextResponse.json({ ok: true, iban });
   }
