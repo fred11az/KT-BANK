@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 80" width="280" height="80">
+  <!-- Background white -->
+  <rect width="280" height="80" fill="white"/>
+  
+  <!-- KT text left -->
+  <text x="10" y="56" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="38" fill="#3d3d3d" letter-spacing="-1">KT</text>
+  
+  <!-- Circle emblem -->
+  <circle cx="136" cy="40" r="32" fill="#2d7a2d"/>
+  <circle cx="136" cy="40" r="28" fill="#2d7a2d" stroke="#1a5c1a" stroke-width="0.5"/>
+  
+  <!-- Palm tree stylized -->
+  <!-- Trunk -->
+  <rect x="133" y="42" width="6" height="16" fill="#c8a800" rx="1"/>
+  <!-- Left frond -->
+  <ellipse cx="121" cy="34" rx="13" ry="5" fill="#c8a800" transform="rotate(-20 121 34)"/>
+  <!-- Right frond -->
+  <ellipse cx="151" cy="34" rx="13" ry="5" fill="#c8a800" transform="rotate(20 151 34)"/>
+  <!-- Top frond -->
+  <ellipse cx="136" cy="24" rx="5" ry="13" fill="#c8a800" transform="rotate(0 136 24)"/>
+  <!-- Left-top frond -->
+  <ellipse cx="124" cy="27" rx="11" ry="4" fill="#c8a800" transform="rotate(-35 124 27)"/>
+  <!-- Right-top frond -->
+  <ellipse cx="148" cy="27" rx="11" ry="4" fill="#c8a800" transform="rotate(35 148 27)"/>
+  
+  <!-- BANK text right -->
+  <text x="174" y="56" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="38" fill="#3d3d3d" letter-spacing="-1">BANK</text>
+</svg>

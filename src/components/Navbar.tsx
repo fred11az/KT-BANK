@@ -1,20 +1,22 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronDown, Menu, X, ArrowRight, Lock } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { Lang } from "@/lib/translations";
 
 function Logo({ white }: { white?: boolean }) {
-  const color = white ? "white" : "#005F2D";
-  const bg = white ? "rgba(255,255,255,0.2)" : "#005F2D";
-  const textColor = white ? "#005F2D" : "white";
   return (
-    <div className="flex items-center gap-1.5">
-      <div style={{ width:32, height:32, borderRadius:"50%", background:bg, display:"flex", alignItems:"center", justifyContent:"center", color:textColor, fontWeight:900, fontSize:13, flexShrink:0 }}>
-        KT
-      </div>
-      <span style={{ fontWeight:900, fontSize:18, color, letterSpacing:-0.5 }}>Bank</span>
+    <div className="flex items-center">
+      <Image
+        src="/kt-logo.png"
+        alt="KT Bank"
+        width={120}
+        height={34}
+        style={{ objectFit: "contain", filter: white ? "brightness(0) invert(1)" : "none" }}
+        priority
+      />
     </div>
   );
 }

@@ -65,14 +65,10 @@ function Sidebar({ logout }: { logout: () => void }) {
   const path = usePathname();
   return (
     <aside style={{ width: 220, background: "#1A1D27", borderRight: "1px solid rgba(255,255,255,0.07)", display: "flex", flexDirection: "column", padding: "24px 12px", flexShrink: 0, minHeight: "100vh" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 8px", marginBottom: 28 }}>
-        <div style={{ width: 32, height: 32, borderRadius: 8, background: "#005F2D", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <span style={{ color: "white", fontWeight: 900, fontSize: 11 }}>KT</span>
-        </div>
-        <div>
-          <p style={{ color: "white", fontWeight: 700, fontSize: "0.85rem", margin: 0 }}>KT Bank</p>
-          <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.7rem", margin: 0 }}>Admin</p>
-        </div>
+      <div style={{ padding: "0 8px", marginBottom: 28 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/kt-logo.png" alt="KT Bank" style={{ height: 28, objectFit: "contain", filter: "brightness(0) invert(1)", display: "block" }} />
+        <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.7rem", margin: "4px 0 0" }}>Admin</p>
       </div>
       <nav style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1 }}>
         {NAV.map(({ href, label, icon: Icon }) => {

@@ -200,12 +200,10 @@ export default function ClientDashboard() {
       <div style={{ display: "flex", flexDirection: "column", height: "100%", width: mobile ? "100%" : 248, background: "linear-gradient(180deg,#001A0D 0%,#003319 55%,#005428 100%)", flexShrink: 0 }}>
         <div style={{ padding: "22px 18px 16px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 38, height: 38, borderRadius: 12, background: "linear-gradient(135deg,#C9A84C,#E6C97A)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.85rem", color: "#001A0D", flexShrink: 0 }}>KT</div>
-            <div>
-              <p style={{ color: "white", fontWeight: 800, fontSize: "0.92rem", margin: 0 }}>KT Bank AG</p>
-              <p style={{ color: "rgba(201,168,76,0.6)", fontSize: "0.7rem", margin: 0 }}>Espace Client</p>
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/kt-logo.png" alt="KT Bank" style={{ height: 32, objectFit: "contain", filter: "brightness(0) invert(1)" }} />
           </div>
+          <p style={{ color: "rgba(201,168,76,0.6)", fontSize: "0.7rem", margin: "6px 0 0" }}>Espace Client</p>
         </div>
 
         {!loading && profile && (
