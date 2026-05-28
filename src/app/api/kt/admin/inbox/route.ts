@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 import { send as sendEmail } from "@/lib/email/send";
+import { bankAdminMessageEmail } from "@/lib/email/templates";
 
 function auth(req: NextRequest) {
   const key = process.env.KT_ADMIN_KEY;
@@ -22,33 +23,29 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   const supabase = getSupabase();
-  const { to, subject, body, thread_id } = await req.json();
+  const { to, subject, body, thread_id, client_name } = await req.json();
   if (!to || !subject || !body) return NextResponse.json({ error: "Champs manquants" }, { status: 400 });
-
-  const fromEmail = process.env.RESEND_FROM_EMAIL ?? "support@kt-bank-ag.com";
-  const fromClean = fromEmail.includes("<") ? fromEmail.match(/<(.+)>/)?.[1] ?? fromEmail : fromEmail;
 
   let threadId = thread_id;
   if (!threadId) {
     const { data: thread } = await supabase.from("kt_email_threads")
-      .insert({ subject, client_email: to, status: "open", last_message_at: new Date().toISOString() })
+      .insert({ subject, client_email: to, client_name: client_name ?? to.split("@")[0], status: "open", last_message_at: new Date().toISOString() })
       .select("id").single();
     threadId = thread?.id;
+  } else {
+    await supabase.from("kt_email_threads").update({ last_message_at: new Date().toISOString(), unread: false }).eq("id", threadId);
   }
 
   if (threadId) {
     await supabase.from("kt_email_messages").insert({
       thread_id: threadId, direction: "outbound",
-      from_email: fromClean, to_email: to, subject, body_text: body,
+      from_email: "support@kt-bank-ag.com", to_email: to, subject, body_text: body,
     });
-    await supabase.from("kt_email_threads").update({
-      last_message_at: new Date().toISOString(),
-      unread: false,
-      message_count: supabase.rpc ? undefined : undefined,
-    }).eq("id", threadId);
   }
 
-  await sendEmail(to, subject, `<div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.6;color:#333;">${body.replace(/\n/g, "<br/>")}</div>`);
+  // Send with full KT Bank branded template
+  const { html } = bankAdminMessageEmail({ subject, body });
+  await sendEmail(to, subject, html);
 
   return NextResponse.json({ ok: true });
 }
