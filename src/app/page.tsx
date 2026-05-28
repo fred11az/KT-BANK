@@ -1,13 +1,12 @@
 "use client";
 import Link from "next/link";
-import { Store, HandCoins, Layers, ArrowLeftRight } from "lucide-react";
 
 /* ─────────── DATA ─────────── */
 const PRODUCTS_GRID = [
-  { icon: Store,          label: "Compte courant",          href: "/products/giro-konto" },
-  { icon: HandCoins,      label: "Compte de participation", href: "/products/festgeld-konto" },
-  { icon: Layers,         label: "Mastercard",              href: "/products/jetzz-card" },
-  { icon: ArrowLeftRight, label: "Compte de devises",       href: "/products/devises" },
+  { icon: "/icons/compte-courant.svg",       label: "Compte courant",          href: "/products/giro-konto" },
+  { icon: "/icons/compte-participation.svg", label: "Compte de participation", href: "/products/festgeld-konto" },
+  { icon: "/icons/mastercard.svg",           label: "Mastercard",              href: "/products/jetzz-card" },
+  { icon: "/icons/compte-devises.svg",       label: "Compte de devises",       href: "/products/devises" },
 ];
 
 /* ─────────── HELPERS ─────────── */
@@ -173,7 +172,7 @@ export default function HomePage() {
                   textDecoration: "none",
                 }}
               >
-                <p.icon size={52} color="#005F2D" strokeWidth={1.5} />
+                <img src={p.icon} alt="" width={52} height={52} />
                 <span
                   style={{
                     color: "#005F2D",

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" fill="none" stroke="#005F2D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Left coin (Euro) -->
+  <circle cx="19" cy="26" r="12"/>
+  <!-- Euro sign (paths) -->
+  <path d="M17 26 Q17 21 21 21 Q24 21 25 23"/>
+  <path d="M15 25 h8"/>
+  <path d="M15 27 h8"/>
+  <path d="M17 26 Q17 31 21 31 Q24 31 25 29"/>
+  <!-- Right coin (Dollar) -->
+  <circle cx="37" cy="30" r="12"/>
+  <!-- Dollar sign (vertical line + S curve) -->
+  <line x1="37" y1="23" x2="37" y2="37"/>
+  <path d="M34 25 Q34 23 37 23 Q40 23 40 26 Q40 30 37 30 Q34 30 34 33 Q34 37 37 37 Q40 37 40 35"/>
+  <!-- Top-right arrow -->
+  <path d="M44 8 Q50 8 50 14" stroke-width="1.8"/>
+  <polyline points="47,8 50,8 50,11" stroke-width="1.8"/>
+  <!-- Bottom-left arrow -->
+  <path d="M12 48 Q6 48 6 42" stroke-width="1.8"/>
+  <polyline points="9,48 6,48 6,45" stroke-width="1.8"/>
+</svg>
