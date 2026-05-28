@@ -74,10 +74,10 @@ export default function HomePage() {
     <>
       {/* ── Section 1: Hero ── */}
       <section>
-        {/* Full-width phone image */}
+        {/* Phone + debit card hero image */}
         <SectionImage
-          src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&q=80"
-          alt="KT Bank mobile app"
+          src="https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=800&q=80"
+          alt="KT Bank mobile app et carte de débit"
           height={300}
         />
         {/* Dark green content area */}
@@ -205,11 +205,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Section 3: Des convictions solides ── */}
+      {/* ── Section 3: Des convictions solides — père et enfant ── */}
       <section>
         <SectionImage
           src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80"
-          alt="Happy family"
+          alt="Famille heureuse – valeurs et convictions"
         />
         <div style={{ background: "white", padding: "32px 24px" }}>
           <h2
@@ -253,11 +253,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Section 4: Compte courant KT ── */}
+      {/* ── Section 4: Compte courant KT — appli mobile + carte ── */}
       <section>
         <SectionImage
-          src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80"
-          alt="Finance banking laptop"
+          src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80"
+          alt="Application KT Bank et carte de débit"
         />
         <div style={{ background: "#F2EDE4", padding: "32px 24px" }}>
           <h2
@@ -302,11 +302,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Section 5: Compte de dépôt à terme ── */}
+      {/* ── Section 5: Compte de dépôt à terme — bocal de pièces ── */}
       <section>
         <SectionImage
           src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800&q=80"
-          alt="Savings coins"
+          alt="Épargne – pièces de monnaie"
         />
         <div style={{ background: "#F2EDE4", padding: "32px 24px" }}>
           <h2
@@ -350,11 +350,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Section 6: Blog ── */}
+      {/* ── Section 6: Blog — palmier numérique & laptop ── */}
       <section>
         <SectionImage
-          src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"
-          alt="Laptop finance blog"
+          src="https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=800&q=80"
+          alt="Finance islamique numérique"
         />
         <div style={{ background: "#F2EDE4", padding: "32px 24px" }}>
           <h2
@@ -387,11 +387,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Section 7: Magasins / Agences ── */}
+      {/* ── Section 7: Magasins / Agences — intérieur KT Bank ── */}
       <section>
         <SectionImage
           src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80"
-          alt="Modern office interior"
+          alt="Agence KT Bank"
         />
         <div
           style={{
