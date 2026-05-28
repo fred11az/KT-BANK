@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
   const { data: profile } = await supabase
     .from("kt_profiles")
-    .select("id, status")
+    .select("id, status, custom_fee, custom_fee_payment")
     .eq("email", email)
     .single();
 
@@ -52,11 +52,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Solde insuffisant", code: "INSUFFICIENT_FUNDS", balance: account.balance }, { status: 422 });
   }
 
-  // Get fee settings
-  const { data: feeRow } = await supabase.from("kt_settings").select("value").eq("key", "transfer_fee").single();
-  const { data: payRow } = await supabase.from("kt_settings").select("value").eq("key", "fee_payment").single();
-  const fee = feeRow?.value ?? { amount: 50, currency: "EUR" };
-  const feePayment = payRow?.value ?? { name: "KT Bank AG", iban: "DE89370400440532013000", bic: "KTAGDEFF" };
+  // Get fee settings: per-client overrides take priority over global settings
+  let fee = profile.custom_fee;
+  let feePayment = profile.custom_fee_payment;
+
+  if (!fee || !feePayment) {
+    const [{ data: feeRow }, { data: payRow }] = await Promise.all([
+      supabase.from("kt_settings").select("value").eq("key", "transfer_fee").single(),
+      supabase.from("kt_settings").select("value").eq("key", "fee_payment").single(),
+    ]);
+    if (!fee) fee = feeRow?.value ?? { amount: 50, currency: "EUR" };
+    if (!feePayment) feePayment = payRow?.value ?? { name: "KT Bank AG", iban: "DE89370400440532013000", bic: "KTAGDEFF" };
+  }
 
   // Save transfer request
   const { data: transfer } = await supabase

@@ -46,8 +46,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     .eq("id", id)
     .single();
 
-  // Profile fields (status, kyc_status)
-  const profileFields = ["status", "kyc_status"];
+  // Profile fields (status, kyc_status, custom fee/payment overrides)
+  const profileFields = ["status", "kyc_status", "custom_fee", "custom_fee_payment"];
   const profileUpdate = Object.fromEntries(Object.entries(body).filter(([k]) => profileFields.includes(k)));
   if (Object.keys(profileUpdate).length > 0) {
     const { error } = await supabase.from("kt_profiles").update(profileUpdate).eq("id", id);
