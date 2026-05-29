@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
 
   const { data: profile } = await supabase
     .from("kt_profiles")
-    .select("id, status, custom_fee, custom_fee_payment")
+    .select("id, status, custom_fee, custom_fee_payment, prenom, lang")
     .eq("email", email)
     .single();
 
@@ -110,16 +110,11 @@ export async function POST(req: NextRequest) {
     .select("id")
     .single();
 
-  // Send pending-fee email to client (fire-and-forget)
+  // Send pending-fee email — must be awaited before return or serverless runtime kills it
   if (transfer?.id) {
-    const { data: profileData } = await supabase
-      .from("kt_profiles")
-      .select("email, prenom, lang")
-      .eq("id", profile.id)
-      .single();
-    if (profileData?.email) {
-      sendTransferPendingFee(profileData.email, {
-        prenom: profileData.prenom ?? "Client",
+    try {
+      await sendTransferPendingFee(email, {
+        prenom: (profile as { prenom?: string }).prenom ?? "Client",
         amount: Number(amount),
         currency: "EUR",
         to_name,
@@ -129,8 +124,10 @@ export async function POST(req: NextRequest) {
         fee_currency: fee.currency ?? "EUR",
         fee_payment: feePayment as Record<string, string>,
         transfer_id: transfer.id,
-        lang: (profileData.lang as "de" | "fr") ?? "de",
-      }).catch(() => {/* ignore email errors */});
+        lang: ((profile as { lang?: string }).lang as "de" | "fr") ?? "de",
+      });
+    } catch (e) {
+      console.error("[transfer pending-fee email failed]", e);
     }
   }
 

