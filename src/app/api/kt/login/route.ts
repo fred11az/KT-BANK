@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
   if (!profile || !profile.email_verified) {
     return NextResponse.json({ error: "Compte non trouvé" }, { status: 404 });
   }
-  if (profile.status !== "active") {
+  if (profile.status === "suspended") {
     return NextResponse.json({ error: "Compte suspendu" }, { status: 403 });
   }
 
