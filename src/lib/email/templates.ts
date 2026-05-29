@@ -384,7 +384,7 @@ export function transferStatusEmail(opts: {
   };
   const s = lang === "fr" ? byStatus[status].fr : byStatus[status].de;
   const color = status === "completed" ? "#005F2D" : status === "rejected" ? "#dc2626" : "#d97706";
-  const ctaUrl = status === "rejected" ? CONTACT_URL : DASHBOARD_URL;
+  const ctaUrl = DASHBOARD_URL;
   const rows = [
     [s.amountLabel, `${status === "completed" ? "-" : ""}${amount.toFixed(2)} ${currency}`],
     [s.toLabel, to_name],

@@ -57,10 +57,10 @@ export default function Footer() {
             style={{ border: "2px solid rgba(255,255,255,0.6)", color: "white" }}>
             {t.nav.openAccount}
           </Link>
-          <a href="tel:+4969255102000"
+          <a href="mailto:support@kt-bank-ag.com"
             className="block w-full text-center py-3.5 rounded-full font-bold text-sm transition-opacity hover:opacity-90"
             style={{ border: "2px solid rgba(255,255,255,0.6)", color: "white" }}>
-            +49 69 255 10 200
+            support@kt-bank-ag.com
           </a>
         </div>
 
