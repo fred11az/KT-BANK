@@ -1,10 +1,28 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { useAdmin } from "../layout";
-import { Send, RefreshCw, Edit3, X, ChevronRight } from "lucide-react";
+import { Send, RefreshCw, Edit3, X, ArrowLeft, MessageSquare } from "lucide-react";
 
-type Message = { id: string; direction: "inbound" | "outbound"; from_email: string; to_email: string; subject: string; body_text: string; created_at: string };
-type Thread = { id: string; subject: string; client_email: string; client_name: string; status: string; unread: boolean; last_message_at: string; kt_email_messages: Message[] };
+type Message = {
+  id: string;
+  direction: "inbound" | "outbound";
+  from_email: string;
+  to_email: string;
+  subject: string;
+  body_text: string;
+  created_at: string;
+};
+type Thread = {
+  id: string;
+  subject: string;
+  client_email: string;
+  client_name: string;
+  status: string;
+  unread: boolean;
+  message_count: number;
+  last_message_at: string;
+  kt_email_messages: Message[];
+};
 
 export default function InboxPage() {
   const { token } = useAdmin();
@@ -17,7 +35,16 @@ export default function InboxPage() {
   const [compBody, setCompBody] = useState("");
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showChat, setShowChat] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function check() { setIsMobile(window.innerWidth < 768); }
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   function load(keepSelected = false) {
     setLoading(true);
@@ -34,7 +61,30 @@ export default function InboxPage() {
   }
 
   useEffect(() => { load(); }, []);
-  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [selected]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [selected?.id, showChat]);
+
+  function selectThread(t: Thread) {
+    setSelected(t);
+    if (isMobile) setShowChat(true);
+
+    if (t.unread) {
+      fetch("/api/kt/admin/inbox", {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ thread_id: t.id }),
+      });
+      setThreads((prev) => prev.map((th) => th.id === t.id ? { ...th, unread: false } : th));
+      setSelected({ ...t, unread: false });
+    }
+  }
+
+  function backToList() {
+    setShowChat(false);
+    setSelected(null);
+  }
 
   async function sendReply() {
     if (!selected || !replyText.trim()) return;
@@ -63,100 +113,200 @@ export default function InboxPage() {
     load(true);
   }
 
-  const selectedMsgs = selected?.kt_email_messages?.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) ?? [];
+  const selectedMsgs = (selected?.kt_email_messages ?? [])
+    .slice()
+    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+
+  const unreadCount = threads.filter((t) => t.unread).length;
+
+  /* On mobile: show either the list panel OR the chat panel */
+  const showListPanel = !isMobile || !showChat;
+  const showChatPanel = !isMobile || showChat;
+
+  /* Container height: account for the 52px mobile topbar added by layout */
+  const containerH = isMobile ? "calc(100dvh - 52px)" : "100dvh";
 
   return (
-    <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+    <div style={{ display: "flex", height: containerH, overflow: "hidden" }}>
 
-      {/* Thread list */}
-      <div style={{ width: 320, borderRight: "1px solid rgba(255,255,255,0.07)", display: "flex", flexDirection: "column", flexShrink: 0 }}>
-        <div style={{ padding: "16px 16px 12px", borderBottom: "1px solid rgba(255,255,255,0.07)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <h2 style={{ color: "white", fontWeight: 700, fontSize: "1rem", margin: 0 }}>Messagerie</h2>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={load} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", padding: 4 }}><RefreshCw size={15} /></button>
-            <button onClick={() => setComposing(true)} style={{ display: "flex", alignItems: "center", gap: 6, background: "#005F2D", border: "none", color: "white", borderRadius: 8, padding: "6px 12px", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer" }}>
-              <Edit3 size={13} /> Composer
-            </button>
-          </div>
-        </div>
-        <div style={{ flex: 1, overflowY: "auto" }}>
-          {loading ? (
-            <p style={{ padding: 20, color: "rgba(255,255,255,0.3)", fontSize: "0.85rem" }}>Chargement…</p>
-          ) : threads.length === 0 ? (
-            <p style={{ padding: 20, color: "rgba(255,255,255,0.3)", fontSize: "0.85rem", textAlign: "center" }}>Aucun message</p>
-          ) : threads.map((t) => (
-            <button key={t.id} onClick={() => setSelected(t)}
-              style={{ width: "100%", textAlign: "left", background: selected?.id === t.id ? "rgba(0,95,45,0.15)" : "transparent", border: "none", borderBottom: "1px solid rgba(255,255,255,0.05)", padding: "14px 16px", cursor: "pointer" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ color: "white", fontWeight: t.unread ? 700 : 500, fontSize: "0.85rem", margin: "0 0 3px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                    {t.client_name || t.client_email}
-                  </p>
-                  <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.78rem", margin: "0 0 3px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{t.subject}</p>
-                  <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.72rem", margin: 0 }}>{t.client_email}</p>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, flexShrink: 0 }}>
-                  <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.7rem", margin: 0 }}>{new Date(t.last_message_at).toLocaleDateString("fr-FR")}</p>
-                  {t.unread && <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#005F2D", display: "block" }} />}
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Message view */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-        {!selected ? (
-          <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12 }}>
-            <ChevronRight size={32} color="rgba(255,255,255,0.1)" />
-            <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.9rem" }}>Sélectionnez une conversation</p>
-          </div>
-        ) : (
-          <>
-            <div style={{ padding: "16px 24px", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
-              <p style={{ color: "white", fontWeight: 700, fontSize: "0.95rem", margin: "0 0 2px" }}>{selected.subject}</p>
-              <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.78rem", margin: 0 }}>{selected.client_email}</p>
+      {/* ── Thread list panel ── */}
+      {showListPanel && (
+        <div style={{
+          width: isMobile ? "100%" : 320,
+          borderRight: isMobile ? "none" : "1px solid rgba(255,255,255,0.07)",
+          display: "flex", flexDirection: "column", flexShrink: 0,
+        }}>
+          {/* Header */}
+          <div style={{ padding: "14px 16px 12px", borderBottom: "1px solid rgba(255,255,255,0.07)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <h2 style={{ color: "white", fontWeight: 700, fontSize: "1rem", margin: 0 }}>Messagerie</h2>
+              {unreadCount > 0 && (
+                <span style={{ background: "#005F2D", color: "white", fontSize: "0.7rem", fontWeight: 700, borderRadius: 20, padding: "2px 8px", lineHeight: 1.6 }}>
+                  {unreadCount}
+                </span>
+              )}
             </div>
-            <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px", display: "flex", flexDirection: "column", gap: 14 }}>
-              {selectedMsgs.map((msg) => {
-                const isOut = msg.direction === "outbound";
-                return (
-                  <div key={msg.id} style={{ display: "flex", flexDirection: "column", alignItems: isOut ? "flex-end" : "flex-start" }}>
-                    <div style={{ maxWidth: "75%", background: isOut ? "#005F2D" : "#252836", borderRadius: isOut ? "14px 14px 4px 14px" : "14px 14px 14px 4px", padding: "12px 16px" }}>
-                      <p style={{ color: "white", fontSize: "0.88rem", margin: 0, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{msg.body_text}</p>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={() => load()} title="Actualiser"
+                style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", padding: 6, borderRadius: 8, display: "flex" }}>
+                <RefreshCw size={15} />
+              </button>
+              <button onClick={() => setComposing(true)}
+                style={{ display: "flex", alignItems: "center", gap: 6, background: "#005F2D", border: "none", color: "white", borderRadius: 8, padding: "7px 12px", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer" }}>
+                <Edit3 size={13} /> Composer
+              </button>
+            </div>
+          </div>
+
+          {/* Thread rows */}
+          <div style={{ flex: 1, overflowY: "auto" }}>
+            {loading ? (
+              <p style={{ padding: 24, color: "rgba(255,255,255,0.3)", fontSize: "0.85rem", textAlign: "center" }}>Chargement…</p>
+            ) : threads.length === 0 ? (
+              <div style={{ padding: 48, textAlign: "center" }}>
+                <MessageSquare size={36} color="rgba(255,255,255,0.1)" style={{ marginBottom: 12 }} />
+                <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.85rem", margin: 0 }}>Aucun message</p>
+              </div>
+            ) : threads.map((t) => {
+              const msgCount = t.kt_email_messages?.length ?? t.message_count ?? 0;
+              const isActive = selected?.id === t.id && !isMobile;
+              return (
+                <button key={t.id} onClick={() => selectThread(t)}
+                  style={{
+                    width: "100%", textAlign: "left",
+                    background: isActive ? "rgba(0,95,45,0.18)" : "transparent",
+                    border: "none", borderBottom: "1px solid rgba(255,255,255,0.05)",
+                    padding: "13px 16px", cursor: "pointer",
+                    borderLeft: t.unread ? "3px solid #4CAF82" : "3px solid transparent",
+                  }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ color: "white", fontWeight: t.unread ? 700 : 500, fontSize: "0.85rem", margin: "0 0 3px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {t.client_name || t.client_email}
+                      </p>
+                      <p style={{ color: t.unread ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.4)", fontSize: "0.78rem", margin: "0 0 2px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {t.subject}
+                      </p>
+                      <p style={{ color: "rgba(255,255,255,0.22)", fontSize: "0.7rem", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {t.client_email}
+                      </p>
                     </div>
-                    <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.7rem", margin: "4px 4px 0" }}>
-                      {isOut ? "Vous" : selected.client_name || selected.client_email} · {new Date(msg.created_at).toLocaleString("fr-FR")}
-                    </p>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5, flexShrink: 0 }}>
+                      <p style={{ color: "rgba(255,255,255,0.28)", fontSize: "0.68rem", margin: 0 }}>
+                        {new Date(t.last_message_at).toLocaleDateString("fr-FR")}
+                      </p>
+                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                        {msgCount > 0 && (
+                          <span style={{ color: "rgba(255,255,255,0.28)", fontSize: "0.68rem" }}>
+                            {msgCount}
+                          </span>
+                        )}
+                        {t.unread ? (
+                          <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#4CAF82", display: "block", flexShrink: 0 }} />
+                        ) : (
+                          <span style={{ width: 8, height: 8, display: "block", flexShrink: 0 }} />
+                        )}
+                      </div>
+                    </div>
                   </div>
-                );
-              })}
-              <div ref={messagesEndRef} />
-            </div>
-            <div style={{ padding: "12px 24px 20px", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
-              <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
-                <textarea
-                  placeholder={`Répondre à ${selected.client_name || selected.client_email}…`}
-                  value={replyText} onChange={(e) => setReplyText(e.target.value)}
-                  rows={3}
-                  style={{ flex: 1, background: "#252836", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "white", fontSize: "0.9rem", padding: 12, outline: "none", resize: "none", fontFamily: "inherit" }}
-                />
-                <button onClick={sendReply} disabled={sending || !replyText.trim()}
-                  style={{ height: 44, width: 44, background: "#005F2D", border: "none", borderRadius: 10, color: "white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: (!replyText.trim() || sending) ? 0.5 : 1, flexShrink: 0 }}>
-                  <Send size={18} />
                 </button>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
-      {/* Compose modal */}
+      {/* ── Chat panel ── */}
+      {showChatPanel && (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0 }}>
+          {!selected ? (
+            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 14 }}>
+              <MessageSquare size={44} color="rgba(255,255,255,0.07)" />
+              <p style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.9rem", margin: 0 }}>Sélectionnez une conversation</p>
+            </div>
+          ) : (
+            <>
+              {/* Chat header */}
+              <div style={{ padding: "12px 18px", borderBottom: "1px solid rgba(255,255,255,0.07)", display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+                {isMobile && (
+                  <button onClick={backToList}
+                    style={{ background: "none", border: "none", color: "rgba(255,255,255,0.6)", cursor: "pointer", padding: "4px 2px", flexShrink: 0, display: "flex" }}>
+                    <ArrowLeft size={20} />
+                  </button>
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ color: "white", fontWeight: 700, fontSize: "0.92rem", margin: "0 0 2px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {selected.client_name || selected.client_email}
+                  </p>
+                  <p style={{ color: "rgba(255,255,255,0.38)", fontSize: "0.75rem", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {selected.subject}
+                  </p>
+                </div>
+                <span style={{
+                  padding: "3px 9px", borderRadius: 6, fontSize: "0.7rem", fontWeight: 600, flexShrink: 0,
+                  background: selected.status === "open" ? "rgba(0,95,45,0.25)" : "rgba(255,255,255,0.07)",
+                  color: selected.status === "open" ? "#4CAF82" : "rgba(255,255,255,0.35)",
+                }}>
+                  {selected.status === "open" ? "Ouvert" : "Fermé"}
+                </span>
+              </div>
+
+              {/* Messages */}
+              <div style={{ flex: 1, overflowY: "auto", padding: "16px 18px", display: "flex", flexDirection: "column", gap: 12 }}>
+                {selectedMsgs.length === 0 ? (
+                  <p style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.85rem", textAlign: "center", marginTop: 32 }}>Aucun message dans cette conversation</p>
+                ) : selectedMsgs.map((msg) => {
+                  const isOut = msg.direction === "outbound";
+                  return (
+                    <div key={msg.id} style={{ display: "flex", flexDirection: "column", alignItems: isOut ? "flex-end" : "flex-start" }}>
+                      <div style={{
+                        maxWidth: isMobile ? "88%" : "72%",
+                        background: isOut ? "#005F2D" : "#252836",
+                        borderRadius: isOut ? "14px 14px 4px 14px" : "14px 14px 14px 4px",
+                        padding: "10px 14px",
+                      }}>
+                        <p style={{ color: "white", fontSize: "0.87rem", margin: 0, lineHeight: 1.65, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+                          {msg.body_text}
+                        </p>
+                      </div>
+                      <p style={{ color: "rgba(255,255,255,0.22)", fontSize: "0.67rem", margin: "4px 4px 0" }}>
+                        {isOut ? "Vous" : (selected.client_name || selected.client_email)}
+                        {" · "}
+                        {new Date(msg.created_at).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                    </div>
+                  );
+                })}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Reply box */}
+              <div style={{ padding: "10px 16px 14px", borderTop: "1px solid rgba(255,255,255,0.07)", flexShrink: 0 }}>
+                <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
+                  <textarea
+                    placeholder={`Répondre à ${selected.client_name || selected.client_email}…`}
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) sendReply(); }}
+                    rows={isMobile ? 2 : 3}
+                    style={{ flex: 1, background: "#252836", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "white", fontSize: "0.9rem", padding: "10px 12px", outline: "none", resize: "none", fontFamily: "inherit" }}
+                  />
+                  <button onClick={sendReply} disabled={sending || !replyText.trim()}
+                    style={{ height: 42, width: 42, background: "#005F2D", border: "none", borderRadius: 10, color: "white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: (!replyText.trim() || sending) ? 0.45 : 1, flexShrink: 0 }}>
+                    <Send size={17} />
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* ── Compose modal ── */}
       {composing && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50 }}>
-          <div style={{ background: "#1A1D27", borderRadius: 16, padding: 28, width: "100%", maxWidth: 500, border: "1px solid rgba(255,255,255,0.1)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 60, padding: 16 }}>
+          <div style={{ background: "#1A1D27", borderRadius: 16, padding: 24, width: "100%", maxWidth: 480, border: "1px solid rgba(255,255,255,0.1)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
               <p style={{ color: "white", fontWeight: 700, fontSize: "1rem", margin: 0 }}>Nouveau message</p>
               <button onClick={() => setComposing(false)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer" }}><X size={20} /></button>
             </div>

@@ -20,6 +20,15 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ threads: data });
 }
 
+export async function PATCH(req: NextRequest) {
+  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const supabase = getSupabase();
+  const { thread_id } = await req.json();
+  if (!thread_id) return NextResponse.json({ error: "thread_id requis" }, { status: 400 });
+  await supabase.from("kt_email_threads").update({ unread: false }).eq("id", thread_id);
+  return NextResponse.json({ ok: true });
+}
+
 export async function POST(req: NextRequest) {
   if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   const supabase = getSupabase();
