@@ -380,6 +380,23 @@ function TransfersPage({ token, balance, transferRequests, kycStatus, accountSta
     };
   }, []);
 
+  // If the saved transfer is no longer pending_fee (proof already submitted), clear localStorage
+  useEffect(() => {
+    if (transferRequests.length === 0) return;
+    try {
+      const saved = localStorage.getItem(TRANSFER_STORAGE_KEY);
+      if (!saved) return;
+      const p = JSON.parse(saved);
+      if (!p.transferId) return;
+      const match = transferRequests.find((t) => t.id === p.transferId);
+      if (match && match.status !== "pending_fee") {
+        localStorage.removeItem(TRANSFER_STORAGE_KEY);
+        setPhase("form");
+        setFeeInfo(null);
+      }
+    } catch { /* ignore */ }
+  }, [transferRequests]);
+
   function applyApiSuccess(data: Record<string, unknown>, currentForm: typeof form) {
     const transferId = data.transfer_id as string;
     const fee = data.fee as { amount: number; currency: string };

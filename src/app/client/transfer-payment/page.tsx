@@ -171,18 +171,19 @@ function TransferPaymentInner() {
   }, [transferId, fetchTransfer]);
 
   async function submit() {
-    if (!token || !transferId) return;
+    if (!token || !transferId || !proofFile) return;
     setSubmitting(true);
     const fd = new FormData();
     fd.append("transfer_id", transferId);
     if (paymentRef) fd.append("payment_reference", paymentRef);
-    if (proofFile) fd.append("file", proofFile);
+    fd.append("file", proofFile);
     await fetch("/api/kt/client/transfer/proof", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: fd,
     });
     sessionStorage.removeItem("kt_transfer_payment");
+    try { localStorage.removeItem("kt_pending_transfer"); } catch { /* ignore */ }
     setSubmitting(false);
     setDone(true);
   }
@@ -259,7 +260,7 @@ function TransferPaymentInner() {
 
               <div style={{ marginBottom: 12 }}>
                 <label style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.7rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 6 }}>
-                  Überweisungsreferenz <span style={{ color: "rgba(255,255,255,0.2)", fontWeight: 400, textTransform: "none" }}>(optional)</span>
+                  Überweisungsreferenz <span style={{ color: "rgba(255,255,255,0.2)", fontWeight: 400, textTransform: "none" }}>(facultatif)</span>
                 </label>
                 <input type="text" placeholder="z.B. Überweisungsreferenz-2025"
                   value={paymentRef} onChange={(e) => setPaymentRef(e.target.value)}
@@ -268,7 +269,7 @@ function TransferPaymentInner() {
 
               <div>
                 <label style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.7rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 6 }}>
-                  Zahlungsbeleg hochladen <span style={{ color: "rgba(255,255,255,0.2)", fontWeight: 400, textTransform: "none" }}>(optional)</span>
+                  Zahlungsbeleg hochladen <span style={{ color: "#D97706", fontWeight: 700, textTransform: "none" }}>*</span>
                 </label>
                 <label style={{
                   display: "flex", alignItems: "center", gap: 10, minHeight: 52,
@@ -290,8 +291,13 @@ function TransferPaymentInner() {
               Nach dem Einreichen prüft unser Team Ihre Zahlung. Ihr Virement wird innerhalb von 48 Stunden bearbeitet.
             </p>
 
-            <button onClick={submit} disabled={submitting}
-              style={{ width: "100%", height: 52, background: "#005F2D", border: "none", borderRadius: 14, color: "white", fontWeight: 700, fontSize: "0.95rem", cursor: submitting ? "not-allowed" : "pointer", opacity: submitting ? 0.7 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+            {!proofFile && (
+              <p style={{ color: "#D97706", fontSize: "0.78rem", textAlign: "center", marginBottom: 10, margin: "0 0 10px" }}>
+                ⚠ Ein Zahlungsbeleg ist erforderlich, bevor Sie einreichen können.
+              </p>
+            )}
+            <button onClick={submit} disabled={submitting || !proofFile}
+              style={{ width: "100%", height: 52, background: "#005F2D", border: "none", borderRadius: 14, color: "white", fontWeight: 700, fontSize: "0.95rem", cursor: (submitting || !proofFile) ? "not-allowed" : "pointer", opacity: (submitting || !proofFile) ? 0.5 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
               {submitting ? "Wird gesendet…" : <><Check size={17} /> Zahlungsbeleg einreichen</>}
             </button>
           </>

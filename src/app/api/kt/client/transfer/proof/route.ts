@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase, getSupabaseAdmin } from "@/lib/supabase";
-import { sendAdminTransferFee } from "@/lib/email/send";
+import { sendAdminTransferFee, sendTransferStatus } from "@/lib/email/send";
 
 async function getSessionEmail(req: NextRequest): Promise<string | null> {
   const auth = req.headers.get("Authorization");
@@ -86,6 +86,23 @@ export async function POST(req: NextRequest) {
     reference: transfer.reference ?? undefined,
     payment_reference: payment_reference ?? undefined,
     transfer_id,
+  });
+
+  // Notify client: transfer is now processing, 48h delay
+  const { data: profileFull } = await supabase
+    .from("kt_profiles")
+    .select("lang")
+    .eq("id", profile.id)
+    .single();
+
+  await sendTransferStatus(profile.email, {
+    prenom: profile.prenom ?? "Client",
+    status: "processing",
+    amount: Number(transfer.amount),
+    currency: "EUR",
+    to_name: transfer.to_name,
+    reference: transfer.reference ?? undefined,
+    lang: (profileFull?.lang as "de" | "fr") ?? "de",
   });
 
   return NextResponse.json({ ok: true });
