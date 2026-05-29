@@ -367,7 +367,7 @@ function TransferPaymentInner() {
             </div>
 
             {/* Amount to pay banner */}
-            <div style={{ background: "rgba(217,119,6,0.12)", border: "1px solid rgba(217,119,6,0.3)", borderRadius: 14, padding: "14px 18px", marginBottom: 16, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ background: "rgba(217,119,6,0.12)", border: "1px solid rgba(217,119,6,0.3)", borderRadius: 14, padding: "14px 18px", marginBottom: 12, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div>
                 <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.68rem", textTransform: "uppercase", letterSpacing: "0.07em", margin: "0 0 3px" }}>Zu zahlende Gebühr</p>
                 <p style={{ color: "#FCD34D", fontWeight: 800, fontSize: "1.4rem", margin: 0 }}>{Number(transfer.fee_amount).toLocaleString("de-DE", { minimumFractionDigits: 2 })} EUR</p>
@@ -376,6 +376,14 @@ function TransferPaymentInner() {
                 <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.68rem", margin: "0 0 2px" }}>Überweisungsbetrag</p>
                 <p style={{ color: "rgba(255,255,255,0.6)", fontWeight: 600, fontSize: "0.85rem", margin: 0 }}>{Number(transfer.amount).toLocaleString("de-DE", { minimumFractionDigits: 2 })} EUR → {transfer.to_name}</p>
               </div>
+            </div>
+
+            {/* Instant transfer notice */}
+            <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.35)", borderRadius: 10, padding: "10px 14px", marginBottom: 16, display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: "1rem", flexShrink: 0 }}>⚡</span>
+              <p style={{ color: "#FCA5A5", fontSize: "0.78rem", margin: 0, lineHeight: 1.5 }}>
+                <strong style={{ color: "#F87171" }}>Virement instantané requis</strong> — Bitte nutzen Sie ausschließlich die <strong style={{ color: "#F87171" }}>Echtzeitüberweisung (SEPA Instant)</strong>. Standardüberweisungen werden nicht akzeptiert.
+              </p>
             </div>
 
             {/* Bank coordinates — secure portal style */}
