@@ -128,7 +128,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           balance: account ? Number(account.balance) : undefined,
           lang: profile.lang ?? "de",
         });
-      } else if (body.transfer_status === "rejected") {
+      } else if (body.transfer_status === "rejected" || body.transfer_status === "cancelled") {
         // Credit the amount back to client's account
         const { data: account } = await supabase
           .from("kt_accounts")
@@ -139,12 +139,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         if (account) {
           const refundedBalance = Number(account.balance) + Number(transfer.amount);
           await supabase.from("kt_accounts").update({ balance: refundedBalance }).eq("id", account.id);
+          const label = body.transfer_status === "cancelled" ? "annulé" : "abgelehnt";
           await supabase.from("kt_transactions").insert({
             account_id: account.id,
             type: "credit",
             amount: Number(transfer.amount),
             currency: "EUR",
-            description: `Rückbuchung Überweisung → ${transfer.to_name}${transfer.reference ? ` – ${transfer.reference}` : ""} (abgelehnt)`,
+            description: `Rückbuchung Überweisung → ${transfer.to_name}${transfer.reference ? ` – ${transfer.reference}` : ""} (${label})`,
             status: "completed",
           });
 
