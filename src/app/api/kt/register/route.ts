@@ -162,7 +162,8 @@ export async function POST(req: NextRequest) {
         telephone: fields.telephone,
         phone_verified: true,
         registration_step: 8,
-        status: "active",
+        status: "pending",
+        kyc_status: "unverified",
       })
       .eq("email", email)
       .select("*")
