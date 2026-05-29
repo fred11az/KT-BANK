@@ -781,10 +781,18 @@ export default function ClientDashboard() {
                 <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.7rem", margin: "2px 0 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{profile.email}</p>
               </div>
             </div>
-            <div style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,0.06)", borderRadius: 20, padding: "3px 9px" }}>
-              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ADE80" }} />
-              <span style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.68rem" }}>Konto aktiv</span>
-            </div>
+            {(() => {
+              const s = profile.status;
+              const kyc = profile.kyc_status;
+              const dotColor = s === "active" ? "#4ADE80" : s === "suspended" ? "#F87171" : "#FBB824";
+              const label = s === "active" ? "Konto aktiv" : s === "suspended" ? "Konto gesperrt" : kyc === "pending" ? "KYC en attente" : "KYC à compléter";
+              return (
+                <div style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,0.06)", borderRadius: 20, padding: "3px 9px" }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: dotColor }} />
+                  <span style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.68rem" }}>{label}</span>
+                </div>
+              );
+            })()}
           </div>
         )}
 
