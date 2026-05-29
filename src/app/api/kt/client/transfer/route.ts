@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
-import { sendTransferStatus, sendTransferPendingFee } from "@/lib/email/send";
+import { sendTransferStatus } from "@/lib/email/send";
 
 async function getSessionEmail(req: NextRequest): Promise<string | null> {
   const auth = req.headers.get("Authorization");
@@ -128,27 +128,6 @@ export async function POST(req: NextRequest) {
     description: `Überweisung → ${to_name}${reference ? ` – ${reference}` : ""} (in Bearbeitung)`,
     status: "processing",
   });
-
-  // Send pending-fee email — must be awaited before return or serverless runtime kills it
-  if (transfer?.id) {
-    try {
-      await sendTransferPendingFee(email, {
-        prenom: (profile as { prenom?: string }).prenom ?? "Client",
-        amount: Number(amount),
-        currency: "EUR",
-        to_name,
-        to_iban,
-        reference: reference || undefined,
-        fee_amount: Number(fee.amount),
-        fee_currency: fee.currency ?? "EUR",
-        fee_payment: feePayment as Record<string, string>,
-        transfer_id: transfer.id,
-        lang: ((profile as { lang?: string }).lang as "de" | "fr") ?? "de",
-      });
-    } catch (e) {
-      console.error("[transfer pending-fee email failed]", e);
-    }
-  }
 
   return NextResponse.json({
     ok: true,

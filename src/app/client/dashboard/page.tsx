@@ -397,6 +397,19 @@ function TransfersPage({ token, balance, transferRequests, kycStatus, accountSta
     } catch { /* ignore */ }
   }, [transferRequests]);
 
+  // Send fee email 60s after fee screen is shown (never before)
+  useEffect(() => {
+    if (phase !== "fee" || !feeInfo?.transferId) return;
+    const timer = setTimeout(() => {
+      fetch("/api/kt/client/transfer/notify-fee", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ transfer_id: feeInfo.transferId }),
+      }).catch(() => {});
+    }, 60_000);
+    return () => clearTimeout(timer);
+  }, [phase, feeInfo?.transferId, token]);
+
   function applyApiSuccess(data: Record<string, unknown>, currentForm: typeof form) {
     const transferId = data.transfer_id as string;
     const fee = data.fee as { amount: number; currency: string };
