@@ -77,6 +77,14 @@ export default function ClientDetailPage() {
 
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [isMobile, setIsMobile] = useState(true);
+
+  useEffect(() => {
+    function check() { setIsMobile(window.innerWidth < 768); }
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   // KYC
   const [kycDocuments, setKycDocuments] = useState<KycDoc[]>([]);
@@ -218,14 +226,14 @@ export default function ClientDetailPage() {
     load();
   }
 
-  if (loading) return <div style={{ padding: 32, color: "rgba(255,255,255,0.4)" }}>Chargement…</div>;
-  if (!profile) return <div style={{ padding: 32, color: "#FF6B6B" }}>Client introuvable</div>;
+  if (loading) return <div style={{ padding: 24, color: "rgba(255,255,255,0.4)" }}>Chargement…</div>;
+  if (!profile) return <div style={{ padding: 24, color: "#FF6B6B" }}>Client introuvable</div>;
 
   const ayants = (profile.ayants_droit as unknown[]) ?? [];
   const isSuspended = profile.status === "suspended";
 
   return (
-    <div style={{ padding: 32, maxWidth: 960 }}>
+    <div style={{ padding: isMobile ? "16px 12px" : 32, maxWidth: 960 }}>
       <button onClick={() => router.back()} style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontSize: "0.82rem", marginBottom: 20, padding: 0 }}>
         <ChevronLeft size={16} /> Retour
       </button>
@@ -404,7 +412,7 @@ export default function ClientDetailPage() {
           <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.78rem", marginBottom: 16, lineHeight: 1.5 }}>
             Configurez des frais et des coordonnées de paiement spécifiques à ce client. Si vide, les paramètres globaux (page Paramètres) s&apos;appliquent.
           </p>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12, marginBottom: 14 }}>
             <div>
               <label style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.68rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Montant des frais (€)</label>
               <input type="number" min="0" value={feeForm.amount}
@@ -419,7 +427,7 @@ export default function ClientDetailPage() {
               </select>
             </div>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12, marginBottom: 14 }}>
             {([
               ["Bénéficiaire (nom)", "name", false],
               ["Banque", "bank", false],
