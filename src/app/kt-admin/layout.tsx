@@ -118,7 +118,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [token, setToken] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(true); // start mobile-first to avoid flash
 
   useEffect(() => {
     const stored = sessionStorage.getItem("kt_admin_token");
