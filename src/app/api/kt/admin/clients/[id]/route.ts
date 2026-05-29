@@ -111,38 +111,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     if (transfer && profile?.email) {
       if (body.transfer_status === "completed") {
-        // Deduct balance from account
-        const { data: account } = await supabase
-          .from("kt_accounts")
-          .select("id, balance")
-          .eq("id", transfer.account_id)
-          .single();
-
-        if (account) {
-          const newBalance = Math.max(0, Number(account.balance) - Number(transfer.amount));
-          await supabase.from("kt_accounts").update({ balance: newBalance }).eq("id", account.id);
-          await supabase.from("kt_transactions").insert({
-            account_id: account.id,
-            type: "debit",
-            amount: Number(transfer.amount),
-            currency: "EUR",
-            description: `Virement vers ${transfer.to_name}${transfer.reference ? ` – ${transfer.reference}` : ""}`,
-            status: "completed",
-          });
-
-          await sendTransferStatus(profile.email, {
-            prenom: profile.prenom ?? "Client",
-            status: "completed",
-            amount: Number(transfer.amount),
-            currency: "EUR",
-            to_name: transfer.to_name,
-            reference: transfer.reference ?? undefined,
-            balance: newBalance,
-            lang: profile.lang ?? "de",
-          });
-        }
-      } else if (body.transfer_status === "rejected") {
-        // Get current balance for email
+        // Funds already debited at transfer creation — just send confirmation email
         const { data: account } = await supabase
           .from("kt_accounts")
           .select("balance")
@@ -151,15 +120,46 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
         await sendTransferStatus(profile.email, {
           prenom: profile.prenom ?? "Client",
-          status: "rejected",
+          status: "completed",
           amount: Number(transfer.amount),
           currency: "EUR",
           to_name: transfer.to_name,
           reference: transfer.reference ?? undefined,
           balance: account ? Number(account.balance) : undefined,
-          rejection_reason: body.rejection_reason ?? undefined,
           lang: profile.lang ?? "de",
         });
+      } else if (body.transfer_status === "rejected") {
+        // Credit the amount back to client's account
+        const { data: account } = await supabase
+          .from("kt_accounts")
+          .select("id, balance")
+          .eq("id", transfer.account_id)
+          .single();
+
+        if (account) {
+          const refundedBalance = Number(account.balance) + Number(transfer.amount);
+          await supabase.from("kt_accounts").update({ balance: refundedBalance }).eq("id", account.id);
+          await supabase.from("kt_transactions").insert({
+            account_id: account.id,
+            type: "credit",
+            amount: Number(transfer.amount),
+            currency: "EUR",
+            description: `Rückbuchung Überweisung → ${transfer.to_name}${transfer.reference ? ` – ${transfer.reference}` : ""} (abgelehnt)`,
+            status: "completed",
+          });
+
+          await sendTransferStatus(profile.email, {
+            prenom: profile.prenom ?? "Client",
+            status: "rejected",
+            amount: Number(transfer.amount),
+            currency: "EUR",
+            to_name: transfer.to_name,
+            reference: transfer.reference ?? undefined,
+            balance: refundedBalance,
+            rejection_reason: body.rejection_reason,
+            lang: profile.lang ?? "de",
+          });
+        }
       }
     }
   }

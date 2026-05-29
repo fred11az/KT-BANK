@@ -341,30 +341,30 @@ export function transferStatusEmail(opts: {
   const byStatus: Record<typeof status, { fr: Strings; de: Strings }> = {
     completed: {
       fr: {
-        subject: `Virement exécuté : -${amount.toFixed(2)} ${currency}`,
-        title: "Virement exécuté",
-        intro: `Votre virement a été traité avec succès, ${prenom}.`,
-        amountLabel: "Montant viré", toLabel: "Bénéficiaire", refLabel: "Référence", balanceLabel: "Solde après virement", cta: "Voir mes transactions",
+        subject: `Virement validé : -${amount.toFixed(2)} ${currency}`,
+        title: "Virement validé",
+        intro: `Votre virement a été approuvé par KT Bank, ${prenom}. Votre compte a été débité et le bénéficiaire recevra les fonds sous <strong>1 à 3 jours ouvrés</strong>.`,
+        amountLabel: "Montant viré", toLabel: "Bénéficiaire", refLabel: "Référence", balanceLabel: "Solde actuel", cta: "Voir mes transactions",
       },
       de: {
-        subject: `Überweisung ausgeführt: -${amount.toFixed(2)} ${currency}`,
-        title: "Überweisung ausgeführt",
-        intro: `Ihre Überweisung wurde erfolgreich ausgeführt, ${prenom}.`,
-        amountLabel: "Überweisungsbetrag", toLabel: "Empfänger", refLabel: "Verwendungszweck", balanceLabel: "Kontostand nach Überweisung", cta: "Transaktionen ansehen",
+        subject: `Überweisung genehmigt: -${amount.toFixed(2)} ${currency}`,
+        title: "Überweisung genehmigt",
+        intro: `Ihre Überweisung wurde von KT Bank genehmigt, ${prenom}. Ihr Konto wurde belastet. Der Empfänger erhält den Betrag innerhalb von <strong>1–3 Werktagen</strong>.`,
+        amountLabel: "Überweisungsbetrag", toLabel: "Empfänger", refLabel: "Verwendungszweck", balanceLabel: "Aktueller Kontostand", cta: "Transaktionen ansehen",
       },
     },
     rejected: {
       fr: {
-        subject: `Virement refusé : ${amount.toFixed(2)} ${currency}`,
+        subject: `Virement refusé — remboursement effectué : ${amount.toFixed(2)} ${currency}`,
         title: "Virement refusé",
-        intro: `Votre demande de virement a été refusée, ${prenom}.${rejection_reason ? ` Motif : ${rejection_reason}` : " Contactez votre conseiller pour plus d'informations."}`,
-        amountLabel: "Montant concerné", toLabel: "Bénéficiaire", refLabel: "Référence", balanceLabel: "Solde actuel", cta: "Contacter le support",
+        intro: `Votre demande de virement a été refusée, ${prenom}. ${rejection_reason ? `<strong>Motif :</strong> ${rejection_reason}` : "Contactez votre conseiller pour plus d'informations."}<br/><br/>Le montant de <strong>${amount.toFixed(2)} ${currency}</strong> a été <strong>remboursé sur votre compte</strong> immédiatement.`,
+        amountLabel: "Montant remboursé", toLabel: "Bénéficiaire concerné", refLabel: "Référence", balanceLabel: "Solde après remboursement", cta: "Voir mon compte",
       },
       de: {
-        subject: `Überweisung abgelehnt: ${amount.toFixed(2)} ${currency}`,
+        subject: `Überweisung abgelehnt — Betrag zurückgebucht: ${amount.toFixed(2)} ${currency}`,
         title: "Überweisung abgelehnt",
-        intro: `Ihr Überweisungsauftrag wurde abgelehnt, ${prenom}.${rejection_reason ? ` Ablehnungsgrund: ${rejection_reason}` : " Bitte kontaktieren Sie Ihren Berater für weitere Informationen."}`,
-        amountLabel: "Betroffener Betrag", toLabel: "Empfänger", refLabel: "Verwendungszweck", balanceLabel: "Aktueller Kontostand", cta: "Support kontaktieren",
+        intro: `Ihr Überweisungsauftrag wurde abgelehnt, ${prenom}. ${rejection_reason ? `<strong>Ablehnungsgrund:</strong> ${rejection_reason}` : "Bitte kontaktieren Sie Ihren Berater für weitere Informationen."}<br/><br/>Der Betrag von <strong>${amount.toFixed(2)} ${currency}</strong> wurde sofort auf Ihr Konto <strong>zurückgebucht</strong>.`,
+        amountLabel: "Zurückgebuchter Betrag", toLabel: "Empfänger", refLabel: "Verwendungszweck", balanceLabel: "Kontostand nach Rückbuchung", cta: "Kontostand prüfen",
       },
     },
     processing: {

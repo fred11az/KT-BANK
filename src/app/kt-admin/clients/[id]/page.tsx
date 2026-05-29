@@ -9,7 +9,7 @@ type FeePayment = { name: string; iban: string; bic: string; bank: string; refer
 type TransferFee = { amount: number; currency: string };
 type KtTx = { id: string; type: string; amount: number; currency: string; description: string; status: string; created_at: string };
 type Account = { id: string; iban: string; type: string; currency: string; balance: number; status: string; kt_cards: { last4: string; expiry_month: number; expiry_year: number; type: string; status: string }[]; kt_transactions: KtTx[] };
-type Transfer = { id: string; to_name: string; to_iban: string; amount: number; fee_amount: number; fee_paid: boolean; status: string; reference: string; payment_reference: string; payment_proof_url: string; created_at: string };
+type Transfer = { id: string; to_name: string; to_iban: string; amount: number; fee_amount: number; fee_paid: boolean; status: string; reference: string; rejection_reason?: string; payment_reference: string; payment_proof_url: string; created_at: string };
 
 function Section({ title, icon: Icon, children }: { title: string; icon: React.ElementType; children: React.ReactNode }) {
   return (
@@ -44,6 +44,7 @@ function TBadge({ status }: { status: string }) {
     processing: ["rgba(59,130,246,.15)", "#60A5FA", "En traitement"],
     completed: ["rgba(74,222,128,.15)", "#4ADE80", "Complété"],
     rejected: ["rgba(248,113,113,.15)", "#F87171", "Rejeté"],
+    cancelled: ["rgba(255,255,255,.06)", "rgba(255,255,255,.4)", "Annulé"],
   };
   const [bg, color, label] = m[status] ?? ["rgba(255,255,255,.1)", "rgba(255,255,255,.5)", status];
   return <span style={{ background: bg, color, fontSize: "0.72rem", fontWeight: 600, padding: "3px 9px", borderRadius: 20 }}>{label}</span>;
@@ -174,7 +175,7 @@ export default function ClientDetailPage() {
     await fetch(`/api/kt/admin/clients/${id}`, {
       method: "PATCH",
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ transfer_id, transfer_status, ...(rejection_reason ? { rejection_reason } : {}) }),
+      body: JSON.stringify({ transfer_id, transfer_status, rejection_reason: rejection_reason || undefined }),
     });
     setRejectTarget(null);
     setRejectReason("");
@@ -312,6 +313,7 @@ export default function ClientDetailPage() {
                   <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.72rem", margin: "2px 0 0", fontFamily: "monospace" }}>{t.to_iban}</p>
                   {t.reference && <p style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.7rem", margin: "2px 0 0" }}>Réf virement : {t.reference}</p>}
                   {t.payment_reference && <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.7rem", margin: "2px 0 0" }}>Réf paiement frais : {t.payment_reference}</p>}
+                  {t.rejection_reason && <p style={{ color: "#F87171", fontSize: "0.7rem", margin: "4px 0 0" }}>Motif : {t.rejection_reason}</p>}
                 </div>
                 <div style={{ textAlign: "right" }}>
                   <p style={{ color: "white", fontWeight: 700, fontSize: "0.88rem", margin: 0 }}>{Number(t.amount).toFixed(2)} €</p>
@@ -342,17 +344,23 @@ export default function ClientDetailPage() {
               {/* Inline rejection reason panel */}
               {rejectTarget === t.id && (
                 <div style={{ margin: "0 20px 14px", background: "rgba(248,113,113,0.06)", border: "1px solid rgba(248,113,113,0.2)", borderRadius: 10, padding: "12px 14px" }}>
-                  <p style={{ color: "#F87171", fontSize: "0.75rem", fontWeight: 600, margin: "0 0 8px" }}>Motif de rejet</p>
+                  <p style={{ color: "#F87171", fontSize: "0.75rem", fontWeight: 600, margin: "0 0 4px" }}>
+                    Motif de rejet <span style={{ color: "#F87171" }}>*</span>
+                  </p>
+                  <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.7rem", margin: "0 0 8px" }}>
+                    Obligatoire — sera affiché au client dans son tableau de bord et par e-mail.
+                  </p>
                   <input
                     type="text"
                     placeholder="Ex: Preuve de paiement insuffisante, informations incorrectes…"
                     value={rejectReason}
                     onChange={(e) => setRejectReason(e.target.value)}
-                    style={{ width: "100%", height: 38, background: "#252836", border: "1px solid rgba(248,113,113,0.3)", borderRadius: 8, color: "white", fontSize: "0.82rem", padding: "0 12px", boxSizing: "border-box", outline: "none", marginBottom: 10 }}
+                    style={{ width: "100%", height: 38, background: "#252836", border: `1px solid ${rejectReason ? "rgba(248,113,113,0.3)" : "rgba(248,113,113,0.6)"}`, borderRadius: 8, color: "white", fontSize: "0.82rem", padding: "0 12px", boxSizing: "border-box", outline: "none", marginBottom: 10 }}
                   />
                   <div style={{ display: "flex", gap: 8 }}>
-                    <button onClick={() => updateTransfer(t.id, "rejected", rejectReason || undefined)}
-                      style={{ flex: 1, height: 34, background: "#991B1B", border: "none", borderRadius: 8, color: "white", fontWeight: 700, fontSize: "0.78rem", cursor: "pointer" }}>
+                    <button onClick={() => updateTransfer(t.id, "rejected", rejectReason)}
+                      disabled={!rejectReason.trim()}
+                      style={{ flex: 1, height: 34, background: rejectReason.trim() ? "#991B1B" : "rgba(153,27,27,0.35)", border: "none", borderRadius: 8, color: "white", fontWeight: 700, fontSize: "0.78rem", cursor: rejectReason.trim() ? "pointer" : "not-allowed" }}>
                       Confirmer le rejet
                     </button>
                     <button onClick={() => setRejectTarget(null)}

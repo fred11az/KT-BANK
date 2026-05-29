@@ -110,6 +110,18 @@ export async function POST(req: NextRequest) {
     .select("id")
     .single();
 
+  // Immediately debit the transfer amount — refunded automatically if rejected
+  const newBalance = Number(account.balance) - Number(amount);
+  await supabase.from("kt_accounts").update({ balance: newBalance }).eq("id", account.id);
+  await supabase.from("kt_transactions").insert({
+    account_id: account.id,
+    type: "debit",
+    amount: Number(amount),
+    currency: "EUR",
+    description: `Überweisung → ${to_name}${reference ? ` – ${reference}` : ""} (in Bearbeitung)`,
+    status: "processing",
+  });
+
   // Send pending-fee email — must be awaited before return or serverless runtime kills it
   if (transfer?.id) {
     try {
