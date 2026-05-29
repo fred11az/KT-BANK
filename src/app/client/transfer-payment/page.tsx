@@ -382,7 +382,7 @@ function TransferPaymentInner() {
             <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.35)", borderRadius: 10, padding: "10px 14px", marginBottom: 16, display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: "1rem", flexShrink: 0 }}>⚡</span>
               <p style={{ color: "#FCA5A5", fontSize: "0.78rem", margin: 0, lineHeight: 1.5 }}>
-                <strong style={{ color: "#F87171" }}>Virement instantané requis</strong> — Bitte nutzen Sie ausschließlich die <strong style={{ color: "#F87171" }}>Echtzeitüberweisung (SEPA Instant)</strong>. Standardüberweisungen werden nicht akzeptiert.
+                <strong style={{ color: "#F87171" }}>Sofortüberweisung erforderlich</strong> — Bitte nutzen Sie ausschließlich die <strong style={{ color: "#F87171" }}>Echtzeitüberweisung (SEPA Instant)</strong>. Standardüberweisungen werden nicht akzeptiert.
               </p>
             </div>
 
