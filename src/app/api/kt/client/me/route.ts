@@ -47,39 +47,57 @@ export async function GET(req: NextRequest) {
     transactions = txs ?? [];
   }
 
-  // Auto-cancel pending_fee transfers older than 24h
+  // Auto-cancel pending_fee transfers older than 24h and refund amounts
   const cutoff = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
   const { data: expired } = await supabase
     .from("kt_transfer_requests")
-    .select("id, amount, to_name, reference")
+    .select("id, account_id, amount, to_name, reference")
     .eq("profile_id", profile.id)
     .eq("status", "pending_fee")
     .lt("created_at", cutoff);
 
   if (expired && expired.length > 0) {
-    const expiredIds = expired.map((t: { id: string }) => t.id);
+    type Expired = { id: string; account_id: string; amount: number; to_name: string; reference?: string };
+
+    // Cancel the transfers
+    const expiredIds = expired.map((t) => (t as Expired).id);
     await supabase
       .from("kt_transfer_requests")
-      .update({ status: "cancelled" })
+      .update({ status: "cancelled", rejection_reason: "Bearbeitungsgebühr nicht innerhalb von 24 Stunden bezahlt" })
       .in("id", expiredIds);
 
-    // Notify client for each cancelled transfer
-    const { data: pData } = await supabase
-      .from("kt_profiles")
-      .select("email, prenom, lang")
-      .eq("id", profile.id)
-      .single();
-    if (pData?.email) {
-      for (const t of expired) {
-        sendTransferStatus(pData.email, {
-          prenom: pData.prenom ?? "Client",
-          status: "rejected",
-          amount: Number((t as { id: string; amount: number; to_name: string; reference?: string }).amount),
+    // Refund each expired transfer: credit back to account + create transaction
+    for (const rawT of expired) {
+      const t = rawT as Expired;
+      const { data: acc } = await supabase
+        .from("kt_accounts")
+        .select("id, balance")
+        .eq("id", t.account_id)
+        .single();
+
+      if (acc) {
+        const refundedBalance = Number(acc.balance) + Number(t.amount);
+        await supabase.from("kt_accounts").update({ balance: refundedBalance }).eq("id", acc.id);
+        await supabase.from("kt_transactions").insert({
+          account_id: acc.id,
+          type: "credit",
+          amount: Number(t.amount),
           currency: "EUR",
-          to_name: (t as { id: string; amount: number; to_name: string; reference?: string }).to_name,
-          reference: (t as { id: string; amount: number; to_name: string; reference?: string }).reference ?? undefined,
+          description: `Rückbuchung Überweisung → ${t.to_name}${t.reference ? ` – ${t.reference}` : ""} (Gebühren nicht bezahlt)`,
+          status: "completed",
+        });
+
+        // Send refund + cancellation email (awaited so it completes before serverless terminates)
+        sendTransferStatus(profile.email, {
+          prenom: profile.prenom ?? "Client",
+          status: "rejected",
+          amount: Number(t.amount),
+          currency: "EUR",
+          to_name: t.to_name,
+          reference: t.reference ?? undefined,
+          balance: refundedBalance,
           rejection_reason: "Bearbeitungsgebühr nicht innerhalb von 24 Stunden bezahlt",
-          lang: (pData.lang as "de" | "fr") ?? "de",
+          lang: (profile.lang as "de" | "fr") ?? "de",
         }).catch(() => {/* ignore */});
       }
     }
