@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   LayoutDashboard, Wallet, ArrowLeftRight, CreditCard, PiggyBank,
   Heart, FileText, User, LogOut, Bell, Send, RefreshCw, Banknote,
@@ -13,6 +13,7 @@ type KtCard = { id: string; last4: string; expiry_month: number; expiry_year: nu
 type Account = { id: string; iban: string; bic: string; type: string; currency: string; balance: number; status: string; opened_at: string; created_at: string; kt_cards: KtCard[] };
 type Transaction = { id: string; type: string; amount: number; currency: string; description: string; counterpart_name: string; created_at: string };
 type TransferRequest = { id: string; to_name: string; to_iban: string; amount: number; fee_amount: number; fee_paid: boolean; status: string; reference?: string; rejection_reason?: string; created_at: string };
+type KycDocument = { id: string; document_type: string; status: string; notes?: string; created_at: string };
 type Profile = {
   id: string; prenom: string; nom: string; email: string; telephone: string;
   pays_residence: string; nationalite: string; adresse: string; ville: string;
@@ -38,6 +39,7 @@ const NAV = [
   { icon: PiggyBank, label: "Sparen", id: "savings" },
   { icon: Heart, label: "Spende / Zakat", id: "zakat" },
   { icon: FileText, label: "Dokumente", id: "docs" },
+  { icon: Shield, label: "KYC / Identität", id: "kyc" },
   { icon: User, label: "Profil", id: "profile" },
 ];
 
@@ -151,6 +153,169 @@ function InfoRow({ label, value, mono }: { label: string; value: string; mono?: 
   );
 }
 
+/* ── KYC PAGE (module-level) ── */
+const DOC_TYPES = [
+  { id: "id_front", label: "Vorderseite Ausweis", desc: "Vorderseite Personalausweis oder Reisepass" },
+  { id: "id_back",  label: "Rückseite Ausweis",   desc: "Rückseite Personalausweis (nicht nötig bei Reisepass)" },
+  { id: "selfie",   label: "Selfie mit Ausweis",  desc: "Foto von Ihnen, auf dem Sie Ihren Ausweis halten" },
+] as const;
+
+function KycPage({ token, kycStatus, accountStatus, activationRequired }: {
+  token: string; kycStatus: string; accountStatus: string; activationRequired: boolean;
+}) {
+  const [docs, setDocs] = React.useState<KycDocument[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [uploading, setUploading] = React.useState<string | null>(null);
+  const [uploadErr, setUploadErr] = React.useState<string | null>(null);
+  const [uploadOk, setUploadOk] = React.useState<string | null>(null);
+
+  function fetchDocs() {
+    fetch("/api/kt/client/kyc", { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(d => { setDocs(d.documents ?? []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }
+  React.useEffect(() => { fetchDocs(); }, [token]);
+
+  async function upload(docType: string, file: File) {
+    setUploading(docType); setUploadErr(null); setUploadOk(null);
+    const fd = new FormData();
+    fd.append("file", file); fd.append("document_type", docType);
+    const res = await fetch("/api/kt/client/kyc", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: fd,
+    });
+    const data = await res.json();
+    if (!res.ok) { setUploadErr(data.error || "Fehler"); }
+    else { setUploadOk(docType); fetchDocs(); }
+    setUploading(null);
+  }
+
+  const docMap = Object.fromEntries(docs.map(d => [d.document_type, d]));
+
+  const statusBg: Record<string, string> = {
+    unverified: "#FEF2F2", pending: "#FFFBF0", approved: "#F0FDF4", rejected: "#FEF2F2",
+  };
+  const statusColor: Record<string, string> = {
+    unverified: "#991B1B", pending: "#92400E", approved: "#166534", rejected: "#991B1B",
+  };
+  const statusLabel: Record<string, string> = {
+    unverified: "Nicht verifiziert", pending: "Wird überprüft", approved: "Verifiziert ✓", rejected: "Abgelehnt",
+  };
+  const statusIcon: Record<string, React.ReactNode> = {
+    unverified: <AlertCircle size={20} color="#DC2626" />,
+    pending: <Clock size={20} color="#D97706" />,
+    approved: <Check size={20} color="#16A34A" />,
+    rejected: <AlertCircle size={20} color="#DC2626" />,
+  };
+
+  const effectiveKyc = kycStatus || "unverified";
+
+  return (
+    <div style={{ padding: 24, maxWidth: 640 }}>
+      <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 20px" }}>KYC / Identitätsverifizierung</h2>
+
+      {/* Status banner */}
+      <div style={{ background: statusBg[effectiveKyc] ?? "#F8FAFC", border: `1px solid ${statusColor[effectiveKyc] ?? "#94A3B8"}30`, borderRadius: 16, padding: "18px 22px", marginBottom: 20, display: "flex", alignItems: "center", gap: 14 }}>
+        {statusIcon[effectiveKyc]}
+        <div>
+          <p style={{ color: statusColor[effectiveKyc] ?? "#334155", fontWeight: 700, fontSize: "0.9rem", margin: 0 }}>{statusLabel[effectiveKyc] ?? effectiveKyc}</p>
+          <p style={{ color: statusColor[effectiveKyc] ?? "#334155", fontSize: "0.78rem", margin: "3px 0 0", opacity: 0.8 }}>
+            {effectiveKyc === "unverified" && "Laden Sie Ihre Identitätsdokumente hoch, um Ihr Konto freizuschalten."}
+            {effectiveKyc === "pending" && "Ihre Dokumente werden geprüft. Dies dauert in der Regel 1–3 Werktage."}
+            {effectiveKyc === "approved" && accountStatus === "active" && "Ihr Konto ist vollständig verifiziert und aktiv."}
+            {effectiveKyc === "approved" && accountStatus !== "active" && "KYC abgeschlossen. Aktivierungseinzahlung erforderlich (siehe unten)."}
+            {effectiveKyc === "rejected" && "Ihre Dokumente wurden abgelehnt. Bitte laden Sie neue Dokumente hoch."}
+          </p>
+        </div>
+      </div>
+
+      {/* Activation deposit instructions */}
+      {effectiveKyc === "approved" && accountStatus !== "active" && activationRequired && (
+        <div style={{ background: "#FFFBF0", border: "2px solid #FDE68A", borderRadius: 16, padding: "20px 22px", marginBottom: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+            <Building2 size={18} color="#D97706" />
+            <p style={{ color: "#92400E", fontWeight: 700, fontSize: "0.9rem", margin: 0 }}>Kontoaktivierung — Mindesteinzahlung erforderlich</p>
+          </div>
+          <p style={{ color: "#78350F", fontSize: "0.82rem", margin: "0 0 14px", lineHeight: 1.6 }}>
+            Um Ihr Konto zu aktivieren, überweisen Sie bitte einen <strong>Mindestbetrag von 250 €</strong> auf folgendes Konto:
+          </p>
+          {[
+            ["Empfänger", "KT Bank AG"],
+            ["IBAN", "DE89 3704 0044 0532 0130 00"],
+            ["BIC", "KTAGDEFF"],
+            ["Verwendungszweck", "AKTIVIERUNG"],
+          ].map(([k, v]) => (
+            <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #FDE68A" }}>
+              <span style={{ color: "#92400E", fontSize: "0.78rem" }}>{k}</span>
+              <span style={{ color: "#78350F", fontWeight: 700, fontSize: "0.82rem", fontFamily: k === "IBAN" || k === "BIC" ? "monospace" : "inherit" }}>{v}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Document upload section (shown if not yet approved) */}
+      {effectiveKyc !== "approved" && (
+        <div style={{ background: "white", borderRadius: 18, border: "1px solid #E9EEF4", overflow: "hidden" }}>
+          <div style={{ padding: "16px 22px", borderBottom: "1px solid #F1F5F9" }}>
+            <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.88rem", margin: 0 }}>Erforderliche Dokumente</p>
+            <p style={{ color: "#64748B", fontSize: "0.75rem", margin: "3px 0 0" }}>Akzeptierte Formate: JPG, PNG, PDF — max. 10 MB pro Datei</p>
+          </div>
+          {uploadErr && (
+            <div style={{ margin: "14px 22px 0", background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 10, padding: "10px 14px" }}>
+              <p style={{ color: "#DC2626", fontSize: "0.8rem", margin: 0 }}>{uploadErr}</p>
+            </div>
+          )}
+          {loading ? (
+            <div style={{ padding: "32px", textAlign: "center" }}>
+              <RefreshCw size={20} color="#CBD5E1" style={{ animation: "spin 1s linear infinite" }} />
+            </div>
+          ) : (
+            DOC_TYPES.map(({ id: docType, label, desc }) => {
+              const existing = docMap[docType];
+              const isUploading = uploading === docType;
+              const justUploaded = uploadOk === docType;
+              return (
+                <div key={docType} style={{ padding: "16px 22px", borderBottom: "1px solid #F8FAFC" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ color: "#0F172A", fontWeight: 600, fontSize: "0.85rem", margin: 0 }}>{label}</p>
+                      <p style={{ color: "#94A3B8", fontSize: "0.72rem", margin: "2px 0 0" }}>{desc}</p>
+                      {existing && (
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, marginTop: 5, background: existing.status === "pending" ? "#FFFBF0" : "#F0FDF4", color: existing.status === "pending" ? "#D97706" : "#16A34A", fontSize: "0.68rem", fontWeight: 700, padding: "2px 8px", borderRadius: 20 }}>
+                          {existing.status === "pending" ? "⏳ In Bearbeitung" : "✓ Eingereicht"}
+                        </span>
+                      )}
+                    </div>
+                    <label style={{ display: "flex", alignItems: "center", gap: 6, height: 36, padding: "0 14px", background: isUploading ? "#F1F5F9" : justUploaded ? "#F0FDF4" : existing ? "#F8FAFC" : "#005F2D", border: `1px solid ${existing ? "#E2E8F0" : "transparent"}`, borderRadius: 10, color: isUploading ? "#94A3B8" : justUploaded ? "#16A34A" : existing ? "#64748B" : "white", fontWeight: 600, fontSize: "0.78rem", cursor: isUploading ? "not-allowed" : "pointer", whiteSpace: "nowrap" }}>
+                      {isUploading ? <><RefreshCw size={12} /> Lädt…</> : justUploaded ? <><Check size={12} /> Hochgeladen</> : existing ? <><RefreshCw size={12} /> Ersetzen</> : <><Plus size={12} /> Hochladen</>}
+                      <input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" style={{ display: "none" }}
+                        onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(docType, f); e.target.value = ""; }}
+                        disabled={isUploading} />
+                    </label>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
+
+      {/* Approved — all good */}
+      {effectiveKyc === "approved" && accountStatus === "active" && (
+        <div style={{ background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 16, padding: "24px", textAlign: "center" }}>
+          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#DCFCE7", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
+            <Check size={26} color="#16A34A" />
+          </div>
+          <p style={{ color: "#166534", fontWeight: 800, fontSize: "1rem", margin: "0 0 6px" }}>Konto vollständig verifiziert</p>
+          <p style={{ color: "#166534", fontSize: "0.82rem", margin: 0, opacity: 0.75 }}>Alle KYC-Anforderungen erfüllt. Voller Zugang zu allen Diensten.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── TRANSFERS PAGE (module-level to prevent remount on parent re-render) ── */
 const TRANSFER_STORAGE_KEY = "kt_pending_transfer";
 
@@ -169,8 +334,9 @@ function getMsgForProgress(p: number) {
   return msg;
 }
 
-function TransfersPage({ token, balance, transferRequests }: {
+function TransfersPage({ token, balance, transferRequests, kycStatus, accountStatus, onGoToKyc }: {
   token: string; balance: number; transferRequests: TransferRequest[];
+  kycStatus: string; accountStatus: string; onGoToKyc: () => void;
 }) {
   const [form, setForm] = useState({ to: "", iban: "", amount: "", ref: "" });
   const [phase, setPhase] = useState<"form" | "progress" | "fee" | "error">("form");
@@ -253,6 +419,7 @@ function TransfersPage({ token, balance, transferRequests }: {
       const data = await res.json();
       if (!res.ok) {
         apiErrorRef.current =
+          data.code === "KYC_REQUIRED" ? "KYC-Verifizierung erforderlich. Bitte laden Sie Ihre Dokumente im KYC-Bereich hoch." :
           data.code === "ACCOUNT_SUSPENDED" ? "Ihr Konto ist deaktiviert. Bitte kontaktieren Sie Ihren Berater." :
           data.code === "INSUFFICIENT_FUNDS" ? `Unzureichendes Guthaben. Kontostand: ${Number(data.balance).toLocaleString("de-DE", { minimumFractionDigits: 2 })} €` :
           (data.error as string) || "Fehler bei der Bearbeitung.";
@@ -320,6 +487,47 @@ function TransfersPage({ token, balance, transferRequests }: {
     setStatusMsg(PROGRESS_STEPS[0].msg);
     apiResultRef.current = null;
     apiErrorRef.current = null;
+  }
+
+  // KYC / activation blocking views
+  if (kycStatus !== "approved") {
+    return (
+      <div style={{ padding: 24, maxWidth: 620 }}>
+        <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 20px" }}>SEPA-Überweisung</h2>
+        <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 18, padding: "36px 28px", textAlign: "center" }}>
+          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#FEE2E2", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+            <Shield size={26} color="#DC2626" />
+          </div>
+          <p style={{ color: "#991B1B", fontWeight: 800, fontSize: "1rem", margin: "0 0 8px" }}>KYC-Verifizierung erforderlich</p>
+          <p style={{ color: "#DC2626", fontSize: "0.85rem", margin: "0 0 24px", lineHeight: 1.6, maxWidth: 380, marginLeft: "auto", marginRight: "auto" }}>
+            Ihre Identität muss zuerst verifiziert werden, bevor Sie Überweisungen tätigen können. Bitte laden Sie Ihre Dokumente im KYC-Bereich hoch.
+          </p>
+          <button onClick={onGoToKyc} style={{ height: 44, padding: "0 24px", background: "#DC2626", border: "none", borderRadius: 12, color: "white", fontWeight: 700, fontSize: "0.88rem", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8 }}>
+            <Shield size={15} /> KYC abschließen →
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (accountStatus !== "active") {
+    return (
+      <div style={{ padding: 24, maxWidth: 620 }}>
+        <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 20px" }}>SEPA-Überweisung</h2>
+        <div style={{ background: "#FFFBF0", border: "1px solid #FDE68A", borderRadius: 18, padding: "36px 28px", textAlign: "center" }}>
+          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#FEF3C7", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+            <AlertCircle size={26} color="#D97706" />
+          </div>
+          <p style={{ color: "#92400E", fontWeight: 800, fontSize: "1rem", margin: "0 0 8px" }}>Konto noch nicht aktiviert</p>
+          <p style={{ color: "#78350F", fontSize: "0.85rem", margin: "0 0 24px", lineHeight: 1.6 }}>
+            Ihr Konto benötigt eine Aktivierungseinzahlung von mindestens 250 €. Bitte schauen Sie im KYC-Bereich nach den Überweisungsdetails.
+          </p>
+          <button onClick={onGoToKyc} style={{ height: 44, padding: "0 24px", background: "#D97706", border: "none", borderRadius: 12, color: "white", fontWeight: 700, fontSize: "0.88rem", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8 }}>
+            <Shield size={15} /> Konto aktivieren →
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -646,6 +854,50 @@ export default function ClientDashboard() {
           </div>
         </div>
 
+        {/* KYC pending banner */}
+        {profile && (profile.kyc_status !== "approved") && (
+          <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 14, padding: "14px 18px", marginBottom: 16, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: "#FEE2E2", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Shield size={16} color="#DC2626" />
+              </div>
+              <div>
+                <p style={{ color: "#991B1B", fontWeight: 700, fontSize: "0.85rem", margin: 0 }}>
+                  {profile.kyc_status === "pending" ? "KYC-Prüfung läuft" : "KYC-Verifizierung erforderlich"}
+                </p>
+                <p style={{ color: "#DC2626", fontSize: "0.75rem", margin: "2px 0 0" }}>
+                  {profile.kyc_status === "pending"
+                    ? "Ihre Dokumente werden geprüft — Überweisungen werden nach Genehmigung freigeschaltet."
+                    : "Laden Sie Ihre Identitätsdokumente hoch, um alle Funktionen zu nutzen."}
+                </p>
+              </div>
+            </div>
+            <button onClick={() => setActiveNav("kyc")}
+              style={{ height: 36, padding: "0 16px", background: "#DC2626", border: "none", borderRadius: 10, color: "white", fontWeight: 700, fontSize: "0.78rem", cursor: "pointer", whiteSpace: "nowrap" }}>
+              KYC abschließen →
+            </button>
+          </div>
+        )}
+
+        {/* Account activation required banner */}
+        {profile && profile.kyc_status === "approved" && profile.status !== "active" && (
+          <div style={{ background: "#FFFBF0", border: "1px solid #FDE68A", borderRadius: 14, padding: "14px 18px", marginBottom: 16, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: "#FEF3C7", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <AlertCircle size={16} color="#D97706" />
+              </div>
+              <div>
+                <p style={{ color: "#92400E", fontWeight: 700, fontSize: "0.85rem", margin: 0 }}>Aktivierungseinzahlung erforderlich</p>
+                <p style={{ color: "#78350F", fontSize: "0.75rem", margin: "2px 0 0" }}>Überweisen Sie mindestens 250 € um Ihr Konto zu aktivieren.</p>
+              </div>
+            </div>
+            <button onClick={() => setActiveNav("kyc")}
+              style={{ height: 36, padding: "0 16px", background: "#D97706", border: "none", borderRadius: 10, color: "white", fontWeight: 700, fontSize: "0.78rem", cursor: "pointer", whiteSpace: "nowrap" }}>
+              Einzahlungsdetails →
+            </button>
+          </div>
+        )}
+
         {/* Pending transfer banner */}
         {transferRequests.some((t) => t.status === "pending_fee") && (
           <div style={{ background: "#FFFBF0", border: "1px solid #FDE68A", borderRadius: 14, padding: "14px 18px", marginBottom: 16, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
@@ -960,7 +1212,7 @@ export default function ClientDashboard() {
               {[
                 { label: "E-Mail verifiziert", ok: true, icon: Mail },
                 { label: "Telefon verifiziert", ok: !!profile.telephone, icon: Phone },
-                { label: "KYC", ok: profile.kyc_status === "verified", val: profile.kyc_status === "verified" ? "Verifiziert" : "In Bearbeitung", icon: Shield },
+                { label: "KYC", ok: profile.kyc_status === "approved", val: profile.kyc_status === "approved" ? "Verifiziert ✓" : profile.kyc_status === "pending" ? "In Prüfung" : profile.kyc_status === "rejected" ? "Abgelehnt" : "Ausstehend", icon: Shield },
               ].map(({ label, ok, val, icon: Icon }) => (
                 <div key={label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 22px", borderBottom: "1px solid #F8FAFC" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -1074,11 +1326,15 @@ export default function ClientDashboard() {
   const pages: Record<string, React.ReactNode> = {
     dashboard: <DashboardHome />,
     accounts: <AccountsPage />,
-    transfers: <TransfersPage token={token!} balance={balance} transferRequests={transferRequests} />,
+    transfers: <TransfersPage token={token!} balance={balance} transferRequests={transferRequests}
+      kycStatus={profile?.kyc_status ?? "unverified"} accountStatus={profile?.status ?? "pending"}
+      onGoToKyc={() => setActiveNav("kyc")} />,
     cards: <CardsPage />,
     savings: <SavingsPage />,
     zakat: <ZakatPage />,
     docs: <DocsPage />,
+    kyc: <KycPage token={token!} kycStatus={profile?.kyc_status ?? "unverified"}
+      accountStatus={profile?.status ?? "pending"} activationRequired={!!(profile as Record<string, unknown>)?.activation_required} />,
     profile: <ProfilePage />,
   };
 

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
-import { sendTransactionNotification, sendTransferStatus } from "@/lib/email/send";
+import {
+  sendTransactionNotification, sendTransferStatus,
+  sendKycApproved, sendAccountActivationRequired, sendKycRejected, sendAccountActivated,
+} from "@/lib/email/send";
 
 function auth(req: NextRequest) {
   const key = process.env.KT_ADMIN_KEY;
@@ -30,7 +33,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     .eq("profile_id", id)
     .order("created_at", { ascending: false });
 
-  return NextResponse.json({ profile, accounts: accounts ?? [], transfers: transfers ?? [] });
+  const { data: kycDocuments } = await supabase
+    .from("kt_kyc_documents")
+    .select("id, document_type, file_path, status, notes, created_at")
+    .eq("profile_id", id)
+    .order("created_at", { ascending: true });
+
+  return NextResponse.json({ profile, accounts: accounts ?? [], transfers: transfers ?? [], kyc_documents: kycDocuments ?? [] });
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -39,19 +48,54 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const supabase = getSupabase();
   const body = await req.json();
 
-  // Fetch profile for email/prenom/lang
+  // Fetch profile for email/prenom/lang/activation state
   const { data: profile } = await supabase
     .from("kt_profiles")
-    .select("email, prenom, lang, status")
+    .select("email, prenom, lang, status, activation_required, kyc_status")
     .eq("id", id)
     .single();
 
-  // Profile fields (status, kyc_status, custom fee/payment overrides)
-  const profileFields = ["status", "kyc_status", "custom_fee", "custom_fee_payment"];
+  // Profile fields (non-KYC updates)
+  const profileFields = ["status", "custom_fee", "custom_fee_payment", "activation_required"];
   const profileUpdate = Object.fromEntries(Object.entries(body).filter(([k]) => profileFields.includes(k)));
   if (Object.keys(profileUpdate).length > 0) {
     const { error } = await supabase.from("kt_profiles").update(profileUpdate).eq("id", id);
     if (error) return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+  }
+
+  // KYC status update (with auto-activation + email logic)
+  if (body.kyc_status && ["approved", "rejected", "pending", "unverified"].includes(body.kyc_status as string)) {
+    const activationRequired = profile?.activation_required ?? false;
+    const kycUpdate: Record<string, unknown> = { kyc_status: body.kyc_status };
+
+    if (body.kyc_status === "approved" && !activationRequired) {
+      kycUpdate.status = "active";
+    }
+    await supabase.from("kt_profiles").update(kycUpdate).eq("id", id);
+
+    if (profile?.email) {
+      if (body.kyc_status === "approved") {
+        if (!activationRequired) {
+          await sendKycApproved(profile.email, { prenom: profile.prenom ?? "Client", lang: profile.lang ?? "de" });
+        } else {
+          const { data: payRow } = await supabase.from("kt_settings").select("value").eq("key", "fee_payment").single();
+          const fp = (payRow?.value ?? {}) as Record<string, string>;
+          await sendAccountActivationRequired(profile.email, {
+            prenom: profile.prenom ?? "Client",
+            bank_name: fp.name ?? "KT Bank AG",
+            bank_iban: fp.iban ?? "DE89370400440532013000",
+            bank_bic: fp.bic ?? "KTAGDEFF",
+            lang: profile.lang ?? "de",
+          });
+        }
+      } else if (body.kyc_status === "rejected") {
+        await sendKycRejected(profile.email, {
+          prenom: profile.prenom ?? "Client",
+          notes: body.kyc_notes as string | undefined,
+          lang: profile.lang ?? "de",
+        });
+      }
+    }
   }
 
   // Credit / debit balance
@@ -89,6 +133,24 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
             balance: newBalance,
             lang: profile.lang ?? "de",
           });
+        }
+
+        // Auto-activate if activation_required, KYC approved, and balance now >= 250
+        if (
+          delta > 0 &&
+          profile?.activation_required &&
+          (profile?.kyc_status ?? "") === "approved" &&
+          (profile?.status ?? "") !== "active" &&
+          newBalance >= 250
+        ) {
+          await supabase.from("kt_profiles").update({ status: "active" }).eq("id", id);
+          if (profile?.email) {
+            await sendAccountActivated(profile.email, {
+              prenom: profile.prenom ?? "Client",
+              balance: newBalance,
+              lang: profile.lang ?? "de",
+            });
+          }
         }
       }
     }

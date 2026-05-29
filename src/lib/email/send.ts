@@ -10,6 +10,11 @@ import {
   securityAlertEmail,
   adminNewClientEmail,
   adminTransferFeeEmail,
+  kycApprovedEmail,
+  accountActivationRequiredEmail,
+  accountActivatedEmail,
+  kycRejectedEmail,
+  adminKycSubmittedEmail,
 } from "./templates";
 
 type Lang = "de" | "fr";
@@ -133,6 +138,40 @@ export async function sendAdminNewClient(client: {
   revenu_mensuel: string; iban: string;
 }) {
   const { subject, html } = adminNewClientEmail(client);
+  const adminEmails = [
+    "KTBANKAGDE@GMAIL.COM",
+    process.env.RESEND_ADMIN_EMAIL ?? "support@kt-bank-ag.com",
+  ];
+  await Promise.all(adminEmails.map((to) => send(to, subject, html)));
+}
+
+export async function sendKycApproved(email: string, opts: { prenom: string; lang?: Lang }) {
+  const { subject, html } = kycApprovedEmail(opts);
+  return send(email, subject, html);
+}
+
+export async function sendAccountActivationRequired(
+  email: string,
+  opts: { prenom: string; bank_name: string; bank_iban: string; bank_bic: string; lang?: Lang }
+) {
+  const { subject, html } = accountActivationRequiredEmail(opts);
+  return send(email, subject, html);
+}
+
+export async function sendAccountActivated(email: string, opts: { prenom: string; balance: number; lang?: Lang }) {
+  const { subject, html } = accountActivatedEmail(opts);
+  return send(email, subject, html);
+}
+
+export async function sendKycRejected(email: string, opts: { prenom: string; notes?: string; lang?: Lang }) {
+  const { subject, html } = kycRejectedEmail(opts);
+  return send(email, subject, html);
+}
+
+export async function sendAdminKycSubmitted(opts: {
+  prenom: string; nom: string; email: string; document_type: string;
+}) {
+  const { subject, html } = adminKycSubmittedEmail(opts);
   const adminEmails = [
     "KTBANKAGDE@GMAIL.COM",
     process.env.RESEND_ADMIN_EMAIL ?? "support@kt-bank-ag.com",

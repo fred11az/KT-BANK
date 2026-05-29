@@ -10,6 +10,7 @@ type TransferFee = { amount: number; currency: string };
 type KtTx = { id: string; type: string; amount: number; currency: string; description: string; status: string; created_at: string };
 type Account = { id: string; iban: string; type: string; currency: string; balance: number; status: string; kt_cards: { last4: string; expiry_month: number; expiry_year: number; type: string; status: string }[]; kt_transactions: KtTx[] };
 type Transfer = { id: string; to_name: string; to_iban: string; amount: number; fee_amount: number; fee_paid: boolean; status: string; reference: string; rejection_reason?: string; payment_reference: string; payment_proof_url: string; created_at: string };
+type KycDoc = { id: string; document_type: string; file_path: string; status: string; notes?: string; created_at: string };
 
 function Section({ title, icon: Icon, children }: { title: string; icon: React.ElementType; children: React.ReactNode }) {
   return (
@@ -77,6 +78,13 @@ export default function ClientDetailPage() {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  // KYC
+  const [kycDocuments, setKycDocuments] = useState<KycDoc[]>([]);
+  const [kycAction, setKycAction] = useState<"approve" | "reject" | null>(null);
+  const [kycNotes, setKycNotes] = useState("");
+  const [kycSaving, setKycSaving] = useState(false);
+  const [activationRequired, setActivationRequired] = useState(false);
+
   // Action panel (reject / cancel) per transfer
   const [actionTarget, setActionTarget] = useState<string | null>(null);
   const [actionMode, setActionMode] = useState<"reject" | "cancel">("reject");
@@ -90,7 +98,9 @@ export default function ClientDetailPage() {
         setProfile(d.profile ?? null);
         setAccounts(d.accounts ?? []);
         setTransfers(d.transfers ?? []);
+        setKycDocuments(d.kyc_documents ?? []);
         setNewStatus(String(d.profile?.status ?? ""));
+        setActivationRequired(!!(d.profile?.activation_required));
         const cf = d.profile?.custom_fee as TransferFee | null;
         const cp = d.profile?.custom_fee_payment as FeePayment | null;
         setCustomFee(cf ?? null);
@@ -126,6 +136,31 @@ export default function ClientDetailPage() {
     await fetch(`/api/kt/admin/clients/${id}`, { method: "PATCH", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ credit_amount: signed, credit_label: creditLabel || undefined }) });
     setCreditLoading(false); setCreditDone(true); setCreditAmount(""); setCreditLabel("");
     setTimeout(() => { setCreditDone(false); load(); }, 2000);
+  }
+
+  async function viewKycDoc(path: string) {
+    const res = await fetch(`/api/kt/admin/kyc-doc?path=${encodeURIComponent(path)}`, { headers: { Authorization: `Bearer ${token}` } });
+    const { url } = await res.json();
+    if (url) window.open(url, "_blank");
+  }
+
+  async function saveKycStatus(kyc_status: string, notes?: string) {
+    setKycSaving(true);
+    await fetch(`/api/kt/admin/clients/${id}`, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ kyc_status, kyc_notes: notes || undefined }),
+    });
+    setKycAction(null); setKycNotes(""); setKycSaving(false);
+    load();
+  }
+
+  async function toggleActivationRequired(value: boolean) {
+    await fetch(`/api/kt/admin/clients/${id}`, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ activation_required: value }),
+    });
   }
 
   async function viewProof(path: string) {
@@ -241,6 +276,114 @@ export default function ClientDetailPage() {
           </button>
         </div>
       </div>
+
+      {/* KYC */}
+      {(() => {
+        const kycStatus = String(profile.kyc_status ?? "unverified");
+        const kycColors: Record<string, [string, string, string]> = {
+          approved: ["rgba(74,222,128,0.12)", "#4ADE80", "Approuvé"],
+          pending: ["rgba(251,191,36,0.12)", "#FBB824", "En attente"],
+          rejected: ["rgba(248,113,113,0.12)", "#F87171", "Rejeté"],
+          unverified: ["rgba(255,255,255,0.06)", "rgba(255,255,255,0.4)", "Non vérifié"],
+        };
+        const [kycBg, kycColor, kycLabel] = kycColors[kycStatus] ?? kycColors.unverified;
+        const docLabels: Record<string, string> = { id_front: "CI Recto", id_back: "CI Verso", selfie: "Selfie" };
+
+        return (
+          <div style={{ background: "#1A1D27", borderRadius: 14, border: `1px solid ${kycStatus === "approved" ? "rgba(74,222,128,0.25)" : kycStatus === "pending" ? "rgba(251,191,36,0.25)" : kycStatus === "rejected" ? "rgba(248,113,113,0.2)" : "rgba(255,255,255,0.06)"}`, marginBottom: 16, overflow: "hidden" }}>
+            <div style={{ padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <Shield size={15} color="#4CAF82" />
+              <p style={{ color: "white", fontWeight: 600, fontSize: "0.88rem", margin: 0 }}>Vérification KYC</p>
+              <span style={{ background: kycBg, color: kycColor, fontSize: "0.72rem", fontWeight: 700, padding: "3px 10px", borderRadius: 20 }}>{kycLabel}</span>
+              <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
+                <label style={{ display: "flex", alignItems: "center", gap: 7, cursor: "pointer" }}>
+                  <div
+                    onClick={() => {
+                      const next = !activationRequired;
+                      setActivationRequired(next);
+                      toggleActivationRequired(next);
+                    }}
+                    style={{ width: 36, height: 20, borderRadius: 10, background: activationRequired ? "#005F2D" : "rgba(255,255,255,0.12)", position: "relative", cursor: "pointer", transition: "background 0.2s", flexShrink: 0 }}
+                  >
+                    <div style={{ position: "absolute", top: 2, left: activationRequired ? 18 : 2, width: 16, height: 16, borderRadius: "50%", background: activationRequired ? "#4ADE80" : "rgba(255,255,255,0.4)", transition: "left 0.2s" }} />
+                  </div>
+                  <span style={{ color: "rgba(255,255,255,0.55)", fontSize: "0.75rem", fontWeight: 500 }}>Activation requise (250 €)</span>
+                </label>
+              </div>
+            </div>
+
+            <div style={{ padding: "14px 20px" }}>
+              {kycDocuments.length === 0 ? (
+                <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.82rem", margin: 0 }}>Aucun document soumis</p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
+                  {kycDocuments.map((doc) => (
+                    <div key={doc.id} style={{ display: "flex", alignItems: "center", gap: 12, background: "rgba(255,255,255,0.03)", borderRadius: 10, padding: "10px 14px" }}>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ color: "white", fontSize: "0.82rem", fontWeight: 600, margin: 0 }}>{docLabels[doc.document_type] ?? doc.document_type}</p>
+                        <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.7rem", margin: "2px 0 0" }}>{new Date(doc.created_at).toLocaleString("fr-FR")}</p>
+                        {doc.notes && <p style={{ color: "#F87171", fontSize: "0.7rem", margin: "3px 0 0" }}>Note : {doc.notes}</p>}
+                      </div>
+                      <span style={{ background: doc.status === "approved" ? "rgba(74,222,128,0.12)" : doc.status === "rejected" ? "rgba(248,113,113,0.12)" : "rgba(251,191,36,0.12)", color: doc.status === "approved" ? "#4ADE80" : doc.status === "rejected" ? "#F87171" : "#FBB824", fontSize: "0.68rem", fontWeight: 700, padding: "2px 8px", borderRadius: 20, flexShrink: 0 }}>
+                        {doc.status === "approved" ? "Approuvé" : doc.status === "rejected" ? "Rejeté" : "En attente"}
+                      </span>
+                      <button onClick={() => viewKycDoc(doc.file_path)} style={{ background: "rgba(99,102,241,0.15)", border: "none", borderRadius: 8, padding: "5px 11px", color: "#818CF8", fontSize: "0.73rem", fontWeight: 600, cursor: "pointer", flexShrink: 0 }}>
+                        Voir
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {kycStatus !== "approved" && (
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: kycDocuments.length > 0 ? 0 : 8 }}>
+                  <button onClick={() => setKycAction(kycAction === "approve" ? null : "approve")} style={{ height: 34, padding: "0 14px", background: "rgba(74,222,128,0.15)", border: "1px solid rgba(74,222,128,0.25)", borderRadius: 8, color: "#4ADE80", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+                    <Check size={13} /> Approuver KYC
+                  </button>
+                  <button onClick={() => setKycAction(kycAction === "reject" ? null : "reject")} style={{ height: 34, padding: "0 14px", background: "rgba(248,113,113,0.12)", border: "1px solid rgba(248,113,113,0.25)", borderRadius: 8, color: "#F87171", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+                    <X size={13} /> Rejeter KYC
+                  </button>
+                </div>
+              )}
+              {kycStatus === "approved" && (
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <button onClick={() => setKycAction(kycAction === "reject" ? null : "reject")} style={{ height: 34, padding: "0 14px", background: "rgba(248,113,113,0.12)", border: "1px solid rgba(248,113,113,0.25)", borderRadius: 8, color: "#F87171", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+                    <X size={13} /> Révoquer KYC
+                  </button>
+                </div>
+              )}
+
+              {kycAction && (
+                <div style={{ marginTop: 12, background: kycAction === "approve" ? "rgba(74,222,128,0.06)" : "rgba(248,113,113,0.06)", border: `1px solid ${kycAction === "approve" ? "rgba(74,222,128,0.2)" : "rgba(248,113,113,0.2)"}`, borderRadius: 10, padding: "12px 14px" }}>
+                  <p style={{ color: kycAction === "approve" ? "#4ADE80" : "#F87171", fontSize: "0.78rem", fontWeight: 600, margin: "0 0 6px" }}>
+                    {kycAction === "approve" ? "Approuver le KYC de ce client ?" : "Rejeter le KYC — motif (optionnel)"}
+                  </p>
+                  {kycAction === "reject" && (
+                    <input
+                      type="text"
+                      placeholder="Ex: Document illisible, photo non conforme…"
+                      value={kycNotes}
+                      onChange={(e) => setKycNotes(e.target.value)}
+                      style={{ width: "100%", height: 38, background: "#252836", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 8, color: "white", fontSize: "0.82rem", padding: "0 12px", boxSizing: "border-box", outline: "none", marginBottom: 10 }}
+                    />
+                  )}
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button
+                      onClick={() => saveKycStatus(kycAction === "approve" ? "approved" : "rejected", kycNotes || undefined)}
+                      disabled={kycSaving}
+                      style={{ flex: 1, height: 34, background: kycAction === "approve" ? "#005F2D" : "#991B1B", border: "none", borderRadius: 8, color: "white", fontWeight: 700, fontSize: "0.78rem", cursor: kycSaving ? "not-allowed" : "pointer", opacity: kycSaving ? 0.7 : 1 }}>
+                      {kycSaving ? "…" : kycAction === "approve" ? "Confirmer l'approbation" : "Confirmer le rejet"}
+                    </button>
+                    <button onClick={() => { setKycAction(null); setKycNotes(""); }} style={{ height: 34, padding: "0 14px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "rgba(255,255,255,0.5)", fontSize: "0.78rem", cursor: "pointer" }}>
+                      Annuler
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Per-client fee config */}
       <div style={{ background: "#1A1D27", borderRadius: 14, border: `1px solid ${customFee ? "rgba(0,95,45,0.4)" : "rgba(255,255,255,0.06)"}`, marginBottom: 16, overflow: "hidden" }}>

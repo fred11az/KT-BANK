@@ -58,11 +58,18 @@ export async function POST(req: NextRequest) {
 
   const { data: profile } = await supabase
     .from("kt_profiles")
-    .select("id, status, custom_fee, custom_fee_payment, prenom, lang")
+    .select("id, status, kyc_status, custom_fee, custom_fee_payment, prenom, lang")
     .eq("email", email)
     .single();
 
   if (!profile) return NextResponse.json({ error: "Profil introuvable" }, { status: 404 });
+
+  if ((profile as { kyc_status?: string }).kyc_status !== "approved") {
+    return NextResponse.json({
+      error: "Ihr KYC-Verfahren ist noch nicht abgeschlossen. Bitte laden Sie Ihre Identitätsdokumente im KYC-Bereich hoch.",
+      code: "KYC_REQUIRED",
+    }, { status: 403 });
+  }
 
   if (profile.status !== "active") {
     return NextResponse.json({ error: "Compte désactivé", code: "ACCOUNT_SUSPENDED" }, { status: 403 });

