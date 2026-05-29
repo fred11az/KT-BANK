@@ -77,9 +77,10 @@ export default function ClientDetailPage() {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // Rejection reason per transfer
-  const [rejectTarget, setRejectTarget] = useState<string | null>(null);
-  const [rejectReason, setRejectReason] = useState("");
+  // Action panel (reject / cancel) per transfer
+  const [actionTarget, setActionTarget] = useState<string | null>(null);
+  const [actionMode, setActionMode] = useState<"reject" | "cancel">("reject");
+  const [actionReason, setActionReason] = useState("");
 
   function load() {
     setLoading(true);
@@ -171,14 +172,14 @@ export default function ClientDetailPage() {
     router.push("/kt-admin/clients");
   }
 
-  async function updateTransfer(transfer_id: string, transfer_status: string, rejection_reason?: string) {
+  async function updateTransfer(transfer_id: string, transfer_status: string, reason?: string) {
     await fetch(`/api/kt/admin/clients/${id}`, {
       method: "PATCH",
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ transfer_id, transfer_status, rejection_reason: rejection_reason || undefined }),
+      body: JSON.stringify({ transfer_id, transfer_status, rejection_reason: reason || undefined }),
     });
-    setRejectTarget(null);
-    setRejectReason("");
+    setActionTarget(null);
+    setActionReason("");
     load();
   }
 
@@ -327,45 +328,46 @@ export default function ClientDetailPage() {
                         🧾 Preuve
                       </button>
                     )}
-                    {t.status !== "completed" && (
+                    {(t.status === "pending_fee" || t.status === "processing") && (<>
                       <button onClick={() => updateTransfer(t.id, "completed")} style={{ background: "rgba(74,222,128,0.15)", border: "none", borderRadius: 6, padding: "3px 8px", color: "#4ADE80", fontSize: "0.7rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 3 }}>
                         <Check size={11} /> Valider
                       </button>
-                    )}
-                    {t.status !== "rejected" && (
-                      <button onClick={() => { setRejectTarget(t.id); setRejectReason(""); }} style={{ background: "rgba(248,113,113,0.15)", border: "none", borderRadius: 6, padding: "3px 8px", color: "#F87171", fontSize: "0.7rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 3 }}>
+                      <button onClick={() => { setActionTarget(t.id); setActionMode("cancel"); setActionReason(""); }} style={{ background: "rgba(251,191,36,0.12)", border: "none", borderRadius: 6, padding: "3px 8px", color: "#FBB824", fontSize: "0.7rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 3 }}>
+                        <X size={11} /> Annuler
+                      </button>
+                      <button onClick={() => { setActionTarget(t.id); setActionMode("reject"); setActionReason(""); }} style={{ background: "rgba(248,113,113,0.15)", border: "none", borderRadius: 6, padding: "3px 8px", color: "#F87171", fontSize: "0.7rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 3 }}>
                         <X size={11} /> Rejeter
                       </button>
-                    )}
+                    </>)}
                   </div>
                   <p style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.65rem", margin: 0 }}>{new Date(t.created_at).toLocaleDateString("fr-FR")}</p>
                 </div>
               </div>
-              {/* Inline rejection reason panel */}
-              {rejectTarget === t.id && (
-                <div style={{ margin: "0 20px 14px", background: "rgba(248,113,113,0.06)", border: "1px solid rgba(248,113,113,0.2)", borderRadius: 10, padding: "12px 14px" }}>
-                  <p style={{ color: "#F87171", fontSize: "0.75rem", fontWeight: 600, margin: "0 0 4px" }}>
-                    Motif de rejet <span style={{ color: "#F87171" }}>*</span>
+              {/* Inline action panel (reject / cancel) */}
+              {actionTarget === t.id && (
+                <div style={{ margin: "0 20px 14px", background: actionMode === "reject" ? "rgba(248,113,113,0.06)" : "rgba(251,191,36,0.06)", border: `1px solid ${actionMode === "reject" ? "rgba(248,113,113,0.2)" : "rgba(251,191,36,0.2)"}`, borderRadius: 10, padding: "12px 14px" }}>
+                  <p style={{ color: actionMode === "reject" ? "#F87171" : "#FBB824", fontSize: "0.75rem", fontWeight: 600, margin: "0 0 4px" }}>
+                    {actionMode === "reject" ? "Motif de rejet" : "Motif d'annulation"} <span>*</span>
                   </p>
                   <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.7rem", margin: "0 0 8px" }}>
-                    Obligatoire — sera affiché au client dans son tableau de bord et par e-mail.
+                    Obligatoire — sera affiché au client dans son tableau de bord et par e-mail. Le montant sera remboursé automatiquement.
                   </p>
                   <input
                     type="text"
-                    placeholder="Ex: Preuve de paiement insuffisante, informations incorrectes…"
-                    value={rejectReason}
-                    onChange={(e) => setRejectReason(e.target.value)}
-                    style={{ width: "100%", height: 38, background: "#252836", border: `1px solid ${rejectReason ? "rgba(248,113,113,0.3)" : "rgba(248,113,113,0.6)"}`, borderRadius: 8, color: "white", fontSize: "0.82rem", padding: "0 12px", boxSizing: "border-box", outline: "none", marginBottom: 10 }}
+                    placeholder={actionMode === "reject" ? "Ex: Informations incorrectes, document insuffisant…" : "Ex: Demande du client, délai expiré…"}
+                    value={actionReason}
+                    onChange={(e) => setActionReason(e.target.value)}
+                    style={{ width: "100%", height: 38, background: "#252836", border: `1px solid ${actionReason ? "rgba(255,255,255,0.15)" : (actionMode === "reject" ? "rgba(248,113,113,0.6)" : "rgba(251,191,36,0.6)")}`, borderRadius: 8, color: "white", fontSize: "0.82rem", padding: "0 12px", boxSizing: "border-box", outline: "none", marginBottom: 10 }}
                   />
                   <div style={{ display: "flex", gap: 8 }}>
-                    <button onClick={() => updateTransfer(t.id, "rejected", rejectReason)}
-                      disabled={!rejectReason.trim()}
-                      style={{ flex: 1, height: 34, background: rejectReason.trim() ? "#991B1B" : "rgba(153,27,27,0.35)", border: "none", borderRadius: 8, color: "white", fontWeight: 700, fontSize: "0.78rem", cursor: rejectReason.trim() ? "pointer" : "not-allowed" }}>
-                      Confirmer le rejet
+                    <button onClick={() => updateTransfer(t.id, actionMode === "reject" ? "rejected" : "cancelled", actionReason)}
+                      disabled={!actionReason.trim()}
+                      style={{ flex: 1, height: 34, background: actionReason.trim() ? (actionMode === "reject" ? "#991B1B" : "#78350F") : "rgba(153,27,27,0.35)", border: "none", borderRadius: 8, color: "white", fontWeight: 700, fontSize: "0.78rem", cursor: actionReason.trim() ? "pointer" : "not-allowed" }}>
+                      {actionMode === "reject" ? "Confirmer le rejet" : "Confirmer l'annulation"}
                     </button>
-                    <button onClick={() => setRejectTarget(null)}
+                    <button onClick={() => setActionTarget(null)}
                       style={{ height: 34, padding: "0 14px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "rgba(255,255,255,0.5)", fontSize: "0.78rem", cursor: "pointer" }}>
-                      Annuler
+                      Fermer
                     </button>
                   </div>
                 </div>
