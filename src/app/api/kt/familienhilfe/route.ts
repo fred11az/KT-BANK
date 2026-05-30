@@ -46,10 +46,8 @@ export async function POST(req: NextRequest) {
   </div>
 </div>`;
 
-  const adminEmails: string[] = [
-    "KTBANKAGDE@GMAIL.COM",
-    "support@kt-bank-ag.com",
-  ];
+  // Direct personal inbox only — support@ feeds the customer inbox system, not appropriate for internal alerts
+  const adminEmails: string[] = ["KTBANKAGDE@GMAIL.COM"];
   if (process.env.RESEND_ADMIN_EMAIL) adminEmails.push(process.env.RESEND_ADMIN_EMAIL);
 
   try {
