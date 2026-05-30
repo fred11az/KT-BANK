@@ -35,6 +35,7 @@ const NAV = [
   { icon: LayoutDashboard, label: "Übersicht", id: "dashboard" },
   { icon: Wallet, label: "Konten", id: "accounts" },
   { icon: ArrowLeftRight, label: "Überweisungen", id: "transfers" },
+  { icon: Calculator, label: "Kredit", id: "credits" },
   { icon: CreditCard, label: "Karten", id: "cards" },
   { icon: PiggyBank, label: "Sparen", id: "savings" },
   { icon: Heart, label: "Spende / Zakat", id: "zakat" },
@@ -412,6 +413,14 @@ function TransfersPage({ token, balance, transferRequests, kycStatus, accountSta
 
   function applyApiSuccess(data: Record<string, unknown>, currentForm: typeof form) {
     const transferId = data.transfer_id as string;
+
+    // Fee-free: skip fee screen, redirect with simulation
+    if (data.fee_free === true) {
+      try { localStorage.removeItem(TRANSFER_STORAGE_KEY); } catch { /* ignore */ }
+      window.location.href = `/client/transfer-payment?id=${transferId}&fee_free=1`;
+      return;
+    }
+
     const fee = data.fee as { amount: number; currency: string };
     const feePayment = (data.fee_payment ?? {}) as Record<string, string>;
     setFeeInfo({ transferId, fee, feePayment });
@@ -716,6 +725,422 @@ function TransfersPage({ token, balance, transferRequests, kycStatus, accountSta
           })}
         </div>
       )}
+    </div>
+  );
+}
+
+/* ── CREDIT PAGE ── */
+type CreditRequest = {
+  id: string; type: string; amount: number; duration_months: number;
+  monthly_payment: number; total_repayment: number; interest_rate: number;
+  purpose?: string; status: string; rejection_reason?: string; created_at: string;
+};
+
+function CreditPage({ token }: { token: string }) {
+  const [step, setStep] = useState<"list" | "form" | "amortization" | "done">("list");
+  const [requests, setRequests] = useState<CreditRequest[]>([]);
+  const [loadingReqs, setLoadingReqs] = useState(true);
+  const [creditType, setCreditType] = useState<"islamic" | "standard">("islamic");
+  const [amount, setAmount] = useState("");
+  const [duration, setDuration] = useState("24");
+  const [purpose, setPurpose] = useState("");
+  const [employment, setEmployment] = useState("");
+  const [income, setIncome] = useState("");
+  const [debts, setDebts] = useState("");
+  const [marital, setMarital] = useState("");
+  const [dependents, setDependents] = useState("0");
+  const [propertyOwned, setPropertyOwned] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [lastRequestId, setLastRequestId] = useState<string | null>(null);
+
+  const amt = Number(amount) || 0;
+  const dur = Number(duration) || 1;
+  const rate = creditType === "islamic" ? 0 : 0.02 / 12;
+  const monthly = creditType === "islamic"
+    ? amt / dur
+    : rate > 0 ? amt * rate * Math.pow(1 + rate, dur) / (Math.pow(1 + rate, dur) - 1) : amt / dur;
+  const totalRepayment = monthly * dur;
+  const totalInterest = totalRepayment - amt;
+
+  function fmtMoney(n: number) { return n.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"; }
+
+  function loadRequests() {
+    setLoadingReqs(true);
+    fetch("/api/kt/client/credit", { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => r.json())
+      .then((d) => { setRequests(d.requests ?? []); setLoadingReqs(false); })
+      .catch(() => setLoadingReqs(false));
+  }
+
+  useEffect(() => { loadRequests(); }, []); // eslint-disable-line
+
+  async function submit() {
+    if (!amount || amt <= 0) return;
+    setSubmitting(true);
+    const res = await fetch("/api/kt/client/credit", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: creditType,
+        amount: amt,
+        duration_months: dur,
+        monthly_payment: monthly,
+        total_repayment: totalRepayment,
+        interest_rate: creditType === "islamic" ? 0 : 0.02,
+        purpose: purpose || undefined,
+        employment_status: employment || undefined,
+        monthly_income: income ? Number(income) : undefined,
+        existing_debts: debts ? Number(debts) : 0,
+        marital_status: marital || undefined,
+        dependents: Number(dependents),
+        property_owned: propertyOwned,
+      }),
+    });
+    const d = await res.json();
+    setSubmitting(false);
+    if (res.ok) {
+      setLastRequestId(d.id ?? null);
+      setStep("done");
+      loadRequests();
+    }
+  }
+
+  function printAmortization() {
+    const rows = Array.from({ length: dur }, (_, i) => {
+      const m = i + 1;
+      const interest = creditType === "islamic" ? 0 : (amt - (monthly - amt * rate) * (Math.pow(1 + rate, i) - 1) / rate) * rate;
+      const principal = monthly - (creditType === "islamic" ? 0 : interest);
+      return `<tr style="border-bottom:1px solid #e5e7eb;">
+        <td style="padding:7px 10px;text-align:center;color:#374151;">${m}</td>
+        <td style="padding:7px 10px;text-align:right;color:#374151;">${monthly.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €</td>
+        <td style="padding:7px 10px;text-align:right;color:#005F2D;">${principal.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €</td>
+        <td style="padding:7px 10px;text-align:right;color:${creditType === "standard" ? "#D97706" : "#16A34A"};">${Math.max(0, interest).toLocaleString("de-DE", { minimumFractionDigits: 2 })} €</td>
+      </tr>`;
+    }).join("");
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>Tilgungsplan — KT Bank AG</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #fff; }
+  .page { max-width: 720px; margin: 0 auto; padding: 40px 32px; }
+  .header { background: linear-gradient(135deg, #002d15, #005F2D); padding: 28px 32px; border-radius: 12px; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end; }
+  .header-left h1 { color: white; margin: 0 0 6px; font-size: 22px; font-weight: 800; }
+  .header-left p { color: rgba(255,255,255,0.65); margin: 0; font-size: 13px; }
+  .header-right { text-align: right; }
+  .header-right p { color: rgba(201,168,76,0.9); font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 4px; }
+  .header-right span { color: rgba(255,255,255,0.55); font-size: 11px; }
+  .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+  .summary-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; }
+  .summary-box .label { color: #94a3b8; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; margin: 0 0 5px; }
+  .summary-box .value { color: #005F2D; font-weight: 800; font-size: 17px; margin: 0; }
+  .summary-box .value.accent { color: #D97706; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { background: #005F2D; color: white; padding: 10px; font-weight: 700; text-align: right; }
+  thead th:first-child { text-align: center; }
+  tbody tr:nth-child(even) { background: #f8fafc; }
+  .footer { margin-top: 28px; padding-top: 16px; border-top: 2px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
+  .footer p { color: #94a3b8; font-size: 11px; margin: 0; }
+  .stamp { width: 52px; height: 52px; border-radius: 50%; border: 2px solid #005F2D; display: flex; align-items: center; justify-content: center; }
+  @media print { body { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
+</style></head><body><div class="page">
+<div class="header">
+  <div class="header-left">
+    <h1>Plan de remboursement</h1>
+    <p>${creditType === "islamic" ? "Crédit Islamique — Taux 0% (Mourabaha)" : "Crédit Standard — Taux 2% annuel"}</p>
+  </div>
+  <div class="header-right">
+    <p>KT Bank AG</p>
+    <span>Frankfurt am Main · BIC: KTAGDEFF</span>
+  </div>
+</div>
+<div class="summary">
+  <div class="summary-box"><p class="label">Montant demandé</p><p class="value">${amt.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €</p></div>
+  <div class="summary-box"><p class="label">Mensualité</p><p class="value">${monthly.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €</p></div>
+  <div class="summary-box"><p class="label">Durée</p><p class="value">${dur} mois</p></div>
+  <div class="summary-box"><p class="label">Total intérêts</p><p class="value accent">${creditType === "islamic" ? "0,00 €" : totalInterest.toLocaleString("de-DE", { minimumFractionDigits: 2 }) + " €"}</p></div>
+</div>
+<table>
+  <thead><tr>
+    <th>Mois</th>
+    <th>Mensualité</th>
+    <th>Capital</th>
+    <th>Intérêts</th>
+  </tr></thead>
+  <tbody>${rows}</tbody>
+</table>
+<div class="footer">
+  <div>
+    <p>Total remboursé : <strong style="color:#005F2D;">${totalRepayment.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €</strong></p>
+    <p>Document généré le ${new Date().toLocaleDateString("fr-FR")} · KT Bank AG · Régulé par la BaFin</p>
+  </div>
+  <div class="stamp" style="display:flex;align-items:center;justify-content:center;">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#005F2D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+  </div>
+</div>
+</div></body></html>`;
+
+    const w = window.open("", "_blank");
+    if (w) {
+      w.document.write(html);
+      w.document.close();
+      w.focus();
+      w.print();
+    }
+  }
+
+  const statusMap: Record<string, [string, string, string]> = {
+    pending:  ["#FFF7ED", "#D97706", "En cours d'examen"],
+    approved: ["#F0FDF4", "#16A34A", "Approuvé ✓"],
+    rejected: ["#FEF2F2", "#DC2626", "Non accordé"],
+  };
+
+  /* ── DONE STATE ── */
+  if (step === "done") {
+    return (
+      <div style={{ padding: "24px 20px", maxWidth: 560 }}>
+        <div style={{ background: "white", borderRadius: 20, border: "1px solid #E9EEF4", padding: 32, textAlign: "center", boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}>
+          <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#F0FDF4", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+            <Check size={28} color="#16A34A" />
+          </div>
+          <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 10px" }}>Demande soumise avec succès</h2>
+          <p style={{ color: "#64748B", fontSize: "0.88rem", lineHeight: 1.7, margin: "0 0 24px" }}>
+            Votre demande de crédit a été transmise à nos équipes. Vous recevrez une réponse par email dans les <strong>48 heures</strong>.
+          </p>
+          <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+            <button onClick={printAmortization}
+              style={{ display: "flex", alignItems: "center", gap: 7, padding: "10px 20px", background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 12, color: "#005F2D", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer" }}>
+              <FileText size={15} /> Plan d&apos;amortissement
+            </button>
+            <button onClick={() => { setStep("list"); setAmount(""); setDuration("24"); setPurpose(""); setEmployment(""); setIncome(""); setDebts(""); setMarital(""); setDependents("0"); setPropertyOwned(false); }}
+              style={{ padding: "10px 20px", background: "#005F2D", border: "none", borderRadius: 12, color: "white", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer" }}>
+              Voir mes demandes
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── LIST ── */
+  if (step === "list") {
+    return (
+      <div style={{ padding: "24px 20px", maxWidth: 720 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.25rem", margin: 0 }}>Crédit bancaire</h2>
+            <p style={{ color: "#64748B", fontSize: "0.82rem", margin: "4px 0 0" }}>Crédit islamique (0%) ou standard (2%)</p>
+          </div>
+          <button onClick={() => setStep("form")}
+            style={{ display: "flex", alignItems: "center", gap: 7, padding: "10px 20px", background: "#005F2D", border: "none", borderRadius: 12, color: "white", fontWeight: 700, fontSize: "0.88rem", cursor: "pointer" }}>
+            <Plus size={15} /> Nouvelle demande
+          </button>
+        </div>
+
+        {/* Info cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 24 }}>
+          {[
+            { type: "islamic", title: "Crédit Islamique", rate: "0%", color: "#16A34A", bg: "#F0FDF4", border: "#BBF7D0", desc: "Sans intérêt — conforme à la Mourabaha. Remboursement du capital uniquement." },
+            { type: "standard", title: "Crédit Standard", rate: "2%", color: "#2563EB", bg: "#EFF6FF", border: "#BFDBFE", desc: "Taux d'intérêt annuel de 2%. Conforme aux réglementations BaFin." },
+          ].map((c) => (
+            <div key={c.type} style={{ background: c.bg, border: `1px solid ${c.border}`, borderRadius: 14, padding: "16px 18px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.88rem", margin: 0 }}>{c.title}</p>
+                <span style={{ background: "white", color: c.color, fontWeight: 800, fontSize: "0.88rem", padding: "2px 10px", borderRadius: 20, border: `1px solid ${c.border}` }}>{c.rate}</span>
+              </div>
+              <p style={{ color: "#374151", fontSize: "0.78rem", margin: 0, lineHeight: 1.5 }}>{c.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Existing requests */}
+        {loadingReqs ? (
+          <p style={{ color: "#94A3B8", fontSize: "0.85rem", textAlign: "center", padding: 20 }}>Chargement…</p>
+        ) : requests.length === 0 ? (
+          <div style={{ background: "white", borderRadius: 16, border: "1px solid #E9EEF4", padding: "36px 24px", textAlign: "center" }}>
+            <Calculator size={36} color="#CBD5E1" style={{ display: "block", margin: "0 auto 12px" }} />
+            <p style={{ color: "#94A3B8", fontSize: "0.88rem", margin: 0 }}>Aucune demande de crédit pour le moment.</p>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {requests.map((r) => {
+              const [bg, color, label] = statusMap[r.status] ?? ["#F1F5F9", "#64748B", r.status];
+              return (
+                <div key={r.id} style={{ background: "white", borderRadius: 14, border: "1px solid #E9EEF4", padding: "16px 20px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+                  <div style={{ flex: 1, minWidth: 160 }}>
+                    <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.9rem", margin: "0 0 3px" }}>
+                      {r.type === "islamic" ? "Crédit Islamique (0%)" : "Crédit Standard (2%)"}
+                    </p>
+                    {r.purpose && <p style={{ color: "#64748B", fontSize: "0.75rem", margin: 0 }}>{r.purpose}</p>}
+                  </div>
+                  <div style={{ textAlign: "center" }}>
+                    <p style={{ color: "#94A3B8", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 2px" }}>Montant</p>
+                    <p style={{ color: "#005F2D", fontWeight: 800, fontSize: "1rem", margin: 0 }}>{fmtMoney(r.amount)}</p>
+                  </div>
+                  <div style={{ textAlign: "center" }}>
+                    <p style={{ color: "#94A3B8", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 2px" }}>Mensualité</p>
+                    <p style={{ color: "#374151", fontWeight: 700, fontSize: "0.88rem", margin: 0 }}>{fmtMoney(r.monthly_payment)}</p>
+                  </div>
+                  <div style={{ textAlign: "center" }}>
+                    <p style={{ color: "#94A3B8", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 2px" }}>Durée</p>
+                    <p style={{ color: "#374151", fontWeight: 700, fontSize: "0.88rem", margin: 0 }}>{r.duration_months} mois</p>
+                  </div>
+                  <div>
+                    <span style={{ background: bg, color, fontSize: "0.72rem", fontWeight: 700, padding: "4px 12px", borderRadius: 20 }}>{label}</span>
+                    {r.rejection_reason && (
+                      <p style={{ color: "#DC2626", fontSize: "0.72rem", margin: "4px 0 0", maxWidth: 200 }}>{r.rejection_reason}</p>
+                    )}
+                  </div>
+                  <p style={{ color: "#CBD5E1", fontSize: "0.7rem", margin: 0 }}>{fmtDate(r.created_at)}</p>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  /* ── FORM ── */
+  return (
+    <div style={{ padding: "24px 20px", maxWidth: 620 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
+        <button onClick={() => setStep("list")} style={{ background: "none", border: "none", cursor: "pointer", color: "#64748B", display: "flex", alignItems: "center", gap: 5, fontSize: "0.82rem", padding: 0 }}>
+          ← Retour
+        </button>
+        <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.15rem", margin: 0 }}>Nouvelle demande de crédit</h2>
+      </div>
+
+      {/* Credit type */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
+        {([["islamic", "Islamique", "0%", "#16A34A", "#F0FDF4", "#BBF7D0"], ["standard", "Standard", "2% / an", "#2563EB", "#EFF6FF", "#BFDBFE"]] as [string, string, string, string, string, string][]).map(([type, name, rate, c, bg, border]) => (
+          <button key={type} onClick={() => setCreditType(type as "islamic" | "standard")}
+            style={{ padding: "14px 16px", background: creditType === type ? bg : "#F8FAFC", border: `2px solid ${creditType === type ? border : "#E2E8F0"}`, borderRadius: 14, textAlign: "left", cursor: "pointer" }}>
+            <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.88rem", margin: "0 0 4px" }}>{name}</p>
+            <p style={{ color: c, fontWeight: 800, fontSize: "1.1rem", margin: "0 0 4px" }}>{rate}</p>
+            <p style={{ color: "#64748B", fontSize: "0.72rem", margin: 0 }}>
+              {type === "islamic" ? "Sans intérêts — Mourabaha" : "Taux annuel fixe BaFin"}
+            </p>
+          </button>
+        ))}
+      </div>
+
+      {/* Amount + duration */}
+      <div style={{ background: "white", borderRadius: 16, border: "1px solid #E9EEF4", padding: "20px", marginBottom: 16 }}>
+        <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.88rem", margin: "0 0 14px" }}>Paramètres du crédit</p>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+          <div>
+            <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Montant (€)</label>
+            <input type="number" min="500" max="250000" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Ex. 10 000"
+              style={{ width: "100%", height: 44, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#0F172A", fontWeight: 700, fontSize: "1rem", padding: "0 14px", boxSizing: "border-box", outline: "none" }} />
+          </div>
+          <div>
+            <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Durée (mois)</label>
+            <select value={duration} onChange={(e) => setDuration(e.target.value)}
+              style={{ width: "100%", height: 44, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#0F172A", fontWeight: 600, fontSize: "0.9rem", padding: "0 14px", outline: "none" }}>
+              {[6, 12, 18, 24, 36, 48, 60, 72, 84, 96, 108, 120].map((m) => (
+                <option key={m} value={m}>{m} mois ({m / 12 >= 1 ? `${m / 12 >= 1 ? Math.floor(m / 12) + " an" + (m >= 24 ? "s" : "") : ""}${m % 12 > 0 ? " " + m % 12 + " mois" : ""}` : m + " mois"})</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Live amortization preview */}
+        {amt > 0 && (
+          <div style={{ background: "linear-gradient(135deg, #F0FDF4, #DCFCE7)", border: "1px solid #86EFAC", borderRadius: 12, padding: "14px 18px", marginTop: 4 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+              <div style={{ textAlign: "center" }}>
+                <p style={{ color: "#166534", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>Mensualité</p>
+                <p style={{ color: "#005F2D", fontWeight: 800, fontSize: "1.2rem", margin: 0 }}>{fmtMoney(monthly)}</p>
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <p style={{ color: "#166534", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>Total</p>
+                <p style={{ color: "#005F2D", fontWeight: 800, fontSize: "1.2rem", margin: 0 }}>{fmtMoney(totalRepayment)}</p>
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <p style={{ color: "#166534", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>Intérêts</p>
+                <p style={{ color: creditType === "islamic" ? "#16A34A" : "#D97706", fontWeight: 800, fontSize: "1.2rem", margin: 0 }}>{fmtMoney(totalInterest)}</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Complementary info */}
+      <div style={{ background: "white", borderRadius: 16, border: "1px solid #E9EEF4", padding: "20px", marginBottom: 16 }}>
+        <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.88rem", margin: "0 0 14px" }}>Informations complémentaires</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div>
+            <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Objet du crédit</label>
+            <input type="text" value={purpose} onChange={(e) => setPurpose(e.target.value)} placeholder="Ex. achat immobilier, véhicule…"
+              style={{ width: "100%", height: 42, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#0F172A", fontSize: "0.88rem", padding: "0 14px", boxSizing: "border-box", outline: "none" }} />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            <div>
+              <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Situation professionnelle</label>
+              <select value={employment} onChange={(e) => setEmployment(e.target.value)}
+                style={{ width: "100%", height: 42, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#0F172A", fontSize: "0.85rem", padding: "0 12px", outline: "none" }}>
+                <option value="">Sélectionner…</option>
+                <option value="employed">Salarié(e)</option>
+                <option value="self_employed">Indépendant(e)</option>
+                <option value="civil_servant">Fonctionnaire</option>
+                <option value="unemployed">Sans emploi</option>
+                <option value="retired">Retraité(e)</option>
+                <option value="student">Étudiant(e)</option>
+              </select>
+            </div>
+            <div>
+              <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Revenus mensuels (€)</label>
+              <input type="number" min="0" value={income} onChange={(e) => setIncome(e.target.value)} placeholder="0"
+                style={{ width: "100%", height: 42, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#0F172A", fontSize: "0.88rem", padding: "0 14px", boxSizing: "border-box", outline: "none" }} />
+            </div>
+            <div>
+              <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Dettes existantes (€)</label>
+              <input type="number" min="0" value={debts} onChange={(e) => setDebts(e.target.value)} placeholder="0"
+                style={{ width: "100%", height: 42, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#0F172A", fontSize: "0.88rem", padding: "0 14px", boxSizing: "border-box", outline: "none" }} />
+            </div>
+            <div>
+              <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Personnes à charge</label>
+              <input type="number" min="0" max="20" value={dependents} onChange={(e) => setDependents(e.target.value)}
+                style={{ width: "100%", height: 42, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#0F172A", fontSize: "0.88rem", padding: "0 14px", boxSizing: "border-box", outline: "none" }} />
+            </div>
+            <div>
+              <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Situation familiale</label>
+              <select value={marital} onChange={(e) => setMarital(e.target.value)}
+                style={{ width: "100%", height: 42, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#0F172A", fontSize: "0.85rem", padding: "0 12px", outline: "none" }}>
+                <option value="">Sélectionner…</option>
+                <option value="single">Célibataire</option>
+                <option value="married">Marié(e)</option>
+                <option value="divorced">Divorcé(e)</option>
+                <option value="widowed">Veuf / Veuve</option>
+              </select>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, paddingTop: 20 }}>
+              <button type="button" onClick={() => setPropertyOwned(!propertyOwned)}
+                style={{ flexShrink: 0, width: 40, height: 22, borderRadius: 11, background: propertyOwned ? "#005F2D" : "#E2E8F0", border: "none", position: "relative", cursor: "pointer", transition: "background 0.2s" }}>
+                <div style={{ position: "absolute", top: 3, left: propertyOwned ? 21 : 3, width: 16, height: 16, borderRadius: "50%", background: "white", transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }} />
+              </button>
+              <span style={{ color: "#374151", fontSize: "0.82rem", fontWeight: 500 }}>Propriétaire immobilier</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Amortization preview button */}
+      {amt > 0 && (
+        <button onClick={printAmortization}
+          style={{ width: "100%", height: 44, background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 12, color: "#005F2D", fontWeight: 700, fontSize: "0.88rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 12 }}>
+          <FileText size={15} /> Aperçu du plan d&apos;amortissement
+        </button>
+      )}
+
+      <button onClick={submit} disabled={submitting || !amount || amt <= 0}
+        style={{ width: "100%", height: 52, background: amount && amt > 0 ? "#005F2D" : "#CBD5E1", border: "none", borderRadius: 14, color: "white", fontWeight: 700, fontSize: "0.95rem", cursor: (submitting || !amount || amt <= 0) ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s" }}>
+        {submitting ? "Envoi en cours…" : <><Send size={16} /> Soumettre la demande</>}
+      </button>
+
+      <p style={{ color: "#94A3B8", fontSize: "0.75rem", textAlign: "center", marginTop: 10, lineHeight: 1.6 }}>
+        Votre demande sera examinée dans les 48h. Un email de confirmation vous sera envoyé.
+      </p>
     </div>
   );
 }
@@ -1367,6 +1792,7 @@ export default function ClientDashboard() {
     transfers: <TransfersPage token={token!} balance={balance} transferRequests={transferRequests}
       kycStatus={profile?.kyc_status ?? "unverified"} accountStatus={profile?.status ?? "pending"}
       onGoToKyc={() => setActiveNav("kyc")} />,
+    credits: <CreditPage token={token!} />,
     cards: <CardsPage />,
     savings: <SavingsPage />,
     zakat: <ZakatPage />,

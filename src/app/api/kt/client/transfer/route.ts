@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
 
   const { data: profile } = await supabase
     .from("kt_profiles")
-    .select("id, status, kyc_status, custom_fee, custom_fee_payment, prenom, lang")
+    .select("id, status, kyc_status, custom_fee, custom_fee_payment, fee_free, prenom, lang")
     .eq("email", email)
     .single();
 
@@ -86,6 +86,42 @@ export async function POST(req: NextRequest) {
 
   if (Number(account.balance) < Number(amount)) {
     return NextResponse.json({ error: "Solde insuffisant", code: "INSUFFICIENT_FUNDS", balance: account.balance }, { status: 422 });
+  }
+
+  // Fee-free path: skip fee entirely, transfer goes straight to processing
+  if ((profile as Record<string, unknown>).fee_free === true) {
+    const { data: transfer } = await supabase
+      .from("kt_transfer_requests")
+      .insert({
+        profile_id: profile.id,
+        account_id: account.id,
+        to_name,
+        to_iban,
+        amount: Number(amount),
+        reference: reference || null,
+        fee_amount: 0,
+        fee_paid: true,
+        status: "processing",
+      })
+      .select("id")
+      .single();
+
+    const newBalance = Number(account.balance) - Number(amount);
+    await supabase.from("kt_accounts").update({ balance: newBalance }).eq("id", account.id);
+    await supabase.from("kt_transactions").insert({
+      account_id: account.id,
+      type: "debit",
+      amount: Number(amount),
+      currency: "EUR",
+      description: `Überweisung → ${to_name}${reference ? ` – ${reference}` : ""} (in Bearbeitung)`,
+      status: "processing",
+    });
+
+    return NextResponse.json({
+      ok: true,
+      transfer_id: transfer?.id,
+      fee_free: true,
+    });
   }
 
   // Get fee settings: per-client overrides take priority over global settings

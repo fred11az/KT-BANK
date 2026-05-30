@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useCallback, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Check, Copy, FileText, ArrowLeft, AlertCircle, Building2, Clock, Printer, Lock, Shield, Wifi } from "lucide-react";
+import { Check, Copy, FileText, ArrowLeft, AlertCircle, Building2, Clock, Printer, Lock, Shield, Wifi, Send } from "lucide-react";
 
 type FeePayment = { name: string; iban: string; bic: string; bank: string; reference: string };
 type Transfer = { id: string; to_name: string; to_iban: string; amount: number; fee_amount: number; status: string; reference?: string; created_at: string };
@@ -28,91 +28,148 @@ function CopyField({ label, value, mono = false }: { label: string; value: strin
   );
 }
 
-function Bordereau({ transfer, profile }: { transfer: Transfer; profile: { prenom: string; nom: string; email: string } }) {
+/* ── Bordereau — professional light theme ── */
+function Bordereau({ transfer, profile, feeFree = false }: { transfer: Transfer; profile: { prenom: string; nom: string; email: string }; feeFree?: boolean }) {
   const ref = `KT-${transfer.id.slice(0, 8).toUpperCase()}`;
   const date = new Date(transfer.created_at);
+  const dateStr = date.toLocaleDateString("de-DE", { day: "2-digit", month: "long", year: "numeric" });
+  const timeStr = date.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+
+  function printDoc() { window.print(); }
+
   return (
-    <div style={{ maxWidth: 560, margin: "0 auto", padding: "0 0 80px" }}>
-      {/* Success header */}
-      <div style={{ textAlign: "center", padding: "32px 24px 24px" }}>
-        <div style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(0,95,45,0.2)", border: "2px solid #005F2D", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-          <Check size={28} color="#4CAF82" />
-        </div>
-        <h1 style={{ color: "white", fontWeight: 800, fontSize: "1.3rem", margin: "0 0 6px" }}>Zahlungsbeleg eingereicht</h1>
-        <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.85rem", margin: 0, lineHeight: 1.6 }}>
-          Ihr Überweisungsauftrag wird innerhalb von <strong style={{ color: "white" }}>48 Stunden</strong> bearbeitet.
-        </p>
-      </div>
-
-      {/* Bordereau card */}
-      <div style={{ margin: "0 20px", background: "#1A1D27", borderRadius: 18, border: "1px solid rgba(255,255,255,0.08)", overflow: "hidden" }} id="bordereau">
-        {/* Bank header */}
-        <div style={{ background: "linear-gradient(135deg, #001A0D 0%, #003319 60%, #005428 100%)", padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div>
-            <p style={{ color: "rgba(201,168,76,0.8)", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", margin: "0 0 2px" }}>KT BANK AG</p>
-            <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.62rem", margin: 0 }}>Überweisungsauftrag</p>
+    <>
+      <style>{`
+        @media print {
+          body * { visibility: hidden !important; }
+          #bordereau-doc, #bordereau-doc * { visibility: visible !important; }
+          #bordereau-doc { position: fixed; top: 0; left: 0; width: 100%; }
+          .no-print { display: none !important; }
+        }
+      `}</style>
+      <div style={{ minHeight: "100vh", background: "#F5F7FA", fontFamily: "'Inter',sans-serif", padding: "24px 16px 80px" }}>
+        {/* Success banner */}
+        <div style={{ maxWidth: 640, margin: "0 auto 24px", textAlign: "center" }}>
+          <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#F0FDF4", border: "2px solid #86EFAC", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+            <Check size={28} color="#16A34A" />
           </div>
-          <div style={{ textAlign: "right" }}>
-            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.62rem", margin: "0 0 2px" }}>Ref.</p>
-            <p style={{ color: "white", fontFamily: "monospace", fontWeight: 700, fontSize: "0.78rem", margin: 0 }}>{ref}</p>
-          </div>
-        </div>
-
-        {/* Status badge */}
-        <div style={{ padding: "12px 24px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Clock size={13} color="#D97706" />
-            <span style={{ color: "#D97706", fontSize: "0.78rem", fontWeight: 600 }}>In Bearbeitung — erwartet in 48h</span>
-          </div>
-          <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.68rem" }}>
-            {date.toLocaleDateString("de-DE")} {date.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
-          </span>
+          <h1 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.4rem", margin: "0 0 8px" }}>
+            {feeFree ? "Virement traité avec succès" : "Ordre de virement soumis"}
+          </h1>
+          <p style={{ color: "#64748B", fontSize: "0.9rem", margin: 0, lineHeight: 1.6 }}>
+            {feeFree
+              ? "Votre virement est en cours de traitement. Il sera exécuté dans les 48 heures."
+              : "Votre dossier est en cours d'examen. Le virement sera exécuté dans les 48 heures."
+            }
+          </p>
         </div>
 
-        {/* Details */}
-        <div style={{ padding: "20px 24px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px 20px", marginBottom: 16 }}>
-            {[
-              ["Auftraggeber", `${profile.prenom} ${profile.nom}`],
-              ["Betrag", `${Number(transfer.amount).toLocaleString("de-DE", { minimumFractionDigits: 2 })} EUR`],
-              ["Empfänger", transfer.to_name],
-              ["IBAN Empfänger", transfer.to_iban],
-              ...(transfer.reference ? [["Verwendungszweck", transfer.reference]] : []),
-            ].map(([k, v]) => (
-              <div key={k} style={k === "IBAN Empfänger" || k === "Verwendungszweck" ? { gridColumn: "1 / -1" } : {}}>
-                <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 3px" }}>{k}</p>
-                <p style={{ color: "white", fontWeight: 600, fontSize: "0.85rem", margin: 0, fontFamily: k === "IBAN Empfänger" ? "monospace" : "inherit" }}>{v}</p>
-              </div>
-            ))}
+        {/* Official document */}
+        <div id="bordereau-doc" style={{ maxWidth: 640, margin: "0 auto", background: "white", borderRadius: 16, overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,0.08)", border: "1px solid #E2E8F0" }}>
+          {/* Document header */}
+          <div style={{ background: "linear-gradient(135deg, #002d15 0%, #005F2D 100%)", padding: "24px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/kt-logo.png" alt="KT Bank AG" style={{ height: 26, filter: "brightness(0) invert(1)", display: "block", marginBottom: 8 }} />
+              <p style={{ color: "rgba(201,168,76,0.9)", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", margin: 0 }}>ORDRE DE VIREMENT SEPA</p>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.65rem", margin: "0 0 3px", textTransform: "uppercase", letterSpacing: "0.06em" }}>Référence</p>
+              <p style={{ color: "white", fontFamily: "monospace", fontWeight: 700, fontSize: "1rem", margin: "0 0 4px" }}>{ref}</p>
+              <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.65rem", margin: 0 }}>{dateStr} · {timeStr}</p>
+            </div>
           </div>
 
-          <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "16px 0" }} />
-
-          {/* Bank stamp area */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          {/* Status bar */}
+          <div style={{ background: "#FFFBF0", borderBottom: "1px solid #FEF3C7", padding: "10px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Building2 size={14} color="#4CAF82" />
-              <span style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.72rem" }}>KT Bank AG · Frankfurt am Main</span>
+              <Clock size={14} color="#D97706" />
+              <span style={{ color: "#92400E", fontSize: "0.8rem", fontWeight: 600 }}>En traitement — livraison sous 48h</span>
             </div>
-            <div style={{ width: 44, height: 44, borderRadius: "50%", border: "2px solid rgba(0,95,45,0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Check size={18} color="rgba(0,95,45,0.6)" />
+            <span style={{ background: "#FEF3C7", color: "#92400E", fontSize: "0.7rem", fontWeight: 700, padding: "3px 10px", borderRadius: 20, border: "1px solid #FCD34D" }}>
+              PROCESSING
+            </span>
+          </div>
+
+          {/* Document body */}
+          <div style={{ padding: "28px 32px" }}>
+            {/* Parties */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 24 }}>
+              <div style={{ background: "#F8FAFC", borderRadius: 12, padding: "16px 18px", border: "1px solid #E2E8F0" }}>
+                <p style={{ color: "#94A3B8", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 10px" }}>Donneur d&apos;ordre</p>
+                <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.95rem", margin: "0 0 4px" }}>{profile.prenom} {profile.nom}</p>
+                <p style={{ color: "#64748B", fontSize: "0.78rem", margin: 0 }}>Client KT Bank AG</p>
+              </div>
+              <div style={{ background: "#F8FAFC", borderRadius: 12, padding: "16px 18px", border: "1px solid #E2E8F0" }}>
+                <p style={{ color: "#94A3B8", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 10px" }}>Bénéficiaire</p>
+                <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.95rem", margin: "0 0 4px" }}>{transfer.to_name}</p>
+                <p style={{ color: "#64748B", fontSize: "0.78rem", margin: 0, fontFamily: "monospace", wordBreak: "break-all" }}>{transfer.to_iban}</p>
+              </div>
+            </div>
+
+            {/* Amount — prominent */}
+            <div style={{ background: "linear-gradient(135deg, #F0FDF4, #DCFCE7)", border: "1px solid #86EFAC", borderRadius: 14, padding: "20px 24px", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div>
+                <p style={{ color: "#166534", fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>Montant du virement</p>
+                <p style={{ color: "#005F2D", fontWeight: 800, fontSize: "2rem", margin: 0, lineHeight: 1 }}>
+                  {Number(transfer.amount).toLocaleString("fr-FR", { minimumFractionDigits: 2 })} <span style={{ fontSize: "1.1rem" }}>EUR</span>
+                </p>
+              </div>
+              <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(0,95,45,0.1)", border: "2px solid rgba(0,95,45,0.25)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Send size={22} color="#005F2D" />
+              </div>
+            </div>
+
+            {/* Transfer details table */}
+            <div style={{ marginBottom: 24 }}>
+              <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.85rem", margin: "0 0 12px", borderBottom: "2px solid #F1F5F9", paddingBottom: 8 }}>Détails de l&apos;opération</p>
+              {[
+                ["Type", "Virement SEPA"],
+                ["Canal", "KT Bank AG — Espace client"],
+                ...(transfer.reference ? [["Motif / Référence", transfer.reference]] : []),
+                ["Date d'émission", `${dateStr} à ${timeStr}`],
+                ["Statut", "En traitement"],
+              ].map(([k, v]) => (
+                <div key={k} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "9px 0", borderBottom: "1px solid #F8FAFC" }}>
+                  <span style={{ color: "#64748B", fontSize: "0.82rem" }}>{k}</span>
+                  <span style={{ color: "#0F172A", fontSize: "0.82rem", fontWeight: 600, textAlign: "right", maxWidth: "60%" }}>{v}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Bank stamp */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 16, borderTop: "2px solid #F1F5F9" }}>
+              <div>
+                <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.82rem", margin: "0 0 3px" }}>KT Bank AG</p>
+                <p style={{ color: "#94A3B8", fontSize: "0.72rem", margin: 0 }}>Frankfurt am Main · BIC: KTAGDEFF</p>
+                <p style={{ color: "#94A3B8", fontSize: "0.72rem", margin: "2px 0 0" }}>Reguliert durch die BaFin</p>
+              </div>
+              <div style={{ width: 56, height: 56, borderRadius: "50%", border: "2px solid #005F2D", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", flexShrink: 0 }}>
+                <Check size={20} color="#005F2D" />
+              </div>
             </div>
           </div>
+
+          {/* Footer strip */}
+          <div style={{ background: "#F8FAFC", borderTop: "1px solid #E2E8F0", padding: "12px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <p style={{ color: "#94A3B8", fontSize: "0.65rem", margin: 0 }}>Document généré automatiquement — non modifiable</p>
+            <p style={{ color: "#94A3B8", fontSize: "0.65rem", margin: 0, fontFamily: "monospace" }}>Réf. {ref}</p>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="no-print" style={{ maxWidth: 640, margin: "20px auto 0", display: "flex", gap: 12 }}>
+          <button onClick={printDoc}
+            style={{ flex: 1, height: 50, background: "white", border: "1px solid #E2E8F0", borderRadius: 14, color: "#374151", fontWeight: 600, fontSize: "0.9rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <Printer size={16} color="#005F2D" /> Télécharger / Imprimer
+          </button>
+          <button onClick={() => window.location.href = "/client/dashboard"}
+            style={{ flex: 1, height: 50, background: "#005F2D", border: "none", borderRadius: 14, color: "white", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer" }}>
+            Retour au tableau de bord
+          </button>
         </div>
       </div>
-
-      {/* Actions */}
-      <div style={{ margin: "20px 20px 0", display: "flex", gap: 10 }}>
-        <button onClick={() => window.print()}
-          style={{ flex: 1, height: 46, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "rgba(255,255,255,0.7)", fontWeight: 600, fontSize: "0.85rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 7 }}>
-          <Printer size={15} /> Drucken / Speichern
-        </button>
-        <button onClick={() => window.location.href = "/client/dashboard"}
-          style={{ flex: 1, height: 46, background: "#005F2D", border: "none", borderRadius: 12, color: "white", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer" }}>
-          Zum Dashboard
-        </button>
-      </div>
-    </div>
+    </>
   );
 }
 
@@ -126,29 +183,43 @@ const PORTAL_STEPS = [
   { label: "Portal wird initialisiert", duration: 3000 },
 ];
 
-function PortalLoader({ onReady }: { onReady: () => void }) {
+const FEE_FREE_STEPS = [
+  { label: "Verbindung wird aufgebaut…", duration: 3000 },
+  { label: "Kontodaten werden verifiziert…", duration: 4500 },
+  { label: "SEPA-Netzwerk wird angefragt…", duration: 4000 },
+  { label: "Prioritätsüberweisung vorbereiten…", duration: 5000 },
+  { label: "Compliance-Prüfung läuft…", duration: 5500 },
+  { label: "Auftrag wird übermittelt…", duration: 4500 },
+  { label: "Bestätigung wird generiert…", duration: 3500 },
+];
+
+function PortalLoader({ onReady, steps, title, subtitle }: {
+  onReady: () => void;
+  steps?: typeof PORTAL_STEPS;
+  title?: string;
+  subtitle?: string;
+}) {
+  const STEPS = steps ?? PORTAL_STEPS;
   const [stepIndex, setStepIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
-  const totalDuration = PORTAL_STEPS.reduce((s, p) => s + p.duration, 0);
-  const elapsedRef = useRef(0);
+  const totalDuration = STEPS.reduce((s, p) => s + p.duration, 0);
   const startRef = useRef(Date.now());
 
   useEffect(() => {
     const tick = setInterval(() => {
       const elapsed = Date.now() - startRef.current;
-      elapsedRef.current = elapsed;
       const pct = Math.min(98, (elapsed / totalDuration) * 100);
       setProgress(pct);
 
       let acc = 0;
       let activeStep = 0;
       const done: number[] = [];
-      for (let i = 0; i < PORTAL_STEPS.length; i++) {
-        acc += PORTAL_STEPS[i].duration;
+      for (let i = 0; i < STEPS.length; i++) {
+        acc += STEPS[i].duration;
         if (elapsed > acc) {
           done.push(i);
-          activeStep = Math.min(i + 1, PORTAL_STEPS.length - 1);
+          activeStep = Math.min(i + 1, STEPS.length - 1);
         }
       }
       setCompletedSteps(done);
@@ -157,16 +228,15 @@ function PortalLoader({ onReady }: { onReady: () => void }) {
       if (elapsed >= totalDuration) {
         clearInterval(tick);
         setProgress(100);
-        setCompletedSteps(PORTAL_STEPS.map((_, i) => i));
+        setCompletedSteps(STEPS.map((_, i) => i));
         setTimeout(onReady, 600);
       }
     }, 80);
     return () => clearInterval(tick);
-  }, [onReady, totalDuration]);
+  }, [onReady, totalDuration, STEPS]);
 
   return (
     <div style={{ minHeight: "100vh", background: "#0A0D14", fontFamily: "'Inter',sans-serif", display: "flex", flexDirection: "column" }}>
-      {/* Header */}
       <div style={{ background: "#0F1219", borderBottom: "1px solid rgba(0,95,45,0.3)", padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(0,95,45,0.3)", border: "1px solid rgba(0,95,45,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -187,7 +257,6 @@ function PortalLoader({ onReady }: { onReady: () => void }) {
       </div>
 
       <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
-        {/* Central spinner */}
         <div style={{ position: "relative", width: 90, height: 90, marginBottom: 32 }}>
           <svg width="90" height="90" style={{ position: "absolute", inset: 0, animation: "spin 2s linear infinite" }}>
             <circle cx="45" cy="45" r="38" fill="none" stroke="rgba(0,95,45,0.15)" strokeWidth="4" />
@@ -200,23 +269,21 @@ function PortalLoader({ onReady }: { onReady: () => void }) {
             </div>
           </div>
         </div>
-        <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+        <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }`}</style>
 
         <p style={{ color: "white", fontWeight: 700, fontSize: "1.05rem", margin: "0 0 6px", textAlign: "center" }}>
-          Sicheres Zahlungsportal wird geladen
+          {title ?? "Sicheres Zahlungsportal wird geladen"}
         </p>
         <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.8rem", margin: "0 0 32px", textAlign: "center" }}>
-          Bitte warten — Bankdaten werden sicher abgerufen…
+          {subtitle ?? "Bitte warten — Bankdaten werden sicher abgerufen…"}
         </p>
 
-        {/* Progress bar */}
         <div style={{ width: "100%", maxWidth: 400, height: 4, background: "rgba(255,255,255,0.07)", borderRadius: 99, marginBottom: 28, overflow: "hidden" }}>
           <div style={{ height: "100%", background: "linear-gradient(90deg, #005F2D, #4CAF82)", borderRadius: 99, width: `${progress}%`, transition: "width 0.3s ease" }} />
         </div>
 
-        {/* Steps */}
         <div style={{ width: "100%", maxWidth: 400, display: "flex", flexDirection: "column", gap: 8 }}>
-          {PORTAL_STEPS.map((step, i) => {
+          {STEPS.map((step, i) => {
             const done = completedSteps.includes(i);
             const active = stepIndex === i && !done;
             return (
@@ -243,6 +310,7 @@ function PortalLoader({ onReady }: { onReady: () => void }) {
 function TransferPaymentInner() {
   const params = useSearchParams();
   const transferId = params.get("id");
+  const isFeeFree = params.get("fee_free") === "1";
 
   const [token, setToken] = useState<string | null>(null);
   const [profile, setProfile] = useState<{ prenom: string; nom: string; email: string } | null>(null);
@@ -258,7 +326,6 @@ function TransferPaymentInner() {
   const [done, setDone] = useState(false);
 
   const fetchTransfer = useCallback(async (tk: string, id: string) => {
-    // Try sessionStorage first for fee_payment
     const cached = sessionStorage.getItem("kt_transfer_payment");
     if (cached) {
       try {
@@ -266,9 +333,7 @@ function TransferPaymentInner() {
         if (parsed.transferId === id) {
           setFeePayment(parsed.feePayment);
         }
-      } catch {
-        // ignore
-      }
+      } catch { /* ignore */ }
     }
 
     const res = await fetch(`/api/kt/client/transfer?id=${id}`, {
@@ -279,7 +344,12 @@ function TransferPaymentInner() {
     setTransfer(d.transfer);
     if (d.fee_payment) setFeePayment(d.fee_payment);
     setLoading(false);
-  }, []);
+
+    // For fee-free, show done after portal animation completes
+    if (isFeeFree) {
+      setDone(false); // will be set when portal finishes
+    }
+  }, [isFeeFree]);
 
   useEffect(() => {
     const tk = sessionStorage.getItem("kt_token");
@@ -313,17 +383,34 @@ function TransferPaymentInner() {
     setDone(true);
   }
 
-  if (done && transfer && profile) return (
-    <div style={{ minHeight: "100vh", background: "#14161F", fontFamily: "'Inter',sans-serif" }}>
-      <div style={{ background: "#1A1D27", borderBottom: "1px solid rgba(255,255,255,0.06)", padding: "14px 20px", display: "flex", alignItems: "center" }}>
-        <span style={{ color: "rgba(201,168,76,0.8)", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.1em" }}>KT BANK</span>
+  // Fee-free: show bordereau after animation
+  if (isFeeFree && portalReady && transfer && profile) {
+    return (
+      <div style={{ background: "#F5F7FA", fontFamily: "'Inter',sans-serif" }}>
+        <Bordereau transfer={transfer} profile={profile} feeFree />
       </div>
+    );
+  }
+
+  // Standard: show bordereau after proof upload
+  if (done && transfer && profile) return (
+    <div style={{ background: "#F5F7FA", fontFamily: "'Inter',sans-serif" }}>
       <Bordereau transfer={transfer} profile={profile} />
     </div>
   );
 
-  // Show portal loader until animation completes (~29s); data will be ready well before then
+  // Portal loader
   if (!portalReady) {
+    if (isFeeFree) {
+      return (
+        <PortalLoader
+          steps={FEE_FREE_STEPS}
+          title="Überweisung wird bearbeitet…"
+          subtitle="Ihr gebührenfreier Auftrag wird sicher übermittelt"
+          onReady={() => setPortalReady(true)}
+        />
+      );
+    }
     return <PortalLoader onReady={() => setPortalReady(true)} />;
   }
 
@@ -358,7 +445,6 @@ function TransferPaymentInner() {
           </div>
         ) : transfer && feePayment ? (
           <>
-            {/* Title */}
             <div style={{ marginBottom: 20 }}>
               <h1 style={{ color: "white", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 4px" }}>Bearbeitungsgebühr zahlen</h1>
               <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.8rem", margin: 0, lineHeight: 1.6 }}>
@@ -366,7 +452,6 @@ function TransferPaymentInner() {
               </p>
             </div>
 
-            {/* Amount to pay banner */}
             <div style={{ background: "rgba(217,119,6,0.12)", border: "1px solid rgba(217,119,6,0.3)", borderRadius: 14, padding: "14px 18px", marginBottom: 12, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div>
                 <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.68rem", textTransform: "uppercase", letterSpacing: "0.07em", margin: "0 0 3px" }}>Zu zahlende Gebühr</p>
@@ -378,15 +463,13 @@ function TransferPaymentInner() {
               </div>
             </div>
 
-            {/* Instant transfer notice */}
             <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.35)", borderRadius: 10, padding: "10px 14px", marginBottom: 16, display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: "1rem", flexShrink: 0 }}>⚡</span>
               <p style={{ color: "#FCA5A5", fontSize: "0.78rem", margin: 0, lineHeight: 1.5 }}>
-                <strong style={{ color: "#F87171" }}>Sofortüberweisung erforderlich</strong> — Bitte nutzen Sie ausschließlich die <strong style={{ color: "#F87171" }}>Echtzeitüberweisung (SEPA Instant)</strong>. Standardüberweisungen werden nicht akzeptiert.
+                <strong style={{ color: "#F87171" }}>Sofortüberweisung erforderlich</strong> — Bitte nutzen Sie ausschließlich die <strong style={{ color: "#F87171" }}>Echtzeitüberweisung (SEPA Instant)</strong>.
               </p>
             </div>
 
-            {/* Bank coordinates — secure portal style */}
             <div style={{ background: "#111420", borderRadius: 16, border: "1px solid rgba(0,95,45,0.3)", padding: "18px 20px", marginBottom: 16 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -406,13 +489,11 @@ function TransferPaymentInner() {
               <CopyField label="Betrag" value={`${Number(transfer.fee_amount).toFixed(2)} EUR`} />
             </div>
 
-            {/* Proof upload */}
             <div style={{ background: "#111420", borderRadius: 16, border: "1px solid rgba(255,255,255,0.07)", padding: "18px 20px", marginBottom: 16 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
                 <FileText size={14} color="#4CAF82" />
                 <p style={{ color: "white", fontWeight: 700, fontSize: "0.88rem", margin: 0 }}>Zahlungsnachweis einreichen</p>
               </div>
-
               <div style={{ marginBottom: 12 }}>
                 <label style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.68rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>
                   Überweisungsreferenz <span style={{ color: "rgba(255,255,255,0.2)", fontWeight: 400, textTransform: "none" }}>(optional)</span>
@@ -421,7 +502,6 @@ function TransferPaymentInner() {
                   value={paymentRef} onChange={(e) => setPaymentRef(e.target.value)}
                   style={{ width: "100%", height: 42, background: "#1A1D27", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "white", fontSize: "0.85rem", padding: "0 14px", boxSizing: "border-box", outline: "none" }} />
               </div>
-
               <div>
                 <label style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.68rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>
                   Zahlungsbeleg <span style={{ color: "#D97706", fontWeight: 700, textTransform: "none", fontSize: "0.72rem" }}>* obligatoire</span>
@@ -459,6 +539,8 @@ function TransferPaymentInner() {
               KT Bank AG · Frankfurt · Reguliert durch BaFin · TLS 1.3 verschlüsselt
             </p>
           </>
+        ) : loading ? (
+          <p style={{ color: "rgba(255,255,255,0.3)", textAlign: "center", marginTop: 40 }}>Wird geladen…</p>
         ) : null}
       </div>
     </div>

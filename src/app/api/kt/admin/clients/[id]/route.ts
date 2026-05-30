@@ -56,7 +56,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     .single();
 
   // Profile fields (non-KYC updates)
-  const profileFields = ["status", "custom_fee", "custom_fee_payment", "activation_required"];
+  const profileFields = ["status", "custom_fee", "custom_fee_payment", "activation_required", "fee_free"];
   const profileUpdate = Object.fromEntries(Object.entries(body).filter(([k]) => profileFields.includes(k)));
   if (Object.keys(profileUpdate).length > 0) {
     const { error } = await supabase.from("kt_profiles").update(profileUpdate).eq("id", id);

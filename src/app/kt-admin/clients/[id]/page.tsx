@@ -75,6 +75,9 @@ export default function ClientDetailPage() {
   const [feeSaving, setFeeSaving] = useState(false);
   const [feeSaved, setFeeSaved] = useState(false);
 
+  const [feeFree, setFeeFree] = useState(false);
+  const [feeFreeLoading, setFeeFreeLoading] = useState(false);
+
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [isMobile, setIsMobile] = useState(true);
@@ -109,6 +112,7 @@ export default function ClientDetailPage() {
         setKycDocuments(d.kyc_documents ?? []);
         setNewStatus(String(d.profile?.status ?? ""));
         setActivationRequired(!!(d.profile?.activation_required));
+        setFeeFree(!!(d.profile?.fee_free));
         const cf = d.profile?.custom_fee as TransferFee | null;
         const cp = d.profile?.custom_fee_payment as FeePayment | null;
         setCustomFee(cf ?? null);
@@ -189,6 +193,17 @@ export default function ClientDetailPage() {
     setFeeSaving(false);
     setFeeSaved(true);
     setTimeout(() => setFeeSaved(false), 3000);
+  }
+
+  async function toggleFeeFree(val: boolean) {
+    setFeeFreeLoading(true);
+    await fetch(`/api/kt/admin/clients/${id}`, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ fee_free: val }),
+    });
+    setFeeFree(val);
+    setFeeFreeLoading(false);
   }
 
   async function resetFeeConfig() {
@@ -392,6 +407,37 @@ export default function ClientDetailPage() {
           </div>
         );
       })()}
+
+      {/* Fee-free toggle */}
+      <div style={{ background: "#1A1D27", borderRadius: 14, border: `1px solid ${feeFree ? "rgba(0,95,45,0.5)" : "rgba(255,255,255,0.06)"}`, marginBottom: 16, padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+        <div>
+          <p style={{ color: "white", fontWeight: 600, fontSize: "0.88rem", margin: "0 0 3px" }}>Virement sans frais</p>
+          <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.75rem", margin: 0, lineHeight: 1.5 }}>
+            {feeFree ? "Activé — ce client ne paie aucun frais de virement." : "Désactivé — les frais standard s'appliquent."}
+          </p>
+        </div>
+        <button onClick={() => toggleFeeFree(!feeFree)} disabled={feeFreeLoading}
+          style={{
+            display: "flex", alignItems: "center", gap: 10, padding: "10px 18px",
+            background: feeFree ? "rgba(0,95,45,0.2)" : "rgba(255,255,255,0.06)",
+            border: `1px solid ${feeFree ? "rgba(0,95,45,0.5)" : "rgba(255,255,255,0.12)"}`,
+            borderRadius: 10, cursor: feeFreeLoading ? "not-allowed" : "pointer", transition: "all 0.2s", flexShrink: 0,
+          }}>
+          <div style={{
+            width: 40, height: 22, borderRadius: 11, background: feeFree ? "#005F2D" : "rgba(255,255,255,0.12)",
+            position: "relative", transition: "background 0.2s",
+          }}>
+            <div style={{
+              position: "absolute", top: 3, left: feeFree ? 21 : 3,
+              width: 16, height: 16, borderRadius: "50%", background: "white",
+              transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+            }} />
+          </div>
+          <span style={{ color: feeFree ? "#4CAF82" : "rgba(255,255,255,0.4)", fontWeight: 600, fontSize: "0.82rem" }}>
+            {feeFreeLoading ? "…" : feeFree ? "Activé" : "Désactivé"}
+          </span>
+        </button>
+      </div>
 
       {/* Per-client fee config */}
       <div style={{ background: "#1A1D27", borderRadius: 14, border: `1px solid ${customFee ? "rgba(0,95,45,0.4)" : "rgba(255,255,255,0.06)"}`, marginBottom: 16, overflow: "hidden" }}>
