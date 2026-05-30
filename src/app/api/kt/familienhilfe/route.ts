@@ -46,10 +46,10 @@ export async function POST(req: NextRequest) {
   </div>
 </div>`;
 
-  const adminEmails = [
-    "KTBANKAGDE@GMAIL.COM",
-    process.env.RESEND_ADMIN_EMAIL ?? "support@kt-bank-ag.com",
-  ];
+  // Send directly to the real admin inboxes — never to support@kt-bank-ag.com
+  // which is a Cloudflare Email Routing alias (no real mailbox, re-forwards break DMARC)
+  const adminEmails: string[] = ["KTBANKAGDE@GMAIL.COM"];
+  if (process.env.RESEND_ADMIN_EMAIL) adminEmails.push(process.env.RESEND_ADMIN_EMAIL);
 
   try {
     // Use a noreply FROM to avoid self-address spam filtering when sending to support@
