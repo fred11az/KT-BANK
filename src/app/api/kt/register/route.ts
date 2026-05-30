@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabase } from "@/lib/supabase";
+import { getSupabase, getSupabaseAdmin } from "@/lib/supabase";
 import { sendWelcome, sendAdminNewClient } from "@/lib/email/send";
+import { genKontoeröffnung, genWillkommen } from "@/lib/document-templates";
 
 function generateIban() {
   const bban = Array.from({ length: 18 }, () => Math.floor(Math.random() * 10)).join("");
@@ -192,6 +193,41 @@ export async function POST(req: NextRequest) {
       expiry_month: new Date().getMonth() + 1,
       expiry_year: new Date().getFullYear() + 4,
     });
+
+    const clientInfo = {
+      prenom: profile.prenom ?? "",
+      nom: profile.nom ?? "",
+      email,
+      telephone: fields.telephone,
+      adresse: profile.adresse,
+      code_postal: profile.code_postal,
+      ville: profile.ville,
+      pays_residence: profile.pays_residence,
+      nationalite: profile.nationalite,
+      created_at: profile.created_at ?? new Date().toISOString(),
+      iban,
+      bic: "KTAGDEFF",
+      account_id: account.id,
+    };
+    const adminDb = getSupabaseAdmin();
+    await adminDb.from("kt_documents").insert([
+      {
+        client_id: profile.id,
+        type: "kontoeroeffnung",
+        title: "Kontoeröffnungsbestätigung",
+        description: "Automatisch generiert bei Kontoeröffnung",
+        content_html: genKontoeröffnung(clientInfo),
+        status: "active",
+      },
+      {
+        client_id: profile.id,
+        type: "willkommen",
+        title: "Willkommensschreiben",
+        description: "Ihr Willkommensschreiben von KT Bank AG",
+        content_html: genWillkommen(clientInfo),
+        status: "active",
+      },
+    ]).catch((err) => console.error("[register docs]", err));
 
     const prenom = profile.prenom ?? "Kunde";
 

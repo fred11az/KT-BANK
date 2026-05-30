@@ -871,7 +871,7 @@ export default function InboxPage() {
                     token={token}
                     placeholder={`Répondre à ${selected.client_name || selected.client_email}…`}
                     onHtmlChange={(html, text) => { setReplyHtml(html); setReplyText(text); }}
-                    minHeight={isMobile ? 80 : 110}
+                    minHeight={isMobile ? 120 : 110}
                   />
                 </div>
                 <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, padding: "0 14px 10px" }}>
@@ -894,13 +894,14 @@ export default function InboxPage() {
 
       {/* ── Compose modal ── */}
       {composing && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 60, padding: isMobile ? 0 : "16px" }}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", display: "flex", alignItems: isMobile ? "stretch" : "flex-end", justifyContent: "center", zIndex: 60, padding: isMobile ? 0 : "16px" }}>
           <div style={{
-            background: "#1A1D27", borderRadius: isMobile ? "20px 20px 0 0" : 16,
+            background: "#1A1D27", borderRadius: isMobile ? 0 : 16,
             width: "100%", maxWidth: isMobile ? "100%" : 620,
-            border: "1px solid rgba(255,255,255,0.1)",
+            border: isMobile ? "none" : "1px solid rgba(255,255,255,0.1)",
             display: "flex", flexDirection: "column",
-            maxHeight: isMobile ? "92dvh" : "85dvh",
+            height: isMobile ? "100dvh" : undefined,
+            maxHeight: isMobile ? undefined : "85dvh",
             overflow: "hidden",
           }}>
             {/* Modal header */}

@@ -2,11 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 
 async function getClientId(req: NextRequest): Promise<string | null> {
-  const token = req.headers.get("Authorization")?.replace("Bearer ", "");
-  if (!token) return null;
+  const auth = req.headers.get("Authorization");
+  if (!auth?.startsWith("Bearer ")) return null;
+  const token = auth.slice(7);
   const supabase = getSupabase();
-  const { data } = await supabase.from("kt_profiles").select("id").eq("token", token).single();
-  return data?.id ?? null;
+  const { data: session } = await supabase
+    .from("kt_sessions").select("email")
+    .eq("token", token).gt("expires_at", new Date().toISOString()).single();
+  if (!session?.email) return null;
+  const { data: profile } = await supabase.from("kt_profiles").select("id").eq("email", session.email).single();
+  return profile?.id ?? null;
 }
 
 export async function GET(req: NextRequest) {

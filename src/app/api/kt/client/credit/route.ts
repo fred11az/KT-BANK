@@ -80,9 +80,10 @@ export async function POST(req: NextRequest) {
   }
 
   const isFr = (profile.lang ?? "de") === "fr";
-  const date = new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" });
-  const amountFmt = Number(amount).toLocaleString("fr-FR", { minimumFractionDigits: 2 }) + " €";
-  const monthlyFmt = Number(monthly_payment).toLocaleString("fr-FR", { minimumFractionDigits: 2 }) + " €";
+  const locale = isFr ? "fr-FR" : "de-DE";
+  const date = new Date().toLocaleString(locale, { timeZone: "Europe/Paris" });
+  const amountFmt = Number(amount).toLocaleString(locale, { minimumFractionDigits: 2 }) + " €";
+  const monthlyFmt = Number(monthly_payment).toLocaleString(locale, { minimumFractionDigits: 2 }) + " €";
   const typeLabel = type === "islamic"
     ? (isFr ? "Crédit Islamique (0% — Mourabaha)" : "Islamischer Kredit (0% — Mourabaha)")
     : (isFr ? "Crédit Standard (2% annuel)" : "Standardkredit (2% p.a.)");
