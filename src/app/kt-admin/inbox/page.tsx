@@ -146,22 +146,25 @@ function MessageContent({ msg }: { msg: Message }) {
 
 /* ── Toolbar button helper ── */
 function TB({
-  onClick, active = false, title, children, disabled = false,
+  onClick, onMD, active = false, title, children, disabled = false,
 }: {
-  onClick: () => void; active?: boolean; title?: string;
+  onClick?: () => void;
+  onMD?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  active?: boolean; title?: string;
   children: React.ReactNode; disabled?: boolean;
 }) {
   return (
     <button
-      type="button" title={title} onMouseDown={(e) => { e.preventDefault(); onClick(); }}
+      type="button" title={title}
+      onMouseDown={onMD ?? ((e) => { e.preventDefault(); onClick?.(); })}
       disabled={disabled}
       style={{
         display: "flex", alignItems: "center", justifyContent: "center",
-        width: 30, height: 26, borderRadius: 5, border: "none",
+        width: 34, height: 32, borderRadius: 6, border: "none",
         background: active ? "rgba(0,95,45,0.4)" : "transparent",
         color: active ? "#4CAF82" : "rgba(255,255,255,0.65)",
         cursor: disabled ? "not-allowed" : "pointer", opacity: disabled ? 0.35 : 1,
-        transition: "all 0.1s",
+        transition: "all 0.1s", flexShrink: 0,
       }}
     >
       {children}
@@ -197,313 +200,209 @@ function Toolbar({
   const [showPasteHtml, setShowPasteHtml] = useState(false);
   const [rawHtml, setRawHtml] = useState("");
   const [uploading, setUploading] = useState(false);
+  /* position: fixed coordinates for the active dropdown */
+  const [ddPos, setDdPos] = useState({ top: 0, left: 0 });
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const toolbarRef = useRef<HTMLDivElement>(null);
+
+  /* Close all dropdowns when clicking/touching outside the toolbar */
+  useEffect(() => {
+    function close(e: MouseEvent | TouchEvent) {
+      if (toolbarRef.current && !toolbarRef.current.contains(e.target as Node)) {
+        setShowColors(false); setShowHighlights(false);
+        setShowLink(false); setShowCTA(false); setShowPasteHtml(false);
+      }
+    }
+    document.addEventListener("mousedown", close);
+    document.addEventListener("touchstart", close);
+    return () => { document.removeEventListener("mousedown", close); document.removeEventListener("touchstart", close); };
+  }, []);
+
+  /* Calculate position: fixed coords from a button element */
+  function pos(e: React.MouseEvent) {
+    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const vw = window.innerWidth;
+    /* Clamp so the dropdown never overflows the viewport horizontally */
+    setDdPos({ top: r.bottom + 6, left: Math.min(r.left, vw - 300) });
+  }
+
+  function closeAll() {
+    setShowColors(false); setShowHighlights(false);
+    setShowLink(false); setShowCTA(false); setShowPasteHtml(false);
+  }
 
   function insertRawHtml() {
     if (!rawHtml.trim()) return;
     const safe = sanitize(rawHtml);
     editor.chain().focus().insertContent(safe, { parseOptions: { preserveWhitespace: false } }).run();
-    setRawHtml("");
-    setShowPasteHtml(false);
+    setRawHtml(""); setShowPasteHtml(false);
   }
 
   function applyLink() {
     if (linkUrl) editor.chain().focus().extendMarkToNextNewline().setLink({ href: linkUrl, target: "_blank" }).run();
     else editor.chain().focus().unsetLink().run();
-    setShowLink(false);
-    setLinkUrl("");
+    setShowLink(false); setLinkUrl("");
   }
 
   function insertCTA() {
-    editor.chain().focus().insertContent({
-      type: "ctaButton",
-      attrs: { label: ctaText, href: ctaUrl },
-    }).run();
+    editor.chain().focus().insertContent({ type: "ctaButton", attrs: { label: ctaText, href: ctaUrl } }).run();
     setShowCTA(false);
   }
 
   async function uploadImage(file: File) {
     setUploading(true);
-    const fd = new FormData();
-    fd.append("file", file);
+    const fd = new FormData(); fd.append("file", file);
     try {
-      const res = await fetch("/api/kt/admin/inbox/upload", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: fd,
-      });
-      if (res.ok) {
-        const { url } = await res.json();
-        editor.chain().focus().setImage({ src: url }).run();
-        onImageUploaded(url);
-      }
-    } finally {
-      setUploading(false);
-    }
+      const res = await fetch("/api/kt/admin/inbox/upload", { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: fd });
+      if (res.ok) { const { url } = await res.json(); editor.chain().focus().setImage({ src: url }).run(); onImageUploaded(url); }
+    } finally { setUploading(false); }
   }
 
-  const tb: React.CSSProperties = {
-    display: "flex", flexWrap: "nowrap", alignItems: "center", gap: 2,
-    padding: "6px 8px", background: "#14161F",
-    borderBottom: "1px solid rgba(255,255,255,0.08)",
-    borderRadius: "10px 10px 0 0",
-    overflowX: "auto",
-    WebkitOverflowScrolling: "touch" as React.CSSProperties["WebkitOverflowScrolling"],
-    scrollbarWidth: "none" as React.CSSProperties["scrollbarWidth"],
-  };
-  const sep: React.CSSProperties = {
-    width: 1, height: 18, background: "rgba(255,255,255,0.12)", margin: "0 4px",
+  const sep: React.CSSProperties = { width: 1, height: 18, background: "rgba(255,255,255,0.12)", margin: "0 3px", flexShrink: 0 };
+
+  /* Base style for all position:fixed dropdowns — escapes every overflow container */
+  const dd: React.CSSProperties = {
+    position: "fixed", top: ddPos.top, left: ddPos.left, zIndex: 9999,
+    background: "#1A1D27", border: "1px solid rgba(255,255,255,0.15)",
+    borderRadius: 10, boxShadow: "0 8px 32px rgba(0,0,0,0.7)",
   };
 
   return (
-    <div className="rich-toolbar" style={tb}>
-      {/* Text format */}
-      <TB onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive("bold")} title="Gras">
-        <Bold size={13} />
-      </TB>
-      <TB onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive("italic")} title="Italique">
-        <Italic size={13} />
-      </TB>
-      <TB onClick={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive("underline")} title="Souligné">
-        <Underline size={13} />
-      </TB>
-      <TB onClick={() => editor.chain().focus().toggleStrike().run()} active={editor.isActive("strike")} title="Barré">
-        <Strikethrough size={13} />
-      </TB>
-
-      <div style={sep} />
-
-      {/* Headings */}
-      <TB onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} active={editor.isActive("heading", { level: 1 })} title="Titre H1">
-        <Heading1 size={13} />
-      </TB>
-      <TB onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={editor.isActive("heading", { level: 2 })} title="Titre H2">
-        <Heading2 size={13} />
-      </TB>
-      <TB onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} active={editor.isActive("heading", { level: 3 })} title="Titre H3">
-        <Heading3 size={13} />
-      </TB>
-
-      <div style={sep} />
-
-      {/* Lists */}
-      <TB onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive("bulletList")} title="Liste à puces">
-        <List size={13} />
-      </TB>
-      <TB onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive("orderedList")} title="Liste numérotée">
-        <ListOrdered size={13} />
-      </TB>
-
-      <div style={sep} />
-
-      {/* Color */}
-      <div style={{ position: "relative" }}>
-        <TB onClick={() => { setShowColors((v) => !v); setShowHighlights(false); setShowPasteHtml(false); }} active={showColors} title="Couleur du texte">
-          <Palette size={13} />
+    <div ref={toolbarRef} style={{ position: "relative" }}>
+      {/* ── Scrollable button strip ── */}
+      <div className="rich-toolbar" style={{
+        display: "flex", flexWrap: "nowrap", alignItems: "center", gap: 1,
+        padding: "5px 8px", background: "#14161F",
+        borderBottom: "1px solid rgba(255,255,255,0.08)",
+        borderRadius: "10px 10px 0 0",
+        overflowX: "auto",
+        WebkitOverflowScrolling: "touch" as React.CSSProperties["WebkitOverflowScrolling"],
+        scrollbarWidth: "none" as React.CSSProperties["scrollbarWidth"],
+      }}>
+        <TB onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive("bold")} title="Gras"><Bold size={14} /></TB>
+        <TB onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive("italic")} title="Italique"><Italic size={14} /></TB>
+        <TB onClick={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive("underline")} title="Souligné"><Underline size={14} /></TB>
+        <TB onClick={() => editor.chain().focus().toggleStrike().run()} active={editor.isActive("strike")} title="Barré"><Strikethrough size={14} /></TB>
+        <div style={sep} />
+        <TB onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} active={editor.isActive("heading", { level: 1 })} title="H1"><Heading1 size={14} /></TB>
+        <TB onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={editor.isActive("heading", { level: 2 })} title="H2"><Heading2 size={14} /></TB>
+        <TB onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} active={editor.isActive("heading", { level: 3 })} title="H3"><Heading3 size={14} /></TB>
+        <div style={sep} />
+        <TB onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive("bulletList")} title="Liste"><List size={14} /></TB>
+        <TB onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive("orderedList")} title="Numérotée"><ListOrdered size={14} /></TB>
+        <div style={sep} />
+        {/* Color */}
+        <TB onMD={(e) => { e.preventDefault(); pos(e); setShowColors(v => !v); setShowHighlights(false); setShowLink(false); setShowCTA(false); setShowPasteHtml(false); }} active={showColors} title="Couleur"><Palette size={14} /></TB>
+        {/* Highlight */}
+        <TB onMD={(e) => { e.preventDefault(); pos(e); setShowHighlights(v => !v); setShowColors(false); setShowLink(false); setShowCTA(false); setShowPasteHtml(false); }} active={showHighlights} title="Surlignage"><Highlighter size={14} /></TB>
+        <div style={sep} />
+        {/* Link */}
+        <TB onMD={(e) => { e.preventDefault(); pos(e); const was = showLink; closeAll(); if (!was) { setShowLink(true); setLinkUrl(editor.getAttributes("link").href ?? ""); } }} active={editor.isActive("link") || showLink} title="Lien"><Link2 size={14} /></TB>
+        {/* Image */}
+        <TB onClick={() => fileInputRef.current?.click()} title="Image" disabled={uploading}>
+          {uploading ? <Upload size={14} style={{ animation: "spin 1s linear infinite" }} /> : <Image size={14} />}
         </TB>
-        {showColors && (
-          <div style={{
-            position: "absolute", top: "100%", left: 0, zIndex: 50,
-            background: "#1A1D27", border: "1px solid rgba(255,255,255,0.12)",
-            borderRadius: 8, padding: 8, display: "flex", gap: 4, flexWrap: "wrap", width: 140,
-          }}>
-            {COLORS.map(([color, label]) => (
-              <button key={color} title={label} type="button"
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  editor.chain().focus().setColor(color).run();
-                  setShowColors(false);
-                }}
-                style={{ width: 22, height: 22, borderRadius: 4, background: color, border: "2px solid rgba(255,255,255,0.2)", cursor: "pointer" }}
-              />
-            ))}
-            <button type="button" title="Aucune couleur"
-              onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().unsetColor().run(); setShowColors(false); }}
-              style={{ width: 22, height: 22, borderRadius: 4, background: "transparent", border: "2px dashed rgba(255,255,255,0.3)", cursor: "pointer", fontSize: 10, color: "rgba(255,255,255,0.4)" }}>
-              ✕
+        <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/gif,image/webp"
+          style={{ display: "none" }} onChange={(e) => { const f = e.target.files?.[0]; if (f) { uploadImage(f); e.target.value = ""; } }} />
+        <TB onClick={() => fileInputRef.current?.click()} title="Pièce jointe"><Paperclip size={14} /></TB>
+        <div style={sep} />
+        {/* Paste HTML */}
+        <TB onMD={(e) => { e.preventDefault(); pos(e); setShowPasteHtml(v => !v); setShowCTA(false); setShowColors(false); setShowHighlights(false); setShowLink(false); }} active={showPasteHtml} title="HTML brut"><Code2 size={14} /></TB>
+        {/* CTA */}
+        <TB onMD={(e) => { e.preventDefault(); pos(e); setShowCTA(v => !v); setShowPasteHtml(false); setShowColors(false); setShowHighlights(false); setShowLink(false); }} active={showCTA} title="Bouton CTA"><MousePointerClick size={14} /></TB>
+      </div>
+
+      {/* ── Dropdowns — position:fixed escapes all overflow/clip parents ── */}
+
+      {showColors && (
+        <div style={{ ...dd, padding: 10, display: "flex", gap: 6, flexWrap: "wrap", width: 156 }}>
+          {COLORS.map(([color, label]) => (
+            <button key={color} title={label} type="button"
+              onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().setColor(color).run(); setShowColors(false); }}
+              style={{ width: 28, height: 28, borderRadius: 6, background: color, border: "2px solid rgba(255,255,255,0.2)", cursor: "pointer" }} />
+          ))}
+          <button type="button" title="Aucune couleur"
+            onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().unsetColor().run(); setShowColors(false); }}
+            style={{ width: 28, height: 28, borderRadius: 6, background: "transparent", border: "2px dashed rgba(255,255,255,0.35)", cursor: "pointer", fontSize: 12, color: "rgba(255,255,255,0.5)" }}>✕</button>
+        </div>
+      )}
+
+      {showHighlights && (
+        <div style={{ ...dd, padding: 10, display: "flex", gap: 6, flexWrap: "wrap", width: 142 }}>
+          {HIGHLIGHTS.map(([color, label]) => (
+            <button key={color} title={label} type="button"
+              onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleHighlight({ color }).run(); setShowHighlights(false); }}
+              style={{ width: 28, height: 28, borderRadius: 6, background: color, border: "2px solid rgba(0,0,0,0.2)", cursor: "pointer" }} />
+          ))}
+          <button type="button" title="Supprimer"
+            onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().unsetHighlight().run(); setShowHighlights(false); }}
+            style={{ width: 28, height: 28, borderRadius: 6, background: "transparent", border: "2px dashed rgba(255,255,255,0.35)", cursor: "pointer", fontSize: 12, color: "rgba(255,255,255,0.5)" }}>✕</button>
+        </div>
+      )}
+
+      {showLink && (
+        <div style={{ ...dd, padding: 14, width: 280 }}>
+          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.7rem", margin: "0 0 8px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Lien URL</p>
+          <input type="url" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} placeholder="https://…"
+            onKeyDown={(e) => e.key === "Enter" && applyLink()} autoFocus
+            style={{ width: "100%", height: 40, background: "#252836", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 8, color: "white", fontSize: "0.9rem", padding: "0 12px", outline: "none", boxSizing: "border-box" }} />
+          <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+            <button type="button" onMouseDown={(e) => { e.preventDefault(); applyLink(); }}
+              style={{ flex: 1, height: 36, background: "#005F2D", border: "none", borderRadius: 8, color: "white", fontSize: "0.82rem", fontWeight: 700, cursor: "pointer" }}>
+              Appliquer
+            </button>
+            {editor.isActive("link") && (
+              <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().unsetLink().run(); setShowLink(false); }}
+                style={{ height: 36, padding: "0 12px", background: "rgba(248,113,113,0.15)", border: "none", borderRadius: 8, color: "#F87171", fontSize: "0.82rem", cursor: "pointer" }}>
+                Supprimer
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {showPasteHtml && (
+        <div style={{ ...dd, padding: 14, width: Math.min(320, window.innerWidth - 16) }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.7rem", margin: 0, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>HTML brut</p>
+            <button type="button" onMouseDown={(e) => { e.preventDefault(); setShowPasteHtml(false); setRawHtml(""); }}
+              style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", padding: 4 }}><X size={15} /></button>
+          </div>
+          <textarea value={rawHtml} onChange={(e) => setRawHtml(e.target.value)}
+            placeholder={"<h1>Titre</h1>\n<p>Contenu…</p>"} autoFocus rows={6}
+            style={{ width: "100%", background: "#0F1117", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "#4CAF82", fontSize: "0.75rem", fontFamily: "monospace", padding: "10px 12px", outline: "none", resize: "vertical", lineHeight: 1.6, boxSizing: "border-box" }} />
+          <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+            <button type="button" onMouseDown={(e) => { e.preventDefault(); insertRawHtml(); }} disabled={!rawHtml.trim()}
+              style={{ flex: 1, height: 36, background: rawHtml.trim() ? "#005F2D" : "rgba(0,95,45,0.3)", border: "none", borderRadius: 8, color: "white", fontSize: "0.82rem", fontWeight: 700, cursor: rawHtml.trim() ? "pointer" : "not-allowed" }}>
+              Insérer
+            </button>
+            <button type="button" onMouseDown={(e) => { e.preventDefault(); setRawHtml(""); }}
+              style={{ height: 36, padding: "0 12px", background: "rgba(255,255,255,0.06)", border: "none", borderRadius: 8, color: "rgba(255,255,255,0.4)", fontSize: "0.82rem", cursor: "pointer" }}>
+              Effacer
             </button>
           </div>
-        )}
-      </div>
+          <p style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.67rem", margin: "8px 0 0", lineHeight: 1.4 }}>Sanitisé automatiquement.</p>
+        </div>
+      )}
 
-      {/* Highlight */}
-      <div style={{ position: "relative" }}>
-        <TB onClick={() => { setShowHighlights((v) => !v); setShowColors(false); setShowPasteHtml(false); }} active={showHighlights} title="Surlignage">
-          <Highlighter size={13} />
-        </TB>
-        {showHighlights && (
-          <div style={{
-            position: "absolute", top: "100%", left: 0, zIndex: 50,
-            background: "#1A1D27", border: "1px solid rgba(255,255,255,0.12)",
-            borderRadius: 8, padding: 8, display: "flex", gap: 4, flexWrap: "wrap", width: 120,
-          }}>
-            {HIGHLIGHTS.map(([color, label]) => (
-              <button key={color} title={label} type="button"
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  editor.chain().focus().toggleHighlight({ color }).run();
-                  setShowHighlights(false);
-                }}
-                style={{ width: 22, height: 22, borderRadius: 4, background: color, border: "2px solid rgba(0,0,0,0.15)", cursor: "pointer" }}
-              />
-            ))}
-            <button type="button" title="Supprimer surlignage"
-              onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().unsetHighlight().run(); setShowHighlights(false); }}
-              style={{ width: 22, height: 22, borderRadius: 4, background: "transparent", border: "2px dashed rgba(255,255,255,0.3)", cursor: "pointer", fontSize: 10, color: "rgba(255,255,255,0.4)" }}>
-              ✕
-            </button>
+      {showCTA && (
+        <div style={{ ...dd, padding: 14, width: Math.min(284, window.innerWidth - 16) }}>
+          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.7rem", margin: "0 0 12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Bouton CTA</p>
+          <label style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.72rem", display: "block", marginBottom: 4 }}>Texte</label>
+          <input type="text" value={ctaText} onChange={(e) => setCtaText(e.target.value)} placeholder="En savoir plus"
+            style={{ width: "100%", height: 38, background: "#252836", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 8, color: "white", fontSize: "0.88rem", padding: "0 10px", outline: "none", boxSizing: "border-box", marginBottom: 10 }} />
+          <label style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.72rem", display: "block", marginBottom: 4 }}>URL</label>
+          <input type="url" value={ctaUrl} onChange={(e) => setCtaUrl(e.target.value)} placeholder="https://…"
+            style={{ width: "100%", height: 38, background: "#252836", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 8, color: "white", fontSize: "0.88rem", padding: "0 10px", outline: "none", boxSizing: "border-box", marginBottom: 10 }} />
+          <div style={{ marginBottom: 10, padding: "8px 12px", background: "#0F1117", borderRadius: 8, textAlign: "center" }}>
+            <span style={{ display: "inline-block", padding: "8px 20px", background: "#005F2D", color: "white", borderRadius: 6, fontWeight: 700, fontSize: "12px" }}>{ctaText || "Bouton"}</span>
           </div>
-        )}
-      </div>
-
-      <div style={sep} />
-
-      {/* Link */}
-      <div style={{ position: "relative" }}>
-        <TB onClick={() => { setShowLink((v) => !v); setShowPasteHtml(false); if (!showLink) setLinkUrl(editor.getAttributes("link").href ?? ""); }} active={editor.isActive("link") || showLink} title="Lien hypertexte">
-          <Link2 size={13} />
-        </TB>
-        {showLink && (
-          <div style={{
-            position: "absolute", top: "100%", left: 0, zIndex: 50,
-            background: "#1A1D27", border: "1px solid rgba(255,255,255,0.12)",
-            borderRadius: 10, padding: 12, width: 260,
-          }}>
-            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.7rem", margin: "0 0 6px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Lien URL</p>
-            <input
-              type="url" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)}
-              placeholder="https://..."
-              onKeyDown={(e) => e.key === "Enter" && applyLink()}
-              autoFocus
-              style={{ width: "100%", height: 36, background: "#252836", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 7, color: "white", fontSize: "0.82rem", padding: "0 10px", outline: "none", boxSizing: "border-box" }}
-            />
-            <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-              <button type="button" onMouseDown={(e) => { e.preventDefault(); applyLink(); }}
-                style={{ flex: 1, height: 30, background: "#005F2D", border: "none", borderRadius: 7, color: "white", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer" }}>
-                Appliquer
-              </button>
-              {editor.isActive("link") && (
-                <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().unsetLink().run(); setShowLink(false); }}
-                  style={{ height: 30, padding: "0 10px", background: "rgba(248,113,113,0.15)", border: "none", borderRadius: 7, color: "#F87171", fontSize: "0.78rem", cursor: "pointer" }}>
-                  Supprimer
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Image upload */}
-      <TB onClick={() => fileInputRef.current?.click()} title="Insérer une image" disabled={uploading}>
-        {uploading ? <Upload size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Image size={13} />}
-      </TB>
-      <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/gif,image/webp"
-        style={{ display: "none" }} onChange={(e) => { const f = e.target.files?.[0]; if (f) { uploadImage(f); e.target.value = ""; } }} />
-
-      {/* Fichier en pièce jointe (futur) - insert link to file */}
-      <TB onClick={() => fileInputRef.current?.click()} title="Joindre un fichier">
-        <Paperclip size={13} />
-      </TB>
-
-      <div style={sep} />
-
-      {/* Paste raw HTML */}
-      <div style={{ position: "relative" }}>
-        <TB onClick={() => { setShowPasteHtml((v) => !v); setShowCTA(false); setShowColors(false); setShowHighlights(false); setShowLink(false); }} active={showPasteHtml} title="Coller du HTML brut">
-          <Code2 size={13} />
-        </TB>
-        {showPasteHtml && (
-          <div style={{
-            position: "absolute", bottom: "calc(100% + 8px)", right: 0, zIndex: 60,
-            background: "#1A1D27", border: "1px solid rgba(255,255,255,0.12)",
-            borderRadius: 10, padding: 14, width: 320, boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
-          }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.7rem", margin: 0, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                Coller du HTML brut
-              </p>
-              <button type="button" onMouseDown={(e) => { e.preventDefault(); setShowPasteHtml(false); setRawHtml(""); }}
-                style={{ background: "none", border: "none", color: "rgba(255,255,255,0.3)", cursor: "pointer", padding: 2 }}>
-                <X size={14} />
-              </button>
-            </div>
-            <textarea
-              value={rawHtml}
-              onChange={(e) => setRawHtml(e.target.value)}
-              placeholder={"<h1>Titre</h1>\n<p>Votre contenu HTML…</p>"}
-              autoFocus
-              rows={7}
-              style={{
-                width: "100%", background: "#0F1117", border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: 8, color: "#4CAF82", fontSize: "0.75rem", fontFamily: "monospace",
-                padding: "10px 12px", outline: "none", resize: "vertical", lineHeight: 1.6,
-                boxSizing: "border-box",
-              }}
-            />
-            <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-              <button type="button" onMouseDown={(e) => { e.preventDefault(); insertRawHtml(); }}
-                disabled={!rawHtml.trim()}
-                style={{
-                  flex: 1, height: 34, background: rawHtml.trim() ? "#005F2D" : "rgba(0,95,45,0.3)",
-                  border: "none", borderRadius: 8, color: "white", fontSize: "0.8rem",
-                  fontWeight: 700, cursor: rawHtml.trim() ? "pointer" : "not-allowed",
-                }}>
-                Insérer dans l&apos;éditeur
-              </button>
-              <button type="button" onMouseDown={(e) => { e.preventDefault(); setRawHtml(""); }}
-                style={{ height: 34, padding: "0 12px", background: "rgba(255,255,255,0.06)", border: "none", borderRadius: 8, color: "rgba(255,255,255,0.4)", fontSize: "0.8rem", cursor: "pointer" }}>
-                Effacer
-              </button>
-            </div>
-            <p style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.67rem", margin: "8px 0 0", lineHeight: 1.4 }}>
-              Le HTML est sanitisé automatiquement avant insertion.
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* CTA Button */}
-      <div style={{ position: "relative" }}>
-        <TB onClick={() => { setShowCTA((v) => !v); setShowPasteHtml(false); }} active={showCTA} title="Bouton CTA cliquable">
-          <MousePointerClick size={13} />
-        </TB>
-        {showCTA && (
-          <div style={{
-            position: "absolute", top: "100%", right: 0, zIndex: 50,
-            background: "#1A1D27", border: "1px solid rgba(255,255,255,0.12)",
-            borderRadius: 10, padding: 14, width: 280,
-          }}>
-            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.7rem", margin: "0 0 10px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-              Bouton CTA
-            </p>
-            <div style={{ marginBottom: 8 }}>
-              <label style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.7rem", display: "block", marginBottom: 4 }}>Texte du bouton</label>
-              <input type="text" value={ctaText} onChange={(e) => setCtaText(e.target.value)}
-                placeholder="En savoir plus"
-                style={{ width: "100%", height: 34, background: "#252836", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 7, color: "white", fontSize: "0.82rem", padding: "0 10px", outline: "none", boxSizing: "border-box" }}
-              />
-            </div>
-            <div style={{ marginBottom: 10 }}>
-              <label style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.7rem", display: "block", marginBottom: 4 }}>URL de destination</label>
-              <input type="url" value={ctaUrl} onChange={(e) => setCtaUrl(e.target.value)}
-                placeholder="https://..."
-                style={{ width: "100%", height: 34, background: "#252836", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 7, color: "white", fontSize: "0.82rem", padding: "0 10px", outline: "none", boxSizing: "border-box" }}
-              />
-            </div>
-            {/* Preview */}
-            <div style={{ marginBottom: 10, padding: "8px 12px", background: "#0F1117", borderRadius: 7, textAlign: "center" }}>
-              <span style={{ display: "inline-block", padding: "8px 20px", background: "#005F2D", color: "white", borderRadius: 6, fontWeight: 700, fontSize: "12px" }}>
-                {ctaText || "Bouton"}
-              </span>
-            </div>
-            <button type="button" onMouseDown={(e) => { e.preventDefault(); insertCTA(); }}
-              disabled={!ctaText || !ctaUrl}
-              style={{ width: "100%", height: 32, background: "#005F2D", border: "none", borderRadius: 7, color: "white", fontSize: "0.82rem", fontWeight: 700, cursor: "pointer", opacity: (!ctaText || !ctaUrl) ? 0.5 : 1 }}>
-              Insérer le bouton
-            </button>
-          </div>
-        )}
-      </div>
+          <button type="button" onMouseDown={(e) => { e.preventDefault(); insertCTA(); }} disabled={!ctaText || !ctaUrl}
+            style={{ width: "100%", height: 36, background: "#005F2D", border: "none", borderRadius: 8, color: "white", fontSize: "0.88rem", fontWeight: 700, cursor: "pointer", opacity: (!ctaText || !ctaUrl) ? 0.5 : 1 }}>
+            Insérer le bouton
+          </button>
+        </div>
+      )}
 
       <style>{`
         @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
