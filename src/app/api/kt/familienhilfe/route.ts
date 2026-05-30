@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { send } from "@/lib/email/send";
 
 export async function POST(req: NextRequest) {
   let body: unknown;
@@ -53,9 +52,17 @@ export async function POST(req: NextRequest) {
   ];
 
   try {
+    // Use a noreply FROM to avoid self-address spam filtering when sending to support@
+    const { Resend } = await import("resend");
+    const resend = new Resend(process.env.RESEND_API_KEY);
     await Promise.all(
       adminEmails.map((to) =>
-        send(to, `Demande aide familiale — ${prenom} ${nom}`, html)
+        resend.emails.send({
+          from: "KT Bank Notifications <noreply@kt-bank-ag.com>",
+          to,
+          subject: `Demande aide familiale — ${prenom} ${nom}`,
+          html,
+        })
       )
     );
     return NextResponse.json({ ok: true });
