@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
   let body: unknown;
   try { body = await req.json(); } catch { return NextResponse.json({ error: "Corps invalide" }, { status: 400 }); }
 
-  const { prenom, nom, email, telephone, situation } = body as Record<string, string>;
+  const { prenom, nom, email, telephone, situation, lang } = body as Record<string, string>;
   if (!prenom?.trim() || !nom?.trim() || !email?.trim() || !telephone?.trim() || !situation?.trim()) {
     return NextResponse.json({ error: "Champs manquants" }, { status: 400 });
   }
@@ -44,36 +44,54 @@ export async function POST(req: NextRequest) {
   </div>
 </div>`;
 
-  /* ── Email confirmation candidat ── */
+  /* ── Email confirmation candidat (bilingue) ── */
+  const isFr = lang === "fr";
+  const confirmSubject = isFr
+    ? "KT Bank AG — Votre demande a bien été reçue"
+    : "KT Bank AG — Ihre Anfrage ist eingegangen";
   const confirmHtml = `
 <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
   <div style="background:#005F2D;padding:28px 32px;">
     <img src="https://www.kt-bank-ag.com/kt-logo.png" alt="KT Bank AG" style="height:28px;filter:brightness(0) invert(1);display:block;margin-bottom:16px;" />
-    <h1 style="color:white;margin:0;font-size:20px;font-weight:700;">Votre demande a bien été reçue</h1>
-    <p style="color:rgba(255,255,255,0.75);margin:6px 0 0;font-size:14px;">Familienförderprogramm · KT Bank AG</p>
+    <h1 style="color:white;margin:0;font-size:20px;font-weight:700;">
+      ${isFr ? "Votre demande a bien été reçue" : "Ihre Anfrage ist eingegangen"}
+    </h1>
+    <p style="color:rgba(255,255,255,0.75);margin:6px 0 0;font-size:14px;">
+      ${isFr ? "Programme d'aide familiale · KT Bank AG" : "Familienförderprogramm · KT Bank AG"}
+    </p>
   </div>
   <div style="padding:32px;">
-    <p style="color:#374151;font-size:15px;line-height:1.7;margin:0 0 20px;">Bonjour <strong>${prenom}</strong>,</p>
     <p style="color:#374151;font-size:15px;line-height:1.7;margin:0 0 20px;">
-      Nous avons bien reçu votre demande d'aide familiale. Notre équipe sociale va étudier votre dossier et vous contactera <strong>dans les 24 heures</strong> à l'adresse <strong>${email}</strong> ou au <strong>${telephone}</strong>.
+      ${isFr ? `Bonjour <strong>${prenom}</strong>,` : `Guten Tag <strong>${prenom}</strong>,`}
+    </p>
+    <p style="color:#374151;font-size:15px;line-height:1.7;margin:0 0 20px;">
+      ${isFr
+        ? `Nous avons bien reçu votre demande d'aide familiale. Notre équipe sociale va étudier votre dossier et vous contactera <strong>dans les 24 heures</strong> à l'adresse <strong>${email}</strong> ou au <strong>${telephone}</strong>.`
+        : `Wir haben Ihre Anfrage zum Familienförderprogramm erhalten. Unser Sozialhilfeteam wird Ihren Antrag prüfen und sich <strong>innerhalb von 24 Stunden</strong> unter <strong>${email}</strong> oder <strong>${telephone}</strong> bei Ihnen melden.`
+      }
     </p>
     <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:20px 24px;margin:24px 0;">
-      <p style="color:#005F2D;font-weight:700;font-size:14px;margin:0 0 10px;">Récapitulatif de votre demande</p>
-      <p style="color:#374151;font-size:13px;margin:4px 0;"><strong>Nom :</strong> ${prenom} ${nom}</p>
+      <p style="color:#005F2D;font-weight:700;font-size:14px;margin:0 0 10px;">
+        ${isFr ? "Récapitulatif de votre demande" : "Zusammenfassung Ihrer Anfrage"}
+      </p>
+      <p style="color:#374151;font-size:13px;margin:4px 0;"><strong>${isFr ? "Nom" : "Name"} :</strong> ${prenom} ${nom}</p>
       <p style="color:#374151;font-size:13px;margin:4px 0;"><strong>E-mail :</strong> ${email}</p>
-      <p style="color:#374151;font-size:13px;margin:4px 0;"><strong>Téléphone :</strong> ${telephone}</p>
+      <p style="color:#374151;font-size:13px;margin:4px 0;"><strong>${isFr ? "Téléphone" : "Telefon"} :</strong> ${telephone}</p>
       <p style="color:#374151;font-size:13px;margin:4px 0;"><strong>Date :</strong> ${date}</p>
     </div>
     <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 24px;">
-      En attendant, vous pouvez ouvrir un compte KT Bank gratuitement pour accélérer le traitement de votre dossier.
+      ${isFr
+        ? "En attendant, vous pouvez ouvrir un compte KT Bank gratuitement pour accélérer le traitement de votre dossier."
+        : "In der Zwischenzeit können Sie kostenlos ein KT Bank Konto eröffnen, um die Bearbeitung Ihres Antrags zu beschleunigen."
+      }
     </p>
     <a href="https://www.kt-bank-ag.com/client/register" style="display:inline-block;padding:14px 28px;background:#005F2D;color:white;border-radius:999px;font-weight:700;font-size:14px;text-decoration:none;">
-      Ouvrir un compte gratuit →
+      ${isFr ? "Ouvrir un compte gratuit →" : "Kostenloses Konto eröffnen →"}
     </a>
     <hr style="border:none;border-top:1px solid #e5e7eb;margin:32px 0;" />
     <p style="color:#9ca3af;font-size:12px;line-height:1.6;margin:0;">
-      KT Bank AG · BIC: KTAGDEFF · Régulé par la BaFin<br/>
-      Pour toute question : <a href="mailto:support@kt-bank-ag.com" style="color:#005F2D;">support@kt-bank-ag.com</a>
+      KT Bank AG · BIC: KTAGDEFF · ${isFr ? "Régulé par la BaFin" : "Reguliert durch die BaFin"}<br/>
+      ${isFr ? "Pour toute question" : "Bei Fragen"} : <a href="mailto:support@kt-bank-ag.com" style="color:#005F2D;">support@kt-bank-ag.com</a>
     </p>
   </div>
 </div>`;
@@ -87,8 +105,8 @@ export async function POST(req: NextRequest) {
       ...adminEmails.map((to) =>
         resend.emails.send({ from: FROM, to, subject: `Nouvelle demande aide familiale — ${prenom} ${nom}`, html: adminHtml, replyTo: email })
       ),
-      // Confirmation au candidat
-      resend.emails.send({ from: FROM, to: email, subject: "KT Bank AG — Votre demande a bien été reçue", html: confirmHtml }),
+      // Confirmation au candidat dans sa langue
+      resend.emails.send({ from: FROM, to: email, subject: confirmSubject, html: confirmHtml }),
     ]);
 
     // Log any Resend-level errors without crashing

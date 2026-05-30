@@ -28,7 +28,7 @@ export default function FamilienhilfePage() {
       const res = await fetch("/api/kt/familienhilfe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prenom, nom, email, telephone, situation }),
+        body: JSON.stringify({ prenom, nom, email, telephone, situation, lang: t.lang }),
       });
       if (res.ok) { setSent(true); }
       else { setApiError(de ? "Fehler beim Senden. Bitte erneut versuchen." : "Erreur lors de l'envoi. Veuillez réessayer."); }
