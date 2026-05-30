@@ -5,7 +5,7 @@ import {
   Send, RefreshCw, Edit3, X, ArrowLeft, MessageSquare,
   Bold, Italic, Underline, Strikethrough, List, ListOrdered,
   Heading1, Heading2, Heading3, Link2, Image, MousePointerClick,
-  Palette, Highlighter, Upload, FileText, Paperclip, ChevronDown,
+  Palette, Highlighter, Upload, FileText, Paperclip, ChevronDown, Code2,
 } from "lucide-react";
 import { useEditor, EditorContent, Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -194,8 +194,18 @@ function Toolbar({
   const [showCTA, setShowCTA] = useState(false);
   const [ctaText, setCtaText] = useState("En savoir plus");
   const [ctaUrl, setCtaUrl] = useState("https://");
+  const [showPasteHtml, setShowPasteHtml] = useState(false);
+  const [rawHtml, setRawHtml] = useState("");
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function insertRawHtml() {
+    if (!rawHtml.trim()) return;
+    const safe = sanitize(rawHtml);
+    editor.chain().focus().insertContent(safe, { parseOptions: { preserveWhitespace: false } }).run();
+    setRawHtml("");
+    setShowPasteHtml(false);
+  }
 
   function applyLink() {
     if (linkUrl) editor.chain().focus().extendMarkToNextNewline().setLink({ href: linkUrl, target: "_blank" }).run();
@@ -285,7 +295,7 @@ function Toolbar({
 
       {/* Color */}
       <div style={{ position: "relative" }}>
-        <TB onClick={() => { setShowColors((v) => !v); setShowHighlights(false); }} active={showColors} title="Couleur du texte">
+        <TB onClick={() => { setShowColors((v) => !v); setShowHighlights(false); setShowPasteHtml(false); }} active={showColors} title="Couleur du texte">
           <Palette size={13} />
         </TB>
         {showColors && (
@@ -315,7 +325,7 @@ function Toolbar({
 
       {/* Highlight */}
       <div style={{ position: "relative" }}>
-        <TB onClick={() => { setShowHighlights((v) => !v); setShowColors(false); }} active={showHighlights} title="Surlignage">
+        <TB onClick={() => { setShowHighlights((v) => !v); setShowColors(false); setShowPasteHtml(false); }} active={showHighlights} title="Surlignage">
           <Highlighter size={13} />
         </TB>
         {showHighlights && (
@@ -347,7 +357,7 @@ function Toolbar({
 
       {/* Link */}
       <div style={{ position: "relative" }}>
-        <TB onClick={() => { setShowLink((v) => !v); if (!showLink) setLinkUrl(editor.getAttributes("link").href ?? ""); }} active={editor.isActive("link") || showLink} title="Lien hypertexte">
+        <TB onClick={() => { setShowLink((v) => !v); setShowPasteHtml(false); if (!showLink) setLinkUrl(editor.getAttributes("link").href ?? ""); }} active={editor.isActive("link") || showLink} title="Lien hypertexte">
           <Link2 size={13} />
         </TB>
         {showLink && (
@@ -394,9 +404,64 @@ function Toolbar({
 
       <div style={sep} />
 
+      {/* Paste raw HTML */}
+      <div style={{ position: "relative" }}>
+        <TB onClick={() => { setShowPasteHtml((v) => !v); setShowCTA(false); setShowColors(false); setShowHighlights(false); setShowLink(false); }} active={showPasteHtml} title="Coller du HTML brut">
+          <Code2 size={13} />
+        </TB>
+        {showPasteHtml && (
+          <div style={{
+            position: "absolute", bottom: "calc(100% + 8px)", right: 0, zIndex: 60,
+            background: "#1A1D27", border: "1px solid rgba(255,255,255,0.12)",
+            borderRadius: 10, padding: 14, width: 320, boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.7rem", margin: 0, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Coller du HTML brut
+              </p>
+              <button type="button" onMouseDown={(e) => { e.preventDefault(); setShowPasteHtml(false); setRawHtml(""); }}
+                style={{ background: "none", border: "none", color: "rgba(255,255,255,0.3)", cursor: "pointer", padding: 2 }}>
+                <X size={14} />
+              </button>
+            </div>
+            <textarea
+              value={rawHtml}
+              onChange={(e) => setRawHtml(e.target.value)}
+              placeholder={"<h1>Titre</h1>\n<p>Votre contenu HTML…</p>"}
+              autoFocus
+              rows={7}
+              style={{
+                width: "100%", background: "#0F1117", border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 8, color: "#4CAF82", fontSize: "0.75rem", fontFamily: "monospace",
+                padding: "10px 12px", outline: "none", resize: "vertical", lineHeight: 1.6,
+                boxSizing: "border-box",
+              }}
+            />
+            <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+              <button type="button" onMouseDown={(e) => { e.preventDefault(); insertRawHtml(); }}
+                disabled={!rawHtml.trim()}
+                style={{
+                  flex: 1, height: 34, background: rawHtml.trim() ? "#005F2D" : "rgba(0,95,45,0.3)",
+                  border: "none", borderRadius: 8, color: "white", fontSize: "0.8rem",
+                  fontWeight: 700, cursor: rawHtml.trim() ? "pointer" : "not-allowed",
+                }}>
+                Insérer dans l&apos;éditeur
+              </button>
+              <button type="button" onMouseDown={(e) => { e.preventDefault(); setRawHtml(""); }}
+                style={{ height: 34, padding: "0 12px", background: "rgba(255,255,255,0.06)", border: "none", borderRadius: 8, color: "rgba(255,255,255,0.4)", fontSize: "0.8rem", cursor: "pointer" }}>
+                Effacer
+              </button>
+            </div>
+            <p style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.67rem", margin: "8px 0 0", lineHeight: 1.4 }}>
+              Le HTML est sanitisé automatiquement avant insertion.
+            </p>
+          </div>
+        )}
+      </div>
+
       {/* CTA Button */}
       <div style={{ position: "relative" }}>
-        <TB onClick={() => setShowCTA((v) => !v)} active={showCTA} title="Bouton CTA cliquable">
+        <TB onClick={() => { setShowCTA((v) => !v); setShowPasteHtml(false); }} active={showCTA} title="Bouton CTA cliquable">
           <MousePointerClick size={13} />
         </TB>
         {showCTA && (
