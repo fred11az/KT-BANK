@@ -2,7 +2,7 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, Inbox, LayoutDashboard, LogOut, Lock, Settings, ArrowLeftRight, Menu, X, CreditCard } from "lucide-react";
+import { Users, Inbox, LayoutDashboard, LogOut, Lock, Settings, ArrowLeftRight, Menu, X, CreditCard, FileText } from "lucide-react";
 
 const AdminCtx = createContext<{ token: string; logout: () => void }>({ token: "", logout: () => {} });
 export const useAdmin = () => useContext(AdminCtx);
@@ -60,6 +60,7 @@ const NAV = [
   { href: "/kt-admin/transfers", label: "Virements", icon: ArrowLeftRight },
   { href: "/kt-admin/credits", label: "Crédits", icon: CreditCard },
   { href: "/kt-admin/inbox", label: "Messagerie", icon: Inbox },
+  { href: "/kt-admin/documents", label: "Dokumente", icon: FileText },
   { href: "/kt-admin/settings", label: "Paramètres", icon: Settings },
 ];
 

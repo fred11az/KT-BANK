@@ -7,6 +7,7 @@ import {
   Shield, Calculator, Check, Wifi, Info, Phone, Mail, MapPin,
   Lock, Plus, AlertCircle, Building2, Clock
 } from "lucide-react";
+import { genTilgungsplan } from "@/lib/document-templates";
 
 /* ── Types ── */
 type KtCard = { id: string; last4: string; expiry_month: number; expiry_year: number; type: string; status: string };
@@ -18,8 +19,10 @@ type Profile = {
   id: string; prenom: string; nom: string; email: string; telephone: string;
   pays_residence: string; nationalite: string; adresse: string; ville: string;
   code_postal: string; situation_professionnelle: string; revenu_mensuel: string;
-  kyc_status: string; status: string; created_at: string;
+  kyc_status: string; status: string; created_at: string; lang?: string;
 };
+type KtDocument = { id: string; client_id: string; type: string; title: string; description?: string; content_html?: string; status: string; created_at: string };
+type KtSubmission = { id: string; client_id: string; type: string; title: string; file_url?: string; file_name?: string; file_size?: number; status: string; notes?: string; created_at: string };
 
 /* ── Helpers ── */
 function initials(p: string, n: string) { return `${p?.[0] ?? ""}${n?.[0] ?? ""}`.toUpperCase(); }
@@ -736,7 +739,7 @@ type CreditRequest = {
   purpose?: string; status: string; rejection_reason?: string; created_at: string;
 };
 
-function CreditPage({ token }: { token: string }) {
+function CreditPage({ token, profile, account }: { token: string; profile: Profile | null; account: Account | null }) {
   const [step, setStep] = useState<"list" | "form" | "amortization" | "done">("list");
   const [requests, setRequests] = useState<CreditRequest[]>([]);
   const [loadingReqs, setLoadingReqs] = useState(true);
@@ -806,92 +809,38 @@ function CreditPage({ token }: { token: string }) {
   }
 
   function printAmortization() {
-    const rows = Array.from({ length: dur }, (_, i) => {
-      const m = i + 1;
-      const interest = creditType === "islamic" ? 0 : (amt - (monthly - amt * rate) * (Math.pow(1 + rate, i) - 1) / rate) * rate;
-      const principal = monthly - (creditType === "islamic" ? 0 : interest);
-      return `<tr style="border-bottom:1px solid #e5e7eb;">
-        <td style="padding:7px 10px;text-align:center;color:#374151;">${m}</td>
-        <td style="padding:7px 10px;text-align:right;color:#374151;">${monthly.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €</td>
-        <td style="padding:7px 10px;text-align:right;color:#005F2D;">${principal.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €</td>
-        <td style="padding:7px 10px;text-align:right;color:${creditType === "standard" ? "#D97706" : "#16A34A"};">${Math.max(0, interest).toLocaleString("de-DE", { minimumFractionDigits: 2 })} €</td>
-      </tr>`;
-    }).join("");
-
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>Tilgungsplan — KT Bank AG</title>
-<style>
-  * { box-sizing: border-box; }
-  body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #fff; }
-  .page { max-width: 720px; margin: 0 auto; padding: 40px 32px; }
-  .header { background: linear-gradient(135deg, #002d15, #005F2D); padding: 28px 32px; border-radius: 12px; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end; }
-  .header-left h1 { color: white; margin: 0 0 6px; font-size: 22px; font-weight: 800; }
-  .header-left p { color: rgba(255,255,255,0.65); margin: 0; font-size: 13px; }
-  .header-right { text-align: right; }
-  .header-right p { color: rgba(201,168,76,0.9); font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 4px; }
-  .header-right span { color: rgba(255,255,255,0.55); font-size: 11px; }
-  .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
-  .summary-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; }
-  .summary-box .label { color: #94a3b8; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; margin: 0 0 5px; }
-  .summary-box .value { color: #005F2D; font-weight: 800; font-size: 17px; margin: 0; }
-  .summary-box .value.accent { color: #D97706; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  thead th { background: #005F2D; color: white; padding: 10px; font-weight: 700; text-align: right; }
-  thead th:first-child { text-align: center; }
-  tbody tr:nth-child(even) { background: #f8fafc; }
-  .footer { margin-top: 28px; padding-top: 16px; border-top: 2px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
-  .footer p { color: #94a3b8; font-size: 11px; margin: 0; }
-  .stamp { width: 52px; height: 52px; border-radius: 50%; border: 2px solid #005F2D; display: flex; align-items: center; justify-content: center; }
-  @media print { body { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
-</style></head><body><div class="page">
-<div class="header">
-  <div class="header-left">
-    <h1>Plan de remboursement</h1>
-    <p>${creditType === "islamic" ? "Crédit Islamique — Taux 0% (Mourabaha)" : "Crédit Standard — Taux 2% annuel"}</p>
-  </div>
-  <div class="header-right">
-    <p>KT Bank AG</p>
-    <span>Frankfurt am Main · BIC: KTAGDEFF</span>
-  </div>
-</div>
-<div class="summary">
-  <div class="summary-box"><p class="label">Montant demandé</p><p class="value">${amt.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €</p></div>
-  <div class="summary-box"><p class="label">Mensualité</p><p class="value">${monthly.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €</p></div>
-  <div class="summary-box"><p class="label">Durée</p><p class="value">${dur} mois</p></div>
-  <div class="summary-box"><p class="label">Total intérêts</p><p class="value accent">${creditType === "islamic" ? "0,00 €" : totalInterest.toLocaleString("de-DE", { minimumFractionDigits: 2 }) + " €"}</p></div>
-</div>
-<table>
-  <thead><tr>
-    <th>Mois</th>
-    <th>Mensualité</th>
-    <th>Capital</th>
-    <th>Intérêts</th>
-  </tr></thead>
-  <tbody>${rows}</tbody>
-</table>
-<div class="footer">
-  <div>
-    <p>Total remboursé : <strong style="color:#005F2D;">${totalRepayment.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €</strong></p>
-    <p>Document généré le ${new Date().toLocaleDateString("fr-FR")} · KT Bank AG · Régulé par la BaFin</p>
-  </div>
-  <div class="stamp" style="display:flex;align-items:center;justify-content:center;">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#005F2D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-  </div>
-</div>
-</div></body></html>`;
-
+    const clientInfo = {
+      prenom: profile?.prenom ?? "—",
+      nom: profile?.nom ?? "—",
+      email: profile?.email ?? "—",
+      telephone: profile?.telephone,
+      adresse: profile?.adresse,
+      code_postal: profile?.code_postal,
+      ville: profile?.ville,
+      pays_residence: profile?.pays_residence,
+      nationalite: profile?.nationalite,
+      created_at: profile?.created_at ?? new Date().toISOString(),
+      iban: account?.iban,
+      bic: account?.bic,
+      account_id: account?.id,
+    };
+    const html = genTilgungsplan(clientInfo, {
+      type: creditType,
+      amount: amt,
+      duration_months: dur,
+      monthly_payment: monthly,
+      total_repayment: totalRepayment,
+      interest_rate: creditType === "islamic" ? 0 : 0.02,
+      purpose: purpose || undefined,
+    });
     const w = window.open("", "_blank");
-    if (w) {
-      w.document.write(html);
-      w.document.close();
-      w.focus();
-      w.print();
-    }
+    if (w) { w.document.write(html); w.document.close(); w.focus(); w.print(); }
   }
 
   const statusMap: Record<string, [string, string, string]> = {
-    pending:  ["#FFF7ED", "#D97706", "En cours d'examen"],
-    approved: ["#F0FDF4", "#16A34A", "Approuvé ✓"],
-    rejected: ["#FEF2F2", "#DC2626", "Non accordé"],
+    pending:  ["#FFF7ED", "#D97706", "Wird geprüft"],
+    approved: ["#F0FDF4", "#16A34A", "Genehmigt ✓"],
+    rejected: ["#FEF2F2", "#DC2626", "Abgelehnt"],
   };
 
   /* ── DONE STATE ── */
@@ -902,18 +851,18 @@ function CreditPage({ token }: { token: string }) {
           <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#F0FDF4", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
             <Check size={28} color="#16A34A" />
           </div>
-          <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 10px" }}>Demande soumise avec succès</h2>
+          <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 10px" }}>Antrag erfolgreich eingereicht</h2>
           <p style={{ color: "#64748B", fontSize: "0.88rem", lineHeight: 1.7, margin: "0 0 24px" }}>
-            Votre demande de crédit a été transmise à nos équipes. Vous recevrez une réponse par email dans les <strong>48 heures</strong>.
+            Ihr Kreditantrag wurde an unser Team weitergeleitet. Sie erhalten innerhalb von <strong>48 Stunden</strong> eine Antwort per E-Mail.
           </p>
           <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
             <button onClick={printAmortization}
               style={{ display: "flex", alignItems: "center", gap: 7, padding: "10px 20px", background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 12, color: "#005F2D", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer" }}>
-              <FileText size={15} /> Plan d&apos;amortissement
+              <FileText size={15} /> Tilgungsplan
             </button>
             <button onClick={() => { setStep("list"); setAmount(""); setDuration("24"); setPurpose(""); setEmployment(""); setIncome(""); setDebts(""); setMarital(""); setDependents("0"); setPropertyOwned(false); }}
               style={{ padding: "10px 20px", background: "#005F2D", border: "none", borderRadius: 12, color: "white", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer" }}>
-              Voir mes demandes
+              Meine Anträge
             </button>
           </div>
         </div>
@@ -927,20 +876,20 @@ function CreditPage({ token }: { token: string }) {
       <div style={{ padding: "24px 20px", maxWidth: 720 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
           <div>
-            <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.25rem", margin: 0 }}>Crédit bancaire</h2>
-            <p style={{ color: "#64748B", fontSize: "0.82rem", margin: "4px 0 0" }}>Crédit islamique (0%) ou standard (2%)</p>
+            <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.25rem", margin: 0 }}>Bankkredit</h2>
+            <p style={{ color: "#64748B", fontSize: "0.82rem", margin: "4px 0 0" }}>Islamischer Kredit (0%) oder Standard (2%)</p>
           </div>
           <button onClick={() => setStep("form")}
             style={{ display: "flex", alignItems: "center", gap: 7, padding: "10px 20px", background: "#005F2D", border: "none", borderRadius: 12, color: "white", fontWeight: 700, fontSize: "0.88rem", cursor: "pointer" }}>
-            <Plus size={15} /> Nouvelle demande
+            <Plus size={15} /> Neuer Antrag
           </button>
         </div>
 
         {/* Info cards */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 24 }}>
           {[
-            { type: "islamic", title: "Crédit Islamique", rate: "0%", color: "#16A34A", bg: "#F0FDF4", border: "#BBF7D0", desc: "Sans intérêt — conforme à la Mourabaha. Remboursement du capital uniquement." },
-            { type: "standard", title: "Crédit Standard", rate: "2%", color: "#2563EB", bg: "#EFF6FF", border: "#BFDBFE", desc: "Taux d'intérêt annuel de 2%. Conforme aux réglementations BaFin." },
+            { type: "islamic", title: "Islamischer Kredit", rate: "0%", color: "#16A34A", bg: "#F0FDF4", border: "#BBF7D0", desc: "Zinsfrei — Murabaha-konform. Nur Kapitalrückzahlung." },
+            { type: "standard", title: "Standard-Kredit", rate: "2%", color: "#2563EB", bg: "#EFF6FF", border: "#BFDBFE", desc: "2% Jahreszins. BaFin-konform." },
           ].map((c) => (
             <div key={c.type} style={{ background: c.bg, border: `1px solid ${c.border}`, borderRadius: 14, padding: "16px 18px" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
@@ -954,11 +903,11 @@ function CreditPage({ token }: { token: string }) {
 
         {/* Existing requests */}
         {loadingReqs ? (
-          <p style={{ color: "#94A3B8", fontSize: "0.85rem", textAlign: "center", padding: 20 }}>Chargement…</p>
+          <p style={{ color: "#94A3B8", fontSize: "0.85rem", textAlign: "center", padding: 20 }}>Wird geladen…</p>
         ) : requests.length === 0 ? (
           <div style={{ background: "white", borderRadius: 16, border: "1px solid #E9EEF4", padding: "36px 24px", textAlign: "center" }}>
             <Calculator size={36} color="#CBD5E1" style={{ display: "block", margin: "0 auto 12px" }} />
-            <p style={{ color: "#94A3B8", fontSize: "0.88rem", margin: 0 }}>Aucune demande de crédit pour le moment.</p>
+            <p style={{ color: "#94A3B8", fontSize: "0.88rem", margin: 0 }}>Keine Kreditanträge vorhanden.</p>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -968,21 +917,21 @@ function CreditPage({ token }: { token: string }) {
                 <div key={r.id} style={{ background: "white", borderRadius: 14, border: "1px solid #E9EEF4", padding: "16px 20px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
                   <div style={{ flex: 1, minWidth: 160 }}>
                     <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.9rem", margin: "0 0 3px" }}>
-                      {r.type === "islamic" ? "Crédit Islamique (0%)" : "Crédit Standard (2%)"}
+                      {r.type === "islamic" ? "Islamischer Kredit (0%)" : "Standard-Kredit (2%)"}
                     </p>
                     {r.purpose && <p style={{ color: "#64748B", fontSize: "0.75rem", margin: 0 }}>{r.purpose}</p>}
                   </div>
                   <div style={{ textAlign: "center" }}>
-                    <p style={{ color: "#94A3B8", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 2px" }}>Montant</p>
+                    <p style={{ color: "#94A3B8", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 2px" }}>Betrag</p>
                     <p style={{ color: "#005F2D", fontWeight: 800, fontSize: "1rem", margin: 0 }}>{fmtMoney(r.amount)}</p>
                   </div>
                   <div style={{ textAlign: "center" }}>
-                    <p style={{ color: "#94A3B8", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 2px" }}>Mensualité</p>
+                    <p style={{ color: "#94A3B8", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 2px" }}>Monatl. Rate</p>
                     <p style={{ color: "#374151", fontWeight: 700, fontSize: "0.88rem", margin: 0 }}>{fmtMoney(r.monthly_payment)}</p>
                   </div>
                   <div style={{ textAlign: "center" }}>
-                    <p style={{ color: "#94A3B8", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 2px" }}>Durée</p>
-                    <p style={{ color: "#374151", fontWeight: 700, fontSize: "0.88rem", margin: 0 }}>{r.duration_months} mois</p>
+                    <p style={{ color: "#94A3B8", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 2px" }}>Laufzeit</p>
+                    <p style={{ color: "#374151", fontWeight: 700, fontSize: "0.88rem", margin: 0 }}>{r.duration_months} Monate</p>
                   </div>
                   <div>
                     <span style={{ background: bg, color, fontSize: "0.72rem", fontWeight: 700, padding: "4px 12px", borderRadius: 20 }}>{label}</span>
@@ -1005,20 +954,20 @@ function CreditPage({ token }: { token: string }) {
     <div style={{ padding: "24px 20px", maxWidth: 620 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
         <button onClick={() => setStep("list")} style={{ background: "none", border: "none", cursor: "pointer", color: "#64748B", display: "flex", alignItems: "center", gap: 5, fontSize: "0.82rem", padding: 0 }}>
-          ← Retour
+          ← Zurück
         </button>
-        <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.15rem", margin: 0 }}>Nouvelle demande de crédit</h2>
+        <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.15rem", margin: 0 }}>Neuer Kreditantrag</h2>
       </div>
 
       {/* Credit type */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
-        {([["islamic", "Islamique", "0%", "#16A34A", "#F0FDF4", "#BBF7D0"], ["standard", "Standard", "2% / an", "#2563EB", "#EFF6FF", "#BFDBFE"]] as [string, string, string, string, string, string][]).map(([type, name, rate, c, bg, border]) => (
+        {([["islamic", "Islamisch", "0%", "#16A34A", "#F0FDF4", "#BBF7D0"], ["standard", "Standard", "2% / Jahr", "#2563EB", "#EFF6FF", "#BFDBFE"]] as [string, string, string, string, string, string][]).map(([type, name, rate, c, bg, border]) => (
           <button key={type} onClick={() => setCreditType(type as "islamic" | "standard")}
             style={{ padding: "14px 16px", background: creditType === type ? bg : "#F8FAFC", border: `2px solid ${creditType === type ? border : "#E2E8F0"}`, borderRadius: 14, textAlign: "left", cursor: "pointer" }}>
             <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.88rem", margin: "0 0 4px" }}>{name}</p>
             <p style={{ color: c, fontWeight: 800, fontSize: "1.1rem", margin: "0 0 4px" }}>{rate}</p>
             <p style={{ color: "#64748B", fontSize: "0.72rem", margin: 0 }}>
-              {type === "islamic" ? "Sans intérêts — Mourabaha" : "Taux annuel fixe BaFin"}
+              {type === "islamic" ? "Zinsfrei — Murabaha" : "BaFin-Festzinssatz"}
             </p>
           </button>
         ))}
@@ -1026,20 +975,23 @@ function CreditPage({ token }: { token: string }) {
 
       {/* Amount + duration */}
       <div style={{ background: "white", borderRadius: 16, border: "1px solid #E9EEF4", padding: "20px", marginBottom: 16 }}>
-        <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.88rem", margin: "0 0 14px" }}>Paramètres du crédit</p>
+        <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.88rem", margin: "0 0 14px" }}>Kreditparameter</p>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
           <div>
-            <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Montant (€)</label>
-            <input type="number" min="500" max="250000" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Ex. 10 000"
+            <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Betrag (€)</label>
+            <input type="number" min="500" max="250000" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="z.B. 10 000"
               style={{ width: "100%", height: 44, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#0F172A", fontWeight: 700, fontSize: "1rem", padding: "0 14px", boxSizing: "border-box", outline: "none" }} />
           </div>
           <div>
-            <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Durée (mois)</label>
+            <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Laufzeit (Monate)</label>
             <select value={duration} onChange={(e) => setDuration(e.target.value)}
               style={{ width: "100%", height: 44, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#0F172A", fontWeight: 600, fontSize: "0.9rem", padding: "0 14px", outline: "none" }}>
-              {[6, 12, 18, 24, 36, 48, 60, 72, 84, 96, 108, 120].map((m) => (
-                <option key={m} value={m}>{m} mois ({m / 12 >= 1 ? `${m / 12 >= 1 ? Math.floor(m / 12) + " an" + (m >= 24 ? "s" : "") : ""}${m % 12 > 0 ? " " + m % 12 + " mois" : ""}` : m + " mois"})</option>
-              ))}
+              {[6, 12, 18, 24, 36, 48, 60, 72, 84, 96, 108, 120].map((m) => {
+                const yrs = Math.floor(m / 12);
+                const mos = m % 12;
+                const lbl = yrs > 0 ? `${yrs} Jahr${yrs > 1 ? "e" : ""}${mos > 0 ? ` ${mos} M.` : ""}` : `${m} Monate`;
+                return <option key={m} value={m}>{m} Monate ({lbl})</option>;
+              })}
             </select>
           </div>
         </div>
@@ -1049,15 +1001,15 @@ function CreditPage({ token }: { token: string }) {
           <div style={{ background: "linear-gradient(135deg, #F0FDF4, #DCFCE7)", border: "1px solid #86EFAC", borderRadius: 12, padding: "14px 18px", marginTop: 4 }}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
               <div style={{ textAlign: "center" }}>
-                <p style={{ color: "#166534", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>Mensualité</p>
+                <p style={{ color: "#166534", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>Monatl. Rate</p>
                 <p style={{ color: "#005F2D", fontWeight: 800, fontSize: "1.2rem", margin: 0 }}>{fmtMoney(monthly)}</p>
               </div>
               <div style={{ textAlign: "center" }}>
-                <p style={{ color: "#166534", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>Total</p>
+                <p style={{ color: "#166534", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>Gesamt</p>
                 <p style={{ color: "#005F2D", fontWeight: 800, fontSize: "1.2rem", margin: 0 }}>{fmtMoney(totalRepayment)}</p>
               </div>
               <div style={{ textAlign: "center" }}>
-                <p style={{ color: "#166534", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>Intérêts</p>
+                <p style={{ color: "#166534", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>Zinsen</p>
                 <p style={{ color: creditType === "islamic" ? "#16A34A" : "#D97706", fontWeight: 800, fontSize: "1.2rem", margin: 0 }}>{fmtMoney(totalInterest)}</p>
               </div>
             </div>
@@ -1067,51 +1019,51 @@ function CreditPage({ token }: { token: string }) {
 
       {/* Complementary info */}
       <div style={{ background: "white", borderRadius: 16, border: "1px solid #E9EEF4", padding: "20px", marginBottom: 16 }}>
-        <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.88rem", margin: "0 0 14px" }}>Informations complémentaires</p>
+        <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.88rem", margin: "0 0 14px" }}>Zusätzliche Angaben</p>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <div>
-            <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Objet du crédit</label>
-            <input type="text" value={purpose} onChange={(e) => setPurpose(e.target.value)} placeholder="Ex. achat immobilier, véhicule…"
+            <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Kreditverwendungszweck</label>
+            <input type="text" value={purpose} onChange={(e) => setPurpose(e.target.value)} placeholder="z.B. Immobilienkauf, Fahrzeug…"
               style={{ width: "100%", height: 42, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#0F172A", fontSize: "0.88rem", padding: "0 14px", boxSizing: "border-box", outline: "none" }} />
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             <div>
-              <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Situation professionnelle</label>
+              <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Beschäftigungsstatus</label>
               <select value={employment} onChange={(e) => setEmployment(e.target.value)}
                 style={{ width: "100%", height: 42, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#0F172A", fontSize: "0.85rem", padding: "0 12px", outline: "none" }}>
-                <option value="">Sélectionner…</option>
-                <option value="employed">Salarié(e)</option>
-                <option value="self_employed">Indépendant(e)</option>
-                <option value="civil_servant">Fonctionnaire</option>
-                <option value="unemployed">Sans emploi</option>
-                <option value="retired">Retraité(e)</option>
-                <option value="student">Étudiant(e)</option>
+                <option value="">Auswählen…</option>
+                <option value="employed">Angestellte(r)</option>
+                <option value="self_employed">Selbstständige(r)</option>
+                <option value="civil_servant">Beamte(r)</option>
+                <option value="unemployed">Arbeitslos</option>
+                <option value="retired">Rentner(in)</option>
+                <option value="student">Student(in)</option>
               </select>
             </div>
             <div>
-              <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Revenus mensuels (€)</label>
+              <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Monatliche Einnahmen (€)</label>
               <input type="number" min="0" value={income} onChange={(e) => setIncome(e.target.value)} placeholder="0"
                 style={{ width: "100%", height: 42, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#0F172A", fontSize: "0.88rem", padding: "0 14px", boxSizing: "border-box", outline: "none" }} />
             </div>
             <div>
-              <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Dettes existantes (€)</label>
+              <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Bestehende Schulden (€)</label>
               <input type="number" min="0" value={debts} onChange={(e) => setDebts(e.target.value)} placeholder="0"
                 style={{ width: "100%", height: 42, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#0F172A", fontSize: "0.88rem", padding: "0 14px", boxSizing: "border-box", outline: "none" }} />
             </div>
             <div>
-              <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Personnes à charge</label>
+              <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Unterhaltsberechtigte</label>
               <input type="number" min="0" max="20" value={dependents} onChange={(e) => setDependents(e.target.value)}
                 style={{ width: "100%", height: 42, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#0F172A", fontSize: "0.88rem", padding: "0 14px", boxSizing: "border-box", outline: "none" }} />
             </div>
             <div>
-              <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Situation familiale</label>
+              <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Familienstand</label>
               <select value={marital} onChange={(e) => setMarital(e.target.value)}
                 style={{ width: "100%", height: 42, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#0F172A", fontSize: "0.85rem", padding: "0 12px", outline: "none" }}>
-                <option value="">Sélectionner…</option>
-                <option value="single">Célibataire</option>
-                <option value="married">Marié(e)</option>
-                <option value="divorced">Divorcé(e)</option>
-                <option value="widowed">Veuf / Veuve</option>
+                <option value="">Auswählen…</option>
+                <option value="single">Ledig</option>
+                <option value="married">Verheiratet</option>
+                <option value="divorced">Geschieden</option>
+                <option value="widowed">Verwitwet</option>
               </select>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, paddingTop: 20 }}>
@@ -1119,7 +1071,7 @@ function CreditPage({ token }: { token: string }) {
                 style={{ flexShrink: 0, width: 40, height: 22, borderRadius: 11, background: propertyOwned ? "#005F2D" : "#E2E8F0", border: "none", position: "relative", cursor: "pointer", transition: "background 0.2s" }}>
                 <div style={{ position: "absolute", top: 3, left: propertyOwned ? 21 : 3, width: 16, height: 16, borderRadius: "50%", background: "white", transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }} />
               </button>
-              <span style={{ color: "#374151", fontSize: "0.82rem", fontWeight: 500 }}>Propriétaire immobilier</span>
+              <span style={{ color: "#374151", fontSize: "0.82rem", fontWeight: 500 }}>Immobilieneigentümer</span>
             </div>
           </div>
         </div>
@@ -1129,17 +1081,17 @@ function CreditPage({ token }: { token: string }) {
       {amt > 0 && (
         <button onClick={printAmortization}
           style={{ width: "100%", height: 44, background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 12, color: "#005F2D", fontWeight: 700, fontSize: "0.88rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 12 }}>
-          <FileText size={15} /> Aperçu du plan d&apos;amortissement
+          <FileText size={15} /> Tilgungsplan anzeigen
         </button>
       )}
 
       <button onClick={submit} disabled={submitting || !amount || amt <= 0}
         style={{ width: "100%", height: 52, background: amount && amt > 0 ? "#005F2D" : "#CBD5E1", border: "none", borderRadius: 14, color: "white", fontWeight: 700, fontSize: "0.95rem", cursor: (submitting || !amount || amt <= 0) ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s" }}>
-        {submitting ? "Envoi en cours…" : <><Send size={16} /> Soumettre la demande</>}
+        {submitting ? "Wird gesendet…" : <><Send size={16} /> Antrag einreichen</>}
       </button>
 
       <p style={{ color: "#94A3B8", fontSize: "0.75rem", textAlign: "center", marginTop: 10, lineHeight: 1.6 }}>
-        Votre demande sera examinée dans les 48h. Un email de confirmation vous sera envoyé.
+        Ihr Antrag wird innerhalb von 48 Stunden bearbeitet. Sie erhalten eine Bestätigungs-E-Mail.
       </p>
     </div>
   );
@@ -1620,27 +1572,204 @@ export default function ClientDashboard() {
   }
 
   function DocsPage() {
+    const [activeTab, setActiveTab] = React.useState<"received" | "submitted">("received");
+    const [docReceived, setDocReceived] = React.useState<KtDocument[]>([]);
+    const [docSubmitted, setDocSubmitted] = React.useState<KtSubmission[]>([]);
+    const [docsLoading, setDocsLoading] = React.useState(true);
+    const [uploading, setUploading] = React.useState(false);
+    const [uploadErr, setUploadErr] = React.useState<string | null>(null);
+    const [uploadOk, setUploadOk] = React.useState(false);
+    const [uploadType, setUploadType] = React.useState("identity");
+    const [uploadTitle, setUploadTitle] = React.useState("");
+
+    function fetchDocs() {
+      fetch("/api/kt/client/documents", { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json())
+        .then(d => { setDocReceived(d.received ?? []); setDocSubmitted(d.submitted ?? []); setDocsLoading(false); })
+        .catch(() => setDocsLoading(false));
+    }
+    React.useEffect(() => { fetchDocs(); }, []); // eslint-disable-line
+
+    async function uploadDoc(file: File) {
+      if (!uploadTitle.trim()) { setUploadErr("Bitte geben Sie einen Titel ein."); return; }
+      setUploading(true); setUploadErr(null); setUploadOk(false);
+      const fd = new FormData();
+      fd.append("file", file); fd.append("type", uploadType); fd.append("title", uploadTitle);
+      const res = await fetch("/api/kt/client/documents/submit", {
+        method: "POST", headers: { Authorization: `Bearer ${token}` }, body: fd,
+      });
+      const data = await res.json();
+      setUploading(false);
+      if (!res.ok) { setUploadErr(data.error || "Fehler beim Hochladen"); }
+      else { setUploadOk(true); setUploadTitle(""); setTimeout(() => setUploadOk(false), 4000); fetchDocs(); }
+    }
+
+    function openDoc(html: string) {
+      const w = window.open("", "_blank");
+      if (w) { w.document.write(html); w.document.close(); }
+    }
+
+    const SUBMIT_TYPES = [
+      { value: "identity", label: "Identitätsnachweis" },
+      { value: "residence_proof", label: "Wohnsitznachweis" },
+      { value: "income_proof", label: "Einkommensnachweis" },
+      { value: "bank_statement", label: "Kontoauszug" },
+      { value: "contract", label: "Vertrag / Vereinbarung" },
+      { value: "other", label: "Sonstiges" },
+    ];
+
+    const DOC_TYPE_LABELS: Record<string, string> = {
+      kontoeroeffnung: "Kontoeröffnungsbestätigung",
+      willkommen: "Willkommensschreiben",
+      kreditvertrag: "Kreditvertrag",
+      tilgungsplan: "Tilgungsplan",
+      agb: "Allgemeine Geschäftsbedingungen",
+      datenschutz: "Datenschutzerklärung",
+      custom: "Dokument",
+    };
+
+    const subStatusConfig: Record<string, { bg: string; color: string; label: string }> = {
+      pending:  { bg: "#FFFBF0", color: "#D97706", label: "In Bearbeitung" },
+      approved: { bg: "#F0FDF4", color: "#16A34A", label: "Genehmigt ✓" },
+      rejected: { bg: "#FEF2F2", color: "#DC2626", label: "Abgelehnt" },
+    };
+
     return (
-      <div style={{ padding: 24, maxWidth: 700 }}>
-        <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 20px" }}>Dokumente</h2>
-        {[
-          { label: "Girokonto-Vertrag", date: fmtDate(profile?.created_at ?? new Date().toISOString()), icon: FileText },
-          { label: "Allgemeine Geschäftsbedingungen KT Bank AG", date: "01 Jan. 2024", icon: FileText },
-          { label: "Datenschutzrichtlinie", date: "01 Jan. 2024", icon: Shield },
-        ].map(({ label, date, icon: Icon }) => (
-          <div key={label} style={{ background: "white", borderRadius: 14, border: "1px solid #E9EEF4", padding: "16px 20px", marginBottom: 10, display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 11, background: "#F0FDF4", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <Icon size={18} color="#005F2D" />
-            </div>
-            <div style={{ flex: 1 }}>
-              <p style={{ color: "#0F172A", fontWeight: 500, fontSize: "0.85rem", margin: 0 }}>{label}</p>
-              <p style={{ color: "#94A3B8", fontSize: "0.72rem", margin: "3px 0 0" }}>Ausgestellt am {date}</p>
-            </div>
-            <button style={{ background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 8, padding: "6px 12px", color: "#005F2D", fontWeight: 600, fontSize: "0.75rem", cursor: "pointer" }}>
-              Herunterladen
+      <div style={{ padding: 24, maxWidth: 800 }}>
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: 0 }}>Dokumente</h2>
+          <p style={{ color: "#64748B", fontSize: "0.78rem", margin: "4px 0 0" }}>Von der Bank gesendete und eingereichte Dokumente</p>
+        </div>
+
+        {/* Tabs */}
+        <div style={{ display: "flex", gap: 0, marginBottom: 20, background: "#F1F5F9", borderRadius: 12, padding: 4 }}>
+          {([
+            { id: "received" as const, label: `Erhaltene Dokumente (${docReceived.length})` },
+            { id: "submitted" as const, label: `Eingereichte Dokumente (${docSubmitted.length})` },
+          ]).map(({ id, label }) => (
+            <button key={id} onClick={() => setActiveTab(id)}
+              style={{ flex: 1, height: 40, borderRadius: 9, border: "none", background: activeTab === id ? "white" : "transparent", color: activeTab === id ? "#0F172A" : "#64748B", fontWeight: activeTab === id ? 700 : 500, fontSize: "0.82rem", cursor: "pointer", boxShadow: activeTab === id ? "0 1px 4px rgba(0,0,0,0.08)" : "none", transition: "all 0.15s" }}>
+              {label}
             </button>
+          ))}
+        </div>
+
+        {docsLoading ? (
+          <div style={{ textAlign: "center", padding: 40 }}>
+            <RefreshCw size={22} color="#CBD5E1" style={{ animation: "spin 1s linear infinite" }} />
           </div>
-        ))}
+        ) : activeTab === "received" ? (
+          <div>
+            {docReceived.length === 0 ? (
+              <div style={{ background: "white", borderRadius: 16, border: "1px solid #E9EEF4", padding: "40px 24px", textAlign: "center" }}>
+                <FileText size={36} color="#CBD5E1" style={{ display: "block", margin: "0 auto 12px" }} />
+                <p style={{ color: "#94A3B8", fontSize: "0.88rem", margin: "0 0 4px" }}>Keine Dokumente von der Bank vorhanden.</p>
+                <p style={{ color: "#CBD5E1", fontSize: "0.78rem", margin: 0 }}>Dokumente der Bank erscheinen hier, sobald sie gesendet werden.</p>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {docReceived.map((doc) => (
+                  <div key={doc.id} style={{ background: "white", borderRadius: 14, border: "1px solid #E9EEF4", padding: "16px 20px", display: "flex", alignItems: "center", gap: 14 }}>
+                    <div style={{ width: 42, height: 42, borderRadius: 12, background: "#F0FDF4", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <FileText size={19} color="#005F2D" />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ color: "#0F172A", fontWeight: 600, fontSize: "0.88rem", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{doc.title}</p>
+                      <p style={{ color: "#94A3B8", fontSize: "0.72rem", margin: "3px 0 0" }}>
+                        {DOC_TYPE_LABELS[doc.type] ?? doc.type} · {fmtDate(doc.created_at)}
+                      </p>
+                    </div>
+                    <button onClick={() => doc.content_html && openDoc(doc.content_html)} disabled={!doc.content_html}
+                      style={{ flexShrink: 0, height: 36, padding: "0 14px", background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 10, color: "#005F2D", fontWeight: 600, fontSize: "0.78rem", cursor: doc.content_html ? "pointer" : "not-allowed", opacity: doc.content_html ? 1 : 0.5, display: "flex", alignItems: "center", gap: 5 }}>
+                      <Eye size={13} /> Anzeigen
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div>
+            {/* Upload form */}
+            <div style={{ background: "white", borderRadius: 16, border: "1px solid #E9EEF4", padding: "20px 22px", marginBottom: 20 }}>
+              <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.88rem", margin: "0 0 14px" }}>Dokument einreichen</p>
+              {uploadOk && (
+                <div style={{ background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 10, padding: "10px 14px", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+                  <Check size={14} color="#16A34A" />
+                  <p style={{ color: "#166534", fontSize: "0.82rem", margin: 0, fontWeight: 600 }}>Dokument erfolgreich hochgeladen!</p>
+                </div>
+              )}
+              {uploadErr && (
+                <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 10, padding: "10px 14px", marginBottom: 12 }}>
+                  <p style={{ color: "#DC2626", fontSize: "0.82rem", margin: 0 }}>{uploadErr}</p>
+                </div>
+              )}
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <div>
+                  <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Dokumenttyp</label>
+                  <select value={uploadType} onChange={(e) => setUploadType(e.target.value)}
+                    style={{ width: "100%", height: 42, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#0F172A", fontSize: "0.88rem", padding: "0 14px", outline: "none" }}>
+                    {SUBMIT_TYPES.map(({ value, label }) => (
+                      <option key={value} value={value}>{label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Titel / Beschreibung</label>
+                  <input type="text" value={uploadTitle} onChange={(e) => setUploadTitle(e.target.value)}
+                    placeholder="z.B. Personalausweis Vorderseite"
+                    style={{ width: "100%", height: 42, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#0F172A", fontSize: "0.88rem", padding: "0 14px", boxSizing: "border-box", outline: "none" }} />
+                </div>
+                <label style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, height: 46, background: uploading ? "#F1F5F9" : "#005F2D", border: "none", borderRadius: 12, color: uploading ? "#94A3B8" : "white", fontWeight: 700, fontSize: "0.88rem", cursor: uploading ? "not-allowed" : "pointer" }}>
+                  {uploading ? <><RefreshCw size={14} style={{ animation: "spin 1s linear infinite" }} /> Wird hochgeladen…</> : <><Plus size={14} /> Datei hochladen</>}
+                  <input type="file" accept="image/jpeg,image/png,image/gif,image/webp,application/pdf,.docx,.xlsx" style={{ display: "none" }}
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadDoc(f); e.target.value = ""; }}
+                    disabled={uploading} />
+                </label>
+                <p style={{ color: "#94A3B8", fontSize: "0.72rem", margin: 0, textAlign: "center" }}>
+                  Akzeptierte Formate: JPG, PNG, PDF, DOCX, XLSX · Max. 20 MB
+                </p>
+              </div>
+            </div>
+
+            {/* Submitted list */}
+            {docSubmitted.length === 0 ? (
+              <div style={{ background: "white", borderRadius: 16, border: "1px solid #E9EEF4", padding: "36px 24px", textAlign: "center" }}>
+                <FileText size={36} color="#CBD5E1" style={{ display: "block", margin: "0 auto 12px" }} />
+                <p style={{ color: "#94A3B8", fontSize: "0.88rem", margin: 0 }}>Keine eingereichten Dokumente.</p>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {docSubmitted.map((doc) => {
+                  const s = subStatusConfig[doc.status] ?? { bg: "#F8FAFC", color: "#64748B", label: doc.status };
+                  return (
+                    <div key={doc.id} style={{ background: "white", borderRadius: 14, border: "1px solid #E9EEF4", padding: "16px 20px", display: "flex", alignItems: "center", gap: 14 }}>
+                      <div style={{ width: 42, height: 42, borderRadius: 12, background: "#F8FAFC", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <FileText size={19} color="#64748B" />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ color: "#0F172A", fontWeight: 600, fontSize: "0.88rem", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{doc.title}</p>
+                        <p style={{ color: "#94A3B8", fontSize: "0.72rem", margin: "3px 0 0" }}>
+                          {SUBMIT_TYPES.find(t => t.value === doc.type)?.label ?? doc.type} · {fmtDate(doc.created_at)}
+                        </p>
+                        {doc.notes && <p style={{ color: "#64748B", fontSize: "0.72rem", margin: "2px 0 0" }}>{doc.notes}</p>}
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                        <span style={{ background: s.bg, color: s.color, fontSize: "0.68rem", fontWeight: 700, padding: "3px 10px", borderRadius: 20 }}>{s.label}</span>
+                        {doc.file_url && (
+                          <a href={doc.file_url} target="_blank" rel="noopener noreferrer"
+                            style={{ height: 34, padding: "0 12px", background: "#F1F5F9", border: "1px solid #E2E8F0", borderRadius: 8, color: "#64748B", fontWeight: 600, fontSize: "0.75rem", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, textDecoration: "none" }}>
+                            <Eye size={12} /> Ansehen
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
   }
@@ -1792,7 +1921,7 @@ export default function ClientDashboard() {
     transfers: <TransfersPage token={token!} balance={balance} transferRequests={transferRequests}
       kycStatus={profile?.kyc_status ?? "unverified"} accountStatus={profile?.status ?? "pending"}
       onGoToKyc={() => setActiveNav("kyc")} />,
-    credits: <CreditPage token={token!} />,
+    credits: <CreditPage token={token!} profile={profile} account={mainAccount} />,
     cards: <CardsPage />,
     savings: <SavingsPage />,
     zakat: <ZakatPage />,

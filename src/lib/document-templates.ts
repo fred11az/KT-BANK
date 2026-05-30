@@ -1,0 +1,511 @@
+/* ── KT Bank AG — Document HTML Templates ── */
+
+interface ClientInfo {
+  prenom: string;
+  nom: string;
+  email: string;
+  telephone?: string;
+  adresse?: string;
+  code_postal?: string;
+  ville?: string;
+  pays_residence?: string;
+  nationalite?: string;
+  created_at: string;
+  iban?: string;
+  bic?: string;
+  account_id?: string;
+}
+
+function docDate() {
+  return new Date().toLocaleDateString("de-DE", { day: "2-digit", month: "long", year: "numeric" });
+}
+
+function docRef() {
+  return `KT-${Date.now().toString(36).toUpperCase().slice(-8)}`;
+}
+
+function baseStyles() {
+  return `
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #fff; color: #1a1a1a; font-size: 13px; line-height: 1.6; }
+    .page { max-width: 760px; margin: 0 auto; padding: 48px 40px; }
+    .letterhead { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 28px; border-bottom: 3px solid #005F2D; margin-bottom: 32px; }
+    .logo-block h1 { color: #005F2D; font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
+    .logo-block p { color: #64748B; font-size: 11px; margin-top: 3px; }
+    .bank-address { text-align: right; color: #64748B; font-size: 11px; line-height: 1.8; }
+    .doc-title { text-align: center; margin-bottom: 32px; }
+    .doc-title h2 { font-size: 18px; font-weight: 800; color: #0F172A; margin-bottom: 6px; }
+    .doc-title .ref { display: inline-block; background: #F0FDF4; border: 1px solid #BBF7D0; color: #005F2D; font-size: 11px; font-weight: 700; padding: 3px 12px; border-radius: 20px; letter-spacing: 0.04em; }
+    .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px; }
+    .party-box { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 16px 18px; }
+    .party-box h4 { color: #64748B; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+    .party-box p { color: #0F172A; font-size: 12.5px; line-height: 1.8; }
+    .party-box .highlight { color: #005F2D; font-weight: 700; font-size: 14px; }
+    .section { margin-bottom: 24px; }
+    .section h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #005F2D; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid #E2E8F0; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+    .info-row { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #F1F5F9; }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: #64748B; font-size: 12px; }
+    .info-value { color: #0F172A; font-weight: 600; font-size: 12px; text-align: right; }
+    .highlight-box { background: linear-gradient(135deg, #F0FDF4, #DCFCE7); border: 1px solid #86EFAC; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px; }
+    .highlight-box .amount { font-size: 28px; font-weight: 900; color: #005F2D; }
+    .highlight-box .label { color: #166534; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px; }
+    thead th { background: #005F2D; color: white; padding: 9px 12px; font-weight: 700; text-align: right; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+    thead th:first-child { text-align: center; }
+    tbody td { padding: 7px 12px; text-align: right; border-bottom: 1px solid #F1F5F9; }
+    tbody td:first-child { text-align: center; color: #64748B; }
+    tbody tr:nth-child(even) { background: #F8FAFC; }
+    .body-text { color: #374151; font-size: 12.5px; line-height: 1.8; margin-bottom: 16px; }
+    .signature-block { margin-top: 40px; display: flex; justify-content: space-between; align-items: flex-end; }
+    .sig-line { width: 200px; border-top: 1.5px solid #1a1a1a; padding-top: 8px; }
+    .sig-label { color: #64748B; font-size: 11px; }
+    .footer-bar { margin-top: 40px; padding-top: 16px; border-top: 2px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center; }
+    .footer-bar p { color: #94A3B8; font-size: 10px; line-height: 1.7; }
+    .badge { display: inline-flex; align-items: center; gap: 5px; background: #F0FDF4; border: 1px solid #BBF7D0; color: #005F2D; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
+    @media print { body { print-color-adjust: exact; -webkit-print-color-adjust: exact; } .page { padding: 20px; } }
+  `;
+}
+
+function letterhead() {
+  return `
+    <div class="letterhead">
+      <div class="logo-block">
+        <h1>KT Bank AG</h1>
+        <p>Reguliert durch die BaFin · IBAN-Netzwerk SEPA</p>
+      </div>
+      <div class="bank-address">
+        KT Bank AG<br/>
+        Bockenheimer Anlage 46<br/>
+        60322 Frankfurt am Main<br/>
+        BIC: KTAGDEFF<br/>
+        support@kt-bank-ag.com
+      </div>
+    </div>
+  `;
+}
+
+function footerBar(ref: string) {
+  return `
+    <div class="footer-bar">
+      <p>
+        KT Bank AG · Bockenheimer Anlage 46 · 60322 Frankfurt am Main<br/>
+        Reguliert durch die BaFin · Einlagensicherungsfonds des privaten Bankgewerbes
+      </p>
+      <div style="text-align:right">
+        <div class="badge">BaFin-reguliert</div><br/>
+        <p style="margin-top:4px;">Ref: ${ref} · ${docDate()}</p>
+      </div>
+    </div>
+  `;
+}
+
+/* ── 1. Kontoeröffnungsbestätigung ── */
+export function genKontoeröffnung(client: ClientInfo): string {
+  const ref = docRef();
+  const openDate = new Date(client.created_at).toLocaleDateString("de-DE", { day: "2-digit", month: "long", year: "numeric" });
+
+  return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
+<title>Kontoeröffnungsbestätigung — KT Bank AG</title>
+<style>${baseStyles()}</style></head><body><div class="page">
+${letterhead()}
+<div class="doc-title">
+  <h2>Kontoeröffnungsbestätigung</h2>
+  <span class="ref">Ref: ${ref}</span>
+</div>
+
+<div class="parties">
+  <div class="party-box">
+    <h4>Kontoinhaber</h4>
+    <p class="highlight">${client.prenom} ${client.nom}</p>
+    <p>${client.adresse ?? ""}<br/>${client.code_postal ?? ""} ${client.ville ?? ""}<br/>${client.pays_residence ?? ""}</p>
+    <p style="margin-top:8px;">${client.email}</p>
+  </div>
+  <div class="party-box">
+    <h4>Kontodaten</h4>
+    <p><strong>IBAN:</strong><br/><span class="highlight">${client.iban ?? "—"}</span></p>
+    <p style="margin-top:6px;"><strong>BIC:</strong> ${client.bic ?? "KTAGDEFF"}</p>
+    <p style="margin-top:6px;"><strong>Kontotyp:</strong> Girokonto</p>
+    <p style="margin-top:6px;"><strong>Eröffnungsdatum:</strong> ${openDate}</p>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Bestätigung</h3>
+  <p class="body-text">Wir bestätigen hiermit die erfolgreiche Eröffnung Ihres Girokontos bei der KT Bank AG. Ihr Konto ist ab sofort aktiv und verfügt über alle SEPA-Funktionen für nationale und internationale Überweisungen.</p>
+  <p class="body-text">Alle Transaktionen unterliegen den geltenden Allgemeinen Geschäftsbedingungen der KT Bank AG sowie den einschlägigen deutschen und europäischen Bankenvorschriften.</p>
+</div>
+
+<div class="section">
+  <h3>Leistungsumfang</h3>
+  <div class="info-row"><span class="info-label">SEPA-Überweisungen</span><span class="info-value">Inklusive</span></div>
+  <div class="info-row"><span class="info-label">SEPA-Lastschriften</span><span class="info-value">Inklusive</span></div>
+  <div class="info-row"><span class="info-label">Online-Banking</span><span class="info-value">Inklusive</span></div>
+  <div class="info-row"><span class="info-label">Kontoauszüge</span><span class="info-value">Digital (kostenlos)</span></div>
+  <div class="info-row"><span class="info-label">Kundenservice</span><span class="info-value">support@kt-bank-ag.com</span></div>
+</div>
+
+<div class="signature-block">
+  <div>
+    <div class="sig-line">
+      <p class="sig-label">Frankfurt am Main, ${docDate()}</p>
+    </div>
+  </div>
+  <div>
+    <div class="sig-line">
+      <p class="sig-label">KT Bank AG — Direktion</p>
+    </div>
+  </div>
+</div>
+
+${footerBar(ref)}
+</div></body></html>`;
+}
+
+/* ── 2. Willkommensschreiben ── */
+export function genWillkommen(client: ClientInfo): string {
+  const ref = docRef();
+
+  return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
+<title>Willkommen bei der KT Bank AG</title>
+<style>${baseStyles()}</style></head><body><div class="page">
+${letterhead()}
+
+<p style="color:#64748B;font-size:12px;margin-bottom:24px;">
+  ${client.prenom} ${client.nom}<br/>
+  ${client.adresse ?? ""}<br/>
+  ${client.code_postal ?? ""} ${client.ville ?? ""}<br/>
+  ${client.pays_residence ?? ""}
+</p>
+
+<div class="doc-title">
+  <h2>Herzlich willkommen bei der KT Bank AG!</h2>
+  <span class="ref">Ref: ${ref}</span>
+</div>
+
+<div class="section">
+  <p class="body-text">Sehr geehrte/r ${client.prenom} ${client.nom},</p>
+  <p class="body-text">wir freuen uns, Sie als neuen Kunden der KT Bank AG begrüßen zu dürfen. Ihr Konto wurde erfolgreich eröffnet, und wir stehen Ihnen für alle Ihre Bankbedürfnisse zur Verfügung.</p>
+  <p class="body-text">Die KT Bank AG bietet Ihnen ein vollständiges Spektrum an Bankdienstleistungen — von SEPA-Überweisungen bis hin zu islamischen Finanzprodukten gemäß den Mourabaha-Grundsätzen, alles reguliert und überwacht durch die BaFin (Bundesanstalt für Finanzdienstleistungsaufsicht).</p>
+</div>
+
+<div class="section">
+  <h3>Ihre Kontodaten im Überblick</h3>
+  <div class="info-row"><span class="info-label">Name</span><span class="info-value">${client.prenom} ${client.nom}</span></div>
+  <div class="info-row"><span class="info-label">IBAN</span><span class="info-value" style="color:#005F2D;font-weight:700;">${client.iban ?? "—"}</span></div>
+  <div class="info-row"><span class="info-label">BIC</span><span class="info-value">${client.bic ?? "KTAGDEFF"}</span></div>
+  <div class="info-row"><span class="info-label">Kontotyp</span><span class="info-value">Girokonto</span></div>
+</div>
+
+<div class="section">
+  <h3>Nächste Schritte</h3>
+  <p class="body-text">1. <strong>Identitätsverifizierung (KYC):</strong> Falls noch nicht abgeschlossen, reichen Sie bitte die erforderlichen Unterlagen über Ihr Online-Dashboard ein.<br/>
+  2. <strong>Online-Banking:</strong> Melden Sie sich unter kt-bank-ag.com an, um alle Funktionen Ihres Kontos zu nutzen.<br/>
+  3. <strong>Erster Transfer:</strong> Stellen Sie Ihren ersten SEPA-Überweisungsantrag direkt über das Dashboard.</p>
+</div>
+
+<p class="body-text">Bei Fragen stehen wir Ihnen jederzeit zur Verfügung: <strong>support@kt-bank-ag.com</strong></p>
+
+<div class="signature-block">
+  <div>
+    <div class="sig-line">
+      <p class="sig-label">Frankfurt am Main, ${docDate()}</p>
+    </div>
+  </div>
+  <div>
+    <div class="sig-line">
+      <p class="sig-label">KT Bank AG — Kundenbetreuer</p>
+    </div>
+  </div>
+</div>
+
+${footerBar(ref)}
+</div></body></html>`;
+}
+
+/* ── 3. Kreditvertrag ── */
+export function genKreditvertrag(client: ClientInfo, loan: {
+  type: "islamic" | "standard";
+  amount: number;
+  duration_months: number;
+  monthly_payment: number;
+  total_repayment: number;
+  interest_rate: number;
+  purpose?: string;
+}): string {
+  const ref = docRef();
+  const fmtMoney = (n: number) => n.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+  const rate = loan.interest_rate / 12;
+
+  const rows = Array.from({ length: loan.duration_months }, (_, i) => {
+    const m = i + 1;
+    const interest = loan.type === "islamic" ? 0 :
+      (loan.amount - (loan.monthly_payment - loan.amount * rate) * (Math.pow(1 + rate, i) - 1) / (rate || 1)) * rate;
+    const principal = loan.monthly_payment - (loan.type === "islamic" ? 0 : interest);
+    return `<tr>
+      <td>${m}</td>
+      <td style="color:#374151;">${fmtMoney(loan.monthly_payment)}</td>
+      <td style="color:#005F2D;">${fmtMoney(Math.max(0, principal))}</td>
+      <td style="color:${loan.type === "standard" ? "#D97706" : "#16A34A"};">${fmtMoney(Math.max(0, interest))}</td>
+    </tr>`;
+  }).join("");
+
+  return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
+<title>Kreditvertrag — KT Bank AG</title>
+<style>${baseStyles()}</style></head><body><div class="page">
+${letterhead()}
+
+<div class="doc-title">
+  <h2>Kreditvertrag</h2>
+  <span class="ref">${loan.type === "islamic" ? "Islamischer Kredit (Mourabaha)" : "Standardkredit"} · Ref: ${ref}</span>
+</div>
+
+<div class="parties">
+  <div class="party-box">
+    <h4>Kreditnehmer</h4>
+    <p class="highlight">${client.prenom} ${client.nom}</p>
+    <p>${client.adresse ?? ""}<br/>${client.code_postal ?? ""} ${client.ville ?? ""}<br/>${client.pays_residence ?? ""}</p>
+    <p style="margin-top:6px;">${client.email}</p>
+    <p style="margin-top:4px;"><strong>IBAN:</strong> ${client.iban ?? "—"}</p>
+  </div>
+  <div class="party-box">
+    <h4>Kreditgeber</h4>
+    <p class="highlight">KT Bank AG</p>
+    <p>Bockenheimer Anlage 46<br/>60322 Frankfurt am Main<br/>Deutschland</p>
+    <p style="margin-top:6px;">BaFin-Reg. Nr. 12345678</p>
+    <p style="margin-top:4px;"><strong>BIC:</strong> KTAGDEFF</p>
+  </div>
+</div>
+
+<div class="highlight-box">
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+    <div><p class="label">Kreditbetrag</p><p class="amount">${fmtMoney(loan.amount)}</p></div>
+    <div><p class="label">Monatliche Rate</p><p class="amount" style="font-size:20px;">${fmtMoney(loan.monthly_payment)}</p></div>
+    <div><p class="label">Laufzeit</p><p class="amount" style="font-size:20px;">${loan.duration_months} Monate</p></div>
+    <div><p class="label">Zinssatz p. a.</p><p class="amount" style="font-size:20px;color:${loan.type === "islamic" ? "#16A34A" : "#D97706"};">${loan.type === "islamic" ? "0 %" : "2 %"}</p></div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Vertragsbedingungen</h3>
+  ${loan.purpose ? `<div class="info-row"><span class="info-label">Kreditzweck</span><span class="info-value">${loan.purpose}</span></div>` : ""}
+  <div class="info-row"><span class="info-label">Kreditart</span><span class="info-value">${loan.type === "islamic" ? "Islamischer Kredit (Mourabaha) — Zinsfrei" : "Standardkredit — Festzins"}</span></div>
+  <div class="info-row"><span class="info-label">Gesamtrückzahlung</span><span class="info-value">${fmtMoney(loan.total_repayment)}</span></div>
+  <div class="info-row"><span class="info-label">Gesamtzinsen</span><span class="info-value" style="color:${loan.type === "standard" ? "#D97706" : "#16A34A"};">${fmtMoney(loan.total_repayment - loan.amount)}</span></div>
+  <div class="info-row"><span class="info-label">Vertragsdatum</span><span class="info-value">${docDate()}</span></div>
+  <div class="info-row"><span class="info-label">Erste Rate fällig am</span><span class="info-value">${new Date(Date.now() + 30 * 86400000).toLocaleDateString("de-DE", { day: "2-digit", month: "long", year: "numeric" })}</span></div>
+</div>
+
+<div class="section">
+  <h3>Tilgungsplan</h3>
+  <table>
+    <thead><tr>
+      <th>Monat</th><th>Rate</th><th>Tilgung</th><th>Zinsen</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+</div>
+
+<div class="section">
+  <h3>Allgemeine Bestimmungen</h3>
+  <p class="body-text">Der Kreditnehmer verpflichtet sich, die monatlichen Raten pünktlich und vollständig zu entrichten. Bei Verzug werden Mahngebühren gemäß den geltenden Allgemeinen Geschäftsbedingungen der KT Bank AG erhoben. Der Kreditnehmer hat das Recht auf vorzeitige Rückzahlung ohne Vorfälligkeitsentschädigung.</p>
+</div>
+
+<div class="signature-block">
+  <div>
+    <div class="sig-line">
+      <p class="sig-label">${client.prenom} ${client.nom} (Kreditnehmer)</p>
+    </div>
+  </div>
+  <div>
+    <div class="sig-line">
+      <p class="sig-label">KT Bank AG (Kreditgeber)</p>
+    </div>
+  </div>
+</div>
+
+${footerBar(ref)}
+</div></body></html>`;
+}
+
+/* ── 4. Tilgungsplan (standalone) ── */
+export function genTilgungsplan(client: ClientInfo, loan: {
+  type: "islamic" | "standard";
+  amount: number;
+  duration_months: number;
+  monthly_payment: number;
+  total_repayment: number;
+  interest_rate: number;
+  purpose?: string;
+}): string {
+  const ref = docRef();
+  const fmtMoney = (n: number) => n.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+  const rate = loan.interest_rate / 12;
+
+  const rows = Array.from({ length: loan.duration_months }, (_, i) => {
+    const m = i + 1;
+    const interest = loan.type === "islamic" ? 0 :
+      (loan.amount - (loan.monthly_payment - loan.amount * rate) * (Math.pow(1 + rate, i) - 1) / (rate || 1)) * rate;
+    const principal = loan.monthly_payment - (loan.type === "islamic" ? 0 : interest);
+    return `<tr>
+      <td>${m}</td>
+      <td>${fmtMoney(loan.monthly_payment)}</td>
+      <td style="color:#005F2D;">${fmtMoney(Math.max(0, principal))}</td>
+      <td style="color:${loan.type === "standard" ? "#D97706" : "#16A34A"};">${fmtMoney(Math.max(0, interest))}</td>
+    </tr>`;
+  }).join("");
+
+  return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
+<title>Tilgungsplan — KT Bank AG</title>
+<style>${baseStyles()}</style></head><body><div class="page">
+${letterhead()}
+
+<div class="doc-title">
+  <h2>Tilgungsplan</h2>
+  <span class="ref">${loan.type === "islamic" ? "Islamischer Kredit (Mourabaha)" : "Standardkredit (2% p. a.)"} · Ref: ${ref}</span>
+</div>
+
+<div class="parties">
+  <div class="party-box">
+    <h4>Kreditnehmer</h4>
+    <p class="highlight">${client.prenom} ${client.nom}</p>
+    <p>${client.adresse ?? ""} ${client.code_postal ?? ""} ${client.ville ?? ""}</p>
+    <p>${client.email}</p>
+  </div>
+  <div class="party-box">
+    <h4>Kreditübersicht</h4>
+    <p><strong>Betrag:</strong> <span class="highlight">${fmtMoney(loan.amount)}</span></p>
+    <p><strong>Laufzeit:</strong> ${loan.duration_months} Monate</p>
+    <p><strong>Rate:</strong> ${fmtMoney(loan.monthly_payment)} / Monat</p>
+    <p><strong>Zinssatz:</strong> ${loan.type === "islamic" ? "0 % (Mourabaha)" : "2 % p. a."}</p>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">
+  ${[
+    ["Kreditbetrag", fmtMoney(loan.amount), "#005F2D"],
+    ["Monatliche Rate", fmtMoney(loan.monthly_payment), "#005F2D"],
+    ["Laufzeit", `${loan.duration_months} Monate`, "#0F172A"],
+    ["Gesamtzinsen", fmtMoney(loan.total_repayment - loan.amount), loan.type === "standard" ? "#D97706" : "#16A34A"],
+  ].map(([l, v, c]) => `
+    <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px 16px;">
+      <p style="color:#94A3B8;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px;">${l}</p>
+      <p style="color:${c};font-weight:800;font-size:16px;">${v}</p>
+    </div>
+  `).join("")}
+</div>
+
+<div class="section">
+  <h3>Zahlungsplan</h3>
+  <table>
+    <thead><tr><th>Monat</th><th>Rate</th><th>Tilgung</th><th>Zinsen</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <p style="color:#64748B;font-size:11px;text-align:right;">Gesamtrückzahlung: <strong style="color:#005F2D;">${fmtMoney(loan.total_repayment)}</strong></p>
+</div>
+
+${footerBar(ref)}
+</div></body></html>`;
+}
+
+/* ── 5. AGB (static) ── */
+export function genAGB(_client: ClientInfo): string {
+  const ref = docRef();
+  return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
+<title>Allgemeine Geschäftsbedingungen — KT Bank AG</title>
+<style>${baseStyles()}</style></head><body><div class="page">
+${letterhead()}
+<div class="doc-title"><h2>Allgemeine Geschäftsbedingungen</h2><span class="ref">Stand: Januar 2024 · Ref: ${ref}</span></div>
+<div class="section"><h3>§ 1 Geltungsbereich</h3>
+<p class="body-text">Diese Allgemeinen Geschäftsbedingungen (AGB) gelten für alle Geschäftsbeziehungen zwischen der KT Bank AG (nachfolgend "Bank") und ihren Kunden (nachfolgend "Kunde").</p></div>
+<div class="section"><h3>§ 2 Kontoführung</h3>
+<p class="body-text">Die Bank führt Konten auf den Namen des Kunden. Der Kunde ist verpflichtet, die Bank unverzüglich über Änderungen seiner persönlichen Daten zu informieren.</p></div>
+<div class="section"><h3>§ 3 Überweisungsaufträge</h3>
+<p class="body-text">SEPA-Überweisungen werden innerhalb eines Bankarbeitstages ausgeführt. Internationale Überweisungen können bis zu 5 Bankarbeitstage in Anspruch nehmen.</p></div>
+<div class="section"><h3>§ 4 Entgelte</h3>
+<p class="body-text">Die aktuellen Konditionen und Entgelte sind im Preis- und Leistungsverzeichnis der Bank festgelegt, das auf Anfrage zur Verfügung gestellt wird.</p></div>
+<div class="section"><h3>§ 5 Datenschutz</h3>
+<p class="body-text">Die Bank verarbeitet personenbezogene Daten gemäß der EU-Datenschutz-Grundverordnung (DSGVO) und dem Bundesdatenschutzgesetz (BDSG).</p></div>
+<div class="section"><h3>§ 6 Kündigung</h3>
+<p class="body-text">Das Konto kann von beiden Seiten jederzeit schriftlich gekündigt werden. Bei Kündigung durch die Bank gilt eine Frist von 2 Monaten.</p></div>
+${footerBar(ref)}
+</div></body></html>`;
+}
+
+/* ── 6. Datenschutzerklärung (static) ── */
+export function genDatenschutz(_client: ClientInfo): string {
+  const ref = docRef();
+  return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
+<title>Datenschutzerklärung — KT Bank AG</title>
+<style>${baseStyles()}</style></head><body><div class="page">
+${letterhead()}
+<div class="doc-title"><h2>Datenschutzerklärung</h2><span class="ref">Stand: Januar 2024 · Ref: ${ref}</span></div>
+<div class="section"><h3>1. Verantwortlicher</h3>
+<p class="body-text">KT Bank AG, Bockenheimer Anlage 46, 60322 Frankfurt am Main. Datenschutzbeauftragter: datenschutz@kt-bank-ag.com</p></div>
+<div class="section"><h3>2. Verarbeitete Daten</h3>
+<p class="body-text">Wir verarbeiten folgende personenbezogene Daten: Name, Adresse, E-Mail, Telefonnummer, Bankverbindung, Transaktionsdaten sowie Identifikationsdokumente im Rahmen der gesetzlichen KYC-Pflichten.</p></div>
+<div class="section"><h3>3. Zweck der Verarbeitung</h3>
+<p class="body-text">Die Datenverarbeitung erfolgt zur Erfüllung des Vertrags (Art. 6 Abs. 1 lit. b DSGVO), zur Erfüllung rechtlicher Pflichten (Art. 6 Abs. 1 lit. c DSGVO) sowie auf Basis berechtigter Interessen der Bank.</p></div>
+<div class="section"><h3>4. Ihre Rechte</h3>
+<p class="body-text">Sie haben das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung. Beschwerden können an die zuständige Aufsichtsbehörde gerichtet werden.</p></div>
+<div class="section"><h3>5. Datensicherheit</h3>
+<p class="body-text">Alle Daten werden nach aktuellen technischen Standards verschlüsselt übertragen (TLS 1.3) und gespeichert (AES-256).</p></div>
+${footerBar(ref)}
+</div></body></html>`;
+}
+
+/* ── 7. Custom document ── */
+export function genCustom(client: ClientInfo, opts: { title: string; body_html: string }): string {
+  const ref = docRef();
+  return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
+<title>${opts.title} — KT Bank AG</title>
+<style>${baseStyles()}
+.custom-body p { margin-bottom:10px; }
+.custom-body h1 { font-size:18px; margin:16px 0 10px; color:#0F172A; }
+.custom-body h2 { font-size:15px; margin:14px 0 8px; color:#0F172A; }
+.custom-body h3 { font-size:13px; margin:12px 0 6px; color:#005F2D; }
+.custom-body ul,.custom-body ol { padding-left:20px; margin-bottom:10px; }
+.custom-body a { color:#005F2D; }
+</style></head><body><div class="page">
+${letterhead()}
+<p style="color:#64748B;font-size:12px;margin-bottom:24px;">
+  ${client.prenom} ${client.nom}<br/>
+  ${client.adresse ?? ""} ${client.code_postal ?? ""} ${client.ville ?? ""}
+</p>
+<div class="doc-title">
+  <h2>${opts.title}</h2>
+  <span class="ref">Ref: ${ref} · ${docDate()}</span>
+</div>
+<div class="custom-body" style="margin-bottom:32px;">
+  ${opts.body_html}
+</div>
+<div class="signature-block">
+  <div></div>
+  <div><div class="sig-line"><p class="sig-label">KT Bank AG — Frankfurt am Main, ${docDate()}</p></div></div>
+</div>
+${footerBar(ref)}
+</div></body></html>`;
+}
+
+/* ── Template dispatch ── */
+export type DocType = "kontoeroeffnung" | "willkommen" | "kreditvertrag" | "tilgungsplan" | "agb" | "datenschutz" | "custom";
+
+export const DOC_TYPES: { value: DocType; label: string; description: string; needsLoan: boolean; needsBody: boolean }[] = [
+  { value: "kontoeroeffnung", label: "Kontoeröffnungsbestätigung", description: "Bestätigung der Kontoeröffnung mit IBAN", needsLoan: false, needsBody: false },
+  { value: "willkommen", label: "Willkommensschreiben", description: "Persönliches Begrüßungsschreiben", needsLoan: false, needsBody: false },
+  { value: "kreditvertrag", label: "Kreditvertrag", description: "Vollständiger Vertrag mit Tilgungsplan", needsLoan: true, needsBody: false },
+  { value: "tilgungsplan", label: "Tilgungsplan", description: "Detaillierter Zahlungsplan", needsLoan: true, needsBody: false },
+  { value: "agb", label: "Allgemeine Geschäftsbedingungen", description: "AGB der KT Bank AG", needsLoan: false, needsBody: false },
+  { value: "datenschutz", label: "Datenschutzerklärung", description: "DSGVO-konforme Datenschutzerklärung", needsLoan: false, needsBody: false },
+  { value: "custom", label: "Benutzerdefiniertes Dokument", description: "Freier Text mit eigenem Titel", needsLoan: false, needsBody: true },
+];
+
+export const SUBMISSION_TYPES = [
+  { value: "identitaet", label: "Identitätsnachweis (Personalausweis / Reisepass)" },
+  { value: "wohnsitz", label: "Wohnsitznachweis (Strom-/Wasserrechnung)" },
+  { value: "einkommen", label: "Einkommensnachweis (Gehaltsabrechnung)" },
+  { value: "bank", label: "Kontoauszug einer anderen Bank" },
+  { value: "steuer", label: "Steuerbescheid" },
+  { value: "sonstige", label: "Sonstiges Dokument" },
+];
