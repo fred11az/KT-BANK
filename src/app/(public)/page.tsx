@@ -91,6 +91,43 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Section 3b: Programme aide familiale ── */}
+      <section style={{ background: "#005F2D", padding: "0" }}>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80"
+            alt={t.lang !== "fr" ? "Familie" : "Famille"}
+            style={{ width: "100%", height: 220, objectFit: "cover", objectPosition: "center 30%", display: "block" }}
+          />
+          <div style={{ padding: "32px 24px", background: "linear-gradient(135deg, #002d15 0%, #005F2D 100%)" }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 999, padding: "5px 14px", marginBottom: 18 }}>
+              <span style={{ color: "#86efac", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                {t.lang !== "fr" ? "BaFin-reguliert" : "Réglementé BaFin"}
+              </span>
+            </div>
+            <h2 style={{ color: "white", fontWeight: 800, fontSize: "1.7rem", lineHeight: 1.2, margin: "0 0 8px" }}>
+              {t.lang !== "fr" ? "Bis zu 250.000 € Familienhilfe" : "Jusqu'à 250 000 € d'aide familiale"}
+            </h2>
+            <p style={{ color: "#86efac", fontWeight: 700, fontSize: "1.2rem", margin: "0 0 14px" }}>
+              250.000 €
+            </p>
+            <p style={{ color: "rgba(255,255,255,0.82)", fontSize: "0.97rem", lineHeight: 1.7, margin: "0 0 24px" }}>
+              {t.lang !== "fr"
+                ? "KT Bank AG hat einen Prioritätsfonds für Familien in finanzieller Not eingerichtet. Schnelle, vertrauliche Bearbeitung innerhalb von 24 Stunden."
+                : "KT Bank AG a mis en place un fonds prioritaire pour les familles en difficulté financière. Traitement rapide et confidentiel dans les 24 heures."
+              }
+            </p>
+            <Link
+              href="/familienhilfe"
+              style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", padding: "18px 24px", borderRadius: 999, background: "white", color: "#005F2D", fontWeight: 700, fontSize: "1rem", textDecoration: "none", boxSizing: "border-box" }}
+            >
+              {t.lang !== "fr" ? "Jetzt Antrag stellen →" : "Faire une demande →"}
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* ── Section 4: Compte courant — app + carte ── */}
       <section>
         <SectionImage src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80" alt="KT Bank App und Karte"/>
