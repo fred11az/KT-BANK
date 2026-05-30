@@ -1,4 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Resend } from "resend";
+
+function getResend() {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) throw new Error("RESEND_API_KEY not set");
+  return new Resend(key);
+}
+
+const FROM = "KT Bank AG <support@kt-bank-ag.com>";
 
 export async function POST(req: NextRequest) {
   let body: unknown;
@@ -9,7 +18,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Champs manquants" }, { status: 400 });
   }
 
-  const html = `
+  const resend = getResend();
+  const date = new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" });
+
+  /* ── Email admin ── */
+  const adminHtml = `
 <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
   <div style="background:#005F2D;padding:28px 32px;">
     <p style="color:rgba(255,255,255,0.7);font-size:12px;margin:0 0 4px;text-transform:uppercase;letter-spacing:0.08em;">KT Bank AG — Programme Social</p>
@@ -17,58 +30,75 @@ export async function POST(req: NextRequest) {
   </div>
   <div style="padding:32px;">
     <table style="width:100%;border-collapse:collapse;">
-      <tr>
-        <td style="padding:12px 0;border-bottom:1px solid #f3f4f6;color:#6b7280;font-size:13px;width:160px;vertical-align:top;">Prénom</td>
-        <td style="padding:12px 0;border-bottom:1px solid #f3f4f6;font-weight:600;color:#111827;">${prenom}</td>
-      </tr>
-      <tr>
-        <td style="padding:12px 0;border-bottom:1px solid #f3f4f6;color:#6b7280;font-size:13px;vertical-align:top;">Nom</td>
-        <td style="padding:12px 0;border-bottom:1px solid #f3f4f6;font-weight:600;color:#111827;">${nom}</td>
-      </tr>
-      <tr>
-        <td style="padding:12px 0;border-bottom:1px solid #f3f4f6;color:#6b7280;font-size:13px;vertical-align:top;">E-mail</td>
-        <td style="padding:12px 0;border-bottom:1px solid #f3f4f6;font-weight:600;color:#111827;"><a href="mailto:${email}" style="color:#005F2D;">${email}</a></td>
-      </tr>
-      <tr>
-        <td style="padding:12px 0;border-bottom:1px solid #f3f4f6;color:#6b7280;font-size:13px;vertical-align:top;">Téléphone</td>
-        <td style="padding:12px 0;border-bottom:1px solid #f3f4f6;font-weight:600;color:#111827;">${telephone}</td>
-      </tr>
-      <tr>
-        <td style="padding:12px 0;color:#6b7280;font-size:13px;vertical-align:top;">Situation financière</td>
-        <td style="padding:12px 0;color:#374151;line-height:1.6;">${situation.replace(/\n/g, "<br>")}</td>
-      </tr>
+      <tr><td style="padding:12px 0;border-bottom:1px solid #f3f4f6;color:#6b7280;font-size:13px;width:160px;">Prénom</td><td style="padding:12px 0;border-bottom:1px solid #f3f4f6;font-weight:600;color:#111827;">${prenom}</td></tr>
+      <tr><td style="padding:12px 0;border-bottom:1px solid #f3f4f6;color:#6b7280;font-size:13px;">Nom</td><td style="padding:12px 0;border-bottom:1px solid #f3f4f6;font-weight:600;color:#111827;">${nom}</td></tr>
+      <tr><td style="padding:12px 0;border-bottom:1px solid #f3f4f6;color:#6b7280;font-size:13px;">E-mail</td><td style="padding:12px 0;border-bottom:1px solid #f3f4f6;font-weight:600;color:#111827;"><a href="mailto:${email}" style="color:#005F2D;">${email}</a></td></tr>
+      <tr><td style="padding:12px 0;border-bottom:1px solid #f3f4f6;color:#6b7280;font-size:13px;">Téléphone</td><td style="padding:12px 0;border-bottom:1px solid #f3f4f6;font-weight:600;color:#111827;">${telephone}</td></tr>
+      <tr><td style="padding:12px 0;color:#6b7280;font-size:13px;vertical-align:top;">Situation</td><td style="padding:12px 0;color:#374151;line-height:1.6;">${situation.replace(/\n/g, "<br>")}</td></tr>
     </table>
     <div style="margin-top:24px;padding:16px;background:#f0fdf4;border-radius:8px;border-left:3px solid #005F2D;">
       <p style="color:#005F2D;font-size:13px;font-weight:600;margin:0 0 4px;">Action requise</p>
-      <p style="color:#374151;font-size:13px;margin:0;">Contacter ${prenom} ${nom} dans les 24 heures pour démarrer l'étude du dossier.</p>
+      <p style="color:#374151;font-size:13px;margin:0;">Contacter ${prenom} ${nom} dans les 24 heures. Répondre directement à cet email.</p>
     </div>
-    <p style="color:#9ca3af;font-size:12px;margin:24px 0 0;">Demande reçue le ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })} via kt-bank-ag.com/familienhilfe</p>
+    <p style="color:#9ca3af;font-size:12px;margin:24px 0 0;">Reçu le ${date} via kt-bank-ag.com/familienhilfe</p>
   </div>
 </div>`;
 
-  const adminEmails: string[] = [
-    "KTBANKAGDE@GMAIL.COM",
-    "support@kt-bank-ag.com",
-  ];
-  if (process.env.RESEND_ADMIN_EMAIL) adminEmails.push(process.env.RESEND_ADMIN_EMAIL);
+  /* ── Email confirmation candidat ── */
+  const confirmHtml = `
+<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
+  <div style="background:#005F2D;padding:28px 32px;">
+    <img src="https://www.kt-bank-ag.com/kt-logo.png" alt="KT Bank AG" style="height:28px;filter:brightness(0) invert(1);display:block;margin-bottom:16px;" />
+    <h1 style="color:white;margin:0;font-size:20px;font-weight:700;">Votre demande a bien été reçue</h1>
+    <p style="color:rgba(255,255,255,0.75);margin:6px 0 0;font-size:14px;">Familienförderprogramm · KT Bank AG</p>
+  </div>
+  <div style="padding:32px;">
+    <p style="color:#374151;font-size:15px;line-height:1.7;margin:0 0 20px;">Bonjour <strong>${prenom}</strong>,</p>
+    <p style="color:#374151;font-size:15px;line-height:1.7;margin:0 0 20px;">
+      Nous avons bien reçu votre demande d'aide familiale. Notre équipe sociale va étudier votre dossier et vous contactera <strong>dans les 24 heures</strong> à l'adresse <strong>${email}</strong> ou au <strong>${telephone}</strong>.
+    </p>
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:20px 24px;margin:24px 0;">
+      <p style="color:#005F2D;font-weight:700;font-size:14px;margin:0 0 10px;">Récapitulatif de votre demande</p>
+      <p style="color:#374151;font-size:13px;margin:4px 0;"><strong>Nom :</strong> ${prenom} ${nom}</p>
+      <p style="color:#374151;font-size:13px;margin:4px 0;"><strong>E-mail :</strong> ${email}</p>
+      <p style="color:#374151;font-size:13px;margin:4px 0;"><strong>Téléphone :</strong> ${telephone}</p>
+      <p style="color:#374151;font-size:13px;margin:4px 0;"><strong>Date :</strong> ${date}</p>
+    </div>
+    <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 24px;">
+      En attendant, vous pouvez ouvrir un compte KT Bank gratuitement pour accélérer le traitement de votre dossier.
+    </p>
+    <a href="https://www.kt-bank-ag.com/client/register" style="display:inline-block;padding:14px 28px;background:#005F2D;color:white;border-radius:999px;font-weight:700;font-size:14px;text-decoration:none;">
+      Ouvrir un compte gratuit →
+    </a>
+    <hr style="border:none;border-top:1px solid #e5e7eb;margin:32px 0;" />
+    <p style="color:#9ca3af;font-size:12px;line-height:1.6;margin:0;">
+      KT Bank AG · BIC: KTAGDEFF · Régulé par la BaFin<br/>
+      Pour toute question : <a href="mailto:support@kt-bank-ag.com" style="color:#005F2D;">support@kt-bank-ag.com</a>
+    </p>
+  </div>
+</div>`;
 
   try {
-    // Use a noreply FROM to avoid self-address spam filtering when sending to support@
-    const { Resend } = await import("resend");
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    await Promise.all(
-      adminEmails.map((to) =>
-        resend.emails.send({
-          from: "KT Bank Notifications <noreply@kt-bank-ag.com>",
-          to,
-          subject: `Demande aide familiale — ${prenom} ${nom}`,
-          html,
-        })
-      )
-    );
+    const adminEmails = ["KTBANKAGDE@GMAIL.COM", "support@kt-bank-ag.com"];
+    if (process.env.RESEND_ADMIN_EMAIL) adminEmails.push(process.env.RESEND_ADMIN_EMAIL);
+
+    const results = await Promise.all([
+      // Notifications admin
+      ...adminEmails.map((to) =>
+        resend.emails.send({ from: FROM, to, subject: `Nouvelle demande aide familiale — ${prenom} ${nom}`, html: adminHtml, replyTo: email })
+      ),
+      // Confirmation au candidat
+      resend.emails.send({ from: FROM, to: email, subject: "KT Bank AG — Votre demande a bien été reçue", html: confirmHtml }),
+    ]);
+
+    // Log any Resend-level errors without crashing
+    results.forEach(({ error }, i) => {
+      if (error) console.error(`[familienhilfe] send[${i}] error:`, JSON.stringify(error));
+    });
+
     return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error("[familienhilfe] send failed", err);
+    console.error("[familienhilfe] fatal:", err);
     return NextResponse.json({ error: "Envoi échoué" }, { status: 500 });
   }
 }
