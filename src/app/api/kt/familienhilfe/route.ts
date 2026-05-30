@@ -5,8 +5,8 @@ export async function POST(req: NextRequest) {
   let body: unknown;
   try { body = await req.json(); } catch { return NextResponse.json({ error: "Corps invalide" }, { status: 400 }); }
 
-  const { prenom, nom, telephone, situation } = body as Record<string, string>;
-  if (!prenom?.trim() || !nom?.trim() || !telephone?.trim() || !situation?.trim()) {
+  const { prenom, nom, email, telephone, situation } = body as Record<string, string>;
+  if (!prenom?.trim() || !nom?.trim() || !email?.trim() || !telephone?.trim() || !situation?.trim()) {
     return NextResponse.json({ error: "Champs manquants" }, { status: 400 });
   }
 
@@ -25,6 +25,10 @@ export async function POST(req: NextRequest) {
       <tr>
         <td style="padding:12px 0;border-bottom:1px solid #f3f4f6;color:#6b7280;font-size:13px;vertical-align:top;">Nom</td>
         <td style="padding:12px 0;border-bottom:1px solid #f3f4f6;font-weight:600;color:#111827;">${nom}</td>
+      </tr>
+      <tr>
+        <td style="padding:12px 0;border-bottom:1px solid #f3f4f6;color:#6b7280;font-size:13px;vertical-align:top;">E-mail</td>
+        <td style="padding:12px 0;border-bottom:1px solid #f3f4f6;font-weight:600;color:#111827;"><a href="mailto:${email}" style="color:#005F2D;">${email}</a></td>
       </tr>
       <tr>
         <td style="padding:12px 0;border-bottom:1px solid #f3f4f6;color:#6b7280;font-size:13px;vertical-align:top;">Téléphone</td>

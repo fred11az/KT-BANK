@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   CheckCircle, Clock, Shield, Users, Phone, Euro,
-  Lock, ArrowRight, FileText, Building2, AlertCircle,
+  Lock, ArrowRight, FileText, Building2, AlertCircle, Mail,
 } from "lucide-react";
 
 export default function FamilienhilfePage() {
@@ -13,6 +13,7 @@ export default function FamilienhilfePage() {
 
   const [prenom, setPrenom] = useState("");
   const [nom, setNom] = useState("");
+  const [email, setEmail] = useState("");
   const [telephone, setTelephone] = useState("");
   const [situation, setSituation] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,7 +28,7 @@ export default function FamilienhilfePage() {
       const res = await fetch("/api/kt/familienhilfe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prenom, nom, telephone, situation }),
+        body: JSON.stringify({ prenom, nom, email, telephone, situation }),
       });
       if (res.ok) { setSent(true); }
       else { setApiError(de ? "Fehler beim Senden. Bitte erneut versuchen." : "Erreur lors de l'envoi. Veuillez réessayer."); }
@@ -37,7 +38,7 @@ export default function FamilienhilfePage() {
     setLoading(false);
   }
 
-  const canSubmit = prenom.trim() && nom.trim() && telephone.trim() && situation.trim();
+  const canSubmit = prenom.trim() && nom.trim() && email.trim() && telephone.trim() && situation.trim();
 
   return (
     <>
@@ -362,6 +363,22 @@ export default function FamilienhilfePage() {
                     onChange={(e) => setNom(e.target.value)}
                     placeholder={de ? "Mustermann" : "Dupont"}
                     style={{ width: "100%", height: 48, background: "white", border: "1px solid #d1d5db", borderRadius: 10, color: "#111827", fontSize: "0.95rem", padding: "0 14px", outline: "none", boxSizing: "border-box" }}
+                  />
+                </div>
+              </div>
+
+              {/* Email */}
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: "block", color: "#374151", fontSize: "0.82rem", fontWeight: 600, marginBottom: 6 }}>
+                  {de ? "E-Mail-Adresse *" : "Adresse e-mail *"}
+                </label>
+                <div style={{ position: "relative" }}>
+                  <Mail size={15} color="#9ca3af" style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+                  <input
+                    type="email" required value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder={de ? "max@beispiel.de" : "jean@exemple.com"}
+                    style={{ width: "100%", height: 48, background: "white", border: "1px solid #d1d5db", borderRadius: 10, color: "#111827", fontSize: "0.95rem", paddingLeft: 40, paddingRight: 14, outline: "none", boxSizing: "border-box" }}
                   />
                 </div>
               </div>
