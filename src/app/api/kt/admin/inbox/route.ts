@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("kt_email_threads")
-    .select("*, kt_email_messages(id, direction, from_email, to_email, subject, body_text, created_at)")
+    .select("*, kt_email_messages(id, direction, from_email, to_email, subject, body_text, body_html, created_at)")
     .order("last_message_at", { ascending: false })
     .limit(50);
   if (error) return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
@@ -23,37 +23,58 @@ export async function GET(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   const supabase = getSupabase();
-  const { thread_id } = await req.json();
+  const body = await req.json();
+  const { thread_id, status } = body;
   if (!thread_id) return NextResponse.json({ error: "thread_id requis" }, { status: 400 });
-  await supabase.from("kt_email_threads").update({ unread: false }).eq("id", thread_id);
+
+  const update: Record<string, unknown> = {};
+  if (status !== undefined) update.status = status;
+  else update.unread = false;
+
+  await supabase.from("kt_email_threads").update(update).eq("id", thread_id);
   return NextResponse.json({ ok: true });
 }
 
 export async function POST(req: NextRequest) {
   if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   const supabase = getSupabase();
-  const { to, subject, body, thread_id, client_name } = await req.json();
-  if (!to || !subject || !body) return NextResponse.json({ error: "Champs manquants" }, { status: 400 });
+  const { to, subject, body, body_html, thread_id, client_name } = await req.json();
+  if (!to || !subject || (!body && !body_html))
+    return NextResponse.json({ error: "Champs manquants" }, { status: 400 });
 
   let threadId = thread_id;
   if (!threadId) {
-    const { data: thread } = await supabase.from("kt_email_threads")
-      .insert({ subject, client_email: to, client_name: client_name ?? to.split("@")[0], status: "open", last_message_at: new Date().toISOString() })
-      .select("id").single();
+    const { data: thread } = await supabase
+      .from("kt_email_threads")
+      .insert({
+        subject,
+        client_email: to,
+        client_name: client_name ?? to.split("@")[0],
+        status: "open",
+        last_message_at: new Date().toISOString(),
+      })
+      .select("id")
+      .single();
     threadId = thread?.id;
   } else {
-    await supabase.from("kt_email_threads").update({ last_message_at: new Date().toISOString(), unread: false }).eq("id", threadId);
+    await supabase.from("kt_email_threads")
+      .update({ last_message_at: new Date().toISOString(), unread: false })
+      .eq("id", threadId);
   }
 
   if (threadId) {
     await supabase.from("kt_email_messages").insert({
-      thread_id: threadId, direction: "outbound",
-      from_email: "support@kt-bank-ag.com", to_email: to, subject, body_text: body,
+      thread_id: threadId,
+      direction: "outbound",
+      from_email: "support@kt-bank-ag.com",
+      to_email: to,
+      subject,
+      body_text: body ?? "",
+      body_html: body_html ?? null,
     });
   }
 
-  // Send with full KT Bank branded template
-  const { html } = bankAdminMessageEmail({ subject, body });
+  const { html } = bankAdminMessageEmail({ subject, body: body ?? "", body_html: body_html ?? undefined });
   await sendEmail(to, subject, html);
 
   return NextResponse.json({ ok: true });

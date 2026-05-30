@@ -301,19 +301,25 @@ export function adminNewClientEmail(client: {
 }
 
 /* ─── Admin → Client message (branded) ─── */
-export function bankAdminMessageEmail(opts: { subject: string; body: string }) {
-  const { subject, body } = opts;
-  const htmlBody = body
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/\n/g, "<br/>");
+export function bankAdminMessageEmail(opts: { subject: string; body: string; body_html?: string }) {
+  const { subject, body, body_html } = opts;
+
+  // If rich HTML provided by admin editor, use it directly (already sanitized client-side)
+  const bodyContent = body_html
+    ? `<div style="font-size:14px;color:#333333;line-height:1.8;">${body_html}</div>`
+    : `<div style="font-size:14px;color:#333333;line-height:1.7;margin:0 0 28px;">${body
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\n/g, "<br/>")
+      }</div>`;
+
   return {
     subject,
     html: base(`
 <h2 style="margin:0 0 20px;font-size:17px;font-weight:700;color:#111111;">${subject.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</h2>
-<div style="font-size:14px;color:#333333;line-height:1.7;margin:0 0 28px;">${htmlBody}</div>
-<hr style="border:none;border-top:1px solid #eeeeee;margin:0 0 20px;"/>
+${bodyContent}
+<hr style="border:none;border-top:1px solid #eeeeee;margin:24px 0 20px;"/>
 <p style="margin:0;font-size:12px;color:#999999;line-height:1.6;">
   KT Bank AG &mdash; BaFin-reguliert<br/>
   <a href="${DASHBOARD_URL}" style="color:#005F2D;text-decoration:none;">Mon espace client</a>
