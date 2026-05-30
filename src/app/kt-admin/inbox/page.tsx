@@ -243,17 +243,20 @@ function Toolbar({
   }
 
   const tb: React.CSSProperties = {
-    display: "flex", flexWrap: "wrap", alignItems: "center", gap: 2,
-    padding: "6px 10px", background: "#14161F",
+    display: "flex", flexWrap: "nowrap", alignItems: "center", gap: 2,
+    padding: "6px 8px", background: "#14161F",
     borderBottom: "1px solid rgba(255,255,255,0.08)",
     borderRadius: "10px 10px 0 0",
+    overflowX: "auto",
+    WebkitOverflowScrolling: "touch" as React.CSSProperties["WebkitOverflowScrolling"],
+    scrollbarWidth: "none" as React.CSSProperties["scrollbarWidth"],
   };
   const sep: React.CSSProperties = {
     width: 1, height: 18, background: "rgba(255,255,255,0.12)", margin: "0 4px",
   };
 
   return (
-    <div style={tb}>
+    <div className="rich-toolbar" style={tb}>
       {/* Text format */}
       <TB onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive("bold")} title="Gras">
         <Bold size={13} />
@@ -502,7 +505,10 @@ function Toolbar({
         )}
       </div>
 
-      <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
+      <style>{`
+        @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+        .rich-toolbar::-webkit-scrollbar { display: none; }
+      `}</style>
     </div>
   );
 }
@@ -517,6 +523,7 @@ function RichEditor({
   minHeight?: number;
 }) {
   const editor = useEditor({
+    immediatelyRender: true,
     extensions: [
       StarterKit.configure({ codeBlock: false, code: false }),
       UnderlineExt,
@@ -538,7 +545,13 @@ function RichEditor({
     },
   });
 
-  if (!editor) return null;
+  if (!editor) {
+    return (
+      <div style={{ minHeight: minHeight, padding: "12px 14px", background: "#1A1D27", color: "rgba(255,255,255,0.2)", fontSize: "0.9rem" }}>
+        {placeholder}
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
