@@ -25,7 +25,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const { data: accounts } = await supabase
     .from("kt_accounts")
     .select("*, kt_cards(*), kt_transactions(*)")
-    .eq("profile_id", id);
+    .eq("profile_id", id)
+    .order("created_at", { ascending: true });
 
   const { data: transfers } = await supabase
     .from("kt_transfer_requests")
