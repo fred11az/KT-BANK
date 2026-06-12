@@ -9,7 +9,7 @@ function L<T extends object>(lang: string, variants: { de: T } & Partial<Record<
 }
 
 const base = (content: string, lang: string = "de") => `<!DOCTYPE html>
-<html lang="${lang}">
+<html lang="${lang}" dir="${lang === "ar" ? "rtl" : "ltr"}">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
