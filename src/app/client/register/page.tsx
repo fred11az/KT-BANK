@@ -236,8 +236,9 @@ export default function RegisterPage() {
 
   async function save(s:2|3|4|5|6|7|8) {
     setLoading(true);setError("");
+    const lang = typeof window !== "undefined" ? (localStorage.getItem("kt_lang") ?? "de") : "de";
     const bodies:Record<number,object> = {
-      2:{step:2,email,pays_residence:pays,date_naissance:dob,code_promo:promo,is_fatca:fatca},
+      2:{step:2,email,pays_residence:pays,date_naissance:dob,code_promo:promo,is_fatca:fatca,lang},
       3:{step:3,email,prenom,nom,sexe,situation_familiale:situation,pays_naissance:paysNaissance,ville_naissance:villeNaissance},
       4:{step:4,email,nationalite,type_document:typeDoc,autorite_document:autorite},
       5:{step:5,email,situation_professionnelle:situationPro,nom_employeur:nomEmployeur,revenu_mensuel:revenuMensuel,adresse,code_postal:codePostal,ville},

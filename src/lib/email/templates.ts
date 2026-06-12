@@ -2,7 +2,13 @@ const LOGO_URL = "https://kt-bank-ag.com/kt-logo.png";
 const DASHBOARD_URL = "https://kt-bank-ag.com/client/dashboard";
 const CONTACT_URL = "https://kt-bank-ag.com/contact";
 
-const base = (content: string, lang: "de" | "fr" = "de") => `<!DOCTYPE html>
+type EL = "de" | "fr" | "en" | "ar" | "tr" | "es" | "it" | "pt" | "nl";
+
+function L<T extends object>(lang: string, variants: { de: T } & Partial<Record<EL, T>>): T {
+  return (variants as Record<string, T>)[lang] ?? (variants as Record<string, T>).en ?? variants.de;
+}
+
+const base = (content: string, lang: string = "de") => `<!DOCTYPE html>
 <html lang="${lang}">
 <head>
 <meta charset="UTF-8"/>
@@ -39,20 +45,72 @@ const base = (content: string, lang: "de" | "fr" = "de") => `<!DOCTYPE html>
 </html>`;
 
 /* ─── OTP – Registration ─── */
-export function otpRegistrationEmail(code: string, _email: string, lang: "de" | "fr" = "de") {
-  const s = lang === "fr" ? {
-    subject: "Votre code de vérification – KT Bank",
-    title: "Confirmez votre adresse e-mail",
-    intro: "Saisissez le code ci-dessous dans les champs de saisie.",
-    expiry: "Valable 10 minutes.",
-    security: "Ne communiquez jamais ce code à personne.",
-  } : {
-    subject: "Bestätigen Sie Ihre E-Mail-Adresse – KT Bank",
-    title: "Bestätigen Sie Ihre E-Mail-Adresse",
-    intro: "Bitte geben Sie den Bestätigungscode in die Felder ein.",
-    expiry: "Gültig für 10 Minuten.",
-    security: "Teilen Sie diesen Code niemals mit Dritten.",
-  };
+export function otpRegistrationEmail(code: string, _email: string, lang: string = "de") {
+  const s = L(lang, {
+    de: {
+      subject: "Bestätigen Sie Ihre E-Mail-Adresse – KT Bank",
+      title: "Bestätigen Sie Ihre E-Mail-Adresse",
+      intro: "Bitte geben Sie den Bestätigungscode in die Felder ein.",
+      expiry: "Gültig für 10 Minuten.",
+      security: "Teilen Sie diesen Code niemals mit Dritten.",
+    },
+    fr: {
+      subject: "Votre code de vérification – KT Bank",
+      title: "Confirmez votre adresse e-mail",
+      intro: "Saisissez le code ci-dessous dans les champs de saisie.",
+      expiry: "Valable 10 minutes.",
+      security: "Ne communiquez jamais ce code à personne.",
+    },
+    en: {
+      subject: "Verify your email – KT Bank",
+      title: "Verify your email address",
+      intro: "Enter the verification code in the fields below.",
+      expiry: "Valid for 10 minutes.",
+      security: "Never share this code with anyone.",
+    },
+    ar: {
+      subject: "تأكيد بريدك الإلكتروني – KT Bank",
+      title: "أكّد عنوان بريدك الإلكتروني",
+      intro: "أدخل رمز التحقق في الحقول أدناه.",
+      expiry: "صالح لمدة 10 دقائق.",
+      security: "لا تشارك هذا الرمز مع أي شخص أبداً.",
+    },
+    tr: {
+      subject: "E-postanızı doğrulayın – KT Bank",
+      title: "E-posta adresinizi doğrulayın",
+      intro: "Doğrulama kodunu aşağıdaki alanlara girin.",
+      expiry: "10 dakika geçerlidir.",
+      security: "Bu kodu asla kimseyle paylaşmayın.",
+    },
+    es: {
+      subject: "Verifica tu correo – KT Bank",
+      title: "Verifica tu dirección de correo",
+      intro: "Enter the verification code in the fields below.",
+      expiry: "Valid for 10 minutes.",
+      security: "Never share this code with anyone.",
+    },
+    it: {
+      subject: "Verifica la tua email – KT Bank",
+      title: "Verifica il tuo indirizzo email",
+      intro: "Enter the verification code in the fields below.",
+      expiry: "Valid for 10 minutes.",
+      security: "Never share this code with anyone.",
+    },
+    pt: {
+      subject: "Verifique seu e-mail – KT Bank",
+      title: "Verifique seu endereço de e-mail",
+      intro: "Enter the verification code in the fields below.",
+      expiry: "Valid for 10 minutes.",
+      security: "Never share this code with anyone.",
+    },
+    nl: {
+      subject: "Bevestig uw e-mail – KT Bank",
+      title: "Bevestig uw e-mailadres",
+      intro: "Enter the verification code in the fields below.",
+      expiry: "Valid for 10 minutes.",
+      security: "Never share this code with anyone.",
+    },
+  });
   return {
     subject: s.subject,
     html: base(`
@@ -68,20 +126,72 @@ export function otpRegistrationEmail(code: string, _email: string, lang: "de" | 
 }
 
 /* ─── OTP – Login ─── */
-export function otpLoginEmail(code: string, lang: "de" | "fr" = "de") {
-  const s = lang === "fr" ? {
-    subject: "Votre code de connexion – KT Bank",
-    title: "Votre code de connexion",
-    intro: "Utilisez ce code pour accéder à votre espace KT Bank.",
-    expiry: "Valable 10 minutes.",
-    security: "Ne communiquez jamais ce code à personne.",
-  } : {
-    subject: "Ihr Anmeldecode – KT Bank",
-    title: "Ihr Anmeldecode",
-    intro: "Verwenden Sie diesen Code, um sich in Ihr KT Bank Konto einzuloggen.",
-    expiry: "Gültig für 10 Minuten.",
-    security: "Teilen Sie diesen Code niemals mit Dritten.",
-  };
+export function otpLoginEmail(code: string, lang: string = "de") {
+  const s = L(lang, {
+    de: {
+      subject: "Ihr Anmeldecode – KT Bank",
+      title: "Ihr Anmeldecode",
+      intro: "Verwenden Sie diesen Code, um sich in Ihr KT Bank Konto einzuloggen.",
+      expiry: "Gültig für 10 Minuten.",
+      security: "Teilen Sie diesen Code niemals mit Dritten.",
+    },
+    fr: {
+      subject: "Votre code de connexion – KT Bank",
+      title: "Votre code de connexion",
+      intro: "Utilisez ce code pour accéder à votre espace KT Bank.",
+      expiry: "Valable 10 minutes.",
+      security: "Ne communiquez jamais ce code à personne.",
+    },
+    en: {
+      subject: "Your login code – KT Bank",
+      title: "Your login code",
+      intro: "Use this code to access your KT Bank account.",
+      expiry: "Valid for 10 minutes.",
+      security: "Never share this code with anyone.",
+    },
+    ar: {
+      subject: "رمز تسجيل الدخول – KT Bank",
+      title: "رمز تسجيل الدخول",
+      intro: "استخدم هذا الرمز للوصول إلى حسابك في KT Bank.",
+      expiry: "صالح لمدة 10 دقائق.",
+      security: "لا تشارك هذا الرمز مع أي شخص أبداً.",
+    },
+    tr: {
+      subject: "Giriş kodunuz – KT Bank",
+      title: "Giriş kodunuz",
+      intro: "KT Bank hesabınıza giriş yapmak için bu kodu kullanın.",
+      expiry: "10 dakika geçerlidir.",
+      security: "Bu kodu asla kimseyle paylaşmayın.",
+    },
+    es: {
+      subject: "Tu código de acceso – KT Bank",
+      title: "Tu código de acceso",
+      intro: "Use this code to access your KT Bank account.",
+      expiry: "Valid for 10 minutes.",
+      security: "Never share this code with anyone.",
+    },
+    it: {
+      subject: "Il tuo codice di accesso – KT Bank",
+      title: "Il tuo codice di accesso",
+      intro: "Use this code to access your KT Bank account.",
+      expiry: "Valid for 10 minutes.",
+      security: "Never share this code with anyone.",
+    },
+    pt: {
+      subject: "Seu código de acesso – KT Bank",
+      title: "Seu código de acesso",
+      intro: "Use this code to access your KT Bank account.",
+      expiry: "Valid for 10 minutes.",
+      security: "Never share this code with anyone.",
+    },
+    nl: {
+      subject: "Uw inlogcode – KT Bank",
+      title: "Uw inlogcode",
+      intro: "Use this code to access your KT Bank account.",
+      expiry: "Valid for 10 minutes.",
+      security: "Never share this code with anyone.",
+    },
+  });
   return {
     subject: s.subject,
     html: base(`
@@ -97,34 +207,135 @@ export function otpLoginEmail(code: string, lang: "de" | "fr" = "de") {
 }
 
 /* ─── Welcome ─── */
-export function welcomeEmail(prenom: string, iban: string, lang: "de" | "fr" = "de") {
-  const s = lang === "fr" ? {
-    subject: `Bienvenue chez KT Bank, ${prenom} !`,
-    title: `Bienvenue, ${prenom} !`,
-    intro: "Votre compte courant KT Bank est ouvert. Vous avez accès à tous vos services bancaires.",
-    ibanLabel: "Votre IBAN",
-    bic: "BIC",
-    cta: "Accéder à mon espace",
-    features: [
-      "Compte courant gratuit sans frais de tenue",
-      "SEPA Instant Payment en moins de 10 secondes",
-      "Carte Visa Débit gratuite",
-      "100 % halal &mdash; certifié par notre Shariah Board",
-    ],
-  } : {
-    subject: `Willkommen bei KT Bank, ${prenom}!`,
-    title: `Herzlich willkommen, ${prenom}!`,
-    intro: "Ihr KT Bank Girokonto ist eröffnet. Sie können jetzt alle Banking-Services nutzen.",
-    ibanLabel: "Ihre IBAN",
-    bic: "BIC",
-    cta: "Zu meinem Konto",
-    features: [
-      "Kostenloses Girokonto ohne Kontoführungsgebühren",
-      "SEPA Instant Payment in unter 10 Sekunden",
-      "Kostenlose Visa-Debitkarte",
-      "100 % halal &mdash; zertifiziert durch unser Shariah Board",
-    ],
-  };
+export function welcomeEmail(prenom: string, iban: string, lang: string = "de") {
+  const s = L(lang, {
+    de: {
+      subject: `Willkommen bei KT Bank, ${prenom}!`,
+      title: `Herzlich willkommen, ${prenom}!`,
+      intro: "Ihr KT Bank Girokonto ist eröffnet. Sie können jetzt alle Banking-Services nutzen.",
+      ibanLabel: "Ihre IBAN",
+      bic: "BIC",
+      cta: "Zu meinem Konto",
+      features: [
+        "Kostenloses Girokonto ohne Kontoführungsgebühren",
+        "SEPA Instant Payment in unter 10 Sekunden",
+        "Kostenlose Visa-Debitkarte",
+        "100 % halal &mdash; zertifiziert durch unser Shariah Board",
+      ],
+    },
+    fr: {
+      subject: `Bienvenue chez KT Bank, ${prenom} !`,
+      title: `Bienvenue, ${prenom} !`,
+      intro: "Votre compte courant KT Bank est ouvert. Vous avez accès à tous vos services bancaires.",
+      ibanLabel: "Votre IBAN",
+      bic: "BIC",
+      cta: "Accéder à mon espace",
+      features: [
+        "Compte courant gratuit sans frais de tenue",
+        "SEPA Instant Payment en moins de 10 secondes",
+        "Carte Visa Débit gratuite",
+        "100 % halal &mdash; certifié par notre Shariah Board",
+      ],
+    },
+    en: {
+      subject: `Welcome to KT Bank, ${prenom}!`,
+      title: `Welcome, ${prenom}!`,
+      intro: "Your KT Bank current account is open. You now have access to all your banking services.",
+      ibanLabel: "Your IBAN",
+      bic: "BIC",
+      cta: "Go to my account",
+      features: [
+        "Free current account with no maintenance fees",
+        "SEPA Instant Payment in under 10 seconds",
+        "Free Visa Debit card",
+        "100% halal — certified by our Shariah Board",
+      ],
+    },
+    ar: {
+      subject: `مرحباً بك في KT Bank، ${prenom}!`,
+      title: `مرحباً بك، ${prenom}!`,
+      intro: "تم فتح حسابك الجاري في KT Bank. يمكنك الآن الوصول إلى جميع خدماتك المصرفية.",
+      ibanLabel: "رقم IBAN الخاص بك",
+      bic: "BIC",
+      cta: "الذهاب إلى حسابي",
+      features: [
+        "حساب جاري مجاني بدون رسوم إدارة",
+        "SEPA Instant Payment في أقل من 10 ثوانٍ",
+        "بطاقة Visa Debit مجانية",
+        "100% حلال — معتمد من مجلس الشريعة لدينا",
+      ],
+    },
+    tr: {
+      subject: `KT Bank'a Hoş Geldiniz, ${prenom}!`,
+      title: `Hoş Geldiniz, ${prenom}!`,
+      intro: "KT Bank vadesiz hesabınız açıldı. Tüm bankacılık hizmetlerinize artık erişebilirsiniz.",
+      ibanLabel: "IBAN numaranız",
+      bic: "BIC",
+      cta: "Hesabıma git",
+      features: [
+        "Ücretsiz vadesiz hesap, işletim ücreti yok",
+        "10 saniyeden kısa sürede SEPA Instant Payment",
+        "Ücretsiz Visa Debit kartı",
+        "100% helal — Şeria Kurulumuz tarafından sertifikalı",
+      ],
+    },
+    es: {
+      subject: `Bienvenido a KT Bank, ${prenom}!`,
+      title: `Bienvenido, ${prenom}!`,
+      intro: "Your KT Bank account is open. You can now access all your banking services.",
+      ibanLabel: "Your IBAN",
+      bic: "BIC",
+      cta: "Go to my account",
+      features: [
+        "Free current account with no maintenance fees",
+        "SEPA Instant Payment in under 10 seconds",
+        "Free Visa Debit card",
+        "100% halal — certified by our Shariah Board",
+      ],
+    },
+    it: {
+      subject: `Benvenuto in KT Bank, ${prenom}!`,
+      title: `Benvenuto, ${prenom}!`,
+      intro: "Your KT Bank account is open. You can now access all your banking services.",
+      ibanLabel: "Your IBAN",
+      bic: "BIC",
+      cta: "Go to my account",
+      features: [
+        "Free current account with no maintenance fees",
+        "SEPA Instant Payment in under 10 seconds",
+        "Free Visa Debit card",
+        "100% halal — certified by our Shariah Board",
+      ],
+    },
+    pt: {
+      subject: `Bem-vindo ao KT Bank, ${prenom}!`,
+      title: `Bem-vindo, ${prenom}!`,
+      intro: "Your KT Bank account is open. You can now access all your banking services.",
+      ibanLabel: "Your IBAN",
+      bic: "BIC",
+      cta: "Go to my account",
+      features: [
+        "Free current account with no maintenance fees",
+        "SEPA Instant Payment in under 10 seconds",
+        "Free Visa Debit card",
+        "100% halal — certified by our Shariah Board",
+      ],
+    },
+    nl: {
+      subject: `Welkom bij KT Bank, ${prenom}!`,
+      title: `Welkom, ${prenom}!`,
+      intro: "Your KT Bank account is open. You can now access all your banking services.",
+      ibanLabel: "Your IBAN",
+      bic: "BIC",
+      cta: "Go to my account",
+      features: [
+        "Free current account with no maintenance fees",
+        "SEPA Instant Payment in under 10 seconds",
+        "Free Visa Debit card",
+        "100% halal — certified by our Shariah Board",
+      ],
+    },
+  });
   return {
     subject: s.subject,
     html: base(`
@@ -153,27 +364,93 @@ export function transactionEmail(opts: {
   currency: string;
   description: string;
   balance: number;
-  lang?: "de" | "fr";
+  lang?: string;
 }) {
   const { prenom, type, amount, currency, description, balance, lang = "de" } = opts;
   const isCredit = type === "credit";
-  const s = lang === "fr" ? {
-    subject: isCredit ? `Virement reçu : +${amount.toFixed(2)} ${currency}` : `Débit : -${amount.toFixed(2)} ${currency}`,
-    title: isCredit ? "Virement reçu" : "Débit effectué",
-    intro: isCredit ? `Un montant a été crédité sur votre compte, ${prenom}.` : `Un débit a été effectué sur votre compte, ${prenom}.`,
-    amountLabel: isCredit ? "Montant reçu" : "Montant débité",
-    descLabel: "Motif",
-    balanceLabel: "Solde actuel",
-    cta: "Voir mes transactions",
-  } : {
-    subject: isCredit ? `Gutschrift: +${amount.toFixed(2)} ${currency}` : `Abbuchung: -${amount.toFixed(2)} ${currency}`,
-    title: isCredit ? "Geldeingang" : "Kontoabbuchung",
-    intro: isCredit ? `Auf Ihrem Konto ist ein Betrag eingegangen, ${prenom}.` : `Eine Abbuchung wurde ausgeführt, ${prenom}.`,
-    amountLabel: isCredit ? "Eingegangener Betrag" : "Abgebuchter Betrag",
-    descLabel: "Verwendungszweck",
-    balanceLabel: "Kontostand",
-    cta: "Transaktionen ansehen",
-  };
+  const s = L(lang, {
+    de: {
+      subject: isCredit ? `Gutschrift: +${amount.toFixed(2)} ${currency}` : `Abbuchung: -${amount.toFixed(2)} ${currency}`,
+      title: isCredit ? "Geldeingang" : "Kontoabbuchung",
+      intro: isCredit ? `Auf Ihrem Konto ist ein Betrag eingegangen, ${prenom}.` : `Eine Abbuchung wurde ausgeführt, ${prenom}.`,
+      amountLabel: isCredit ? "Eingegangener Betrag" : "Abgebuchter Betrag",
+      descLabel: "Verwendungszweck",
+      balanceLabel: "Kontostand",
+      cta: "Transaktionen ansehen",
+    },
+    fr: {
+      subject: isCredit ? `Virement reçu : +${amount.toFixed(2)} ${currency}` : `Débit : -${amount.toFixed(2)} ${currency}`,
+      title: isCredit ? "Virement reçu" : "Débit effectué",
+      intro: isCredit ? `Un montant a été crédité sur votre compte, ${prenom}.` : `Un débit a été effectué sur votre compte, ${prenom}.`,
+      amountLabel: isCredit ? "Montant reçu" : "Montant débité",
+      descLabel: "Motif",
+      balanceLabel: "Solde actuel",
+      cta: "Voir mes transactions",
+    },
+    en: {
+      subject: isCredit ? `KT Bank — Credit received on your account` : `KT Bank — Debit on your account`,
+      title: isCredit ? "A credit has been applied to your account" : "A debit has been applied to your account",
+      intro: isCredit ? `A credit has been applied to your account, ${prenom}.` : `A debit has been applied to your account, ${prenom}.`,
+      amountLabel: isCredit ? "Amount received" : "Amount debited",
+      descLabel: "Description",
+      balanceLabel: "New balance",
+      cta: "View my account",
+    },
+    ar: {
+      subject: isCredit ? `KT Bank — تم قيد مبلغ في حسابك` : `KT Bank — تم خصم مبلغ من حسابك`,
+      title: isCredit ? "تم إضافة مبلغ إلى حسابك" : "تم خصم مبلغ من حسابك",
+      intro: isCredit ? `تم إضافة مبلغ إلى حسابك، ${prenom}.` : `تم خصم مبلغ من حسابك، ${prenom}.`,
+      amountLabel: isCredit ? "المبلغ المستلم" : "المبلغ المخصوم",
+      descLabel: "الوصف",
+      balanceLabel: "الرصيد الجديد",
+      cta: "عرض حسابي",
+    },
+    tr: {
+      subject: isCredit ? `KT Bank — Hesabınıza para yatırıldı` : `KT Bank — Hesabınızdan para çıktı`,
+      title: isCredit ? "Hesabınıza para yatırıldı" : "Hesabınızdan para çıktı",
+      intro: isCredit ? `Hesabınıza para yatırıldı, ${prenom}.` : `Hesabınızdan para çıktı, ${prenom}.`,
+      amountLabel: isCredit ? "Yatırılan tutar" : "Çekilen tutar",
+      descLabel: "Açıklama",
+      balanceLabel: "Yeni bakiye",
+      cta: "Hesabımı görüntüle",
+    },
+    es: {
+      subject: isCredit ? `KT Bank — Crédito recibido en su cuenta` : `KT Bank — Débito en su cuenta`,
+      title: isCredit ? "A credit has been applied to your account" : "A debit has been applied to your account",
+      intro: isCredit ? `A credit has been applied to your account, ${prenom}.` : `A debit has been applied to your account, ${prenom}.`,
+      amountLabel: isCredit ? "Amount received" : "Amount debited",
+      descLabel: "Description",
+      balanceLabel: "New balance",
+      cta: "View my account",
+    },
+    it: {
+      subject: isCredit ? `KT Bank — Credito ricevuto sul conto` : `KT Bank — Addebito sul conto`,
+      title: isCredit ? "A credit has been applied to your account" : "A debit has been applied to your account",
+      intro: isCredit ? `A credit has been applied to your account, ${prenom}.` : `A debit has been applied to your account, ${prenom}.`,
+      amountLabel: isCredit ? "Amount received" : "Amount debited",
+      descLabel: "Description",
+      balanceLabel: "New balance",
+      cta: "View my account",
+    },
+    pt: {
+      subject: isCredit ? `KT Bank — Crédito recebido em sua conta` : `KT Bank — Débito em sua conta`,
+      title: isCredit ? "A credit has been applied to your account" : "A debit has been applied to your account",
+      intro: isCredit ? `A credit has been applied to your account, ${prenom}.` : `A debit has been applied to your account, ${prenom}.`,
+      amountLabel: isCredit ? "Amount received" : "Amount debited",
+      descLabel: "Description",
+      balanceLabel: "New balance",
+      cta: "View my account",
+    },
+    nl: {
+      subject: isCredit ? `KT Bank — Bijschrijving op uw rekening` : `KT Bank — Afschrijving van uw rekening`,
+      title: isCredit ? "A credit has been applied to your account" : "A debit has been applied to your account",
+      intro: isCredit ? `A credit has been applied to your account, ${prenom}.` : `A debit has been applied to your account, ${prenom}.`,
+      amountLabel: isCredit ? "Amount received" : "Amount debited",
+      descLabel: "Description",
+      balanceLabel: "New balance",
+      cta: "View my account",
+    },
+  });
   const color = isCredit ? "#005F2D" : "#dc2626";
   const sign = isCredit ? "+" : "-";
   return {
@@ -197,19 +474,40 @@ export function transactionEmail(opts: {
 }
 
 /* ─── Bank message notification ─── */
-export function bankMessageEmail(opts: { prenom: string; messagePreview: string; lang?: "de" | "fr" }) {
+export function bankMessageEmail(opts: { prenom: string; messagePreview: string; lang?: string }) {
   const { prenom, messagePreview, lang = "de" } = opts;
-  const s = lang === "fr" ? {
-    subject: "Nouveau message de KT Bank",
-    title: `Nouveau message, ${prenom}`,
-    intro: "Vous avez reçu un nouveau message de votre conseiller KT Bank :",
-    cta: "Lire le message",
-  } : {
-    subject: "Neue Nachricht von KT Bank",
-    title: `Neue Nachricht, ${prenom}`,
-    intro: "Sie haben eine neue Nachricht von Ihrem Berater bei KT Bank erhalten:",
-    cta: "Nachricht lesen",
-  };
+  const s = L(lang, {
+    de: {
+      subject: "Neue Nachricht von KT Bank",
+      title: `Neue Nachricht, ${prenom}`,
+      intro: "Sie haben eine neue Nachricht von Ihrem Berater bei KT Bank erhalten:",
+      cta: "Nachricht lesen",
+    },
+    fr: {
+      subject: "Nouveau message de KT Bank",
+      title: `Nouveau message, ${prenom}`,
+      intro: "Vous avez reçu un nouveau message de votre conseiller KT Bank :",
+      cta: "Lire le message",
+    },
+    en: {
+      subject: "New message from KT Bank",
+      title: `New message, ${prenom}`,
+      intro: "You have received a new message from your KT Bank advisor:",
+      cta: "Read message",
+    },
+    ar: {
+      subject: "رسالة جديدة من KT Bank",
+      title: `رسالة جديدة، ${prenom}`,
+      intro: "لقد تلقيت رسالة جديدة من مستشارك في KT Bank:",
+      cta: "قراءة الرسالة",
+    },
+    tr: {
+      subject: "KT Bank'tan yeni mesaj",
+      title: `Yeni mesaj, ${prenom}`,
+      intro: "KT Bank danışmanınızdan yeni bir mesaj aldınız:",
+      cta: "Mesajı oku",
+    },
+  });
   return {
     subject: s.subject,
     html: base(`
@@ -340,7 +638,7 @@ export function transferStatusEmail(opts: {
   reference?: string;
   balance?: number;
   rejection_reason?: string;
-  lang?: "de" | "fr";
+  lang?: string;
 }) {
   const { prenom, status, amount, currency, to_name, reference, balance, rejection_reason, lang = "de" } = opts;
   type Strings = { subject: string; title: string; intro: string; amountLabel: string; toLabel: string; refLabel: string; balanceLabel: string; cta: string };
@@ -429,7 +727,7 @@ export function transferPendingFeeEmail(opts: {
   fee_currency: string;
   fee_payment: { name?: string; iban?: string; bic?: string; bank?: string; reference?: string };
   transfer_id: string;
-  lang?: "de" | "fr";
+  lang?: string;
 }) {
   const { prenom, amount, currency, to_name, to_iban, reference, fee_amount, fee_currency, fee_payment, transfer_id, lang = "de" } = opts;
   const PAYMENT_URL = `https://kt-bank-ag.com/client/transfer-payment?id=${transfer_id}`;
@@ -504,21 +802,45 @@ export function transferPendingFeeEmail(opts: {
 }
 
 /* ─── KYC approved (account now active) ─── */
-export function kycApprovedEmail(opts: { prenom: string; lang?: "de" | "fr" }) {
+export function kycApprovedEmail(opts: { prenom: string; lang?: string }) {
   const { prenom, lang = "de" } = opts;
-  const s = lang === "fr" ? {
-    subject: "✅ Votre identité a été vérifiée — Compte actif",
-    title: `Identité vérifiée, ${prenom} !`,
-    intro: "Votre procédure de vérification d'identité (KYC) a été complétée avec succès. Votre compte est maintenant <strong>pleinement actif</strong>.",
-    items: ["Virements SEPA disponibles", "Accès complet à tous les services", "Carte bancaire disponible"],
-    cta: "Accéder à mon compte",
-  } : {
-    subject: "✅ Ihre Identität wurde verifiziert — Konto aktiv",
-    title: `Identität verifiziert, ${prenom}!`,
-    intro: "Ihr KYC-Verfahren wurde erfolgreich abgeschlossen. Ihr Konto ist jetzt <strong>vollständig aktiv</strong>.",
-    items: ["SEPA-Überweisungen verfügbar", "Vollzugriff auf alle Dienste", "Bankkarte verfügbar"],
-    cta: "Zu meinem Konto",
-  };
+  const s = L(lang, {
+    de: {
+      subject: "✅ Ihre Identität wurde verifiziert — Konto aktiv",
+      title: `Identität verifiziert, ${prenom}!`,
+      intro: "Ihr KYC-Verfahren wurde erfolgreich abgeschlossen. Ihr Konto ist jetzt <strong>vollständig aktiv</strong>.",
+      items: ["SEPA-Überweisungen verfügbar", "Vollzugriff auf alle Dienste", "Bankkarte verfügbar"],
+      cta: "Zu meinem Konto",
+    },
+    fr: {
+      subject: "✅ Votre identité a été vérifiée — Compte actif",
+      title: `Identité vérifiée, ${prenom} !`,
+      intro: "Votre procédure de vérification d'identité (KYC) a été complétée avec succès. Votre compte est maintenant <strong>pleinement actif</strong>.",
+      items: ["Virements SEPA disponibles", "Accès complet à tous les services", "Carte bancaire disponible"],
+      cta: "Accéder à mon compte",
+    },
+    en: {
+      subject: "KT Bank — Your identity has been verified ✓",
+      title: `Your identity has been verified`,
+      intro: "Your KYC verification has been approved. Your account is now fully active.",
+      items: ["SEPA transfers available", "Full access to all services", "Bank card available"],
+      cta: "Access my account",
+    },
+    ar: {
+      subject: "KT Bank — تم التحقق من هويتك ✓",
+      title: "تم التحقق من هويتك",
+      intro: "تمت الموافقة على التحقق من هويتك. حسابك الآن نشط بالكامل.",
+      items: ["التحويلات SEPA متاحة", "وصول كامل إلى جميع الخدمات", "البطاقة المصرفية متاحة"],
+      cta: "الوصول إلى حسابي",
+    },
+    tr: {
+      subject: "KT Bank — Kimliğiniz doğrulandı ✓",
+      title: "Kimliğiniz doğrulandı",
+      intro: "KYC doğrulamanız onaylandı. Hesabınız artık tamamen aktif.",
+      items: ["SEPA transferleri mevcut", "Tüm hizmetlere tam erişim", "Banka kartı mevcut"],
+      cta: "Hesabıma eriş",
+    },
+  });
   return {
     subject: s.subject,
     html: base(`
@@ -540,7 +862,7 @@ export function accountActivationRequiredEmail(opts: {
   bank_name: string;
   bank_iban: string;
   bank_bic: string;
-  lang?: "de" | "fr";
+  lang?: string;
 }) {
   const { prenom, bank_name, bank_iban, bank_bic, lang = "de" } = opts;
   const s = lang === "fr" ? {
@@ -594,21 +916,45 @@ export function accountActivationRequiredEmail(opts: {
 }
 
 /* ─── Account activated after deposit ─── */
-export function accountActivatedEmail(opts: { prenom: string; balance: number; lang?: "de" | "fr" }) {
+export function accountActivatedEmail(opts: { prenom: string; balance: number; lang?: string }) {
   const { prenom, balance, lang = "de" } = opts;
-  const s = lang === "fr" ? {
-    subject: "🎉 Votre compte est maintenant actif !",
-    title: `Compte activé, ${prenom} !`,
-    intro: "Votre dépôt a bien été reçu. Votre compte KT Bank est maintenant <strong>entièrement actif</strong>. Vous pouvez utiliser toutes les fonctionnalités.",
-    balanceLabel: "Solde actuel",
-    cta: "Accéder à mon compte",
-  } : {
-    subject: "🎉 Ihr Konto ist jetzt aktiv!",
-    title: `Konto aktiviert, ${prenom}!`,
-    intro: "Ihre Einzahlung ist eingegangen. Ihr KT Bank Konto ist jetzt <strong>vollständig aktiv</strong>. Sie können alle Funktionen nutzen.",
-    balanceLabel: "Aktueller Kontostand",
-    cta: "Zu meinem Konto",
-  };
+  const s = L(lang, {
+    de: {
+      subject: "🎉 Ihr Konto ist jetzt aktiv!",
+      title: `Konto aktiviert, ${prenom}!`,
+      intro: "Ihre Einzahlung ist eingegangen. Ihr KT Bank Konto ist jetzt <strong>vollständig aktiv</strong>. Sie können alle Funktionen nutzen.",
+      balanceLabel: "Aktueller Kontostand",
+      cta: "Zu meinem Konto",
+    },
+    fr: {
+      subject: "🎉 Votre compte est maintenant actif !",
+      title: `Compte activé, ${prenom} !`,
+      intro: "Votre dépôt a bien été reçu. Votre compte KT Bank est maintenant <strong>entièrement actif</strong>. Vous pouvez utiliser toutes les fonctionnalités.",
+      balanceLabel: "Solde actuel",
+      cta: "Accéder à mon compte",
+    },
+    en: {
+      subject: "KT Bank — Your account is now active!",
+      title: `Your account is active!`,
+      intro: "Your KT Bank account has been activated. You can now use all features.",
+      balanceLabel: "Current balance",
+      cta: "Access my account",
+    },
+    ar: {
+      subject: "KT Bank — حسابك الآن نشط!",
+      title: "حسابك نشط!",
+      intro: "تم تفعيل حسابك في KT Bank. يمكنك الآن استخدام جميع الميزات.",
+      balanceLabel: "الرصيد الحالي",
+      cta: "الوصول إلى حسابي",
+    },
+    tr: {
+      subject: "KT Bank — Hesabınız aktif!",
+      title: "Hesabınız aktif!",
+      intro: "KT Bank hesabınız aktive edildi. Artık tüm özellikleri kullanabilirsiniz.",
+      balanceLabel: "Mevcut bakiye",
+      cta: "Hesabıma eriş",
+    },
+  });
   return {
     subject: s.subject,
     html: base(`
@@ -626,23 +972,50 @@ export function accountActivatedEmail(opts: { prenom: string; balance: number; l
 }
 
 /* ─── KYC rejected ─── */
-export function kycRejectedEmail(opts: { prenom: string; notes?: string; lang?: "de" | "fr" }) {
+export function kycRejectedEmail(opts: { prenom: string; notes?: string; lang?: string }) {
   const { prenom, notes, lang = "de" } = opts;
-  const s = lang === "fr" ? {
-    subject: "Vérification d'identité refusée — Action requise",
-    title: `Vérification refusée, ${prenom}`,
-    intro: "Votre demande de vérification d'identité n'a pas pu être validée.",
-    notesLabel: "Motif / remarques",
-    nextSteps: "Veuillez soumettre à nouveau vos documents en vous assurant qu'ils sont lisibles, non expirés et correspondent aux informations de votre profil.",
-    cta: "Soumettre mes documents",
-  } : {
-    subject: "Identitätsverifizierung abgelehnt — Aktion erforderlich",
-    title: `Verifizierung abgelehnt, ${prenom}`,
-    intro: "Ihr KYC-Antrag konnte nicht bestätigt werden.",
-    notesLabel: "Grund / Anmerkungen",
-    nextSteps: "Bitte laden Sie Ihre Dokumente erneut hoch und stellen Sie sicher, dass sie lesbar, nicht abgelaufen sind und mit Ihren Profildaten übereinstimmen.",
-    cta: "Dokumente erneut einreichen",
-  };
+  const s = L(lang, {
+    de: {
+      subject: "Identitätsverifizierung abgelehnt — Aktion erforderlich",
+      title: `Verifizierung abgelehnt, ${prenom}`,
+      intro: "Ihr KYC-Antrag konnte nicht bestätigt werden.",
+      notesLabel: "Grund / Anmerkungen",
+      nextSteps: "Bitte laden Sie Ihre Dokumente erneut hoch und stellen Sie sicher, dass sie lesbar, nicht abgelaufen sind und mit Ihren Profildaten übereinstimmen.",
+      cta: "Dokumente erneut einreichen",
+    },
+    fr: {
+      subject: "Vérification d'identité refusée — Action requise",
+      title: `Vérification refusée, ${prenom}`,
+      intro: "Votre demande de vérification d'identité n'a pas pu être validée.",
+      notesLabel: "Motif / remarques",
+      nextSteps: "Veuillez soumettre à nouveau vos documents en vous assurant qu'ils sont lisibles, non expirés et correspondent aux informations de votre profil.",
+      cta: "Soumettre mes documents",
+    },
+    en: {
+      subject: "KT Bank — Your documents could not be verified",
+      title: "Verification unsuccessful",
+      intro: "Unfortunately, we could not verify the documents you submitted. Please contact our support team.",
+      notesLabel: "Notes",
+      nextSteps: "Please resubmit your documents ensuring they are legible, not expired, and match your profile information.",
+      cta: "Contact support",
+    },
+    ar: {
+      subject: "KT Bank — تعذّر التحقق من وثائقك",
+      title: "التحقق غير ناجح",
+      intro: "لم نتمكن للأسف من التحقق من الوثائق التي أرسلتها. يرجى التواصل مع فريق الدعم.",
+      notesLabel: "ملاحظات",
+      nextSteps: "يرجى إعادة تقديم مستنداتك مع التأكد من أنها واضحة وغير منتهية الصلاحية وتتطابق مع معلومات ملفك الشخصي.",
+      cta: "التواصل مع الدعم",
+    },
+    tr: {
+      subject: "KT Bank — Belgeleriniz doğrulanamadı",
+      title: "Doğrulama başarısız",
+      intro: "Maalesef gönderdiğiniz belgeler doğrulanamadı. Lütfen destek ekibimizle iletişime geçin.",
+      notesLabel: "Notlar",
+      nextSteps: "Lütfen belgelerinizi yeniden gönderin ve okunabilir, süresi dolmamış ve profil bilgilerinizle eşleşen belgeler olduğundan emin olun.",
+      cta: "Desteğe başvur",
+    },
+  });
   return {
     subject: s.subject,
     html: base(`
@@ -692,20 +1065,44 @@ export function adminKycSubmittedEmail(opts: {
 }
 
 /* ─── Security alert ─── */
-export function securityAlertEmail(prenom: string, reason: string, lang: "de" | "fr" = "de") {
-  const s = lang === "fr" ? {
-    subject: "Alerte sécurité – KT Bank",
-    title: `Alerte sécurité, ${prenom}`,
-    intro: "Nous souhaitons vous informer de ce qui suit :",
-    cta: "Contacter le support",
-    phone: "+49 69 255 10 200",
-  } : {
-    subject: "Sicherheitshinweis – KT Bank",
-    title: `Sicherheitshinweis, ${prenom}`,
-    intro: "Wir möchten Sie auf folgendes aufmerksam machen:",
-    cta: "Support kontaktieren",
-    phone: "+49 69 255 10 200",
-  };
+export function securityAlertEmail(prenom: string, reason: string, lang: string = "de") {
+  const s = L(lang, {
+    de: {
+      subject: "Sicherheitshinweis – KT Bank",
+      title: `Sicherheitshinweis, ${prenom}`,
+      intro: "Wir möchten Sie auf folgendes aufmerksam machen:",
+      cta: "Support kontaktieren",
+      phone: "+49 69 255 10 200",
+    },
+    fr: {
+      subject: "Alerte sécurité – KT Bank",
+      title: `Alerte sécurité, ${prenom}`,
+      intro: "Nous souhaitons vous informer de ce qui suit :",
+      cta: "Contacter le support",
+      phone: "+49 69 255 10 200",
+    },
+    en: {
+      subject: "Security alert – KT Bank",
+      title: `Security alert, ${prenom}`,
+      intro: "We would like to inform you of the following:",
+      cta: "Contact support",
+      phone: "+49 69 255 10 200",
+    },
+    ar: {
+      subject: "تنبيه أمني – KT Bank",
+      title: `تنبيه أمني، ${prenom}`,
+      intro: "نود إبلاغك بما يلي:",
+      cta: "التواصل مع الدعم",
+      phone: "+49 69 255 10 200",
+    },
+    tr: {
+      subject: "Güvenlik uyarısı – KT Bank",
+      title: `Güvenlik uyarısı, ${prenom}`,
+      intro: "Aşağıdaki konuda sizi bilgilendirmek istiyoruz:",
+      cta: "Desteğe başvur",
+      phone: "+49 69 255 10 200",
+    },
+  });
   return {
     subject: s.subject,
     html: base(`

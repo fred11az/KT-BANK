@@ -8,6 +8,327 @@ import {
   Lock, Plus, AlertCircle, Building2, Clock
 } from "lucide-react";
 import { genTilgungsplan } from "@/lib/document-templates";
+import { useLanguage } from "@/contexts/LanguageContext";
+
+const DASHBOARD_UI = {
+  de: {
+    nav: ["Übersicht", "Konten", "Überweisungen", "Kredit", "Karten", "Sparen", "Spende / Zakat", "Dokumente", "KYC / Identität", "Profil"],
+    balance: "Kontostand",
+    hiddenBalance: "••••••",
+    myAccount: "Mein Konto",
+    recentTx: "Letzte Transaktionen",
+    noTx: "Keine Transaktionen",
+    sendMoney: "Geld senden",
+    iban: "IBAN",
+    bic: "BIC",
+    status: "Status",
+    active: "Aktiv",
+    pending: "In Bearbeitung",
+    blocked: "Gesperrt",
+    verified: "Verifiziert",
+    unverified: "Nicht verifiziert",
+    rejected: "Abgelehnt",
+    logout: "Abmelden",
+    loading: "Laden…",
+    error: "Fehler beim Laden",
+    credit: "Gutschrift",
+    debit: "Belastung",
+    transfer: "Überweisung",
+    amount: "Betrag",
+    date: "Datum",
+    submit: "Absenden",
+    cancel: "Abbrechen",
+    save: "Speichern",
+    close: "Schließen",
+    back: "Zurück",
+    next: "Weiter",
+    confirm: "Bestätigen",
+    seeAll: "Alle ansehen",
+    documents: "Dokumente",
+    myDocuments: "Meine Dokumente",
+    uploadDoc: "Dokument hochladen",
+    profile: "Profil",
+    security: "Sicherheit",
+    kyc: "KYC / Identität",
+    kycPending: "Verifizierung ausstehend",
+    kycUpload: "Dokumente hochladen",
+    transferNew: "Neue Überweisung",
+    transferHistory: "Überweisungshistorie",
+    creditRequest: "Kreditantrag",
+    islamicCredit: "Islamischer Kredit (0%)",
+    standardCredit: "Standardkredit (2%)",
+    monthly: "Monatliche Rate",
+    duration: "Laufzeit",
+    months: "Monate",
+    totalAmount: "Gesamtbetrag",
+    requestCredit: "Kredit beantragen",
+    card: "Karte",
+    cardNumber: "Kartennummer",
+    expiry: "Gültig bis",
+    debitCard: "Debitkarte",
+    zakat: "Zakat berechnen",
+    donation: "Spende",
+    savings: "Sparen",
+  },
+  fr: {
+    nav: ["Tableau de bord", "Comptes", "Virements", "Crédit", "Cartes", "Épargne", "Don / Zakat", "Documents", "KYC / Identité", "Profil"],
+    balance: "Solde",
+    hiddenBalance: "••••••",
+    myAccount: "Mon compte",
+    recentTx: "Dernières transactions",
+    noTx: "Aucune transaction",
+    sendMoney: "Envoyer de l'argent",
+    iban: "IBAN",
+    bic: "BIC",
+    status: "Statut",
+    active: "Actif",
+    pending: "En cours",
+    blocked: "Bloqué",
+    verified: "Vérifié",
+    unverified: "Non vérifié",
+    rejected: "Rejeté",
+    logout: "Se déconnecter",
+    loading: "Chargement…",
+    error: "Erreur de chargement",
+    credit: "Crédit",
+    debit: "Débit",
+    transfer: "Virement",
+    amount: "Montant",
+    date: "Date",
+    submit: "Envoyer",
+    cancel: "Annuler",
+    save: "Enregistrer",
+    close: "Fermer",
+    back: "Retour",
+    next: "Suivant",
+    confirm: "Confirmer",
+    seeAll: "Voir tout",
+    documents: "Documents",
+    myDocuments: "Mes documents",
+    uploadDoc: "Télécharger un document",
+    profile: "Profil",
+    security: "Sécurité",
+    kyc: "KYC / Identité",
+    kycPending: "Vérification en attente",
+    kycUpload: "Télécharger des documents",
+    transferNew: "Nouveau virement",
+    transferHistory: "Historique des virements",
+    creditRequest: "Demande de crédit",
+    islamicCredit: "Crédit islamique (0%)",
+    standardCredit: "Crédit standard (2%)",
+    monthly: "Mensualité",
+    duration: "Durée",
+    months: "mois",
+    totalAmount: "Montant total",
+    requestCredit: "Demander un crédit",
+    card: "Carte",
+    cardNumber: "Numéro de carte",
+    expiry: "Expire le",
+    debitCard: "Carte de débit",
+    zakat: "Calculer la Zakat",
+    donation: "Don",
+    savings: "Épargne",
+  },
+  en: {
+    nav: ["Overview", "Accounts", "Transfers", "Credit", "Cards", "Savings", "Donation / Zakat", "Documents", "KYC / Identity", "Profile"],
+    balance: "Balance",
+    hiddenBalance: "••••••",
+    myAccount: "My account",
+    recentTx: "Recent transactions",
+    noTx: "No transactions",
+    sendMoney: "Send money",
+    iban: "IBAN",
+    bic: "BIC",
+    status: "Status",
+    active: "Active",
+    pending: "Pending",
+    blocked: "Blocked",
+    verified: "Verified",
+    unverified: "Unverified",
+    rejected: "Rejected",
+    logout: "Sign out",
+    loading: "Loading…",
+    error: "Loading error",
+    credit: "Credit",
+    debit: "Debit",
+    transfer: "Transfer",
+    amount: "Amount",
+    date: "Date",
+    submit: "Submit",
+    cancel: "Cancel",
+    save: "Save",
+    close: "Close",
+    back: "Back",
+    next: "Next",
+    confirm: "Confirm",
+    seeAll: "See all",
+    documents: "Documents",
+    myDocuments: "My documents",
+    uploadDoc: "Upload document",
+    profile: "Profile",
+    security: "Security",
+    kyc: "KYC / Identity",
+    kycPending: "Verification pending",
+    kycUpload: "Upload documents",
+    transferNew: "New transfer",
+    transferHistory: "Transfer history",
+    creditRequest: "Credit application",
+    islamicCredit: "Islamic Credit (0%)",
+    standardCredit: "Standard Credit (2%)",
+    monthly: "Monthly payment",
+    duration: "Duration",
+    months: "months",
+    totalAmount: "Total amount",
+    requestCredit: "Apply for credit",
+    card: "Card",
+    cardNumber: "Card number",
+    expiry: "Expires",
+    debitCard: "Debit card",
+    zakat: "Calculate Zakat",
+    donation: "Donation",
+    savings: "Savings",
+  },
+  ar: {
+    nav: ["نظرة عامة", "الحسابات", "التحويلات", "الائتمان", "البطاقات", "المدخرات", "تبرع / زكاة", "المستندات", "KYC / الهوية", "الملف الشخصي"],
+    balance: "الرصيد",
+    hiddenBalance: "••••••",
+    myAccount: "حسابي",
+    recentTx: "آخر المعاملات",
+    noTx: "لا توجد معاملات",
+    sendMoney: "إرسال الأموال",
+    iban: "IBAN",
+    bic: "BIC",
+    status: "الحالة",
+    active: "نشط",
+    pending: "قيد المعالجة",
+    blocked: "محظور",
+    verified: "موثّق",
+    unverified: "غير موثّق",
+    rejected: "مرفوض",
+    logout: "تسجيل الخروج",
+    loading: "جارٍ التحميل…",
+    error: "خطأ في التحميل",
+    credit: "إيداع",
+    debit: "سحب",
+    transfer: "تحويل",
+    amount: "المبلغ",
+    date: "التاريخ",
+    submit: "إرسال",
+    cancel: "إلغاء",
+    save: "حفظ",
+    close: "إغلاق",
+    back: "رجوع",
+    next: "التالي",
+    confirm: "تأكيد",
+    seeAll: "عرض الكل",
+    documents: "المستندات",
+    myDocuments: "مستنداتي",
+    uploadDoc: "رفع مستند",
+    profile: "الملف الشخصي",
+    security: "الأمان",
+    kyc: "KYC / الهوية",
+    kycPending: "التحقق قيد الانتظار",
+    kycUpload: "رفع المستندات",
+    transferNew: "تحويل جديد",
+    transferHistory: "سجل التحويلات",
+    creditRequest: "طلب تمويل",
+    islamicCredit: "تمويل إسلامي (0%)",
+    standardCredit: "تمويل تقليدي (2%)",
+    monthly: "القسط الشهري",
+    duration: "المدة",
+    months: "أشهر",
+    totalAmount: "المبلغ الإجمالي",
+    requestCredit: "طلب تمويل",
+    card: "البطاقة",
+    cardNumber: "رقم البطاقة",
+    expiry: "تنتهي في",
+    debitCard: "بطاقة الخصم",
+    zakat: "احتساب الزكاة",
+    donation: "تبرع",
+    savings: "مدخرات",
+  },
+  tr: {
+    nav: ["Genel Bakış", "Hesaplar", "Transferler", "Kredi", "Kartlar", "Tasarruf", "Bağış / Zekat", "Belgeler", "KYC / Kimlik", "Profil"],
+    balance: "Bakiye",
+    hiddenBalance: "••••••",
+    myAccount: "Hesabım",
+    recentTx: "Son işlemler",
+    noTx: "İşlem yok",
+    sendMoney: "Para gönder",
+    iban: "IBAN",
+    bic: "BIC",
+    status: "Durum",
+    active: "Aktif",
+    pending: "Beklemede",
+    blocked: "Engelli",
+    verified: "Doğrulandı",
+    unverified: "Doğrulanmadı",
+    rejected: "Reddedildi",
+    logout: "Çıkış yap",
+    loading: "Yükleniyor…",
+    error: "Yükleme hatası",
+    credit: "Alacak",
+    debit: "Borç",
+    transfer: "Transfer",
+    amount: "Tutar",
+    date: "Tarih",
+    submit: "Gönder",
+    cancel: "İptal",
+    save: "Kaydet",
+    close: "Kapat",
+    back: "Geri",
+    next: "İleri",
+    confirm: "Onayla",
+    seeAll: "Tümünü gör",
+    documents: "Belgeler",
+    myDocuments: "Belgelerim",
+    uploadDoc: "Belge yükle",
+    profile: "Profil",
+    security: "Güvenlik",
+    kyc: "KYC / Kimlik",
+    kycPending: "Doğrulama beklemede",
+    kycUpload: "Belge yükle",
+    transferNew: "Yeni transfer",
+    transferHistory: "Transfer geçmişi",
+    creditRequest: "Kredi başvurusu",
+    islamicCredit: "İslami Kredi (0%)",
+    standardCredit: "Standart Kredi (2%)",
+    monthly: "Aylık ödeme",
+    duration: "Süre",
+    months: "ay",
+    totalAmount: "Toplam tutar",
+    requestCredit: "Kredi başvuru",
+    card: "Kart",
+    cardNumber: "Kart numarası",
+    expiry: "Son kullanım",
+    debitCard: "Banka kartı",
+    zakat: "Zekat hesapla",
+    donation: "Bağış",
+    savings: "Tasarruf",
+  },
+  es: {
+    nav: ["Resumen", "Cuentas", "Transferencias", "Crédito", "Tarjetas", "Ahorros", "Donación / Zakat", "Documentos", "KYC / Identidad", "Perfil"],
+    balance: "Saldo", myAccount: "Mi cuenta", recentTx: "Últimas transacciones", noTx: "Sin transacciones", sendMoney: "Enviar dinero", status: "Estado", active: "Activo", pending: "Pendiente", blocked: "Bloqueado", verified: "Verificado", unverified: "No verificado", rejected: "Rechazado", logout: "Cerrar sesión", loading: "Cargando…", error: "Error de carga", credit: "Crédito", debit: "Débito", transfer: "Transferencia", amount: "Importe", date: "Fecha", submit: "Enviar", cancel: "Cancelar", save: "Guardar", close: "Cerrar", back: "Atrás", next: "Siguiente", confirm: "Confirmar", seeAll: "Ver todo", documents: "Documentos", myDocuments: "Mis documentos", uploadDoc: "Subir documento", profile: "Perfil", security: "Seguridad", kyc: "KYC / Identidad", kycPending: "Verificación pendiente", kycUpload: "Subir documentos", transferNew: "Nueva transferencia", transferHistory: "Historial", creditRequest: "Solicitud de crédito", islamicCredit: "Crédito islámico (0%)", standardCredit: "Crédito estándar (2%)", monthly: "Cuota mensual", duration: "Duración", months: "meses", totalAmount: "Importe total", requestCredit: "Solicitar crédito", card: "Tarjeta", cardNumber: "Número de tarjeta", expiry: "Caduca", debitCard: "Tarjeta de débito", zakat: "Calcular Zakat", donation: "Donación", savings: "Ahorros", hiddenBalance: "••••••", iban: "IBAN", bic: "BIC",
+  },
+  it: {
+    nav: ["Panoramica", "Conti", "Bonifici", "Credito", "Carte", "Risparmio", "Donazione / Zakat", "Documenti", "KYC / Identità", "Profilo"],
+    balance: "Saldo", myAccount: "Il mio conto", recentTx: "Ultime transazioni", noTx: "Nessuna transazione", sendMoney: "Invia denaro", status: "Stato", active: "Attivo", pending: "In attesa", blocked: "Bloccato", verified: "Verificato", unverified: "Non verificato", rejected: "Rifiutato", logout: "Esci", loading: "Caricamento…", error: "Errore di caricamento", credit: "Accredito", debit: "Addebito", transfer: "Bonifico", amount: "Importo", date: "Data", submit: "Invia", cancel: "Annulla", save: "Salva", close: "Chiudi", back: "Indietro", next: "Avanti", confirm: "Conferma", seeAll: "Vedi tutto", documents: "Documenti", myDocuments: "I miei documenti", uploadDoc: "Carica documento", profile: "Profilo", security: "Sicurezza", kyc: "KYC / Identità", kycPending: "Verifica in attesa", kycUpload: "Carica documenti", transferNew: "Nuovo bonifico", transferHistory: "Cronologia", creditRequest: "Richiesta di credito", islamicCredit: "Credito islamico (0%)", standardCredit: "Credito standard (2%)", monthly: "Rata mensile", duration: "Durata", months: "mesi", totalAmount: "Importo totale", requestCredit: "Richiedi credito", card: "Carta", cardNumber: "Numero carta", expiry: "Scadenza", debitCard: "Carta di debito", zakat: "Calcola Zakat", donation: "Donazione", savings: "Risparmio", hiddenBalance: "••••••", iban: "IBAN", bic: "BIC",
+  },
+  pt: {
+    nav: ["Visão geral", "Contas", "Transferências", "Crédito", "Cartões", "Poupança", "Doação / Zakat", "Documentos", "KYC / Identidade", "Perfil"],
+    balance: "Saldo", myAccount: "Minha conta", recentTx: "Últimas transações", noTx: "Sem transações", sendMoney: "Enviar dinheiro", status: "Status", active: "Ativo", pending: "Pendente", blocked: "Bloqueado", verified: "Verificado", unverified: "Não verificado", rejected: "Rejeitado", logout: "Sair", loading: "Carregando…", error: "Erro de carregamento", credit: "Crédito", debit: "Débito", transfer: "Transferência", amount: "Valor", date: "Data", submit: "Enviar", cancel: "Cancelar", save: "Salvar", close: "Fechar", back: "Voltar", next: "Próximo", confirm: "Confirmar", seeAll: "Ver tudo", documents: "Documentos", myDocuments: "Meus documentos", uploadDoc: "Enviar documento", profile: "Perfil", security: "Segurança", kyc: "KYC / Identidade", kycPending: "Verificação pendente", kycUpload: "Enviar documentos", transferNew: "Nova transferência", transferHistory: "Histórico", creditRequest: "Pedido de crédito", islamicCredit: "Crédito islâmico (0%)", standardCredit: "Crédito padrão (2%)", monthly: "Prestação mensal", duration: "Duração", months: "meses", totalAmount: "Valor total", requestCredit: "Solicitar crédito", card: "Cartão", cardNumber: "Número do cartão", expiry: "Validade", debitCard: "Cartão de débito", zakat: "Calcular Zakat", donation: "Doação", savings: "Poupança", hiddenBalance: "••••••", iban: "IBAN", bic: "BIC",
+  },
+  nl: {
+    nav: ["Overzicht", "Rekeningen", "Overschrijvingen", "Krediet", "Kaarten", "Sparen", "Donatie / Zakat", "Documenten", "KYC / Identiteit", "Profiel"],
+    balance: "Saldo", myAccount: "Mijn rekening", recentTx: "Recente transacties", noTx: "Geen transacties", sendMoney: "Geld sturen", status: "Status", active: "Actief", pending: "In behandeling", blocked: "Geblokkeerd", verified: "Geverifieerd", unverified: "Niet geverifieerd", rejected: "Afgewezen", logout: "Afmelden", loading: "Laden…", error: "Laaderfout", credit: "Bijschrijving", debit: "Afschrijving", transfer: "Overschrijving", amount: "Bedrag", date: "Datum", submit: "Verzenden", cancel: "Annuleren", save: "Opslaan", close: "Sluiten", back: "Terug", next: "Volgende", confirm: "Bevestigen", seeAll: "Alles zien", documents: "Documenten", myDocuments: "Mijn documenten", uploadDoc: "Document uploaden", profile: "Profiel", security: "Beveiliging", kyc: "KYC / Identiteit", kycPending: "Verificatie in behandeling", kycUpload: "Documenten uploaden", transferNew: "Nieuwe overschrijving", transferHistory: "Geschiedenis", creditRequest: "Kredietaanvraag", islamicCredit: "Islamitisch krediet (0%)", standardCredit: "Standaard krediet (2%)", monthly: "Maandelijkse betaling", duration: "Looptijd", months: "maanden", totalAmount: "Totaalbedrag", requestCredit: "Krediet aanvragen", card: "Kaart", cardNumber: "Kaartnummer", expiry: "Vervalt", debitCard: "Betaalkaart", zakat: "Zakat berekenen", donation: "Donatie", savings: "Sparen", hiddenBalance: "••••••", iban: "IBAN", bic: "BIC",
+  },
+} as const;
+
+type DUI = typeof DASHBOARD_UI.de;
+
+function getDUI(lang: string): DUI {
+  return (DASHBOARD_UI as unknown as Record<string, DUI>)[lang] ?? DASHBOARD_UI.en ?? DASHBOARD_UI.de;
+}
 
 /* ── Types ── */
 type KtCard = { id: string; last4: string; expiry_month: number; expiry_year: number; type: string; status: string };
@@ -34,18 +355,20 @@ function fmtIbanMasked(iban: string) {
   return `${clean.slice(0, 4)} •••• •••• •••• ${clean.slice(-4)}`;
 }
 
-const NAV = [
-  { icon: LayoutDashboard, label: "Übersicht", id: "dashboard" },
-  { icon: Wallet, label: "Konten", id: "accounts" },
-  { icon: ArrowLeftRight, label: "Überweisungen", id: "transfers" },
-  { icon: Calculator, label: "Kredit", id: "credits" },
-  { icon: CreditCard, label: "Karten", id: "cards" },
-  { icon: PiggyBank, label: "Sparen", id: "savings" },
-  { icon: Heart, label: "Spende / Zakat", id: "zakat" },
-  { icon: FileText, label: "Dokumente", id: "docs" },
-  { icon: Shield, label: "KYC / Identität", id: "kyc" },
-  { icon: User, label: "Profil", id: "profile" },
-];
+function buildNav(ui: DUI) {
+  return [
+    { icon: LayoutDashboard, label: ui.nav[0], id: "dashboard" },
+    { icon: Wallet, label: ui.nav[1], id: "accounts" },
+    { icon: ArrowLeftRight, label: ui.nav[2], id: "transfers" },
+    { icon: Calculator, label: ui.nav[3], id: "credits" },
+    { icon: CreditCard, label: ui.nav[4], id: "cards" },
+    { icon: PiggyBank, label: ui.nav[5], id: "savings" },
+    { icon: Heart, label: ui.nav[6], id: "zakat" },
+    { icon: FileText, label: ui.nav[7], id: "docs" },
+    { icon: Shield, label: ui.nav[8], id: "kyc" },
+    { icon: User, label: ui.nav[9], id: "profile" },
+  ];
+}
 
 /* ── Sub-components ── */
 function TxIcon({ type }: { type: string }) {
@@ -1099,6 +1422,9 @@ function CreditPage({ token, profile, account }: { token: string; profile: Profi
 
 /* ── MAIN COMPONENT ── */
 export default function ClientDashboard() {
+  const { lang } = useLanguage();
+  const ui = getDUI(lang);
+  const nav = buildNav(ui);
   const [token, setToken] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -1192,7 +1518,7 @@ export default function ClientDashboard() {
               const s = profile.status;
               const kyc = profile.kyc_status;
               const dotColor = s === "active" ? "#4ADE80" : s === "suspended" ? "#F87171" : "#FBB824";
-              const label = s === "active" ? "Konto aktiv" : s === "suspended" ? "Konto gesperrt" : kyc === "pending" ? "KYC en attente" : "KYC à compléter";
+              const label = s === "active" ? ui.active : s === "suspended" ? ui.blocked : kyc === "pending" ? ui.kycPending : ui.kyc;
               return (
                 <div style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,0.06)", borderRadius: 20, padding: "3px 9px" }}>
                   <div style={{ width: 6, height: 6, borderRadius: "50%", background: dotColor }} />
@@ -1204,7 +1530,7 @@ export default function ClientDashboard() {
         )}
 
         <nav style={{ flex: 1, padding: "10px 8px", overflowY: "auto" }}>
-          {NAV.map(({ icon: Icon, label, id }) => (
+          {nav.map(({ icon: Icon, label, id }) => (
             <button key={id} onClick={() => { setActiveNav(id); if (mobile) setSidebarOpen(false); }}
               style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderRadius: 10, border: "none", background: activeNav === id ? "rgba(201,168,76,0.12)" : "transparent", color: activeNav === id ? "#C9A84C" : "rgba(255,255,255,0.5)", fontSize: "0.83rem", fontWeight: activeNav === id ? 600 : 400, cursor: "pointer", textAlign: "left", transition: "all 0.12s", borderLeft: `3px solid ${activeNav === id ? "#C9A84C" : "transparent"}`, marginBottom: 2 }}>
               <Icon size={16} />
@@ -1216,7 +1542,7 @@ export default function ClientDashboard() {
 
         <div style={{ padding: "10px 8px", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
           <button onClick={logout} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderRadius: 10, border: "none", background: "transparent", color: "rgba(255,255,255,0.35)", fontSize: "0.83rem", cursor: "pointer" }}>
-            <LogOut size={16} /> Abmelden
+            <LogOut size={16} /> {ui.logout}
           </button>
         </div>
       </div>
@@ -1254,10 +1580,10 @@ export default function ClientDashboard() {
               </div>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {[
-                  { icon: <Send size={14} />, label: "Überweisung", nav: "transfers" },
-                  { icon: <CreditCard size={14} />, label: "Karte", nav: "cards" },
-                  { icon: <Banknote size={14} />, label: "Konten", nav: "accounts" },
-                  { icon: <FileText size={14} />, label: "Dokumente", nav: "docs" },
+                  { icon: <Send size={14} />, label: ui.transfer, nav: "transfers" },
+                  { icon: <CreditCard size={14} />, label: ui.card, nav: "cards" },
+                  { icon: <Banknote size={14} />, label: ui.nav[1], nav: "accounts" },
+                  { icon: <FileText size={14} />, label: ui.documents, nav: "docs" },
                 ].map((a) => (
                   <button key={a.label} onClick={() => setActiveNav(a.nav)}
                     style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, color: "white", fontSize: "0.78rem", fontWeight: 500, cursor: "pointer" }}>
@@ -1349,12 +1675,12 @@ export default function ClientDashboard() {
 
         {/* Transactions + card side by side */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 20, alignItems: "start" }}>
-          <Panel title="Aktuelle Transaktionen" subtitle={`${transactions.length} Transaktion${transactions.length !== 1 ? "en" : ""}`}
-            action={<button onClick={() => setActiveNav("accounts")} style={{ display: "flex", alignItems: "center", gap: 5, background: "#F0FDF4", border: "none", borderRadius: 8, padding: "5px 11px", color: "#005F2D", fontWeight: 600, fontSize: "0.75rem", cursor: "pointer" }}>Alle anzeigen <ChevronRight size={12} /></button>}>
+          <Panel title={ui.recentTx} subtitle={`${transactions.length} Transaktion${transactions.length !== 1 ? "en" : ""}`}
+            action={<button onClick={() => setActiveNav("accounts")} style={{ display: "flex", alignItems: "center", gap: 5, background: "#F0FDF4", border: "none", borderRadius: 8, padding: "5px 11px", color: "#005F2D", fontWeight: 600, fontSize: "0.75rem", cursor: "pointer" }}>{ui.seeAll} <ChevronRight size={12} /></button>}>
             {loading ? [1,2,3,4].map((i) => <Skeleton key={i} />) : transactions.length === 0 ? (
               <div style={{ padding: "40px 22px", textAlign: "center" }}>
                 <ArrowLeftRight size={28} color="#CBD5E1" style={{ margin: "0 auto 12px" }} />
-                <p style={{ color: "#94A3B8", fontSize: "0.88rem", margin: "0 0 4px" }}>Keine Transaktionen</p>
+                <p style={{ color: "#94A3B8", fontSize: "0.88rem", margin: "0 0 4px" }}>{ui.noTx}</p>
                 <p style={{ color: "#CBD5E1", fontSize: "0.78rem", margin: 0 }}>Ihre Transaktionen erscheinen hier</p>
               </div>
             ) : transactions.slice(0, 7).map((tx) => (
@@ -1378,7 +1704,7 @@ export default function ClientDashboard() {
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {/* Card */}
             <div style={{ background: "white", borderRadius: 18, border: "1px solid #E9EEF4", padding: 20 }}>
-              <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.88rem", margin: "0 0 14px" }}>Meine Karte</p>
+              <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.88rem", margin: "0 0 14px" }}>{ui.card}</p>
               {mainCard ? (
                 <BankCard card={mainCard} holderName={holderName} balance={balance} />
               ) : (
@@ -1388,7 +1714,7 @@ export default function ClientDashboard() {
                 </div>
               )}
               <button onClick={() => setActiveNav("cards")} style={{ width: "100%", marginTop: 14, height: 38, background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 10, color: "#005F2D", fontWeight: 600, fontSize: "0.8rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-                <CreditCard size={14} /> Karten verwalten
+                <CreditCard size={14} /> {ui.card}
               </button>
             </div>
 
@@ -1413,7 +1739,7 @@ export default function ClientDashboard() {
   function AccountsPage() {
     return (
       <div style={{ padding: 24, maxWidth: 800 }}>
-        <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 20px" }}>Meine Konten</h2>
+        <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 20px" }}>{ui.myAccount}</h2>
         {accounts.map((acc) => (
           <div key={acc.id} style={{ background: "white", borderRadius: 18, border: "1px solid #E9EEF4", marginBottom: 16, overflow: "hidden" }}>
             <div style={{ background: "linear-gradient(135deg,#001A0D,#003319)", padding: "20px 24px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -1424,7 +1750,7 @@ export default function ClientDashboard() {
                 </p>
               </div>
               <span style={{ background: acc.status === "active" ? "rgba(74,222,128,0.15)" : "rgba(252,165,165,0.15)", color: acc.status === "active" ? "#4ADE80" : "#FCA5A5", fontSize: "0.72rem", fontWeight: 700, padding: "4px 10px", borderRadius: 20 }}>
-                {acc.status === "active" ? "Aktiv" : acc.status}
+                {acc.status === "active" ? ui.active : acc.status}
               </span>
             </div>
             <div>
@@ -1450,7 +1776,7 @@ export default function ClientDashboard() {
   function CardsPage() {
     return (
       <div style={{ padding: 24, maxWidth: 700 }}>
-        <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 20px" }}>Meine Karten</h2>
+        <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 20px" }}>{ui.debitCard}</h2>
         {accounts.flatMap((acc) => acc.kt_cards.map((card) => (
           <div key={card.id} style={{ background: "white", borderRadius: 18, border: "1px solid #E9EEF4", padding: 24, marginBottom: 16 }}>
             <div style={{ marginBottom: 20, display: "flex", justifyContent: "center" }}>
@@ -1464,7 +1790,7 @@ export default function ClientDashboard() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 22px" }}>
                 <span style={{ color: "#64748B", fontSize: "0.82rem" }}>Status</span>
                 <span style={{ background: card.status === "active" ? "#F0FDF4" : "#FEF2F2", color: card.status === "active" ? "#16A34A" : "#DC2626", fontSize: "0.75rem", fontWeight: 600, padding: "3px 10px", borderRadius: 20 }}>
-                  {card.status === "active" ? "Aktiv" : card.status}
+                  {card.status === "active" ? ui.active : card.status}
                 </span>
               </div>
             </div>
@@ -1637,7 +1963,7 @@ export default function ClientDashboard() {
     return (
       <div style={{ padding: 24, maxWidth: 800 }}>
         <div style={{ marginBottom: 24 }}>
-          <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: 0 }}>Dokumente</h2>
+          <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: 0 }}>{ui.documents}</h2>
           <p style={{ color: "#64748B", fontSize: "0.78rem", margin: "4px 0 0" }}>Von der Bank gesendete und eingereichte Dokumente</p>
         </div>
 
@@ -1777,7 +2103,7 @@ export default function ClientDashboard() {
   function ProfilePage() {
     return (
       <div style={{ padding: 24, maxWidth: 700 }}>
-        <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 20px" }}>Mein Profil</h2>
+        <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 20px" }}>{ui.profile}</h2>
         {loading || !profile ? <Skeleton /> : (
           <>
             <div style={{ background: "white", borderRadius: 18, border: "1px solid #E9EEF4", marginBottom: 16, overflow: "hidden" }}>
@@ -1851,7 +2177,7 @@ export default function ClientDashboard() {
               <Mail size={15} /> Kontaktieren
             </a>
             <button onClick={() => setShowIbanModal(false)} style={{ flex: 1, height: 44, background: "#F1F5F9", border: "none", borderRadius: 12, color: "#64748B", fontWeight: 600, fontSize: "0.85rem", cursor: "pointer" }}>
-              Schließen
+              {ui.close}
             </button>
           </div>
         </div>
@@ -1873,7 +2199,7 @@ export default function ClientDashboard() {
                 Ihre Anfrage für eine {cardTier === "premium" ? "Premium (500 €)" : "Standard (260 €)"}-Karte wurde eingereicht. Ein Berater wird sich innerhalb von 48 Stunden bei Ihnen melden.
               </p>
               <button onClick={() => { setShowCardRequest(false); setCardRequested(false); }} style={{ padding: "10px 28px", background: "#005F2D", border: "none", borderRadius: 12, color: "white", fontWeight: 700, fontSize: "0.88rem", cursor: "pointer" }}>
-                Schließen
+                {ui.close}
               </button>
             </div>
           ) : (
@@ -2013,7 +2339,7 @@ export default function ClientDashboard() {
               </a>
               <button onClick={logout}
                 style={{ height: 46, padding: "0 18px", background: "#F1F5F9", border: "none", borderRadius: 12, color: "#64748B", fontWeight: 600, fontSize: "0.85rem", cursor: "pointer" }}>
-                Abmelden
+                {ui.logout}
               </button>
             </div>
           </div>

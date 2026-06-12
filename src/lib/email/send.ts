@@ -17,7 +17,7 @@ import {
   adminKycSubmittedEmail,
 } from "./templates";
 
-type Lang = "de" | "fr";
+type Lang = "de" | "fr" | "en" | "ar" | "tr" | "es" | "it" | "pt" | "nl";
 
 // Lazy init — Resend is only instantiated at call time, not at build time
 function getResend() {
