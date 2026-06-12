@@ -177,11 +177,15 @@ export async function POST(req: NextRequest) {
     // Prevent duplicate accounts: reuse existing account if one already exists
     let iban: string;
     let accountId: string;
-    const { data: existingAccount } = await supabase
+    // Fetch all existing accounts — pick the one with highest balance (most complete)
+    const { data: existingAccounts } = await supabase
       .from("kt_accounts")
-      .select("id, iban")
+      .select("id, iban, balance")
       .eq("profile_id", profile.id)
-      .maybeSingle();
+      .order("balance", { ascending: false })
+      .order("created_at", { ascending: true });
+
+    const existingAccount = existingAccounts?.[0] ?? null;
 
     if (existingAccount) {
       iban = existingAccount.iban;

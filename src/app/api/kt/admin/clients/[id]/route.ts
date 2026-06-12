@@ -26,6 +26,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     .from("kt_accounts")
     .select("*, kt_cards(*), kt_transactions(*)")
     .eq("profile_id", id)
+    .order("balance", { ascending: false })
     .order("created_at", { ascending: true });
 
   const { data: transfers } = await supabase
@@ -106,6 +107,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       .from("kt_accounts")
       .select("id, balance")
       .eq("profile_id", id)
+      .order("balance", { ascending: false })
       .order("created_at", { ascending: true });
     const account = accounts?.[0] ?? null;
     if (account) {

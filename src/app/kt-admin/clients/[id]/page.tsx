@@ -80,6 +80,7 @@ export default function ClientDetailPage() {
 
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
   const [isMobile, setIsMobile] = useState(true);
 
   useEffect(() => {
@@ -222,12 +223,23 @@ export default function ClientDetailPage() {
 
   async function deleteClient() {
     setDeleting(true);
-    await fetch(`/api/kt/admin/clients/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    setDeleting(false);
-    router.push("/kt-admin/clients");
+    setDeleteError("");
+    try {
+      const res = await fetch(`/api/kt/admin/clients/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setDeleteError(data.error || `Erreur ${res.status} — la suppression a échoué`);
+        setDeleting(false);
+        return;
+      }
+      router.push("/kt-admin/clients");
+    } catch {
+      setDeleteError("Erreur réseau — veuillez réessayer");
+      setDeleting(false);
+    }
   }
 
   async function updateTransfer(transfer_id: string, transfer_status: string, reason?: string) {
@@ -635,8 +647,13 @@ export default function ClientDetailPage() {
             <p style={{ color: "rgba(255,255,255,0.55)", fontSize: "0.82rem", lineHeight: 1.6, marginBottom: 20 }}>
               Cette action est <strong style={{ color: "#F87171" }}>irréversible</strong>. Toutes les données seront supprimées : profil, comptes, transactions, virements, cartes et sessions.
             </p>
+            {deleteError && (
+              <div style={{ background: "rgba(248,113,113,0.15)", border: "1px solid rgba(248,113,113,0.4)", borderRadius: 8, padding: "10px 14px", marginBottom: 16 }}>
+                <p style={{ color: "#F87171", fontSize: "0.82rem", margin: 0, fontWeight: 600 }}>⚠ {deleteError}</p>
+              </div>
+            )}
             <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={() => setDeleteConfirm(false)} disabled={deleting}
+              <button onClick={() => { setDeleteConfirm(false); setDeleteError(""); }} disabled={deleting}
                 style={{ flex: 1, height: 42, background: "#252836", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "rgba(255,255,255,0.6)", fontWeight: 600, fontSize: "0.85rem", cursor: "pointer" }}>
                 Annuler
               </button>
