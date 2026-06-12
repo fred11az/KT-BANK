@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { LogIn, ArrowRight, ChevronLeft, Check, Plus, Trash2 } from "lucide-react";
 
@@ -155,6 +155,58 @@ export default function RegisterPage() {
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
   ];
+
+  // Restore saved progress on mount
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem("kt_reg");
+      if (!saved) return;
+      const s = JSON.parse(saved);
+      if (s.email) setEmail(s.email);
+      if (s.step && s.step !== 0 && s.step !== 1) setStep(s.step);
+      if (s.pays) setPays(s.pays);
+      if (s.dob) setDob(s.dob);
+      if (s.promo) setPromo(s.promo);
+      if (s.fatca !== undefined) setFatca(s.fatca);
+      if (s.prenom) setPrenom(s.prenom);
+      if (s.nom) setNom(s.nom);
+      if (s.sexe) setSexe(s.sexe);
+      if (s.situation) setSituation(s.situation);
+      if (s.paysNaissance) setPaysNaissance(s.paysNaissance);
+      if (s.villeNaissance) setVilleNaissance(s.villeNaissance);
+      if (s.nationalite) setNationalite(s.nationalite);
+      if (s.typeDoc) setTypeDoc(s.typeDoc);
+      if (s.autorite) setAutorite(s.autorite);
+      if (s.situationPro) setSituationPro(s.situationPro);
+      if (s.nomEmployeur) setNomEmployeur(s.nomEmployeur);
+      if (s.revenuMensuel) setRevenuMensuel(s.revenuMensuel);
+      if (s.adresse) setAdresse(s.adresse);
+      if (s.codePostal) setCodePostal(s.codePostal);
+      if (s.ville) setVille(s.ville);
+      if (s.aCredits !== undefined) setACredits(s.aCredits);
+      if (s.credits) setCredits(s.credits);
+      if (s.nbEnfants !== undefined) setNbEnfants(s.nbEnfants);
+      if (s.personnesCharge !== undefined) setPersonnesCharge(s.personnesCharge);
+      if (s.ayantsDroit) setAyantsDroit(s.ayantsDroit);
+      if (s.phone) setPhone(s.phone);
+    } catch { /* ignore */ }
+  }, []);
+
+  // Save progress to sessionStorage whenever key state changes
+  useEffect(() => {
+    if (step === "done") { sessionStorage.removeItem("kt_reg"); return; }
+    try {
+      sessionStorage.setItem("kt_reg", JSON.stringify({
+        step, email, pays, dob, promo, fatca,
+        prenom, nom, sexe, situation, paysNaissance, villeNaissance,
+        nationalite, typeDoc, autorite,
+        situationPro, nomEmployeur, revenuMensuel, adresse, codePostal, ville,
+        aCredits, credits, nbEnfants, personnesCharge, ayantsDroit, phone,
+      }));
+    } catch { /* ignore */ }
+  }, [step, email, pays, dob, promo, fatca, prenom, nom, sexe, situation, paysNaissance, villeNaissance,
+     nationalite, typeDoc, autorite, situationPro, nomEmployeur, revenuMensuel, adresse, codePostal, ville,
+     aCredits, credits, nbEnfants, personnesCharge, ayantsDroit, phone]);
 
   function startTimer() {
     setTimer(120);

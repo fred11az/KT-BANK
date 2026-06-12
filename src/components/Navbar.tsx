@@ -21,26 +21,78 @@ function Logo({ white }: { white?: boolean }) {
   );
 }
 
+const LANG_OPTIONS: { code: Lang; flag: string; label: string }[] = [
+  { code: "de", flag: "🇩🇪", label: "Deutsch" },
+  { code: "fr", flag: "🇫🇷", label: "Français" },
+  { code: "en", flag: "🇬🇧", label: "English" },
+  { code: "ar", flag: "🇸🇦", label: "العربية" },
+  { code: "tr", flag: "🇹🇷", label: "Türkçe" },
+  { code: "es", flag: "🇪🇸", label: "Español" },
+  { code: "it", flag: "🇮🇹", label: "Italiano" },
+  { code: "pt", flag: "🇵🇹", label: "Português" },
+  { code: "nl", flag: "🇳🇱", label: "Nederlands" },
+];
+
 function LangToggle({ compact }: { compact?: boolean }) {
   const { lang, setLang } = useLanguage();
-  const other: Lang = lang === "de" ? "fr" : "de";
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const current = LANG_OPTIONS.find((l) => l.code === lang) ?? LANG_OPTIONS[0];
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
   return (
-    <button
-      onClick={() => setLang(other)}
-      title={lang === "de" ? "Auf Französisch wechseln" : "Passer en allemand"}
-      style={{
-        display:"flex", alignItems:"center", gap:4, padding: compact ? "4px 8px" : "4px 10px",
-        borderRadius:999, border: compact ? "1px solid rgba(255,255,255,0.3)" : "1px solid #E5E7EB",
-        background: compact ? "rgba(255,255,255,0.12)" : "transparent",
-        cursor:"pointer", fontWeight:700, fontSize:"0.78rem",
-        color: compact ? "white" : "#005F2D",
-        letterSpacing:"0.04em",
-      }}
-    >
-      <span style={{ fontSize:"0.85rem" }}>{lang === "de" ? "🇩🇪" : "🇫🇷"}</span>
-      {lang.toUpperCase()}
-      <ChevronDown size={10}/>
-    </button>
+    <div ref={ref} style={{ position: "relative" }}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        style={{
+          display: "flex", alignItems: "center", gap: 4,
+          padding: compact ? "4px 8px" : "4px 10px",
+          borderRadius: 999,
+          border: compact ? "1px solid rgba(255,255,255,0.3)" : "1px solid #E5E7EB",
+          background: compact ? "rgba(255,255,255,0.12)" : "transparent",
+          cursor: "pointer", fontWeight: 700, fontSize: "0.78rem",
+          color: compact ? "white" : "#005F2D",
+          letterSpacing: "0.04em",
+        }}
+      >
+        <span style={{ fontSize: "0.85rem" }}>{current.flag}</span>
+        {current.code.toUpperCase()}
+        <ChevronDown size={10} style={{ transform: open ? "rotate(180deg)" : undefined, transition: "transform 0.15s" }} />
+      </button>
+      {open && (
+        <div style={{
+          position: "absolute", top: "calc(100% + 6px)", right: 0, zIndex: 9999,
+          background: "white", border: "1px solid #E5E7EB", borderRadius: 12,
+          boxShadow: "0 8px 32px rgba(0,0,0,0.12)", minWidth: 160, overflow: "hidden",
+        }}>
+          {LANG_OPTIONS.map((opt) => (
+            <button
+              key={opt.code}
+              onClick={() => { setLang(opt.code); setOpen(false); }}
+              style={{
+                display: "flex", alignItems: "center", gap: 10,
+                width: "100%", padding: "10px 16px", border: "none", textAlign: "left",
+                background: lang === opt.code ? "#f0fdf4" : "transparent",
+                color: lang === opt.code ? "#005F2D" : "#374151",
+                fontWeight: lang === opt.code ? 700 : 400,
+                fontSize: "0.87rem", cursor: "pointer",
+              }}
+            >
+              <span style={{ fontSize: "1rem" }}>{opt.flag}</span>
+              {opt.label}
+              {lang === opt.code && <span style={{ marginLeft: "auto", color: "#005F2D" }}>✓</span>}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

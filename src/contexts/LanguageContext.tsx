@@ -8,6 +8,8 @@ interface LanguageCtx {
   t: Translations;
 }
 
+const SUPPORTED: Lang[] = ["de", "fr", "en", "ar", "tr", "es", "it", "pt", "nl"];
+
 const LanguageContext = createContext<LanguageCtx>({
   lang: "de",
   setLang: () => {},
@@ -17,15 +19,17 @@ const LanguageContext = createContext<LanguageCtx>({
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("de");
 
-  // Hydrate from localStorage on mount
   useEffect(() => {
-    const stored = localStorage.getItem("kt_lang") as Lang | null;
-    if (stored === "de" || stored === "fr") setLangState(stored);
+    const stored = localStorage.getItem("kt_lang");
+    if (stored && SUPPORTED.includes(stored as Lang)) {
+      setLangState(stored as Lang);
+    }
   }, []);
 
-  // Update html lang attribute whenever language changes
   useEffect(() => {
     document.documentElement.lang = lang;
+    // RTL support for Arabic
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
   }, [lang]);
 
   function setLang(l: Lang) {
@@ -33,8 +37,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("kt_lang", l);
   }
 
+  const t = translations[lang] ?? translations.de;
+
   return (
-    <LanguageContext.Provider value={{ lang, setLang, t: translations[lang] }}>
+    <LanguageContext.Provider value={{ lang, setLang, t }}>
       {children}
     </LanguageContext.Provider>
   );

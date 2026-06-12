@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabase } from "@/lib/supabase";
+import { getSupabase, getSupabaseAdmin } from "@/lib/supabase";
 import {
   sendTransactionNotification, sendTransferStatus,
   sendKycApproved, sendAccountActivationRequired, sendKycRejected, sendAccountActivated,
@@ -100,20 +100,22 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   // Credit / debit balance
   if (body.credit_amount !== undefined) {
-    const { data: account } = await supabase
+    const adminDb = getSupabaseAdmin();
+    const { data: accounts } = await adminDb
       .from("kt_accounts")
       .select("id, balance")
       .eq("profile_id", id)
-      .single();
+      .order("created_at", { ascending: true });
+    const account = accounts?.[0] ?? null;
     if (account) {
       const delta = Number(body.credit_amount);
       const newBalance = Number(account.balance) + delta;
-      await supabase.from("kt_accounts").update({ balance: newBalance }).eq("id", account.id);
+      await adminDb.from("kt_accounts").update({ balance: newBalance }).eq("id", account.id);
 
       if (delta !== 0) {
         const txType = delta > 0 ? "credit" : "debit";
         const label = body.credit_label || (delta > 0 ? "Crédit administratif" : "Débit administratif");
-        await supabase.from("kt_transactions").insert({
+        await adminDb.from("kt_transactions").insert({
           account_id: account.id,
           type: txType,
           amount: Math.abs(delta),
@@ -143,7 +145,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           (profile?.status ?? "") !== "active" &&
           newBalance >= 250
         ) {
-          await supabase.from("kt_profiles").update({ status: "active" }).eq("id", id);
+          await adminDb.from("kt_profiles").update({ status: "active" }).eq("id", id);
           if (profile?.email) {
             await sendAccountActivated(profile.email, {
               prenom: profile.prenom ?? "Client",
@@ -233,9 +235,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   const { id } = await params;
-  const supabase = getSupabase();
+  const adminDb = getSupabaseAdmin();
 
-  const { data: accounts } = await supabase
+  const { data: accounts } = await adminDb
     .from("kt_accounts")
     .select("id")
     .eq("profile_id", id);
@@ -243,19 +245,25 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   const accountIds = (accounts ?? []).map((a: { id: string }) => a.id);
 
   if (accountIds.length > 0) {
-    await supabase.from("kt_transfer_requests").delete().in("account_id", accountIds);
-    await supabase.from("kt_transactions").delete().in("account_id", accountIds);
-    await supabase.from("kt_cards").delete().in("account_id", accountIds);
+    await adminDb.from("kt_transfer_requests").delete().in("account_id", accountIds);
+    await adminDb.from("kt_transactions").delete().in("account_id", accountIds);
+    await adminDb.from("kt_cards").delete().in("account_id", accountIds);
   }
-  await supabase.from("kt_transfer_requests").delete().eq("profile_id", id);
-  await supabase.from("kt_accounts").delete().eq("profile_id", id);
 
-  const { data: profileRow } = await supabase.from("kt_profiles").select("email").eq("id", id).single();
+  // Clean up all profile-related data
+  await adminDb.from("kt_transfer_requests").delete().eq("profile_id", id);
+  await adminDb.from("kt_credit_requests").delete().eq("profile_id", id);
+  await adminDb.from("kt_kyc_documents").delete().eq("profile_id", id);
+  await adminDb.from("kt_documents").delete().eq("client_id", id);
+  await adminDb.from("kt_client_submissions").delete().eq("profile_id", id);
+  await adminDb.from("kt_accounts").delete().eq("profile_id", id);
+
+  const { data: profileRow } = await adminDb.from("kt_profiles").select("email").eq("id", id).single();
   if (profileRow?.email) {
-    await supabase.from("kt_sessions").delete().eq("email", profileRow.email);
+    await adminDb.from("kt_sessions").delete().eq("email", profileRow.email);
   }
 
-  const { error } = await supabase.from("kt_profiles").delete().eq("id", id);
+  const { error } = await adminDb.from("kt_profiles").delete().eq("id", id);
   if (error) return NextResponse.json({ error: "Erreur suppression" }, { status: 500 });
 
   return NextResponse.json({ ok: true });

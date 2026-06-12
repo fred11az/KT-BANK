@@ -22,14 +22,19 @@ function sanitize(html: string): string {
   if (typeof window === "undefined" || !html) return "";
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const DOMPurify = require("dompurify");
-  return DOMPurify.sanitize(html, {
+  // Replace CID references (inline email attachments) with a placeholder
+  const cleaned = html.replace(/src="cid:[^"]*"/gi, 'src="" alt="[image attachment]"');
+  const result = DOMPurify.sanitize(cleaned, {
     ALLOWED_TAGS: [
       "p","br","b","strong","i","em","u","s","del","h1","h2","h3","h4",
-      "ul","ol","li","a","img","span","div","blockquote","pre","code","hr",
+      "ul","ol","li","a","img","span","div","blockquote","pre","code","hr","table","tbody","tr","td","th","thead",
     ],
-    ALLOWED_ATTR: ["href","src","alt","style","target","rel","class"],
+    ALLOWED_ATTR: ["href","src","alt","style","target","rel","class","width","height","border","cellpadding","cellspacing"],
     ALLOW_DATA_ATTR: false,
+    // Allow data: URIs for images (base64 embedded images from email clients)
+    ADD_DATA_URI_TAGS: ["img"],
   });
+  return result;
 }
 
 /* ── Custom TipTap CTA Button Node ── */
@@ -208,7 +213,8 @@ function Toolbar({
   /* Close all dropdowns when clicking/touching outside the toolbar */
   useEffect(() => {
     function close(e: MouseEvent | TouchEvent) {
-      if (toolbarRef.current && !toolbarRef.current.contains(e.target as Node)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (toolbarRef.current && !toolbarRef.current.contains(e.target as any)) {
         setShowColors(false); setShowHighlights(false);
         setShowLink(false); setShowCTA(false); setShowPasteHtml(false);
       }
@@ -239,7 +245,7 @@ function Toolbar({
   }
 
   function applyLink() {
-    if (linkUrl) editor.chain().focus().extendMarkToNextNewline().setLink({ href: linkUrl, target: "_blank" }).run();
+    if (linkUrl) editor.chain().focus().setLink({ href: linkUrl, target: "_blank" }).run();
     else editor.chain().focus().unsetLink().run();
     setShowLink(false); setLinkUrl("");
   }

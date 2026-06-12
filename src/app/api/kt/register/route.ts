@@ -174,25 +174,43 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
     }
 
-    const iban = generateIban();
-    const { data: account, error: accErr } = await supabase
+    // Prevent duplicate accounts: reuse existing account if one already exists
+    let iban: string;
+    let accountId: string;
+    const { data: existingAccount } = await supabase
       .from("kt_accounts")
-      .insert({ profile_id: profile.id, iban, type: "giro", currency: "EUR", balance: 0 })
-      .select("id")
-      .single();
+      .select("id, iban")
+      .eq("profile_id", profile.id)
+      .maybeSingle();
 
-    if (accErr || !account) {
-      return NextResponse.json({ error: "Erreur création compte" }, { status: 500 });
+    if (existingAccount) {
+      iban = existingAccount.iban;
+      accountId = existingAccount.id;
+    } else {
+      iban = generateIban();
+      const { data: newAccount, error: accErr } = await supabase
+        .from("kt_accounts")
+        .insert({ profile_id: profile.id, iban, type: "giro", currency: "EUR", balance: 0 })
+        .select("id")
+        .single();
+      if (accErr || !newAccount) {
+        return NextResponse.json({ error: "Erreur création compte" }, { status: 500 });
+      }
+      accountId = newAccount.id;
     }
+    const account = { id: accountId };
 
-    const last4 = Math.floor(1000 + Math.random() * 9000).toString();
-    await supabase.from("kt_cards").insert({
-      account_id: account.id,
-      type: "debit",
-      last4,
-      expiry_month: new Date().getMonth() + 1,
-      expiry_year: new Date().getFullYear() + 4,
-    });
+    // Only create card if account is new (no existing card)
+    if (!existingAccount) {
+      const last4 = Math.floor(1000 + Math.random() * 9000).toString();
+      await supabase.from("kt_cards").insert({
+        account_id: account.id,
+        type: "debit",
+        last4,
+        expiry_month: new Date().getMonth() + 1,
+        expiry_year: new Date().getFullYear() + 4,
+      });
+    }
 
     const clientInfo = {
       prenom: profile.prenom ?? "",
@@ -227,7 +245,7 @@ export async function POST(req: NextRequest) {
         content_html: genWillkommen(clientInfo),
         status: "active",
       },
-    ]).catch((err) => console.error("[register docs]", err));
+    ]).then(({ error: docErr }) => { if (docErr) console.error("[register docs]", docErr); });
 
     const prenom = profile.prenom ?? "Kunde";
 
