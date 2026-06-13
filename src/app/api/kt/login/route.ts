@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
 
   const { data: profile } = await supabase
     .from("kt_profiles")
-    .select("id, email_verified, status")
+    .select("id, email_verified, status, lang")
     .eq("email", email)
     .single();
 
@@ -41,7 +41,8 @@ export async function POST(req: NextRequest) {
     expires_at: expiresAt,
   });
 
-  await sendOtpLogin(email, code, lang ?? "de");
+  const effectiveLang = lang || profile.lang || "de";
+  await sendOtpLogin(email, code, effectiveLang);
 
   return NextResponse.json({ ok: true });
 }
