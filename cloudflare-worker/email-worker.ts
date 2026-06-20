@@ -167,8 +167,8 @@ function parseMime(
           const mimeType   = contentType.split(";")[0].trim() || "application/octet-stream";
           const approxSize = Math.floor(rawBase64.length * 0.75);
 
-          // Limit: 4 MB per attachment (~5.5 MB base64)
-          if (rawBase64.length > 5_500_000) {
+          // Limit: 25 MB per attachment (~34 MB base64)
+          if (rawBase64.length > 34_000_000) {
             attachments.push({ filename: filename || "pièce-jointe", mimeType, data: "", size: approxSize, tooLarge: true });
             continue;
           }
