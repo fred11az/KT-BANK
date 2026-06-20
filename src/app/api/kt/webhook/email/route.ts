@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { from, to, subject, bodyText, bodyHtml, messageId, inReplyTo } = body;
+  const { from, to, subject, bodyText, bodyHtml, messageId, inReplyTo, attachments } = body;
   if (!from || !subject) return NextResponse.json({ error: "Données manquantes" }, { status: 400 });
 
   // Ignore Resend system emails (bounce/delivery notifications from send.kt-bank-ag.com)
@@ -50,8 +50,12 @@ export async function POST(req: NextRequest) {
     if (existing) return NextResponse.json({ ok: true, duplicate: true });
   }
 
-  // Resolve body text
-  const resolvedBody = bodyText?.trim() || (bodyHtml ? stripHtml(bodyHtml) : "");
+  // Resolve body text — append file attachments as a marker so the inbox UI can display them
+  const fileAttachments = Array.isArray(attachments) ? attachments.filter((a: { cid?: string }) => !a.cid) : [];
+  const baseText = bodyText?.trim() || (bodyHtml ? stripHtml(bodyHtml) : "");
+  const resolvedBody = fileAttachments.length > 0
+    ? `${baseText}\n###KT_ATTACHMENTS###${JSON.stringify(fileAttachments)}`
+    : baseText;
 
   // Find existing thread via In-Reply-To or by client email + subject
   let threadId: string | null = null;

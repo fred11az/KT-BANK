@@ -17,24 +17,79 @@ import Link from "@tiptap/extension-link";
 import ImageExt from "@tiptap/extension-image";
 import { Node, mergeAttributes } from "@tiptap/core";
 
+/* ── Attachment type ── */
+type EmailAttachment = {
+  filename: string;
+  mimeType: string;
+  cid?: string;
+  data: string;   // base64
+  size: number;   // approximate bytes
+  tooLarge?: boolean;
+};
+
+/* ── Parse file attachments embedded in body_text by the webhook ── */
+function parseAttachments(bodyText: string): EmailAttachment[] {
+  const marker = "###KT_ATTACHMENTS###";
+  const idx = bodyText.indexOf(marker);
+  if (idx === -1) return [];
+  try {
+    return JSON.parse(bodyText.slice(idx + marker.length));
+  } catch { return []; }
+}
+
 /* ── DOMPurify (client-side only) ── */
 function sanitize(html: string): string {
   if (typeof window === "undefined" || !html) return "";
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const DOMPurify = require("dompurify");
-  // Replace CID references (inline email attachments) with a placeholder
-  const cleaned = html.replace(/src="cid:[^"]*"/gi, 'src="" alt="[image attachment]"');
-  const result = DOMPurify.sanitize(cleaned, {
+  // DO NOT strip cid: — the worker now replaces them with data URIs before storing
+  const result = DOMPurify.sanitize(html, {
     ALLOWED_TAGS: [
       "p","br","b","strong","i","em","u","s","del","h1","h2","h3","h4",
       "ul","ol","li","a","img","span","div","blockquote","pre","code","hr","table","tbody","tr","td","th","thead",
     ],
     ALLOWED_ATTR: ["href","src","alt","style","target","rel","class","width","height","border","cellpadding","cellspacing"],
     ALLOW_DATA_ATTR: false,
-    // Allow data: URIs for images (base64 embedded images from email clients)
     ADD_DATA_URI_TAGS: ["img"],
+    FORCE_BODY: false,
   });
   return result;
+}
+
+/* ── Download a base64 attachment in the browser ── */
+function downloadAttachment(att: EmailAttachment) {
+  if (!att.data) return;
+  try {
+    const bytes = atob(att.data);
+    const arr = new Uint8Array(bytes.length);
+    for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+    const blob = new Blob([arr], { type: att.mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = att.filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (e) { console.error("Download error:", e); }
+}
+
+/* ── Format file size ── */
+function fmtSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} o`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} Ko`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
+}
+
+/* ── File icon by MIME type ── */
+function fileIcon(mimeType: string): string {
+  if (mimeType.startsWith("image/")) return "🖼";
+  if (mimeType === "application/pdf") return "📄";
+  if (mimeType.includes("word") || mimeType.includes("document")) return "📝";
+  if (mimeType.includes("sheet") || mimeType.includes("excel")) return "📊";
+  if (mimeType.includes("zip") || mimeType.includes("rar") || mimeType.includes("7z")) return "🗜";
+  return "📎";
 }
 
 /* ── Custom TipTap CTA Button Node ── */
@@ -102,6 +157,11 @@ function MessageContent({ msg }: { msg: Message }) {
     else setSafe("");
   }, [html]);
 
+  // Extract file attachments encoded in body_text by the webhook
+  const attachments = parseAttachments(msg.body_text || "");
+  // Display text without the attachment marker
+  const displayText = (msg.body_text || "").split("###KT_ATTACHMENTS###")[0];
+
   const isOut = msg.direction === "outbound";
   const baseStyle: React.CSSProperties = {
     fontSize: "0.87rem",
@@ -110,42 +170,82 @@ function MessageContent({ msg }: { msg: Message }) {
     wordBreak: "break-word",
   };
 
-  if (safe) {
-    return (
-      <>
-        <style>{`
-          .msg-rich a { color:${isOut ? "#86EFAC" : "#4CAF82"}; text-decoration:underline; }
-          .msg-rich a[data-cta] {
-            display:inline-block; padding:10px 22px; background:${isOut ? "rgba(255,255,255,0.15)" : "#005F2D"};
-            color:white; border-radius:6px; font-weight:700; font-size:13px;
-            text-decoration:none; border:1px solid rgba(255,255,255,0.3);
-          }
-          .msg-rich h1,.msg-rich h2,.msg-rich h3 { color:white; margin:10px 0 6px; }
-          .msg-rich h1 { font-size:1.2rem; } .msg-rich h2 { font-size:1.05rem; } .msg-rich h3 { font-size:0.95rem; }
-          .msg-rich p { margin:0 0 6px; }
-          .msg-rich ul,.msg-rich ol { margin:4px 0; padding-left:20px; }
-          .msg-rich li { margin-bottom:2px; }
-          .msg-rich img { max-width:100%; border-radius:6px; display:block; margin:6px 0; }
-          .msg-rich strong { font-weight:700; }
-          .msg-rich em { font-style:italic; }
-          .msg-rich u { text-decoration:underline; }
-          .msg-rich s { text-decoration:line-through; }
-          .msg-rich mark { background:rgba(255,235,59,0.35); padding:0 3px; border-radius:2px; }
-          .msg-rich blockquote { border-left:3px solid rgba(255,255,255,0.2); margin:6px 0; padding:4px 12px; opacity:0.8; }
-        `}</style>
-        <div
-          className="msg-rich"
-          style={baseStyle}
-          dangerouslySetInnerHTML={{ __html: safe }}
-        />
-      </>
-    );
-  }
-
   return (
-    <p style={{ ...baseStyle, whiteSpace: "pre-wrap", margin: 0 }}>
-      {msg.body_text}
-    </p>
+    <>
+      {/* ── Main message body ── */}
+      {safe ? (
+        <>
+          <style>{`
+            .msg-rich a { color:${isOut ? "#86EFAC" : "#4CAF82"}; text-decoration:underline; }
+            .msg-rich a[data-cta] {
+              display:inline-block; padding:10px 22px; background:${isOut ? "rgba(255,255,255,0.15)" : "#005F2D"};
+              color:white; border-radius:6px; font-weight:700; font-size:13px;
+              text-decoration:none; border:1px solid rgba(255,255,255,0.3);
+            }
+            .msg-rich h1,.msg-rich h2,.msg-rich h3 { color:white; margin:10px 0 6px; }
+            .msg-rich h1 { font-size:1.2rem; } .msg-rich h2 { font-size:1.05rem; } .msg-rich h3 { font-size:0.95rem; }
+            .msg-rich p { margin:0 0 6px; }
+            .msg-rich ul,.msg-rich ol { margin:4px 0; padding-left:20px; }
+            .msg-rich li { margin-bottom:2px; }
+            .msg-rich img { max-width:100%; border-radius:6px; display:block; margin:6px 0; cursor:pointer; }
+            .msg-rich strong { font-weight:700; }
+            .msg-rich em { font-style:italic; }
+            .msg-rich u { text-decoration:underline; }
+            .msg-rich s { text-decoration:line-through; }
+            .msg-rich mark { background:rgba(255,235,59,0.35); padding:0 3px; border-radius:2px; }
+            .msg-rich blockquote { border-left:3px solid rgba(255,255,255,0.2); margin:6px 0; padding:4px 12px; opacity:0.8; }
+          `}</style>
+          <div
+            className="msg-rich"
+            style={baseStyle}
+            dangerouslySetInnerHTML={{ __html: safe }}
+          />
+        </>
+      ) : (
+        <p style={{ ...baseStyle, whiteSpace: "pre-wrap", margin: 0 }}>
+          {displayText}
+        </p>
+      )}
+
+      {/* ── File attachments ── */}
+      {attachments.length > 0 && (
+        <div style={{ marginTop: 10, borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
+          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.7rem", margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            Pièces jointes ({attachments.length})
+          </p>
+          {attachments.map((att, i) => (
+            <div key={i} style={{
+              display: "flex", alignItems: "center", gap: 10,
+              background: "rgba(255,255,255,0.06)", borderRadius: 10,
+              padding: "8px 12px",
+            }}>
+              <span style={{ fontSize: "1.1rem" }}>{fileIcon(att.mimeType)}</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ color: "white", fontSize: "0.8rem", fontWeight: 600, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {att.filename}
+                </p>
+                <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.7rem", margin: 0 }}>
+                  {att.tooLarge ? "Fichier trop volumineux (> 4 Mo)" : fmtSize(att.size)}
+                </p>
+              </div>
+              {att.data && !att.tooLarge && (
+                <button
+                  type="button"
+                  onClick={() => downloadAttachment(att)}
+                  style={{
+                    background: "#005F2D", border: "none", borderRadius: 8,
+                    color: "white", fontSize: "0.72rem", fontWeight: 700,
+                    padding: "5px 10px", cursor: "pointer", flexShrink: 0,
+                  }}
+                >
+                  ↓ Télécharger
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </>
   );
 }
 
