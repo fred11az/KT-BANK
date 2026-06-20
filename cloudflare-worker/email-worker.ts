@@ -32,9 +32,27 @@ interface Attachment {
   filename: string;
   mimeType: string;
   cid?: string;
-  data: string;     // base64-encoded content (vide si tooLarge)
-  size: number;     // octets approximatifs
+  data: string;
+  size: number;
   tooLarge?: boolean;
+}
+
+// Decode RFC 2047 encoded email headers (e.g. =?UTF-8?Q?...?= or =?UTF-8?B?...?=)
+function decodeRfc2047(str: string): string {
+  if (!str) return str;
+  return str.replace(/=\?([^?]+)\?([BbQq])\?([^?=]*)\?=/g, (match, charset: string, encoding: string, text: string) => {
+    try {
+      if (encoding.toUpperCase() === "Q") {
+        const unescaped = text.replace(/_/g, " ").replace(/=([0-9A-Fa-f]{2})/g, (_: string, h: string) => String.fromCharCode(parseInt(h, 16)));
+        return new TextDecoder(charset.toLowerCase()).decode(new Uint8Array([...unescaped].map((c: string) => c.charCodeAt(0))));
+      } else {
+        const bin = atob(text.replace(/\s+/g, ""));
+        return new TextDecoder(charset.toLowerCase()).decode(new Uint8Array([...bin].map((c: string) => c.charCodeAt(0))));
+      }
+    } catch {
+      return match;
+    }
+  });
 }
 
 function decodeQuotedPrintable(input: string): string {
@@ -56,10 +74,12 @@ function decodeBase64Safe(input: string): string {
   }
 }
 
+// Parse MIME email. CID images are stored in cidMap (not embedded in bodyHtml).
+// bodyHtml is returned raw (with original cid: refs) to keep the webhook payload small.
 function parseMime(
   raw: string,
   depth = 0,
-): { bodyText: string; bodyHtml: string; attachments: Attachment[]; cidMap: Map<string, string> } {
+): { bodyText: string; bodyHtml: string; attachments: Attachment[]; cidMap: Map<string, { data: string; mimeType: string }> } {
   if (depth > 5) return { bodyText: "", bodyHtml: "", attachments: [], cidMap: new Map() };
 
   try {
@@ -68,7 +88,7 @@ function parseMime(
     let bodyText = "";
     let bodyHtml = "";
     const attachments: Attachment[] = [];
-    const cidMap = new Map<string, string>(); // cid → data URI
+    const cidMap = new Map<string, { data: string; mimeType: string }>();
 
     const boundaryMatch = text.match(
       /Content-Type:\s*multipart\/[^;\n]+;\s*(?:[^;\n]+;\s*)*boundary=["']?([^"'\n\s;]+)["']?/im,
@@ -93,9 +113,9 @@ function parseMime(
         const headers = part.slice(0, divider);
         const body = part.slice(divider + 2);
 
-        const ctMatch  = headers.match(/Content-Type:\s*([^\n;]+)/i);
-        const ceMatch  = headers.match(/Content-Transfer-Encoding:\s*(\S+)/i);
-        const cidMatch = headers.match(/Content-ID:\s*<?([^>\n\s]+)>?/i);
+        const ctMatch   = headers.match(/Content-Type:\s*([^\n;]+)/i);
+        const ceMatch   = headers.match(/Content-Transfer-Encoding:\s*(\S+)/i);
+        const cidMatch  = headers.match(/Content-ID:\s*<?([^>\n\s]+)>?/i);
         const dispMatch = headers.match(/Content-Disposition:\s*([^;\n]+)/i);
         const nameMatch = headers.match(/(?:filename\*?|name)=["']?([^"'\n;]+)["']?/i);
 
@@ -133,7 +153,6 @@ function parseMime(
           contentType.startsWith("video/") ||
           contentType.startsWith("audio/")
         ) {
-          // Pièce jointe ou image inline
           let rawBase64 = "";
           if (encoding === "base64") {
             rawBase64 = body.replace(/\s+/g, "");
@@ -148,31 +167,21 @@ function parseMime(
           const mimeType   = contentType.split(";")[0].trim() || "application/octet-stream";
           const approxSize = Math.floor(rawBase64.length * 0.75);
 
-          // Limite : 4 Mo par pièce jointe (~5,5 Mo base64)
+          // Limit: 4 MB per attachment (~5.5 MB base64)
           if (rawBase64.length > 5_500_000) {
-            if (!cid) {
-              attachments.push({
-                filename: filename || "pièce-jointe",
-                mimeType, data: "", size: approxSize, tooLarge: true,
-              });
-            }
+            attachments.push({ filename: filename || "pièce-jointe", mimeType, data: "", size: approxSize, tooLarge: true });
             continue;
           }
 
           if (cid) {
-            // Image inline → stocke dans cidMap pour remplacement dans le HTML
-            cidMap.set(cid, `data:${mimeType};base64,${rawBase64}`);
+            // Inline image — store in cidMap, will be sent as attachment to Gmail
+            cidMap.set(cid, { data: rawBase64, mimeType });
           } else {
-            // Fichier joint classique
-            attachments.push({
-              filename: filename || "pièce-jointe",
-              mimeType, data: rawBase64, size: approxSize,
-            });
+            attachments.push({ filename: filename || "pièce-jointe", mimeType, data: rawBase64, size: approxSize });
           }
         }
       }
     } else {
-      // Email simple sans multipart
       const split = text.indexOf("\n\n");
       if (split !== -1) {
         const headers = text.slice(0, split);
@@ -185,24 +194,16 @@ function parseMime(
       }
     }
 
-    // Remplace les références CID dans le HTML par des data URIs
-    if (bodyHtml && cidMap.size > 0) {
-      cidMap.forEach((dataUri, cid) => {
-        const escapedCid = cid.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-        bodyHtml = bodyHtml.replace(
-          new RegExp(`cid:<?${escapedCid}>?`, "gi"),
-          dataUri,
-        );
-      });
-    }
-
     return { bodyText, bodyHtml, attachments, cidMap };
   } catch {
     return { bodyText: "", bodyHtml: "", attachments: [], cidMap: new Map() };
   }
 }
 
-/* ── Forward vers Gmail via Resend (avec images et fichiers) ── */
+/* ── Forward vers Gmail via Resend ──
+ * Images inline et fichiers joints sont envoyés comme pièces jointes classiques.
+ * Gmail bloque les data URIs dans le HTML, donc on n'intègre rien dans le body.
+ */
 async function forwardViaResend(
   env: Env,
   from: string,
@@ -210,10 +211,10 @@ async function forwardViaResend(
   bodyHtml: string,
   bodyText: string,
   attachments: Attachment[],
+  cidMap: Map<string, { data: string; mimeType: string }>,
 ): Promise<void> {
   if (!env.RESEND_API_KEY) return;
 
-  // En-tête d'information sur l'expéditeur original
   const header = `
     <div style="background:#f4f4f4;border-left:4px solid #005F2D;padding:12px 16px;
                 margin-bottom:20px;border-radius:4px;font-family:sans-serif;font-size:13px;color:#333;">
@@ -223,14 +224,31 @@ async function forwardViaResend(
     </div>
   `;
 
-  const htmlBody = bodyHtml
-    ? `${header}${bodyHtml}`
+  // Clean bodyHtml: remove unresolvable cid: src refs
+  const cleanHtml = bodyHtml
+    ? bodyHtml.replace(/src=["']cid:[^"']*["']/gi, 'src=""')
+    : "";
+
+  const htmlBody = cleanHtml
+    ? `${header}${cleanHtml}`
     : `${header}<pre style="font-family:sans-serif;font-size:14px;white-space:pre-wrap;">${bodyText}</pre>`;
 
-  // Fichiers joints pour Resend (seulement ceux avec data, non-CID)
-  const resendAttachments = attachments
-    .filter(a => !a.cid && a.data && !a.tooLarge)
-    .map(a => ({ filename: a.filename, content: a.data }));
+  // Collect all attachments for Gmail:
+  // 1) Inline CID images → send as regular attachments
+  // 2) Regular file attachments
+  const resendAttachments: { filename: string; content: string }[] = [];
+
+  let imgIndex = 1;
+  cidMap.forEach(({ data, mimeType }, _cid) => {
+    const ext = mimeType.split("/")[1]?.replace(/[^a-z0-9]/g, "") || "jpg";
+    resendAttachments.push({ filename: `image-${imgIndex++}.${ext}`, content: data });
+  });
+
+  for (const a of attachments) {
+    if (a.data && !a.tooLarge) {
+      resendAttachments.push({ filename: a.filename, content: a.data });
+    }
+  }
 
   await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -250,16 +268,18 @@ async function forwardViaResend(
 
 export default {
   async email(message: EmailMessage, env: Env, _ctx: ExecutionContext) {
-    const from      = message.from ?? "";
-    const to        = message.to ?? "";
-    const subject   = message.headers.get("subject") ?? "(sans objet)";
-    const messageId = message.headers.get("message-id") ?? undefined;
-    const inReplyTo = message.headers.get("in-reply-to") ?? undefined;
+    const from       = message.from ?? "";
+    const to         = message.to ?? "";
+    // Decode RFC 2047 encoded subject (e.g. =?UTF-8?Q?...?=)
+    const subject    = decodeRfc2047(message.headers.get("subject") ?? "(sans objet)");
+    const messageId  = message.headers.get("message-id") ?? undefined;
+    const inReplyTo  = message.headers.get("in-reply-to") ?? undefined;
     const references = message.headers.get("references") ?? undefined;
 
     let bodyText  = "";
     let bodyHtml  = "";
     let attachments: Attachment[] = [];
+    let cidMap = new Map<string, { data: string; mimeType: string }>();
 
     try {
       const reader  = message.raw.getReader();
@@ -273,20 +293,22 @@ export default {
       const raw    = chunks.join("");
       const parsed = parseMime(raw);
       bodyText     = parsed.bodyText;
-      bodyHtml     = parsed.bodyHtml;
+      bodyHtml     = parsed.bodyHtml;   // raw HTML — no embedded data URIs
       attachments  = parsed.attachments;
+      cidMap       = parsed.cidMap;
     } catch (err) {
       console.error("[KT Email Worker] MIME parse error:", err);
     }
 
-    // ── 1. Forward vers Gmail via Resend (avec images + fichiers) ──
+    // ── 1. Forward vers Gmail via Resend (images + fichiers en pièces jointes) ──
     try {
-      await forwardViaResend(env, from, subject, bodyHtml, bodyText, attachments);
+      await forwardViaResend(env, from, subject, bodyHtml, bodyText, attachments, cidMap);
     } catch (err) {
       console.error("[KT Email Worker] Resend forward failed:", err);
     }
 
     // ── 2. Webhook → base de données KT Bank ──
+    // bodyHtml is raw (no data URIs) — payload stays small and fits Vercel's body limit
     try {
       const webhookUrl = env.WEBHOOK_URL;
       const secret     = env.WEBHOOK_SECRET ?? "";
