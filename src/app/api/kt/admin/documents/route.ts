@@ -4,6 +4,8 @@ import {
   genKontoeröffnung, genWillkommen, genKreditvertrag, genTilgungsplan,
   genAGB, genDatenschutz, genCustom, type DocType,
 } from "@/lib/document-templates";
+import type { SignatureOptions } from "@/lib/document-templates";
+import { sendDocumentToClient } from "@/lib/email/send";
 
 function auth(req: NextRequest) {
   const key = process.env.KT_ADMIN_KEY;
@@ -39,13 +41,14 @@ export async function POST(req: NextRequest) {
   if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
 
   const body = await req.json();
-  const { client_id, type, title, description, loan, body_html } = body as {
+  const { client_id, type, title, description, loan, body_html, signature_options } = body as {
     client_id: string;
     type: DocType;
     title: string;
     description?: string;
     loan?: { type: "islamic" | "standard"; amount: number; duration_months: number; monthly_payment: number; total_repayment: number; interest_rate: number; purpose?: string };
     body_html?: string;
+    signature_options?: SignatureOptions;
   };
 
   if (!client_id || !type || !title)
@@ -80,15 +83,17 @@ export async function POST(req: NextRequest) {
     account_id: account?.id,
   };
 
+  const sigOpts: SignatureOptions = signature_options ?? {};
+
   let contentHtml = "";
   switch (type) {
-    case "kontoeroeffnung": contentHtml = genKontoeröffnung(clientInfo); break;
-    case "willkommen":      contentHtml = genWillkommen(clientInfo); break;
-    case "kreditvertrag":   contentHtml = loan ? genKreditvertrag(clientInfo, loan) : ""; break;
+    case "kontoeroeffnung": contentHtml = genKontoeröffnung(clientInfo, sigOpts); break;
+    case "willkommen":      contentHtml = genWillkommen(clientInfo, sigOpts); break;
+    case "kreditvertrag":   contentHtml = loan ? genKreditvertrag(clientInfo, loan, sigOpts) : ""; break;
     case "tilgungsplan":    contentHtml = loan ? genTilgungsplan(clientInfo, loan) : ""; break;
     case "agb":             contentHtml = genAGB(clientInfo); break;
     case "datenschutz":     contentHtml = genDatenschutz(clientInfo); break;
-    case "custom":          contentHtml = body_html ? genCustom(clientInfo, { title, body_html }) : ""; break;
+    case "custom":          contentHtml = body_html ? genCustom(clientInfo, { title, body_html }, sigOpts) : ""; break;
   }
 
   const supabaseAdmin = getSupabaseAdmin();
@@ -104,6 +109,19 @@ export async function POST(req: NextRequest) {
   if (error) {
     console.error("[admin/documents POST]", error);
     return NextResponse.json({ error: "Datenbankfehler" }, { status: 500 });
+  }
+
+  // Send notification email to client
+  try {
+    const { data: profileLang } = await supabase.from("kt_profiles").select("lang").eq("id", client_id).single();
+    await sendDocumentToClient(profile.email, {
+      prenom: profile.prenom,
+      docTitle: title,
+      docType: type,
+      lang: profileLang?.lang ?? "de",
+    });
+  } catch (err) {
+    console.error("[admin/documents] Email send failed:", err);
   }
 
   return NextResponse.json({ ok: true, id: data?.id, preview_html: contentHtml });

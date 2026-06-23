@@ -1064,6 +1064,56 @@ export function adminKycSubmittedEmail(opts: {
   };
 }
 
+/* ─── Document notification ─── */
+export function documentNotificationEmail(opts: {
+  prenom: string;
+  docTitle: string;
+  docType: string;
+  lang?: string;
+}): { subject: string; html: string } {
+  const lang = opts.lang ?? "de";
+
+  const t: Record<string, { subject: string; greeting: string; body: string; cta: string; footer: string }> = {
+    de: { subject: `Neues Dokument verfügbar: ${opts.docTitle}`, greeting: `Sehr geehrte/r ${opts.prenom}`, body: `Ein neues Dokument wurde für Sie bereitgestellt: <strong>${opts.docTitle}</strong>.<br/>Sie können es jederzeit in Ihrem sicheren Online-Banking-Dashboard einsehen und herunterladen.`, cta: "Dokument ansehen", footer: "KT Bank AG · Bockenheimer Anlage 46 · 60322 Frankfurt am Main" },
+    fr: { subject: `Nouveau document disponible : ${opts.docTitle}`, greeting: `Cher/Chère ${opts.prenom}`, body: `Un nouveau document a été mis à votre disposition : <strong>${opts.docTitle}</strong>.<br/>Vous pouvez le consulter et le télécharger à tout moment dans votre espace bancaire en ligne.`, cta: "Consulter le document", footer: "KT Bank AG · Bockenheimer Anlage 46 · 60322 Frankfurt am Main" },
+    en: { subject: `New document available: ${opts.docTitle}`, greeting: `Dear ${opts.prenom}`, body: `A new document has been made available for you: <strong>${opts.docTitle}</strong>.<br/>You can view and download it at any time in your secure online banking dashboard.`, cta: "View document", footer: "KT Bank AG · Bockenheimer Anlage 46 · 60322 Frankfurt am Main" },
+    ar: { subject: `مستند جديد متاح: ${opts.docTitle}`, greeting: `عزيزي/عزيزتي ${opts.prenom}`, body: `تم توفير مستند جديد لك: <strong>${opts.docTitle}</strong>.<br/>يمكنك الاطلاع عليه وتنزيله في أي وقت من لوحة تحكم الخدمات المصرفية عبر الإنترنت.`, cta: "عرض المستند", footer: "KT Bank AG · Bockenheimer Anlage 46 · 60322 Frankfurt am Main" },
+    tr: { subject: `Yeni belge mevcut: ${opts.docTitle}`, greeting: `Sayın ${opts.prenom}`, body: `Sizin için yeni bir belge hazırlandı: <strong>${opts.docTitle}</strong>.<br/>Güvenli çevrimiçi bankacılık panelinizde istediğiniz zaman görüntüleyip indirebilirsiniz.`, cta: "Belgeyi görüntüle", footer: "KT Bank AG · Bockenheimer Anlage 46 · 60322 Frankfurt am Main" },
+    es: { subject: `Nuevo documento disponible: ${opts.docTitle}`, greeting: `Estimado/a ${opts.prenom}`, body: `Se ha puesto a su disposición un nuevo documento: <strong>${opts.docTitle}</strong>.<br/>Puede consultarlo y descargarlo en cualquier momento en su banca en línea.`, cta: "Ver documento", footer: "KT Bank AG · Bockenheimer Anlage 46 · 60322 Frankfurt am Main" },
+    it: { subject: `Nuovo documento disponibile: ${opts.docTitle}`, greeting: `Gentile ${opts.prenom}`, body: `È stato reso disponibile un nuovo documento: <strong>${opts.docTitle}</strong>.<br/>Può visualizzarlo e scaricarlo in qualsiasi momento nel suo portale bancario online.`, cta: "Visualizza documento", footer: "KT Bank AG · Bockenheimer Anlage 46 · 60322 Frankfurt am Main" },
+    pt: { subject: `Novo documento disponível: ${opts.docTitle}`, greeting: `Caro/a ${opts.prenom}`, body: `Um novo documento foi disponibilizado para si: <strong>${opts.docTitle}</strong>.<br/>Pode consultá-lo e transferi-lo a qualquer momento no seu painel bancário online.`, cta: "Ver documento", footer: "KT Bank AG · Bockenheimer Anlage 46 · 60322 Frankfurt am Main" },
+    nl: { subject: `Nieuw document beschikbaar: ${opts.docTitle}`, greeting: `Beste ${opts.prenom}`, body: `Er is een nieuw document voor u beschikbaar gesteld: <strong>${opts.docTitle}</strong>.<br/>U kunt het op elk moment bekijken en downloaden in uw online bankportaal.`, cta: "Document bekijken", footer: "KT Bank AG · Bockenheimer Anlage 46 · 60322 Frankfurt am Main" },
+  };
+
+  const c = t[lang] ?? t["de"];
+
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>${c.subject}</title></head><body style="margin:0;padding:0;background:#F4F4F5;font-family:Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#F4F4F5;padding:32px 0;">
+<tr><td align="center">
+<table width="560" cellpadding="0" cellspacing="0" style="background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+<tr><td style="background:#005F2D;padding:28px 36px;">
+  <h1 style="color:white;font-size:22px;font-weight:900;margin:0;letter-spacing:-0.3px;">KT Bank AG</h1>
+  <p style="color:rgba(255,255,255,0.7);font-size:12px;margin:4px 0 0;">Bockenheimer Anlage 46 · 60322 Frankfurt am Main</p>
+</td></tr>
+<tr><td style="padding:36px 36px 28px;">
+  <p style="color:#0F172A;font-size:16px;font-weight:600;margin:0 0 16px;">${c.greeting},</p>
+  <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 28px;">${c.body}</p>
+  <div style="margin:0 0 28px;">
+    <a href="https://kt-bank-ag.com/client/dashboard" style="display:inline-block;background:#005F2D;color:white;font-size:14px;font-weight:700;padding:14px 28px;border-radius:8px;text-decoration:none;">${c.cta} →</a>
+  </div>
+  <p style="color:#94A3B8;font-size:12px;margin:0;">support@kt-bank-ag.com</p>
+</td></tr>
+<tr><td style="background:#F8FAFC;padding:16px 36px;border-top:1px solid #E2E8F0;">
+  <p style="color:#94A3B8;font-size:11px;margin:0;text-align:center;">${c.footer}</p>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body></html>`;
+
+  return { subject: c.subject, html };
+}
+
 /* ─── Security alert ─── */
 export function securityAlertEmail(prenom: string, reason: string, lang: string = "de") {
   const s = L(lang, {

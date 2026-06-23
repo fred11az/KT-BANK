@@ -101,8 +101,39 @@ function footerBar(ref: string) {
   `;
 }
 
+export interface SignatureOptions {
+  presignedByBank?: boolean;
+  clientSignatureSpace?: boolean;
+}
+
+function sigBlock(
+  client: ClientInfo,
+  opts: SignatureOptions = {},
+  bankRole = "Direktion",
+  showClientLine = true,
+): string {
+  const bankSide = opts.presignedByBank
+    ? `<div>
+        <div style="font-family:Georgia,serif;font-size:22px;color:#005F2D;font-style:italic;line-height:1;margin-bottom:4px;">KT Bank AG</div>
+        <div style="font-size:10px;color:#64748B;margin-bottom:8px;">Frankfurt am Main, ${docDate()}</div>
+        <div class="sig-line"><p class="sig-label">KT Bank AG — ${bankRole}</p></div>
+      </div>`
+    : `<div><div class="sig-line"><p class="sig-label">KT Bank AG — ${bankRole}</p></div></div>`;
+
+  const clientSide = !showClientLine ? `<div></div>` : opts.clientSignatureSpace
+    ? `<div>
+        <div style="width:220px;height:70px;border:2px dashed #CBD5E1;border-radius:6px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;">
+          <span style="color:#CBD5E1;font-size:11px;font-style:italic;">Unterschrift / Signature</span>
+        </div>
+        <div class="sig-line"><p class="sig-label">${client.prenom} ${client.nom}</p></div>
+      </div>`
+    : `<div><div class="sig-line"><p class="sig-label">${client.prenom} ${client.nom}</p></div></div>`;
+
+  return `<div class="signature-block">${clientSide}${bankSide}</div>`;
+}
+
 /* ── 1. Kontoeröffnungsbestätigung ── */
-export function genKontoeröffnung(client: ClientInfo): string {
+export function genKontoeröffnung(client: ClientInfo, sigOpts: SignatureOptions = {}): string {
   const ref = docRef();
   const openDate = new Date(client.created_at).toLocaleDateString("de-DE", { day: "2-digit", month: "long", year: "numeric" });
 
@@ -146,25 +177,14 @@ ${letterhead()}
   <div class="info-row"><span class="info-label">Kundenservice</span><span class="info-value">support@kt-bank-ag.com</span></div>
 </div>
 
-<div class="signature-block">
-  <div>
-    <div class="sig-line">
-      <p class="sig-label">Frankfurt am Main, ${docDate()}</p>
-    </div>
-  </div>
-  <div>
-    <div class="sig-line">
-      <p class="sig-label">KT Bank AG — Direktion</p>
-    </div>
-  </div>
-</div>
+${sigBlock(client, sigOpts, "Direktion", false)}
 
 ${footerBar(ref)}
 </div></body></html>`;
 }
 
 /* ── 2. Willkommensschreiben ── */
-export function genWillkommen(client: ClientInfo): string {
+export function genWillkommen(client: ClientInfo, sigOpts: SignatureOptions = {}): string {
   const ref = docRef();
 
   return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
@@ -207,18 +227,7 @@ ${letterhead()}
 
 <p class="body-text">Bei Fragen stehen wir Ihnen jederzeit zur Verfügung: <strong>support@kt-bank-ag.com</strong></p>
 
-<div class="signature-block">
-  <div>
-    <div class="sig-line">
-      <p class="sig-label">Frankfurt am Main, ${docDate()}</p>
-    </div>
-  </div>
-  <div>
-    <div class="sig-line">
-      <p class="sig-label">KT Bank AG — Kundenbetreuer</p>
-    </div>
-  </div>
-</div>
+${sigBlock(client, sigOpts, "Kundenbetreuer", false)}
 
 ${footerBar(ref)}
 </div></body></html>`;
@@ -233,7 +242,7 @@ export function genKreditvertrag(client: ClientInfo, loan: {
   total_repayment: number;
   interest_rate: number;
   purpose?: string;
-}): string {
+}, sigOpts: SignatureOptions = {}): string {
   const ref = docRef();
   const fmtMoney = (n: number) => n.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
   const rate = loan.interest_rate / 12;
@@ -312,18 +321,7 @@ ${letterhead()}
   <p class="body-text">Der Kreditnehmer verpflichtet sich, die monatlichen Raten pünktlich und vollständig zu entrichten. Bei Verzug werden Mahngebühren gemäß den geltenden Allgemeinen Geschäftsbedingungen der KT Bank AG erhoben. Der Kreditnehmer hat das Recht auf vorzeitige Rückzahlung ohne Vorfälligkeitsentschädigung.</p>
 </div>
 
-<div class="signature-block">
-  <div>
-    <div class="sig-line">
-      <p class="sig-label">${client.prenom} ${client.nom} (Kreditnehmer)</p>
-    </div>
-  </div>
-  <div>
-    <div class="sig-line">
-      <p class="sig-label">KT Bank AG (Kreditgeber)</p>
-    </div>
-  </div>
-</div>
+${sigBlock(client, sigOpts, "Kreditgeber")}
 
 ${footerBar(ref)}
 </div></body></html>`;
@@ -456,7 +454,7 @@ ${footerBar(ref)}
 }
 
 /* ── 7. Custom document ── */
-export function genCustom(client: ClientInfo, opts: { title: string; body_html: string }): string {
+export function genCustom(client: ClientInfo, opts: { title: string; body_html: string }, sigOpts: SignatureOptions = {}): string {
   const ref = docRef();
   return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
 <title>${opts.title} — KT Bank AG</title>
@@ -480,10 +478,7 @@ ${letterhead()}
 <div class="custom-body" style="margin-bottom:32px;">
   ${opts.body_html}
 </div>
-<div class="signature-block">
-  <div></div>
-  <div><div class="sig-line"><p class="sig-label">KT Bank AG — Frankfurt am Main, ${docDate()}</p></div></div>
-</div>
+${sigBlock(client, sigOpts, "Frankfurt am Main")}
 ${footerBar(ref)}
 </div></body></html>`;
 }

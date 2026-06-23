@@ -46,6 +46,8 @@ export default function AdminDocumentsPage() {
   const [loanDur, setLoanDur] = useState("24");
   const [loanPurpose, setLoanPurpose] = useState("");
   const [sending, setSending] = useState(false);
+  const [presignedByBank, setPresignedByBank] = useState(false);
+  const [clientSignatureSpace, setClientSignatureSpace] = useState(false);
   const [clientSearch, setClientSearch] = useState("");
 
   const headers = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
@@ -102,6 +104,7 @@ export default function AdminDocumentsPage() {
       body.loan = { type: loanType, amount: amt, duration_months: dur, monthly_payment: monthly, total_repayment: totalRepayment, interest_rate: loanType === "islamic" ? 0 : 0.02, purpose: loanPurpose || undefined };
     }
     if (selectedDocType?.needsBody) body.body_html = bodyHtml;
+    body.signature_options = { presignedByBank, clientSignatureSpace };
 
     const res = await fetch("/api/kt/admin/documents", { method: "POST", headers, body: JSON.stringify(body) });
     setSending(false);
@@ -109,6 +112,7 @@ export default function AdminDocumentsPage() {
       load(selectedClient.id);
       setTab("sent");
       setDocType(""); setDocTitle(""); setDocDesc(""); setBodyHtml(""); setLoanAmount(""); setLoanPurpose("");
+      setPresignedByBank(false); setClientSignatureSpace(false);
     }
   }
 
@@ -265,6 +269,21 @@ export default function AdminDocumentsPage() {
                       <div style={{ marginBottom: 14 }}>
                         <label style={lbl}>Beschreibung (optional)</label>
                         <input type="text" value={docDesc} onChange={(e) => setDocDesc(e.target.value)} placeholder="Kurzbeschreibung…" style={inp} />
+                      </div>
+
+                      {/* Signature options */}
+                      <div style={{ background: "#14161F", borderRadius: 10, padding: "14px 16px", marginBottom: 14, border: "1px solid rgba(255,255,255,0.07)" }}>
+                        <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.07em", marginBottom: 12 }}>Options de signature</p>
+                        <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", marginBottom: 10 }}>
+                          <input type="checkbox" checked={presignedByBank} onChange={(e) => setPresignedByBank(e.target.checked)}
+                            style={{ width: 16, height: 16, accentColor: "#4CAF82", cursor: "pointer" }} />
+                          <span style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.83rem" }}>Pré-signé par KT Bank AG</span>
+                        </label>
+                        <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
+                          <input type="checkbox" checked={clientSignatureSpace} onChange={(e) => setClientSignatureSpace(e.target.checked)}
+                            style={{ width: 16, height: 16, accentColor: "#4CAF82", cursor: "pointer" }} />
+                          <span style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.83rem" }}>Espace de signature pour le client</span>
+                        </label>
                       </div>
 
                       {selectedDocType?.needsLoan && (

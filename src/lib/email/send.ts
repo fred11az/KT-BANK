@@ -15,6 +15,7 @@ import {
   accountActivatedEmail,
   kycRejectedEmail,
   adminKycSubmittedEmail,
+  documentNotificationEmail,
 } from "./templates";
 
 type Lang = "de" | "fr" | "en" | "ar" | "tr" | "es" | "it" | "pt" | "nl";
@@ -186,5 +187,13 @@ export async function sendSecurityAlert(
   lang: Lang = "de"
 ) {
   const { subject, html } = securityAlertEmail(prenom, reason, lang);
+  return send(email, subject, html);
+}
+
+export async function sendDocumentToClient(
+  email: string,
+  opts: { prenom: string; docTitle: string; docType: string; lang?: Lang }
+) {
+  const { subject, html } = documentNotificationEmail(opts);
   return send(email, subject, html);
 }
