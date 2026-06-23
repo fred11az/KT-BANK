@@ -192,8 +192,22 @@ export async function sendSecurityAlert(
 
 export async function sendDocumentToClient(
   email: string,
-  opts: { prenom: string; docTitle: string; docType: string; lang?: Lang }
+  opts: { prenom: string; docTitle: string; docType: string; lang?: Lang; contentHtml?: string }
 ) {
   const { subject, html } = documentNotificationEmail(opts);
-  return send(email, subject, html);
+  try {
+    const safeTitle = (opts.docTitle ?? "document").replace(/[^a-zA-Z0-9\s\-_]/g, "").trim() || "document";
+    const params: Parameters<ReturnType<typeof getResend>["emails"]["send"]>[0] = {
+      from: FROM(), to: email, subject, html,
+      ...(opts.contentHtml ? {
+        attachments: [{ filename: `${safeTitle}.html`, content: Buffer.from(opts.contentHtml).toString("base64") }]
+      } : {}),
+    };
+    const { error } = await getResend().emails.send(params);
+    if (error) console.error("[Resend document email error]", error);
+    return !error;
+  } catch (err) {
+    console.error("[Resend document send failed]", err);
+    return false;
+  }
 }

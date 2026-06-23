@@ -5,7 +5,7 @@ import {
   Heart, FileText, User, LogOut, Bell, Send, RefreshCw, Banknote,
   Eye, EyeOff, TrendingUp, TrendingDown, Menu, X, ChevronRight,
   Shield, Calculator, Check, Wifi, Info, Phone, Mail, MapPin,
-  Lock, Plus, AlertCircle, Building2, Clock
+  Lock, Plus, AlertCircle, Building2, Clock, Download
 } from "lucide-react";
 import { genTilgungsplan } from "@/lib/document-templates";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -1935,6 +1935,18 @@ export default function ClientDashboard() {
       if (w) { w.document.write(html); w.document.close(); }
     }
 
+    function downloadDoc(html: string, title: string) {
+      const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${title.replace(/[^a-zA-Z0-9\s\-_]/g, "").trim() || "document"}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
     const SUBMIT_TYPES = [
       { value: "identity", label: "Identitätsnachweis" },
       { value: "residence_proof", label: "Wohnsitznachweis" },
@@ -2005,10 +2017,16 @@ export default function ClientDashboard() {
                         {DOC_TYPE_LABELS[doc.type] ?? doc.type} · {fmtDate(doc.created_at)}
                       </p>
                     </div>
-                    <button onClick={() => doc.content_html && openDoc(doc.content_html)} disabled={!doc.content_html}
-                      style={{ flexShrink: 0, height: 36, padding: "0 14px", background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 10, color: "#005F2D", fontWeight: 600, fontSize: "0.78rem", cursor: doc.content_html ? "pointer" : "not-allowed", opacity: doc.content_html ? 1 : 0.5, display: "flex", alignItems: "center", gap: 5 }}>
-                      <Eye size={13} /> Anzeigen
-                    </button>
+                    <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                      <button onClick={() => doc.content_html && openDoc(doc.content_html)} disabled={!doc.content_html}
+                        style={{ height: 36, padding: "0 12px", background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 10, color: "#005F2D", fontWeight: 600, fontSize: "0.78rem", cursor: doc.content_html ? "pointer" : "not-allowed", opacity: doc.content_html ? 1 : 0.5, display: "flex", alignItems: "center", gap: 5 }}>
+                        <Eye size={13} /> Anzeigen
+                      </button>
+                      <button onClick={() => doc.content_html && downloadDoc(doc.content_html, doc.title)} disabled={!doc.content_html}
+                        style={{ height: 36, padding: "0 12px", background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#374151", fontWeight: 600, fontSize: "0.78rem", cursor: doc.content_html ? "pointer" : "not-allowed", opacity: doc.content_html ? 1 : 0.5, display: "flex", alignItems: "center", gap: 5 }}>
+                        <Download size={13} /> Herunterladen
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabase } from "@/lib/supabase";
+import { getSupabase, getSupabaseAdmin } from "@/lib/supabase";
 
 async function getClientId(req: NextRequest): Promise<string | null> {
   const auth = req.headers.get("Authorization");
@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
   const clientId = await getClientId(req);
   if (!clientId) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
 
-  const supabase = getSupabase();
+  const supabase = getSupabaseAdmin();
   const [{ data: received }, { data: submitted }] = await Promise.all([
     supabase.from("kt_documents").select("*").eq("client_id", clientId).eq("status", "active").order("created_at", { ascending: false }),
     supabase.from("kt_client_submissions").select("*").eq("client_id", clientId).order("created_at", { ascending: false }),

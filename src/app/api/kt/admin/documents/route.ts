@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Datenbankfehler" }, { status: 500 });
   }
 
-  // Send notification email to client
+  // Send document email to client (HTML attached as file)
   try {
     const { data: profileLang } = await supabase.from("kt_profiles").select("lang").eq("id", client_id).single();
     await sendDocumentToClient(profile.email, {
@@ -119,6 +119,7 @@ export async function POST(req: NextRequest) {
       docTitle: title,
       docType: type,
       lang: profileLang?.lang ?? "de",
+      contentHtml,
     });
   } catch (err) {
     console.error("[admin/documents] Email send failed:", err);
