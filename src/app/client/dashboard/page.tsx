@@ -1930,18 +1930,18 @@ export default function ClientDashboard() {
       else { setUploadOk(true); setUploadTitle(""); setTimeout(() => setUploadOk(false), 4000); fetchDocs(); }
     }
 
-    function openDoc(html: string) {
-      const w = window.open("", "_blank");
-      if (w) { w.document.write(html); w.document.close(); }
+    function openDocBlob(html: string) {
+      const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
     }
 
     function downloadDoc(html: string, _title: string) {
-      const w = window.open("", "_blank");
-      if (!w) return;
-      w.document.write(html);
-      w.document.close();
-      setTimeout(() => { w.focus(); w.print(); }, 300);
+      openDocBlob(html);
     }
+
+    const openDoc = openDocBlob;
 
     const SUBMIT_TYPES = [
       { value: "identity", label: "Identitätsnachweis" },
