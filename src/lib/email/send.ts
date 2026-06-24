@@ -194,16 +194,12 @@ export async function sendDocumentToClient(
   email: string,
   opts: { prenom: string; docTitle: string; docType: string; lang?: Lang; contentHtml?: string }
 ) {
-  const { subject, html } = documentNotificationEmail(opts);
+  const { subject } = documentNotificationEmail(opts);
+  // Send the document HTML directly as the email body — no attachment.
+  // Attaching as .html caused email clients to show raw source code.
+  const html = opts.contentHtml ?? documentNotificationEmail(opts).html;
   try {
-    const safeTitle = (opts.docTitle ?? "document").replace(/[^a-zA-Z0-9\s\-_]/g, "").trim() || "document";
-    const params: Parameters<ReturnType<typeof getResend>["emails"]["send"]>[0] = {
-      from: FROM(), to: email, subject, html,
-      ...(opts.contentHtml ? {
-        attachments: [{ filename: `${safeTitle}.html`, content: Buffer.from(opts.contentHtml).toString("base64") }]
-      } : {}),
-    };
-    const { error } = await getResend().emails.send(params);
+    const { error } = await getResend().emails.send({ from: FROM(), to: email, subject, html });
     if (error) console.error("[Resend document email error]", error);
     return !error;
   } catch (err) {
