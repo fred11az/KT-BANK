@@ -46,15 +46,18 @@ function baseStyles() {
       position: relative;
     }
 
-    /* Print: proper A4 */
+    /* Print: keep same A4 dimensions as screen — just remove decorations */
     @media print {
-      body, .page-bg { background: white; padding: 0; }
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      html, body { margin: 0 !important; background: white !important; }
+      .page-bg { background: white !important; padding: 0 !important; }
       .page {
-        width: 100%; min-height: auto; margin: 0; padding: 15mm;
-        box-shadow: none; page-break-after: always;
-        print-color-adjust: exact; -webkit-print-color-adjust: exact;
+        box-shadow: none !important;
+        margin: 0 auto !important;
+        page-break-after: always;
+        break-after: page;
       }
-      .page:last-child { page-break-after: auto; }
+      .page:last-child { page-break-after: avoid; break-after: avoid; }
       @page { size: A4; margin: 0; }
       #pdf-btn { display: none !important; }
     }
