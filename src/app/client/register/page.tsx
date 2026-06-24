@@ -8,7 +8,7 @@ type Step = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | "done";
 type AyantDroit = { prenom: string; nom: string; lien: string; date_naissance: string };
 type Credit = { nom_banque: string; montant: string };
 
-const PAYS = ["Deutschland","Frankreich","Belgien","Schweiz","Österreich","Niederlande","Luxemburg","Türkei","Marokko","Algerien","Tunesien","Senegal","Elfenbeinküste","Sonstiges"];
+const PAYS = ["Deutschland","Frankreich","Belgien","Schweiz","Österreich","Niederlande","Luxemburg","Litauen","Türkei","Marokko","Algerien","Tunesien","Senegal","Elfenbeinküste","Sonstiges"];
 const DOCS = ["Reisepass","Personalausweis","Aufenthaltstitel"];
 const SITUATIONS_PRO = ["Angestellt(e)","Beamter/Beamtin","Freiberuflich / Selbstständig","Unternehmer(in)","Freier Beruf","Student(in)","Rentner(in)","Arbeitslos","Sonstiges"];
 const REVENUS = ["Unter 1.000 €","1.000 – 2.000 €","2.000 – 3.500 €","3.500 – 5.000 €","Über 5.000 €"];
@@ -112,6 +112,11 @@ const REGISTER_UI = {
     selectPlaceholder: "Auswählen…",
     selectGender: ["Männlich", "Weiblich"],
     selectMarital: ["Ledig", "Verheiratet", "Geschieden", "Verwitwet", "Lebenspartnerschaft"],
+    pays: ["Deutschland","Frankreich","Belgien","Schweiz","Österreich","Niederlande","Luxemburg","Litauen","Türkei","Marokko","Algerien","Tunesien","Senegal","Elfenbeinküste","Sonstiges"],
+    docs: ["Reisepass","Personalausweis","Aufenthaltstitel"],
+    situations: ["Angestellt(e)","Beamter/Beamtin","Freiberuflich / Selbstständig","Unternehmer(in)","Freier Beruf","Student(in)","Rentner(in)","Arbeitslos","Sonstiges"],
+    revenues: ["Unter 1.000 €","1.000 – 2.000 €","2.000 – 3.500 €","3.500 – 5.000 €","Über 5.000 €"],
+    links: ["Ehepartner(in)","Kind","Elternteil","Geschwister","Sonstiges"],
   },
   fr: {
     step0Title: "Créer un compte",
@@ -210,6 +215,11 @@ const REGISTER_UI = {
     selectPlaceholder: "Sélectionner…",
     selectGender: ["Masculin", "Féminin"],
     selectMarital: ["Célibataire", "Marié(e)", "Divorcé(e)", "Veuf/Veuve", "Partenariat civil"],
+    pays: ["Allemagne","France","Belgique","Suisse","Autriche","Pays-Bas","Luxembourg","Lituanie","Turquie","Maroc","Algérie","Tunisie","Sénégal","Côte d'Ivoire","Autre"],
+    docs: ["Passeport","Carte d'identité","Titre de séjour"],
+    situations: ["Salarié(e)","Fonctionnaire","Freelance / Indépendant(e)","Chef d'entreprise","Profession libérale","Étudiant(e)","Retraité(e)","Sans emploi","Autre"],
+    revenues: ["Moins de 1 000 €","1 000 – 2 000 €","2 000 – 3 500 €","3 500 – 5 000 €","Plus de 5 000 €"],
+    links: ["Conjoint(e)","Enfant","Parent","Frère/Sœur","Autre"],
   },
   en: {
     step0Title: "Create account",
@@ -308,6 +318,11 @@ const REGISTER_UI = {
     selectPlaceholder: "Select…",
     selectGender: ["Male", "Female"],
     selectMarital: ["Single", "Married", "Divorced", "Widowed", "Civil partnership"],
+    pays: ["Germany","France","Belgium","Switzerland","Austria","Netherlands","Luxembourg","Lithuania","Turkey","Morocco","Algeria","Tunisia","Senegal","Ivory Coast","Other"],
+    docs: ["Passport","Identity card","Residence permit"],
+    situations: ["Employee","Civil servant","Freelance / Self-employed","Entrepreneur","Liberal profession","Student","Retired","Unemployed","Other"],
+    revenues: ["Under €1,000","€1,000 – €2,000","€2,000 – €3,500","€3,500 – €5,000","Over €5,000"],
+    links: ["Spouse","Child","Parent","Sibling","Other"],
   },
   ar: {
     step0Title: "إنشاء حساب",
@@ -406,6 +421,11 @@ const REGISTER_UI = {
     selectPlaceholder: "اختر…",
     selectGender: ["ذكر", "أنثى"],
     selectMarital: ["أعزب/عزباء", "متزوج/ة", "مطلق/ة", "أرمل/ة", "شراكة مدنية"],
+    pays: ["ألمانيا","فرنسا","بلجيكا","سويسرا","النمسا","هولندا","لوكسمبورغ","ليتوانيا","تركيا","المغرب","الجزائر","تونس","السنغال","ساحل العاج","أخرى"],
+    docs: ["جواز سفر","بطاقة هوية","تصريح إقامة"],
+    situations: ["موظف","موظف حكومي","مستقل / عمل حر","رجل أعمال","مهنة حرة","طالب","متقاعد","عاطل","أخرى"],
+    revenues: ["أقل من 1,000 €","1,000 – 2,000 €","2,000 – 3,500 €","3,500 – 5,000 €","أكثر من 5,000 €"],
+    links: ["زوج/زوجة","طفل","والد/والدة","أخ/أخت","أخرى"],
   },
   tr: {
     step0Title: "Hesap oluştur",
@@ -504,6 +524,11 @@ const REGISTER_UI = {
     selectPlaceholder: "Seçin…",
     selectGender: ["Erkek", "Kadın"],
     selectMarital: ["Bekar", "Evli", "Boşanmış", "Dul", "Medeni birliktelik"],
+    pays: ["Almanya","Fransa","Belçika","İsviçre","Avusturya","Hollanda","Lüksemburg","Litvanya","Türkiye","Fas","Cezayir","Tunus","Senegal","Fildişi Sahili","Diğer"],
+    docs: ["Pasaport","Kimlik kartı","İkamet izni"],
+    situations: ["Çalışan","Devlet memuru","Serbest / Bağımsız","Girişimci","Serbest meslek","Öğrenci","Emekli","İşsiz","Diğer"],
+    revenues: ["1.000 €'nun altında","1.000 – 2.000 €","2.000 – 3.500 €","3.500 – 5.000 €","5.000 €'nun üzerinde"],
+    links: ["Eş","Çocuk","Ebeveyn","Kardeş","Diğer"],
   },
   es: {
     step0Title: "Crear cuenta",
@@ -602,6 +627,11 @@ const REGISTER_UI = {
     selectPlaceholder: "Seleccionar…",
     selectGender: ["Masculino", "Femenino"],
     selectMarital: ["Soltero/a", "Casado/a", "Divorciado/a", "Viudo/a", "Pareja de hecho"],
+    pays: ["Alemania","Francia","Bélgica","Suiza","Austria","Países Bajos","Luxemburgo","Lituania","Turquía","Marruecos","Argelia","Túnez","Senegal","Costa de Marfil","Otro"],
+    docs: ["Pasaporte","Tarjeta de identidad","Permiso de residencia"],
+    situations: ["Empleado/a","Funcionario/a","Freelance / Autónomo/a","Empresario/a","Profesión liberal","Estudiante","Jubilado/a","Desempleado/a","Otro"],
+    revenues: ["Menos de 1.000 €","1.000 – 2.000 €","2.000 – 3.500 €","3.500 – 5.000 €","Más de 5.000 €"],
+    links: ["Cónyuge","Hijo/a","Padre/Madre","Hermano/a","Otro"],
   },
   it: {
     step0Title: "Crea account",
@@ -700,6 +730,11 @@ const REGISTER_UI = {
     selectPlaceholder: "Seleziona…",
     selectGender: ["Maschio", "Femmina"],
     selectMarital: ["Celibe/Nubile", "Sposato/a", "Divorziato/a", "Vedovo/a", "Unione civile"],
+    pays: ["Germania","Francia","Belgio","Svizzera","Austria","Paesi Bassi","Lussemburgo","Lituania","Turchia","Marocco","Algeria","Tunisia","Senegal","Costa d'Avorio","Altro"],
+    docs: ["Passaporto","Carta d'identità","Permesso di soggiorno"],
+    situations: ["Dipendente","Funzionario pubblico","Freelance / Autonomo","Imprenditore","Libero professionista","Studente","Pensionato","Disoccupato","Altro"],
+    revenues: ["Meno di 1.000 €","1.000 – 2.000 €","2.000 – 3.500 €","3.500 – 5.000 €","Più di 5.000 €"],
+    links: ["Coniuge","Figlio/a","Genitore","Fratello/Sorella","Altro"],
   },
   pt: {
     step0Title: "Criar conta",
@@ -798,6 +833,11 @@ const REGISTER_UI = {
     selectPlaceholder: "Selecionar…",
     selectGender: ["Masculino", "Feminino"],
     selectMarital: ["Solteiro/a", "Casado/a", "Divorciado/a", "Viúvo/a", "União de facto"],
+    pays: ["Alemanha","França","Bélgica","Suíça","Áustria","Países Baixos","Luxemburgo","Lituânia","Turquia","Marrocos","Argélia","Tunísia","Senegal","Costa do Marfim","Outro"],
+    docs: ["Passaporte","Bilhete de identidade","Título de residência"],
+    situations: ["Empregado/a","Funcionário público","Freelance / Independente","Empresário/a","Profissão liberal","Estudante","Aposentado/a","Desempregado/a","Outro"],
+    revenues: ["Menos de 1.000 €","1.000 – 2.000 €","2.000 – 3.500 €","3.500 – 5.000 €","Mais de 5.000 €"],
+    links: ["Cônjuge","Filho/a","Pai/Mãe","Irmão/Irmã","Outro"],
   },
   nl: {
     step0Title: "Account aanmaken",
@@ -896,6 +936,11 @@ const REGISTER_UI = {
     selectPlaceholder: "Selecteren…",
     selectGender: ["Man", "Vrouw"],
     selectMarital: ["Ongehuwd", "Gehuwd", "Gescheiden", "Weduwe/Weduwnaar", "Geregistreerd partnerschap"],
+    pays: ["Duitsland","Frankrijk","België","Zwitserland","Oostenrijk","Nederland","Luxemburg","Litouwen","Turkije","Marokko","Algerije","Tunesië","Senegal","Ivoorkust","Anders"],
+    docs: ["Paspoort","Identiteitskaart","Verblijfsvergunning"],
+    situations: ["Werknemer","Ambtenaar","Freelance / Zelfstandige","Ondernemer","Vrij beroep","Student","Gepensioneerde","Werkloos","Anders"],
+    revenues: ["Minder dan €1.000","€1.000 – €2.000","€2.000 – €3.500","€3.500 – €5.000","Meer dan €5.000"],
+    links: ["Echtgenoot/echtgenote","Kind","Ouder","Broer/Zus","Anders"],
   },
 } as const;
 
@@ -936,6 +981,23 @@ function FSelect({ label, value, onChange, options, placeholder }: {
         style={{width:"100%",height:52,background:"#2A2A35",border:"1px solid rgba(255,255,255,0.1)",borderRadius:14,color:value?"white":"rgba(255,255,255,0.35)",fontSize:"1rem",padding:"0 16px",boxSizing:"border-box",outline:"none",appearance:"none"}}>
         <option value="" disabled>{placeholder ?? "Select…"}</option>
         {options.map((o)=><option key={o} value={o}>{o}</option>)}
+      </select>
+    </div>
+  );
+}
+
+function FSelectT({ label, value, onChange, canonicalOptions, displayOptions, placeholder }: {
+  label:string; value:string; onChange:(v:string)=>void; canonicalOptions:string[]; displayOptions:readonly string[]; placeholder?:string;
+}) {
+  return (
+    <div style={{display:"flex",flexDirection:"column",gap:6}}>
+      <label style={{color:"rgba(255,255,255,0.6)",fontSize:"0.8rem",fontWeight:500}}>{label}</label>
+      <select value={value} onChange={(e)=>onChange(e.target.value)}
+        style={{width:"100%",height:52,background:"#2A2A35",border:"1px solid rgba(255,255,255,0.1)",borderRadius:14,color:value?"white":"rgba(255,255,255,0.35)",fontSize:"1rem",padding:"0 16px",boxSizing:"border-box",outline:"none",appearance:"none"}}>
+        <option value="" disabled>{placeholder ?? "Select…"}</option>
+        {canonicalOptions.map((canonical,idx)=>(
+          <option key={canonical} value={canonical}>{displayOptions[idx] ?? canonical}</option>
+        ))}
       </select>
     </div>
   );
@@ -1247,7 +1309,7 @@ export default function RegisterPage() {
       <div style={{flex:1,paddingTop:20}}>
         <h1 style={{color:"white",fontWeight:800,fontSize:"1.5rem",marginBottom:20}}>{ui.step2Title}</h1>
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
-          <FSelect label={ui.residenceLabel} value={pays} onChange={setPays} options={PAYS} placeholder={ui.selectPlaceholder}/>
+          <FSelectT label={ui.residenceLabel} value={pays} onChange={setPays} canonicalOptions={PAYS} displayOptions={ui.pays} placeholder={ui.selectPlaceholder}/>
           <FInput label={ui.dobLabel} type="date" value={dob} onChange={setDob}
             max={new Date(Date.now()-18*365.25*86400000).toISOString().split("T")[0]}/>
           <FInput label={ui.promoLabel} placeholder="KT2024" value={promo} onChange={setPromo}/>
@@ -1281,7 +1343,7 @@ export default function RegisterPage() {
           <FSelect label={ui.genderLabel} value={sexe} onChange={setSexe} options={[...ui.selectGender]} placeholder={ui.selectPlaceholder}/>
           <FSelect label={ui.maritalLabel} value={situation} onChange={setSituation}
             options={[...ui.selectMarital]} placeholder={ui.selectPlaceholder}/>
-          <FSelect label={ui.birthCountryLabel} value={paysNaissance} onChange={setPaysNaissance} options={PAYS} placeholder={ui.selectPlaceholder}/>
+          <FSelectT label={ui.birthCountryLabel} value={paysNaissance} onChange={setPaysNaissance} canonicalOptions={PAYS} displayOptions={ui.pays} placeholder={ui.selectPlaceholder}/>
           <FInput label={ui.birthCityLabel} placeholder={ui.birthCityPlaceholder} value={villeNaissance} onChange={setVilleNaissance}/>
           {error&&<p style={{color:"#FF6B6B",fontSize:"0.85rem"}}>{error}</p>}
           <Btn onClick={()=>{if(!prenom||!nom||!sexe||!situation||!paysNaissance||!villeNaissance){setError(ui.errorAllRequired);return;}save(3);}} loading={loading} loadingText={ui.loading}>
@@ -1299,8 +1361,8 @@ export default function RegisterPage() {
       <div style={{flex:1,paddingTop:20}}>
         <h1 style={{color:"white",fontWeight:800,fontSize:"1.5rem",marginBottom:20}}>{ui.step4Title}</h1>
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
-          <FSelect label={ui.nationalityLabel} value={nationalite} onChange={setNationalite} options={PAYS} placeholder={ui.selectPlaceholder}/>
-          <FSelect label={ui.docTypeLabel} value={typeDoc} onChange={setTypeDoc} options={DOCS} placeholder={ui.selectPlaceholder}/>
+          <FSelectT label={ui.nationalityLabel} value={nationalite} onChange={setNationalite} canonicalOptions={PAYS} displayOptions={ui.pays} placeholder={ui.selectPlaceholder}/>
+          <FSelectT label={ui.docTypeLabel} value={typeDoc} onChange={setTypeDoc} canonicalOptions={DOCS} displayOptions={ui.docs} placeholder={ui.selectPlaceholder}/>
           <FInput label={ui.authorityLabel} placeholder={ui.authorityPlaceholder} value={autorite} onChange={setAutorite}/>
           {error&&<p style={{color:"#FF6B6B",fontSize:"0.85rem"}}>{error}</p>}
           <Btn onClick={()=>{if(!nationalite||!typeDoc||!autorite){setError(ui.errorAllRequired);return;}save(4);}} loading={loading} loadingText={ui.loading}>
@@ -1318,11 +1380,11 @@ export default function RegisterPage() {
       <div style={{flex:1,paddingTop:20}}>
         <h1 style={{color:"white",fontWeight:800,fontSize:"1.5rem",marginBottom:20}}>{ui.step5Title}</h1>
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
-          <FSelect label={ui.currentSitLabel} value={situationPro} onChange={setSituationPro} options={SITUATIONS_PRO} placeholder={ui.selectPlaceholder}/>
+          <FSelectT label={ui.currentSitLabel} value={situationPro} onChange={setSituationPro} canonicalOptions={SITUATIONS_PRO} displayOptions={ui.situations} placeholder={ui.selectPlaceholder}/>
           {employeurLabel&&(
             <FInput label={employeurLabel} placeholder={ui.employerPlaceholder} value={nomEmployeur} onChange={setNomEmployeur}/>
           )}
-          <FSelect label={ui.incomeLabel} value={revenuMensuel} onChange={setRevenuMensuel} options={REVENUS} placeholder={ui.selectPlaceholder}/>
+          <FSelectT label={ui.incomeLabel} value={revenuMensuel} onChange={setRevenuMensuel} canonicalOptions={REVENUS} displayOptions={ui.revenues} placeholder={ui.selectPlaceholder}/>
           <div style={{height:1,background:"rgba(255,255,255,0.07)",margin:"4px 0"}}/>
           <p style={{color:"rgba(255,255,255,0.5)",fontSize:"0.82rem",margin:0}}>{ui.addressTitle}</p>
           <FInput label={ui.streetLabel} placeholder={ui.streetPlaceholder} value={adresse} onChange={setAdresse}/>
@@ -1445,7 +1507,7 @@ export default function RegisterPage() {
                     <FInput label={ui.firstNameLabel} placeholder="Sarah" value={ad.prenom} onChange={(v)=>updateAyantDroit(i,"prenom",v)}/>
                     <FInput label={ui.lastNameLabel} placeholder="Müller" value={ad.nom} onChange={(v)=>updateAyantDroit(i,"nom",v)}/>
                   </div>
-                  <FSelect label={ui.relationshipLabel} value={ad.lien} onChange={(v)=>updateAyantDroit(i,"lien",v)} options={LIENS} placeholder={ui.selectPlaceholder}/>
+                  <FSelectT label={ui.relationshipLabel} value={ad.lien} onChange={(v)=>updateAyantDroit(i,"lien",v)} canonicalOptions={LIENS} displayOptions={ui.links} placeholder={ui.selectPlaceholder}/>
                   <FInput label={ui.dobLabel} type="date" value={ad.date_naissance} onChange={(v)=>updateAyantDroit(i,"date_naissance",v)}/>
                 </div>
               </div>
@@ -1473,11 +1535,8 @@ export default function RegisterPage() {
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:6}}>
             <label style={{color:"rgba(255,255,255,0.6)",fontSize:"0.8rem",fontWeight:500}}>{ui.phoneLabel}</label>
-            <div style={{display:"flex",gap:8}}>
-              <div style={{height:52,minWidth:76,background:"#2A2A35",border:"1px solid rgba(255,255,255,0.1)",borderRadius:14,display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontSize:"0.9rem",fontWeight:600}}>🇩🇪 +49</div>
-              <input type="tel" placeholder="152 345 6789" value={phone} onChange={(e)=>setPhone(e.target.value)}
-                style={{flex:1,height:52,background:"#2A2A35",border:"1px solid rgba(255,255,255,0.1)",borderRadius:14,color:"white",fontSize:"1rem",padding:"0 16px",boxSizing:"border-box",outline:"none"}}/>
-            </div>
+            <input type="tel" placeholder="+49 152 345 6789" value={phone} onChange={(e)=>setPhone(e.target.value)}
+              style={{width:"100%",height:52,background:"#2A2A35",border:"1px solid rgba(255,255,255,0.1)",borderRadius:14,color:"white",fontSize:"1rem",padding:"0 16px",boxSizing:"border-box",outline:"none"}}/>
           </div>
           <div style={{background:"rgba(0,95,45,0.1)",border:"1px solid rgba(0,95,45,0.25)",borderRadius:14,padding:16}}>
             <p style={{color:"rgba(255,255,255,0.6)",fontSize:"0.8rem",margin:0,lineHeight:1.6}}>

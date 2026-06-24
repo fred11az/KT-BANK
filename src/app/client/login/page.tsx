@@ -198,7 +198,7 @@ function getLUI(lang: string) {
 }
 
 export default function LoginPage() {
-  const { lang } = useLanguage();
+  const { lang, setLangFromProfile } = useLanguage();
   const ui = getLUI(lang);
 
   const [step, setStep] = useState<LoginStep>("email");
@@ -264,6 +264,17 @@ export default function LoginPage() {
     if (!res.ok) { setError(data.error || ui.errorInvalidCode); return; }
     sessionStorage.setItem("kt_token", data.token);
     sessionStorage.setItem("kt_email", email);
+    // Restore user's preferred language from profile
+    try {
+      const profileRes = await fetch("/api/kt/client/me", {
+        headers: { Authorization: `Bearer ${data.token}` }
+      });
+      if (profileRes.ok) {
+        const profileData = await profileRes.json();
+        const userLang = profileData.profile?.lang || profileData.lang;
+        if (userLang) setLangFromProfile(userLang);
+      }
+    } catch {}
     window.location.href = "/client/dashboard";
   }
 

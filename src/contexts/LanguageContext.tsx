@@ -5,6 +5,7 @@ import { translations, Lang, Translations } from "@/lib/translations";
 interface LanguageCtx {
   lang: Lang;
   setLang: (l: Lang) => void;
+  setLangFromProfile: (l: string) => void;
   t: Translations;
 }
 
@@ -13,6 +14,7 @@ const SUPPORTED: Lang[] = ["de", "fr", "en", "ar", "tr", "es", "it", "pt", "nl"]
 const LanguageContext = createContext<LanguageCtx>({
   lang: "de",
   setLang: () => {},
+  setLangFromProfile: () => {},
   t: translations.de,
 });
 
@@ -37,10 +39,17 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("kt_lang", l);
   }
 
+  function setLangFromProfile(l: string) {
+    if (SUPPORTED.includes(l as Lang)) {
+      setLangState(l as Lang);
+      localStorage.setItem("kt_lang", l);
+    }
+  }
+
   const t = translations[lang] ?? translations.de;
 
   return (
-    <LanguageContext.Provider value={{ lang, setLang, t }}>
+    <LanguageContext.Provider value={{ lang, setLang, setLangFromProfile, t }}>
       {children}
     </LanguageContext.Provider>
   );
