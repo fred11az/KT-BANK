@@ -496,23 +496,81 @@ export function genTilgungsplan(client: ClientInfo, loan: {
   const fmtMoney = (n: number) => n.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
   const rate = loan.interest_rate / 12;
 
-  const allRows = Array.from({ length: loan.duration_months }, (_, i) => {
-    const m = i + 1;
-    const interest = loan.type === "islamic" ? 0 :
-      (loan.amount - (loan.monthly_payment - loan.amount * rate) * (Math.pow(1 + rate, i) - 1) / (rate || 1)) * rate;
-    const principal = loan.monthly_payment - (loan.type === "islamic" ? 0 : interest);
-    return `<tr>
-      <td>${m}</td>
-      <td>${fmtMoney(loan.monthly_payment)}</td>
-      <td style="color:#005F2D;">${fmtMoney(Math.max(0, principal))}</td>
-      <td style="color:${loan.type === "standard" ? "#D97706" : "#16A34A"};">${fmtMoney(Math.max(0, interest))}</td>
-    </tr>`;
-  });
+  const GERMAN_MONTHS = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
 
-  const tableHead = `<thead><tr><th>Monat</th><th>Rate</th><th>Tilgung</th><th>Zinsen</th></tr></thead>`;
-  const totalRow = `<p style="color:#64748B;font-size:11px;text-align:right;margin-top:8px;">Gesamtrückzahlung: <strong style="color:#005F2D;">${fmtMoney(loan.total_repayment)}</strong></p>`;
+  const allRows = (() => {
+    const rows: string[] = [];
+    let restschuld = loan.amount;
+    let kumTilgung = 0;
+    const now = new Date();
+    const startMonthIdx = now.getMonth();
+    const startYear = now.getFullYear();
+
+    for (let i = 0; i < loan.duration_months; i++) {
+      const m = i + 1;
+      const dateTotalMonths = startMonthIdx + m;
+      const datum = `${GERMAN_MONTHS[dateTotalMonths % 12]} ${startYear + Math.floor(dateTotalMonths / 12)}`;
+
+      const isLast = i === loan.duration_months - 1;
+      let interest: number, principal: number, payment: number;
+
+      if (loan.type === "islamic") {
+        interest = 0;
+        principal = isLast ? restschuld : loan.monthly_payment;
+        payment = principal;
+      } else {
+        interest = restschuld * rate;
+        if (isLast) {
+          principal = restschuld;
+          payment = principal + interest;
+        } else {
+          payment = loan.monthly_payment;
+          principal = Math.max(0, payment - interest);
+        }
+      }
+
+      restschuld = Math.max(0, restschuld - principal);
+      kumTilgung = Math.min(kumTilgung + principal, loan.amount);
+
+      const isAnnual = m % 12 === 0;
+      const rowBg = isAnnual ? ' style="background:#FFF8DC;"' : '';
+
+      rows.push(`<tr${rowBg}>
+        <td>${m}</td>
+        <td style="text-align:left;">${datum}</td>
+        <td>${fmtMoney(payment)}</td>
+        <td style="color:${loan.type === "standard" ? "#D97706" : "#16A34A"};">${fmtMoney(Math.max(0, interest))}</td>
+        <td style="color:#005F2D;">${fmtMoney(Math.max(0, principal))}</td>
+        <td style="font-weight:600;">${fmtMoney(Math.max(0, restschuld))}</td>
+        <td style="color:#005F2D;">${fmtMoney(kumTilgung)}</td>
+      </tr>`);
+    }
+    return rows;
+  })();
+
+  const tableHead = `<thead><tr>
+    <th style="text-align:center;width:6%;">Monat</th>
+    <th style="text-align:left;width:18%;">Datum</th>
+    <th style="width:13%;">Rate (EUR)</th>
+    <th style="width:13%;">Zinsen (EUR)</th>
+    <th style="width:13%;">Tilgung (EUR)</th>
+    <th style="width:13%;">Restschuld</th>
+    <th style="width:13%;">Kum. Tilgung</th>
+  </tr></thead>`;
+
+  const gesamtRow = `<tr style="background:#F0FDF4;border-top:2px solid #005F2D;">
+    <td colspan="2" style="text-align:left;font-weight:700;color:#005F2D;padding:7px 10px;">GESAMT</td>
+    <td style="font-weight:700;color:#005F2D;">${fmtMoney(loan.total_repayment)}</td>
+    <td style="font-weight:700;color:${loan.type === "standard" ? "#D97706" : "#16A34A"};">${fmtMoney(loan.total_repayment - loan.amount)}</td>
+    <td style="font-weight:700;color:#005F2D;">${fmtMoney(loan.amount)}</td>
+    <td style="font-weight:700;color:#16A34A;">0,00 €</td>
+    <td style="font-weight:700;color:#005F2D;">${fmtMoney(loan.amount)}</td>
+  </tr>`;
+
+  const annualNote = `<p style="color:#64748B;font-size:10px;margin-top:4px;">* Gelbe Zeilen = Jahresabschlüsse</p>`;
+
   const ROWS_FIRST = 16;
-  const ROWS_PER_PAGE = 25;
+  const ROWS_PER_PAGE = 28;
 
   const summaryCards = [
     ["Kreditbetrag", fmtMoney(loan.amount), "#005F2D"],
@@ -551,27 +609,28 @@ ${letterhead()}
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">${summaryCards}</div>
 <div class="section">
   <h3>Zahlungsplan</h3>
-  <table>${tableHead}<tbody>${firstChunk.join("")}</tbody></table>
-  ${isOnePage ? totalRow : ""}
+  <table style="font-size:10px;">${tableHead}<tbody>${firstChunk.join("")}${isOnePage ? gesamtRow : ""}</tbody></table>
+  ${isOnePage ? annualNote : ""}
 </div>
 ${isOnePage ? sigBlock(client, sigOpts, "Direktion") : ""}
 ${isOnePage ? footerBar(ref) : ""}
 </div>`;
 
-  // Continuation pages — table only (no footer, no sigBlock; footer is on the Abschluss page only)
+  // Continuation pages — table only; GESAMT row on last data page; footer on Abschluss page only
   let morePages = "";
   if (!isOnePage) {
     for (let p = ROWS_FIRST; p < allRows.length; p += ROWS_PER_PAGE) {
       const chunk = allRows.slice(p, p + ROWS_PER_PAGE);
+      const isLast = p + ROWS_PER_PAGE >= allRows.length;
       morePages += `<div class="page">
 ${contPageHeader(ref, "Tilgungsplan — Fortsetzung")}
-<table>${tableHead}<tbody>${chunk.join("")}</tbody></table>
+<table style="font-size:10px;">${tableHead}<tbody>${chunk.join("")}${isLast ? gesamtRow : ""}</tbody></table>
+${isLast ? annualNote : ""}
 </div>`;
     }
-    // Dedicated final page: total summary + signature (never overflows)
+    // Dedicated final page: signature only
     morePages += `<div class="page">
 ${contPageHeader(ref, "Tilgungsplan — Abschluss")}
-${totalRow}
 ${sigBlock(client, sigOpts, "Direktion")}
 ${footerBar(ref)}
 </div>`;

@@ -1935,7 +1935,12 @@ export default function ClientDashboard() {
       const fixedHtml = html.includes("</head>") ? html.replace("</head>", pdfScript + "</head>") : html;
       const blob = new Blob([fixedHtml], { type: "text/html;charset=utf-8" });
       const url = URL.createObjectURL(blob);
-      window.open(url, "_blank");
+      const win = window.open(url, "_blank");
+      if (!win) {
+        alert("Le navigateur a bloqué l'ouverture du document. Veuillez autoriser les popups pour ce site, puis réessayez.");
+        URL.revokeObjectURL(url);
+        return;
+      }
       setTimeout(() => URL.revokeObjectURL(url), 60_000);
     }
 
