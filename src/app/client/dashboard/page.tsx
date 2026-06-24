@@ -1931,7 +1931,10 @@ export default function ClientDashboard() {
     }
 
     function openDocBlob(html: string) {
-      const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+      // Inject print CSS override so all stored documents (old and new) print correctly
+      const printOverride = `<style>@media print{*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}html,body{margin:0!important;padding:0!important;background:white!important;}.page-bg{background:white!important;padding:0!important;margin:0!important;}.page{display:block!important;position:static!important;width:auto!important;min-height:0!important;margin:0!important;padding:0!important;box-shadow:none!important;overflow:visible!important;page-break-after:always!important;break-after:page!important;}.page:last-child{page-break-after:avoid!important;break-after:avoid!important;}@page{size:A4;margin:20mm 18mm;}#pdf-btn{display:none!important;}}</style>`;
+      const fixedHtml = html.includes("</head>") ? html.replace("</head>", printOverride + "</head>") : html;
+      const blob = new Blob([fixedHtml], { type: "text/html;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
       setTimeout(() => URL.revokeObjectURL(url), 60_000);

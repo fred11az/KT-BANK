@@ -46,19 +46,25 @@ function baseStyles() {
       position: relative;
     }
 
-    /* Print: keep same A4 dimensions as screen — just remove decorations */
+    /* Print */
     @media print {
       * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-      html, body { margin: 0 !important; background: white !important; }
-      .page-bg { background: white !important; padding: 0 !important; }
+      html, body { margin: 0 !important; padding: 0 !important; background: white !important; }
+      .page-bg { background: white !important; padding: 0 !important; margin: 0 !important; }
       .page {
+        display: block !important;
+        position: static !important;
+        width: auto !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
         box-shadow: none !important;
-        margin: 0 auto !important;
-        page-break-after: always;
-        break-after: page;
+        overflow: visible !important;
+        page-break-after: always !important;
+        break-after: page !important;
       }
-      .page:last-child { page-break-after: avoid; break-after: avoid; }
-      @page { size: A4; margin: 0; }
+      .page:last-child { page-break-after: avoid !important; break-after: avoid !important; }
+      @page { size: A4; margin: 20mm 18mm; }
       #pdf-btn { display: none !important; }
     }
 
