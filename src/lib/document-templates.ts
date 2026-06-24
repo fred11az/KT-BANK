@@ -264,6 +264,16 @@ function sigBlock(
   return `<div class="sig-row">${clientCol}${bankCol}</div>`;
 }
 
+function contPageHeader(ref: string, subtitle: string) {
+  return `<div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:2px solid #005F2D;margin-bottom:18px;">
+    <div>
+      <p style="color:#005F2D;font-size:14px;font-weight:800;margin:0;">KT Bank AG</p>
+      <p style="color:#64748B;font-size:10px;margin:2px 0 0;">${subtitle}</p>
+    </div>
+    <p style="color:#94A3B8;font-size:10px;margin:0;">Ref: ${ref} · ${docDate()}</p>
+  </div>`;
+}
+
 /* ── 1. Kontoeröffnungsbestätigung ── */
 export function genKontoeröffnung(client: ClientInfo, sigOpts: SignatureOptions = {}): string {
   const ref = docRef();
@@ -379,7 +389,7 @@ export function genKreditvertrag(client: ClientInfo, loan: {
   const fmtMoney = (n: number) => n.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
   const rate = loan.interest_rate / 12;
 
-  const rows = Array.from({ length: loan.duration_months }, (_, i) => {
+  const allRows = Array.from({ length: loan.duration_months }, (_, i) => {
     const m = i + 1;
     const interest = loan.type === "islamic" ? 0 :
       (loan.amount - (loan.monthly_payment - loan.amount * rate) * (Math.pow(1 + rate, i) - 1) / (rate || 1)) * rate;
@@ -390,18 +400,18 @@ export function genKreditvertrag(client: ClientInfo, loan: {
       <td style="color:#005F2D;">${fmtMoney(Math.max(0, principal))}</td>
       <td style="color:${loan.type === "standard" ? "#D97706" : "#16A34A"};">${fmtMoney(Math.max(0, interest))}</td>
     </tr>`;
-  }).join("");
+  });
 
-  return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
-<title>Kreditvertrag — KT Bank AG</title>
-<style>${baseStyles()}</style></head><body><div class="page-bg"><div class="page">
+  const tableHead = `<thead><tr><th>Monat</th><th>Rate</th><th>Tilgung</th><th>Zinsen</th></tr></thead>`;
+  const ROWS_PER_PAGE = 30;
+
+  // Page 1: contract terms + signature (no table)
+  const page1 = `<div class="page">
 ${letterhead()}
-
 <div class="doc-title">
   <h2>Kreditvertrag</h2>
   <span class="ref">${loan.type === "islamic" ? "Islamischer Kredit (Mourabaha)" : "Standardkredit"} · Ref: ${ref}</span>
 </div>
-
 <div class="parties">
   <div class="party-box">
     <h4>Kreditnehmer</h4>
@@ -418,7 +428,6 @@ ${letterhead()}
     <p style="margin-top:4px;"><strong>BIC:</strong> KTAGDEFF</p>
   </div>
 </div>
-
 <div class="highlight-box">
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
     <div><p class="label">Kreditbetrag</p><p class="amount">${fmtMoney(loan.amount)}</p></div>
@@ -427,7 +436,6 @@ ${letterhead()}
     <div><p class="label">Zinssatz p. a.</p><p class="amount" style="font-size:20px;color:${loan.type === "islamic" ? "#16A34A" : "#D97706"};">${loan.type === "islamic" ? "0 %" : "2 %"}</p></div>
   </div>
 </div>
-
 <div class="section">
   <h3>Vertragsbedingungen</h3>
   ${loan.purpose ? `<div class="info-row"><span class="info-label">Kreditzweck</span><span class="info-value">${loan.purpose}</span></div>` : ""}
@@ -437,26 +445,33 @@ ${letterhead()}
   <div class="info-row"><span class="info-label">Vertragsdatum</span><span class="info-value">${docDate()}</span></div>
   <div class="info-row"><span class="info-label">Erste Rate fällig am</span><span class="info-value">${new Date(Date.now() + 30 * 86400000).toLocaleDateString("de-DE", { day: "2-digit", month: "long", year: "numeric" })}</span></div>
 </div>
-
-<div class="section">
-  <h3>Tilgungsplan</h3>
-  <table>
-    <thead><tr>
-      <th>Monat</th><th>Rate</th><th>Tilgung</th><th>Zinsen</th>
-    </tr></thead>
-    <tbody>${rows}</tbody>
-  </table>
-</div>
-
 <div class="section">
   <h3>Allgemeine Bestimmungen</h3>
   <p class="body-text">Der Kreditnehmer verpflichtet sich, die monatlichen Raten pünktlich und vollständig zu entrichten. Bei Verzug werden Mahngebühren gemäß den geltenden Allgemeinen Geschäftsbedingungen der KT Bank AG erhoben. Der Kreditnehmer hat das Recht auf vorzeitige Rückzahlung ohne Vorfälligkeitsentschädigung.</p>
 </div>
-
 ${sigBlock(client, sigOpts, "Kreditgeber")}
-
 ${footerBar(ref)}
-</div></div></body></html>`;
+</div>`;
+
+  // Pages 2+: amortization table split into chunks of 30 rows
+  let tablePages = "";
+  for (let p = 0; p < allRows.length; p += ROWS_PER_PAGE) {
+    const chunk = allRows.slice(p, p + ROWS_PER_PAGE);
+    const isLast = p + ROWS_PER_PAGE >= allRows.length;
+    const pageNum = Math.floor(p / ROWS_PER_PAGE) + 2;
+    tablePages += `<div class="page">
+${contPageHeader(ref, `Kreditvertrag — Tilgungsplan${p > 0 ? " (Fortsetzung)" : ""}`)}
+<table style="margin-top:4px;">${tableHead}<tbody>${chunk.join("")}</tbody></table>
+${isLast ? `<p style="color:#64748B;font-size:11px;text-align:right;margin-top:8px;">Gesamtrückzahlung: <strong style="color:#005F2D;">${fmtMoney(loan.total_repayment)}</strong></p>` : ""}
+${footerBar(ref)}
+</div>`;
+  }
+
+  return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
+<title>Kreditvertrag — KT Bank AG</title>
+<style>${baseStyles()}</style></head><body><div class="page-bg">
+${page1}${tablePages}
+</div></body></html>`;
 }
 
 /* ── 4. Tilgungsplan (standalone) ── */
@@ -473,7 +488,7 @@ export function genTilgungsplan(client: ClientInfo, loan: {
   const fmtMoney = (n: number) => n.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
   const rate = loan.interest_rate / 12;
 
-  const rows = Array.from({ length: loan.duration_months }, (_, i) => {
+  const allRows = Array.from({ length: loan.duration_months }, (_, i) => {
     const m = i + 1;
     const interest = loan.type === "islamic" ? 0 :
       (loan.amount - (loan.monthly_payment - loan.amount * rate) * (Math.pow(1 + rate, i) - 1) / (rate || 1)) * rate;
@@ -484,18 +499,32 @@ export function genTilgungsplan(client: ClientInfo, loan: {
       <td style="color:#005F2D;">${fmtMoney(Math.max(0, principal))}</td>
       <td style="color:${loan.type === "standard" ? "#D97706" : "#16A34A"};">${fmtMoney(Math.max(0, interest))}</td>
     </tr>`;
-  }).join("");
+  });
 
-  return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
-<title>Tilgungsplan — KT Bank AG</title>
-<style>${baseStyles()}</style></head><body><div class="page-bg"><div class="page">
+  const tableHead = `<thead><tr><th>Monat</th><th>Rate</th><th>Tilgung</th><th>Zinsen</th></tr></thead>`;
+  const totalRow = `<p style="color:#64748B;font-size:11px;text-align:right;margin-top:8px;">Gesamtrückzahlung: <strong style="color:#005F2D;">${fmtMoney(loan.total_repayment)}</strong></p>`;
+  const ROWS_FIRST = 18;
+  const ROWS_PER_PAGE = 30;
+
+  const summaryCards = [
+    ["Kreditbetrag", fmtMoney(loan.amount), "#005F2D"],
+    ["Monatliche Rate", fmtMoney(loan.monthly_payment), "#005F2D"],
+    ["Laufzeit", `${loan.duration_months} Monate`, "#0F172A"],
+    ["Gesamtzinsen", fmtMoney(loan.total_repayment - loan.amount), loan.type === "standard" ? "#D97706" : "#16A34A"],
+  ].map(([l, v, c]) => `<div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px 16px;">
+    <p style="color:#94A3B8;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px;">${l}</p>
+    <p style="color:${c};font-weight:800;font-size:16px;">${v}</p>
+  </div>`).join("");
+
+  const firstChunk = allRows.slice(0, ROWS_FIRST);
+  const isOnePage = allRows.length <= ROWS_FIRST;
+
+  const page1 = `<div class="page">
 ${letterhead()}
-
 <div class="doc-title">
   <h2>Tilgungsplan</h2>
   <span class="ref">${loan.type === "islamic" ? "Islamischer Kredit (Mourabaha)" : "Standardkredit (2% p. a.)"} · Ref: ${ref}</span>
 </div>
-
 <div class="parties">
   <div class="party-box">
     <h4>Kreditnehmer</h4>
@@ -511,34 +540,35 @@ ${letterhead()}
     <p><strong>Zinssatz:</strong> ${loan.type === "islamic" ? "0 % (Mourabaha)" : "2 % p. a."}</p>
   </div>
 </div>
-
-<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">
-  ${[
-    ["Kreditbetrag", fmtMoney(loan.amount), "#005F2D"],
-    ["Monatliche Rate", fmtMoney(loan.monthly_payment), "#005F2D"],
-    ["Laufzeit", `${loan.duration_months} Monate`, "#0F172A"],
-    ["Gesamtzinsen", fmtMoney(loan.total_repayment - loan.amount), loan.type === "standard" ? "#D97706" : "#16A34A"],
-  ].map(([l, v, c]) => `
-    <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px 16px;">
-      <p style="color:#94A3B8;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px;">${l}</p>
-      <p style="color:${c};font-weight:800;font-size:16px;">${v}</p>
-    </div>
-  `).join("")}
-</div>
-
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">${summaryCards}</div>
 <div class="section">
   <h3>Zahlungsplan</h3>
-  <table>
-    <thead><tr><th>Monat</th><th>Rate</th><th>Tilgung</th><th>Zinsen</th></tr></thead>
-    <tbody>${rows}</tbody>
-  </table>
-  <p style="color:#64748B;font-size:11px;text-align:right;">Gesamtrückzahlung: <strong style="color:#005F2D;">${fmtMoney(loan.total_repayment)}</strong></p>
+  <table>${tableHead}<tbody>${firstChunk.join("")}</tbody></table>
+  ${isOnePage ? totalRow : ""}
 </div>
-
-${sigBlock(client, sigOpts, "Direktion")}
-
+${isOnePage ? sigBlock(client, sigOpts, "Direktion") : ""}
 ${footerBar(ref)}
-</div></div></body></html>`;
+</div>`;
+
+  // Continuation pages
+  let morePages = "";
+  for (let p = ROWS_FIRST; p < allRows.length; p += ROWS_PER_PAGE) {
+    const chunk = allRows.slice(p, p + ROWS_PER_PAGE);
+    const isLast = p + ROWS_PER_PAGE >= allRows.length;
+    morePages += `<div class="page">
+${contPageHeader(ref, "Tilgungsplan — Fortsetzung")}
+<table>${tableHead}<tbody>${chunk.join("")}</tbody></table>
+${isLast ? totalRow : ""}
+${isLast ? sigBlock(client, sigOpts, "Direktion") : ""}
+${footerBar(ref)}
+</div>`;
+  }
+
+  return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
+<title>Tilgungsplan — KT Bank AG</title>
+<style>${baseStyles()}</style></head><body><div class="page-bg">
+${page1}${morePages}
+</div></body></html>`;
 }
 
 /* ── 5. AGB (static) ── */
