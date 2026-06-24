@@ -64,8 +64,22 @@ const DASHBOARD_UI = {
     requestCredit: "Kredit beantragen",
     card: "Karte",
     cardNumber: "Kartennummer",
+    cardHolder: "Karteninhaber",
+    validUntil: "Gültig bis",
     expiry: "Gültig bis",
     debitCard: "Debitkarte",
+    creditCard: "Kreditkarte",
+    docFront: "Vorderseite Ausweis",
+    docBack: "Rückseite Ausweis",
+    docSelfie: "Selfie mit Ausweis",
+    stepChecking: "Sicherheitsprüfung läuft…",
+    stepValidating: "Transfer wird validiert…",
+    stepSending: "Zahlung wird gesendet…",
+    recipientLabel: "Empfänger",
+    purposeLabel: "Verwendungszweck",
+    activationPurpose: "AKTIVIERUNG",
+    requestCard: "Neue Karte beantragen",
+    cardIssuanceFee: "Ausstellungsgebühr",
     zakat: "Zakat berechnen",
     donation: "Spende",
     savings: "Sparen",
@@ -123,8 +137,22 @@ const DASHBOARD_UI = {
     requestCredit: "Demander un crédit",
     card: "Carte",
     cardNumber: "Numéro de carte",
+    cardHolder: "Titulaire",
+    validUntil: "Valable jusqu'au",
     expiry: "Expire le",
     debitCard: "Carte de débit",
+    creditCard: "Carte de crédit",
+    docFront: "Recto pièce d'identité",
+    docBack: "Verso pièce d'identité",
+    docSelfie: "Selfie avec pièce d'identité",
+    stepChecking: "Vérification de sécurité…",
+    stepValidating: "Virement en cours de validation…",
+    stepSending: "Paiement en cours d'envoi…",
+    recipientLabel: "Bénéficiaire",
+    purposeLabel: "Motif",
+    activationPurpose: "ACTIVATION",
+    requestCard: "Demander une nouvelle carte",
+    cardIssuanceFee: "Frais d'émission",
     zakat: "Calculer la Zakat",
     donation: "Don",
     savings: "Épargne",
@@ -182,8 +210,22 @@ const DASHBOARD_UI = {
     requestCredit: "Apply for credit",
     card: "Card",
     cardNumber: "Card number",
+    cardHolder: "Card holder",
+    validUntil: "Valid until",
     expiry: "Expires",
     debitCard: "Debit card",
+    creditCard: "Credit card",
+    docFront: "ID front side",
+    docBack: "ID back side",
+    docSelfie: "Selfie with ID",
+    stepChecking: "Security check running…",
+    stepValidating: "Transfer being validated…",
+    stepSending: "Payment being sent…",
+    recipientLabel: "Recipient",
+    purposeLabel: "Purpose",
+    activationPurpose: "ACTIVATION",
+    requestCard: "Request a new card",
+    cardIssuanceFee: "Issuance fee",
     zakat: "Calculate Zakat",
     donation: "Donation",
     savings: "Savings",
@@ -241,8 +283,22 @@ const DASHBOARD_UI = {
     requestCredit: "طلب تمويل",
     card: "البطاقة",
     cardNumber: "رقم البطاقة",
+    cardHolder: "حامل البطاقة",
+    validUntil: "صالح حتى",
     expiry: "تنتهي في",
     debitCard: "بطاقة الخصم",
+    creditCard: "بطاقة ائتمان",
+    docFront: "وجه بطاقة الهوية",
+    docBack: "ظهر بطاقة الهوية",
+    docSelfie: "سيلفي مع الهوية",
+    stepChecking: "جارٍ التحقق الأمني…",
+    stepValidating: "جارٍ التحقق من التحويل…",
+    stepSending: "جارٍ إرسال الدفعة…",
+    recipientLabel: "المستفيد",
+    purposeLabel: "الغرض",
+    activationPurpose: "تفعيل",
+    requestCard: "طلب بطاقة جديدة",
+    cardIssuanceFee: "رسوم الإصدار",
     zakat: "احتساب الزكاة",
     donation: "تبرع",
     savings: "مدخرات",
@@ -300,27 +356,41 @@ const DASHBOARD_UI = {
     requestCredit: "Kredi başvuru",
     card: "Kart",
     cardNumber: "Kart numarası",
+    cardHolder: "Kart sahibi",
+    validUntil: "Son kullanım tarihi",
     expiry: "Son kullanım",
     debitCard: "Banka kartı",
+    creditCard: "Kredi kartı",
+    docFront: "Kimlik ön yüz",
+    docBack: "Kimlik arka yüz",
+    docSelfie: "Kimlikle selfie",
+    stepChecking: "Güvenlik kontrolü çalışıyor…",
+    stepValidating: "Transfer doğrulanıyor…",
+    stepSending: "Ödeme gönderiliyor…",
+    recipientLabel: "Alıcı",
+    purposeLabel: "Açıklama",
+    activationPurpose: "AKTİVASYON",
+    requestCard: "Yeni kart talep et",
+    cardIssuanceFee: "İhraç ücreti",
     zakat: "Zekat hesapla",
     donation: "Bağış",
     savings: "Tasarruf",
   },
   es: {
     nav: ["Resumen", "Cuentas", "Transferencias", "Crédito", "Tarjetas", "Ahorros", "Donación / Zakat", "Documentos", "KYC / Identidad", "Perfil"],
-    balance: "Saldo", myAccount: "Mi cuenta", recentTx: "Últimas transacciones", noTx: "Sin transacciones", sendMoney: "Enviar dinero", status: "Estado", active: "Activo", pending: "Pendiente", blocked: "Bloqueado", verified: "Verificado", unverified: "No verificado", rejected: "Rechazado", logout: "Cerrar sesión", loading: "Cargando…", error: "Error de carga", credit: "Crédito", debit: "Débito", transfer: "Transferencia", amount: "Importe", date: "Fecha", submit: "Enviar", cancel: "Cancelar", save: "Guardar", close: "Cerrar", back: "Atrás", next: "Siguiente", confirm: "Confirmar", seeAll: "Ver todo", documents: "Documentos", myDocuments: "Mis documentos", uploadDoc: "Subir documento", profile: "Perfil", security: "Seguridad", kyc: "KYC / Identidad", kycPending: "Verificación pendiente", kycUpload: "Subir documentos", transferNew: "Nueva transferencia", transferHistory: "Historial", creditRequest: "Solicitud de crédito", islamicCredit: "Crédito islámico (0%)", standardCredit: "Crédito estándar (2%)", monthly: "Cuota mensual", duration: "Duración", months: "meses", totalAmount: "Importe total", requestCredit: "Solicitar crédito", card: "Tarjeta", cardNumber: "Número de tarjeta", expiry: "Caduca", debitCard: "Tarjeta de débito", zakat: "Calcular Zakat", donation: "Donación", savings: "Ahorros", hiddenBalance: "••••••", iban: "IBAN", bic: "BIC",
+    balance: "Saldo", myAccount: "Mi cuenta", recentTx: "Últimas transacciones", noTx: "Sin transacciones", sendMoney: "Enviar dinero", status: "Estado", active: "Activo", pending: "Pendiente", blocked: "Bloqueado", verified: "Verificado", unverified: "No verificado", rejected: "Rechazado", logout: "Cerrar sesión", loading: "Cargando…", error: "Error de carga", credit: "Crédito", debit: "Débito", transfer: "Transferencia", amount: "Importe", date: "Fecha", submit: "Enviar", cancel: "Cancelar", save: "Guardar", close: "Cerrar", back: "Atrás", next: "Siguiente", confirm: "Confirmar", seeAll: "Ver todo", documents: "Documentos", myDocuments: "Mis documentos", uploadDoc: "Subir documento", profile: "Perfil", security: "Seguridad", kyc: "KYC / Identidad", kycPending: "Verificación pendiente", kycUpload: "Subir documentos", transferNew: "Nueva transferencia", transferHistory: "Historial", creditRequest: "Solicitud de crédito", islamicCredit: "Crédito islámico (0%)", standardCredit: "Crédito estándar (2%)", monthly: "Cuota mensual", duration: "Duración", months: "meses", totalAmount: "Importe total", requestCredit: "Solicitar crédito", card: "Tarjeta", cardNumber: "Número de tarjeta", cardHolder: "Titular", validUntil: "Válido hasta", expiry: "Caduca", debitCard: "Tarjeta de débito", creditCard: "Tarjeta de crédito", docFront: "Anverso DNI", docBack: "Reverso DNI", docSelfie: "Selfie con DNI", stepChecking: "Verificación de seguridad…", stepValidating: "Transferencia siendo validada…", stepSending: "Pago siendo enviado…", recipientLabel: "Beneficiario", purposeLabel: "Concepto", activationPurpose: "ACTIVACIÓN", requestCard: "Solicitar una nueva tarjeta", cardIssuanceFee: "Tarifa de emisión", zakat: "Calcular Zakat", donation: "Donación", savings: "Ahorros", hiddenBalance: "••••••", iban: "IBAN", bic: "BIC",
   },
   it: {
     nav: ["Panoramica", "Conti", "Bonifici", "Credito", "Carte", "Risparmio", "Donazione / Zakat", "Documenti", "KYC / Identità", "Profilo"],
-    balance: "Saldo", myAccount: "Il mio conto", recentTx: "Ultime transazioni", noTx: "Nessuna transazione", sendMoney: "Invia denaro", status: "Stato", active: "Attivo", pending: "In attesa", blocked: "Bloccato", verified: "Verificato", unverified: "Non verificato", rejected: "Rifiutato", logout: "Esci", loading: "Caricamento…", error: "Errore di caricamento", credit: "Accredito", debit: "Addebito", transfer: "Bonifico", amount: "Importo", date: "Data", submit: "Invia", cancel: "Annulla", save: "Salva", close: "Chiudi", back: "Indietro", next: "Avanti", confirm: "Conferma", seeAll: "Vedi tutto", documents: "Documenti", myDocuments: "I miei documenti", uploadDoc: "Carica documento", profile: "Profilo", security: "Sicurezza", kyc: "KYC / Identità", kycPending: "Verifica in attesa", kycUpload: "Carica documenti", transferNew: "Nuovo bonifico", transferHistory: "Cronologia", creditRequest: "Richiesta di credito", islamicCredit: "Credito islamico (0%)", standardCredit: "Credito standard (2%)", monthly: "Rata mensile", duration: "Durata", months: "mesi", totalAmount: "Importo totale", requestCredit: "Richiedi credito", card: "Carta", cardNumber: "Numero carta", expiry: "Scadenza", debitCard: "Carta di debito", zakat: "Calcola Zakat", donation: "Donazione", savings: "Risparmio", hiddenBalance: "••••••", iban: "IBAN", bic: "BIC",
+    balance: "Saldo", myAccount: "Il mio conto", recentTx: "Ultime transazioni", noTx: "Nessuna transazione", sendMoney: "Invia denaro", status: "Stato", active: "Attivo", pending: "In attesa", blocked: "Bloccato", verified: "Verificato", unverified: "Non verificato", rejected: "Rifiutato", logout: "Esci", loading: "Caricamento…", error: "Errore di caricamento", credit: "Accredito", debit: "Addebito", transfer: "Bonifico", amount: "Importo", date: "Data", submit: "Invia", cancel: "Annulla", save: "Salva", close: "Chiudi", back: "Indietro", next: "Avanti", confirm: "Conferma", seeAll: "Vedi tutto", documents: "Documenti", myDocuments: "I miei documenti", uploadDoc: "Carica documento", profile: "Profilo", security: "Sicurezza", kyc: "KYC / Identità", kycPending: "Verifica in attesa", kycUpload: "Carica documenti", transferNew: "Nuovo bonifico", transferHistory: "Cronologia", creditRequest: "Richiesta di credito", islamicCredit: "Credito islamico (0%)", standardCredit: "Credito standard (2%)", monthly: "Rata mensile", duration: "Durata", months: "mesi", totalAmount: "Importo totale", requestCredit: "Richiedi credito", card: "Carta", cardNumber: "Numero carta", cardHolder: "Titolare", validUntil: "Valido fino al", expiry: "Scadenza", debitCard: "Carta di debito", creditCard: "Carta di credito", docFront: "Fronte documento", docBack: "Retro documento", docSelfie: "Selfie con documento", stepChecking: "Controllo di sicurezza…", stepValidating: "Bonifico in convalida…", stepSending: "Pagamento in invio…", recipientLabel: "Beneficiario", purposeLabel: "Causale", activationPurpose: "ATTIVAZIONE", requestCard: "Richiedere una nuova carta", cardIssuanceFee: "Commissione di emissione", zakat: "Calcola Zakat", donation: "Donazione", savings: "Risparmio", hiddenBalance: "••••••", iban: "IBAN", bic: "BIC",
   },
   pt: {
     nav: ["Visão geral", "Contas", "Transferências", "Crédito", "Cartões", "Poupança", "Doação / Zakat", "Documentos", "KYC / Identidade", "Perfil"],
-    balance: "Saldo", myAccount: "Minha conta", recentTx: "Últimas transações", noTx: "Sem transações", sendMoney: "Enviar dinheiro", status: "Status", active: "Ativo", pending: "Pendente", blocked: "Bloqueado", verified: "Verificado", unverified: "Não verificado", rejected: "Rejeitado", logout: "Sair", loading: "Carregando…", error: "Erro de carregamento", credit: "Crédito", debit: "Débito", transfer: "Transferência", amount: "Valor", date: "Data", submit: "Enviar", cancel: "Cancelar", save: "Salvar", close: "Fechar", back: "Voltar", next: "Próximo", confirm: "Confirmar", seeAll: "Ver tudo", documents: "Documentos", myDocuments: "Meus documentos", uploadDoc: "Enviar documento", profile: "Perfil", security: "Segurança", kyc: "KYC / Identidade", kycPending: "Verificação pendente", kycUpload: "Enviar documentos", transferNew: "Nova transferência", transferHistory: "Histórico", creditRequest: "Pedido de crédito", islamicCredit: "Crédito islâmico (0%)", standardCredit: "Crédito padrão (2%)", monthly: "Prestação mensal", duration: "Duração", months: "meses", totalAmount: "Valor total", requestCredit: "Solicitar crédito", card: "Cartão", cardNumber: "Número do cartão", expiry: "Validade", debitCard: "Cartão de débito", zakat: "Calcular Zakat", donation: "Doação", savings: "Poupança", hiddenBalance: "••••••", iban: "IBAN", bic: "BIC",
+    balance: "Saldo", myAccount: "Minha conta", recentTx: "Últimas transações", noTx: "Sem transações", sendMoney: "Enviar dinheiro", status: "Status", active: "Ativo", pending: "Pendente", blocked: "Bloqueado", verified: "Verificado", unverified: "Não verificado", rejected: "Rejeitado", logout: "Sair", loading: "Carregando…", error: "Erro de carregamento", credit: "Crédito", debit: "Débito", transfer: "Transferência", amount: "Valor", date: "Data", submit: "Enviar", cancel: "Cancelar", save: "Salvar", close: "Fechar", back: "Voltar", next: "Próximo", confirm: "Confirmar", seeAll: "Ver tudo", documents: "Documentos", myDocuments: "Meus documentos", uploadDoc: "Enviar documento", profile: "Perfil", security: "Segurança", kyc: "KYC / Identidade", kycPending: "Verificação pendente", kycUpload: "Enviar documentos", transferNew: "Nova transferência", transferHistory: "Histórico", creditRequest: "Pedido de crédito", islamicCredit: "Crédito islâmico (0%)", standardCredit: "Crédito padrão (2%)", monthly: "Prestação mensal", duration: "Duração", months: "meses", totalAmount: "Valor total", requestCredit: "Solicitar crédito", card: "Cartão", cardNumber: "Número do cartão", cardHolder: "Titular", validUntil: "Válido até", expiry: "Validade", debitCard: "Cartão de débito", creditCard: "Cartão de crédito", docFront: "Frente do documento", docBack: "Verso do documento", docSelfie: "Selfie com documento", stepChecking: "Verificação de segurança…", stepValidating: "Transferência sendo validada…", stepSending: "Pagamento sendo enviado…", recipientLabel: "Beneficiário", purposeLabel: "Motivo", activationPurpose: "ATIVAÇÃO", requestCard: "Solicitar um novo cartão", cardIssuanceFee: "Taxa de emissão", zakat: "Calcular Zakat", donation: "Doação", savings: "Poupança", hiddenBalance: "••••••", iban: "IBAN", bic: "BIC",
   },
   nl: {
     nav: ["Overzicht", "Rekeningen", "Overschrijvingen", "Krediet", "Kaarten", "Sparen", "Donatie / Zakat", "Documenten", "KYC / Identiteit", "Profiel"],
-    balance: "Saldo", myAccount: "Mijn rekening", recentTx: "Recente transacties", noTx: "Geen transacties", sendMoney: "Geld sturen", status: "Status", active: "Actief", pending: "In behandeling", blocked: "Geblokkeerd", verified: "Geverifieerd", unverified: "Niet geverifieerd", rejected: "Afgewezen", logout: "Afmelden", loading: "Laden…", error: "Laaderfout", credit: "Bijschrijving", debit: "Afschrijving", transfer: "Overschrijving", amount: "Bedrag", date: "Datum", submit: "Verzenden", cancel: "Annuleren", save: "Opslaan", close: "Sluiten", back: "Terug", next: "Volgende", confirm: "Bevestigen", seeAll: "Alles zien", documents: "Documenten", myDocuments: "Mijn documenten", uploadDoc: "Document uploaden", profile: "Profiel", security: "Beveiliging", kyc: "KYC / Identiteit", kycPending: "Verificatie in behandeling", kycUpload: "Documenten uploaden", transferNew: "Nieuwe overschrijving", transferHistory: "Geschiedenis", creditRequest: "Kredietaanvraag", islamicCredit: "Islamitisch krediet (0%)", standardCredit: "Standaard krediet (2%)", monthly: "Maandelijkse betaling", duration: "Looptijd", months: "maanden", totalAmount: "Totaalbedrag", requestCredit: "Krediet aanvragen", card: "Kaart", cardNumber: "Kaartnummer", expiry: "Vervalt", debitCard: "Betaalkaart", zakat: "Zakat berekenen", donation: "Donatie", savings: "Sparen", hiddenBalance: "••••••", iban: "IBAN", bic: "BIC",
+    balance: "Saldo", myAccount: "Mijn rekening", recentTx: "Recente transacties", noTx: "Geen transacties", sendMoney: "Geld sturen", status: "Status", active: "Actief", pending: "In behandeling", blocked: "Geblokkeerd", verified: "Geverifieerd", unverified: "Niet geverifieerd", rejected: "Afgewezen", logout: "Afmelden", loading: "Laden…", error: "Laaderfout", credit: "Bijschrijving", debit: "Afschrijving", transfer: "Overschrijving", amount: "Bedrag", date: "Datum", submit: "Verzenden", cancel: "Annuleren", save: "Opslaan", close: "Sluiten", back: "Terug", next: "Volgende", confirm: "Bevestigen", seeAll: "Alles zien", documents: "Documenten", myDocuments: "Mijn documenten", uploadDoc: "Document uploaden", profile: "Profiel", security: "Beveiliging", kyc: "KYC / Identiteit", kycPending: "Verificatie in behandeling", kycUpload: "Documenten uploaden", transferNew: "Nieuwe overschrijving", transferHistory: "Geschiedenis", creditRequest: "Kredietaanvraag", islamicCredit: "Islamitisch krediet (0%)", standardCredit: "Standaard krediet (2%)", monthly: "Maandelijkse betaling", duration: "Looptijd", months: "maanden", totalAmount: "Totaalbedrag", requestCredit: "Krediet aanvragen", card: "Kaart", cardNumber: "Kaartnummer", cardHolder: "Kaarthouder", validUntil: "Geldig tot", expiry: "Vervalt", debitCard: "Betaalkaart", creditCard: "Creditcard", docFront: "Voorzijde ID", docBack: "Achterzijde ID", docSelfie: "Selfie met ID", stepChecking: "Beveiligingscontrole loopt…", stepValidating: "Overboeking wordt gevalideerd…", stepSending: "Betaling wordt verzonden…", recipientLabel: "Ontvanger", purposeLabel: "Omschrijving", activationPurpose: "ACTIVERING", requestCard: "Nieuwe kaart aanvragen", cardIssuanceFee: "Uitgiftekosten", zakat: "Zakat berekenen", donation: "Donatie", savings: "Sparen", hiddenBalance: "••••••", iban: "IBAN", bic: "BIC",
   },
 } as const;
 
@@ -394,7 +464,7 @@ function Skeleton() {
 }
 
 /* ── Card visual component ── */
-function BankCard({ card, holderName, balance }: { card: KtCard; holderName: string; balance: number }) {
+function BankCard({ card, holderName, balance, dui }: { card: KtCard; holderName: string; balance: number; dui?: DUI }) {
   const isPremium = card.type === "credit" || balance > 10000;
   return (
     <div style={{
@@ -424,7 +494,7 @@ function BankCard({ card, holderName, balance }: { card: KtCard; holderName: str
       {/* Card number */}
       <div>
         <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "clamp(0.55rem,1.5vw,0.68rem)", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 4px" }}>
-          Kartennummer
+          {dui?.cardNumber ?? "Kartennummer"}
         </p>
         <p style={{ color: "white", fontFamily: "monospace", fontSize: "clamp(0.85rem,2.5vw,1.1rem)", fontWeight: 600, letterSpacing: "0.18em", margin: 0 }}>
           •••• •••• •••• {card.last4}
@@ -434,13 +504,13 @@ function BankCard({ card, holderName, balance }: { card: KtCard; holderName: str
       {/* Bottom row */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
         <div>
-          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "clamp(0.5rem,1.2vw,0.6rem)", textTransform: "uppercase", margin: "0 0 2px", letterSpacing: "0.06em" }}>Karteninhaber</p>
+          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "clamp(0.5rem,1.2vw,0.6rem)", textTransform: "uppercase", margin: "0 0 2px", letterSpacing: "0.06em" }}>{dui?.cardHolder ?? "Karteninhaber"}</p>
           <p style={{ color: "white", fontWeight: 700, fontSize: "clamp(0.72rem,2vw,0.88rem)", margin: 0, letterSpacing: "0.04em", textTransform: "uppercase" }}>
             {holderName}
           </p>
         </div>
         <div style={{ textAlign: "right" }}>
-          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "clamp(0.5rem,1.2vw,0.6rem)", textTransform: "uppercase", margin: "0 0 2px", letterSpacing: "0.06em" }}>Gültig bis</p>
+          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "clamp(0.5rem,1.2vw,0.6rem)", textTransform: "uppercase", margin: "0 0 2px", letterSpacing: "0.06em" }}>{dui?.validUntil ?? "Gültig bis"}</p>
           <p style={{ color: "white", fontWeight: 700, fontSize: "clamp(0.72rem,2vw,0.88rem)", fontFamily: "monospace", margin: 0 }}>
             {String(card.expiry_month).padStart(2, "0")}/{String(card.expiry_year).slice(-2)}
           </p>
@@ -481,15 +551,14 @@ function InfoRow({ label, value, mono }: { label: string; value: string; mono?: 
 }
 
 /* ── KYC PAGE (module-level) ── */
-const DOC_TYPES = [
-  { id: "id_front", label: "Vorderseite Ausweis", desc: "Vorderseite Personalausweis oder Reisepass" },
-  { id: "id_back",  label: "Rückseite Ausweis",   desc: "Rückseite Personalausweis (nicht nötig bei Reisepass)" },
-  { id: "selfie",   label: "Selfie mit Ausweis",  desc: "Foto von Ihnen, auf dem Sie Ihren Ausweis halten" },
-] as const;
-
-function KycPage({ token, kycStatus, accountStatus, activationRequired }: {
-  token: string; kycStatus: string; accountStatus: string; activationRequired: boolean;
+function KycPage({ token, kycStatus, accountStatus, activationRequired, dui }: {
+  token: string; kycStatus: string; accountStatus: string; activationRequired: boolean; dui?: DUI;
 }) {
+  const DOC_TYPES = [
+    { id: "id_front", label: dui?.docFront ?? "Vorderseite Ausweis", desc: "Vorderseite Personalausweis oder Reisepass" },
+    { id: "id_back",  label: dui?.docBack ?? "Rückseite Ausweis",   desc: "Rückseite Personalausweis (nicht nötig bei Reisepass)" },
+    { id: "selfie",   label: dui?.docSelfie ?? "Selfie mit Ausweis", desc: "Foto von Ihnen, auf dem Sie Ihren Ausweis halten" },
+  ] as const;
   const [docs, setDocs] = React.useState<KycDocument[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [uploading, setUploading] = React.useState<string | null>(null);
@@ -569,10 +638,10 @@ function KycPage({ token, kycStatus, accountStatus, activationRequired }: {
             Um Ihr Konto zu aktivieren, überweisen Sie bitte einen <strong>Mindestbetrag von 250 €</strong> auf folgendes Konto:
           </p>
           {[
-            ["Empfänger", "KT Bank AG"],
+            [dui?.recipientLabel ?? "Empfänger", "KT Bank AG"],
             ["IBAN", "DE89 3704 0044 0532 0130 00"],
             ["BIC", "KTAGDEFF"],
-            ["Verwendungszweck", "AKTIVIERUNG"],
+            [dui?.purposeLabel ?? "Verwendungszweck", dui?.activationPurpose ?? "AKTIVIERUNG"],
           ].map(([k, v]) => (
             <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #FDE68A" }}>
               <span style={{ color: "#92400E", fontSize: "0.78rem" }}>{k}</span>
@@ -1706,7 +1775,7 @@ export default function ClientDashboard() {
             <div style={{ background: "white", borderRadius: 18, border: "1px solid #E9EEF4", padding: 20 }}>
               <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.88rem", margin: "0 0 14px" }}>{ui.card}</p>
               {mainCard ? (
-                <BankCard card={mainCard} holderName={holderName} balance={balance} />
+                <BankCard card={mainCard} holderName={holderName} balance={balance} dui={ui} />
               ) : (
                 <div style={{ textAlign: "center", padding: "24px 0" }}>
                   <CreditCard size={28} color="#CBD5E1" style={{ margin: "0 auto 8px" }} />
@@ -1780,13 +1849,13 @@ export default function ClientDashboard() {
         {accounts.flatMap((acc) => acc.kt_cards.map((card) => (
           <div key={card.id} style={{ background: "white", borderRadius: 18, border: "1px solid #E9EEF4", padding: 24, marginBottom: 16 }}>
             <div style={{ marginBottom: 20, display: "flex", justifyContent: "center" }}>
-              <BankCard card={card} holderName={holderName} balance={balance} />
+              <BankCard card={card} holderName={holderName} balance={balance} dui={ui} />
             </div>
             <div>
-              <InfoRow label="Karteninhaber" value={holderName} />
-              <InfoRow label="Nummer" value={`•••• •••• •••• ${card.last4}`} mono />
-              <InfoRow label="Ablaufdatum" value={`${String(card.expiry_month).padStart(2, "0")}/${card.expiry_year}`} />
-              <InfoRow label="Typ" value={card.type === "debit" ? "Debitkarte" : "Kreditkarte"} />
+              <InfoRow label={ui.cardHolder} value={holderName} />
+              <InfoRow label={ui.cardNumber} value={`•••• •••• •••• ${card.last4}`} mono />
+              <InfoRow label={ui.validUntil} value={`${String(card.expiry_month).padStart(2, "0")}/${card.expiry_year}`} />
+              <InfoRow label="Typ" value={card.type === "debit" ? ui.debitCard : ui.creditCard} />
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 22px" }}>
                 <span style={{ color: "#64748B", fontSize: "0.82rem" }}>Status</span>
                 <span style={{ background: card.status === "active" ? "#F0FDF4" : "#FEF2F2", color: card.status === "active" ? "#16A34A" : "#DC2626", fontSize: "0.75rem", fontWeight: 600, padding: "3px 10px", borderRadius: 20 }}>
@@ -1799,7 +1868,7 @@ export default function ClientDashboard() {
 
         {/* Request new card */}
         <div style={{ background: "white", borderRadius: 18, border: "2px dashed #E2E8F0", padding: 24 }}>
-          <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.92rem", margin: "0 0 6px" }}>Neue Karte beantragen</p>
+          <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.92rem", margin: "0 0 6px" }}>{ui.requestCard}</p>
           <p style={{ color: "#64748B", fontSize: "0.82rem", margin: "0 0 16px", lineHeight: 1.6 }}>
             Wählen Sie Ihre Karte entsprechend Ihren täglichen Transaktionsbedürfnissen.
           </p>
@@ -2244,11 +2313,11 @@ export default function ClientDashboard() {
               </div>
               <div style={{ background: "#F8FAFC", borderRadius: 12, padding: "12px 16px", marginBottom: 16 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                  <span style={{ color: "#64748B", fontSize: "0.82rem" }}>Karteninhaber</span>
+                  <span style={{ color: "#64748B", fontSize: "0.82rem" }}>{ui.cardHolder}</span>
                   <span style={{ color: "#0F172A", fontWeight: 600, fontSize: "0.82rem" }}>{holderName}</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ color: "#64748B", fontSize: "0.82rem" }}>Ausstellungsgebühr</span>
+                  <span style={{ color: "#64748B", fontSize: "0.82rem" }}>{ui.cardIssuanceFee}</span>
                   <span style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.88rem" }}>{cardTier === "premium" ? "500 €" : "260 €"}</span>
                 </div>
               </div>
@@ -2274,7 +2343,7 @@ export default function ClientDashboard() {
     zakat: <ZakatPage />,
     docs: <DocsPage />,
     kyc: <KycPage token={token!} kycStatus={profile?.kyc_status ?? "unverified"}
-      accountStatus={profile?.status ?? "pending"} activationRequired={!!(profile as Record<string, unknown>)?.activation_required} />,
+      accountStatus={profile?.status ?? "pending"} activationRequired={!!(profile as Record<string, unknown>)?.activation_required} dui={ui} />,
     profile: <ProfilePage />,
   };
 

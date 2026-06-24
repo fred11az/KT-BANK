@@ -16,13 +16,88 @@ interface ClientInfo {
   account_id?: string;
 }
 
-function docDate() {
-  return new Date().toLocaleDateString("de-DE", { day: "2-digit", month: "long", year: "numeric" });
-}
-
 function docRef() {
   return `KT-${Date.now().toString(36).toUpperCase().slice(-8)}`;
 }
+
+type DocLang = "de" | "fr" | "en" | "ar" | "tr" | "es" | "it" | "pt" | "nl";
+
+function L<T extends Record<string, unknown>>(lang: string, variants: Partial<Record<DocLang, T>> & { de: T }): T {
+  return (variants[lang as DocLang] ?? variants.de) as T;
+}
+
+function docDate(lang = "de") {
+  const localeMap: Record<string, string> = { de:"de-DE", fr:"fr-FR", en:"en-GB", ar:"ar-SA", tr:"tr-TR", es:"es-ES", it:"it-IT", pt:"pt-PT", nl:"nl-NL" };
+  return new Date().toLocaleDateString(localeMap[lang] ?? "de-DE", { day:"2-digit", month:"long", year:"numeric" });
+}
+
+const DL = (key: string, lang: string): string => {
+  const labels: Record<string, Partial<Record<DocLang, string>> & { de: string }> = {
+    // Document titles
+    accountConfirmTitle: { de:"Kontoeröffnungsbestätigung", fr:"Confirmation d'ouverture de compte", en:"Account Opening Confirmation", ar:"تأكيد فتح الحساب", tr:"Hesap Açılış Onayı", es:"Confirmación de apertura de cuenta", it:"Conferma apertura conto", pt:"Confirmação de abertura de conta", nl:"Bevestiging rekeningopening" },
+    welcomeTitle: { de:"Herzlich willkommen bei der KT Bank AG!", fr:"Bienvenue à la KT Bank AG !", en:"Welcome to KT Bank AG!", ar:"مرحباً بك في KT Bank AG!", tr:"KT Bank AG'ye Hoş Geldiniz!", es:"¡Bienvenido/a a KT Bank AG!", it:"Benvenuto/a in KT Bank AG!", pt:"Bem-vindo/a ao KT Bank AG!", nl:"Welkom bij KT Bank AG!" },
+    loanContractTitle: { de:"Kreditvertrag", fr:"Contrat de crédit", en:"Loan Agreement", ar:"عقد القرض", tr:"Kredi Sözleşmesi", es:"Contrato de préstamo", it:"Contratto di prestito", pt:"Contrato de crédito", nl:"Leningovereenkomst" },
+    tilgungsplanTitle: { de:"Tilgungsplan", fr:"Tableau d'amortissement", en:"Amortization Schedule", ar:"جدول السداد", tr:"İtfa Planı", es:"Plan de amortización", it:"Piano di ammortamento", pt:"Plano de amortização", nl:"Aflossingsschema" },
+    agbTitle: { de:"Allgemeine Geschäftsbedingungen", fr:"Conditions Générales de Vente", en:"General Terms and Conditions", ar:"الشروط والأحكام العامة", tr:"Genel Hüküm ve Koşullar", es:"Términos y Condiciones Generales", it:"Termini e Condizioni Generali", pt:"Termos e Condições Gerais", nl:"Algemene Voorwaarden" },
+    datenschutzTitle: { de:"Datenschutzerklärung", fr:"Politique de confidentialité", en:"Privacy Policy", ar:"سياسة الخصوصية", tr:"Gizlilik Politikası", es:"Política de privacidad", it:"Informativa sulla privacy", pt:"Política de privacidade", nl:"Privacybeleid" },
+    // Parties
+    borrower: { de:"Kreditnehmer", fr:"Emprunteur", en:"Borrower", ar:"المقترض", tr:"Borçlu", es:"Prestatario", it:"Mutuatario", pt:"Mutuário", nl:"Kredietnemer" },
+    lender: { de:"Kreditgeber", fr:"Prêteur", en:"Lender", ar:"المقرض", tr:"Borç Veren", es:"Prestamista", it:"Prestatore", pt:"Mutuante", nl:"Kredietverstrekker" },
+    accountHolder: { de:"Kontoinhaber", fr:"Titulaire du compte", en:"Account Holder", ar:"صاحب الحساب", tr:"Hesap Sahibi", es:"Titular de la cuenta", it:"Titolare del conto", pt:"Titular da conta", nl:"Rekeninghouder" },
+    accountData: { de:"Kontodaten", fr:"Données du compte", en:"Account Data", ar:"بيانات الحساب", tr:"Hesap Bilgileri", es:"Datos de la cuenta", it:"Dati del conto", pt:"Dados da conta", nl:"Rekeninggegevens" },
+    // Loan labels
+    loanAmount: { de:"Kreditbetrag", fr:"Montant du crédit", en:"Loan Amount", ar:"مبلغ القرض", tr:"Kredi Tutarı", es:"Importe del préstamo", it:"Importo del prestito", pt:"Montante do crédito", nl:"Leningbedrag" },
+    monthlyRate: { de:"Monatliche Rate", fr:"Mensualité", en:"Monthly Payment", ar:"القسط الشهري", tr:"Aylık Taksit", es:"Cuota mensual", it:"Rata mensile", pt:"Prestação mensal", nl:"Maandelijkse betaling" },
+    duration: { de:"Laufzeit", fr:"Durée", en:"Duration", ar:"المدة", tr:"Süre", es:"Duración", it:"Durata", pt:"Duração", nl:"Looptijd" },
+    interestRate: { de:"Zinssatz", fr:"Taux d'intérêt", en:"Interest Rate", ar:"معدل الفائدة", tr:"Faiz Oranı", es:"Tasa de interés", it:"Tasso di interesse", pt:"Taxa de juro", nl:"Rentepercentage" },
+    totalRepayment: { de:"Gesamtrückzahlung", fr:"Remboursement total", en:"Total Repayment", ar:"إجمالي السداد", tr:"Toplam Geri Ödeme", es:"Reembolso total", it:"Rimborso totale", pt:"Reembolso total", nl:"Totale terugbetaling" },
+    totalInterest: { de:"Gesamtzinsen", fr:"Intérêts totaux", en:"Total Interest", ar:"إجمالي الفوائد", tr:"Toplam Faiz", es:"Interés total", it:"Interessi totali", pt:"Juros totais", nl:"Totale rente" },
+    contractDate: { de:"Vertragsdatum", fr:"Date du contrat", en:"Contract Date", ar:"تاريخ العقد", tr:"Sözleşme Tarihi", es:"Fecha del contrato", it:"Data del contratto", pt:"Data do contrato", nl:"Contractdatum" },
+    firstPayment: { de:"Erste Rate fällig am", fr:"Première échéance le", en:"First payment due on", ar:"أول قسط مستحق في", tr:"İlk ödeme tarihi:", es:"Primera cuota vence el", it:"Prima rata in scadenza il", pt:"Primeira prestação com vencimento em", nl:"Eerste betaling verschuldigd op" },
+    // Tilgungsplan table headers
+    month: { de:"Monat", fr:"Mois", en:"Month", ar:"الشهر", tr:"Ay", es:"Mes", it:"Mese", pt:"Mês", nl:"Maand" },
+    date: { de:"Datum", fr:"Date", en:"Date", ar:"التاريخ", tr:"Tarih", es:"Fecha", it:"Data", pt:"Data", nl:"Datum" },
+    rateEur: { de:"Rate (EUR)", fr:"Mensualité (EUR)", en:"Payment (EUR)", ar:"القسط (EUR)", tr:"Taksit (EUR)", es:"Cuota (EUR)", it:"Rata (EUR)", pt:"Prestação (EUR)", nl:"Betaling (EUR)" },
+    zinsenEur: { de:"Zinsen (EUR)", fr:"Intérêts (EUR)", en:"Interest (EUR)", ar:"الفائدة (EUR)", tr:"Faiz (EUR)", es:"Interés (EUR)", it:"Interessi (EUR)", pt:"Juros (EUR)", nl:"Rente (EUR)" },
+    tilgungEur: { de:"Tilgung (EUR)", fr:"Capital (EUR)", en:"Principal (EUR)", ar:"رأس المال (EUR)", tr:"Anapara (EUR)", es:"Capital (EUR)", it:"Capitale (EUR)", pt:"Capital (EUR)", nl:"Aflossing (EUR)" },
+    restschuld: { de:"Restschuld", fr:"Capital restant", en:"Remaining Balance", ar:"الرصيد المتبقي", tr:"Kalan Borç", es:"Capital pendiente", it:"Debito residuo", pt:"Saldo remanescente", nl:"Restschuld" },
+    kumTilgung: { de:"Kum. Tilgung", fr:"Capital remb.", en:"Cum. Principal", ar:"رأس المال المسدد", tr:"Toplam Anapara", es:"Capital amort.", it:"Capitale amm.", pt:"Capital amort.", nl:"Cum. aflossing" },
+    gesamt: { de:"GESAMT", fr:"TOTAL", en:"TOTAL", ar:"الإجمالي", tr:"TOPLAM", es:"TOTAL", it:"TOTALE", pt:"TOTAL", nl:"TOTAAL" },
+    annualNote: { de:"* Gelbe Zeilen = Jahresabschlüsse", fr:"* Lignes jaunes = Bilans annuels", en:"* Yellow rows = Annual checkpoints", ar:"* الصفوف الصفراء = المراجعات السنوية", tr:"* Sarı satırlar = Yıllık kontrol", es:"* Filas amarillas = Cierres anuales", it:"* Righe gialle = Chiusure annuali", pt:"* Linhas amarelas = Encerramentos anuais", nl:"* Gele rijen = Jaarlijkse controles" },
+    paymentPlan: { de:"Zahlungsplan", fr:"Plan de paiement", en:"Payment Plan", ar:"خطة السداد", tr:"Ödeme Planı", es:"Plan de pago", it:"Piano di pagamento", pt:"Plano de pagamentos", nl:"Betalingsplan" },
+    loanOverview: { de:"Kreditübersicht", fr:"Aperçu du crédit", en:"Loan Overview", ar:"نظرة عامة على القرض", tr:"Kredi Özeti", es:"Resumen del préstamo", it:"Panoramica del prestito", pt:"Resumo do crédito", nl:"Leningoverzicht" },
+    // Islamic
+    islamicLoan: { de:"Islamischer Kredit (Mourabaha) — Zinsfrei", fr:"Crédit islamique (Mourabaha) — Sans intérêts", en:"Islamic Loan (Murabaha) — Interest-free", ar:"قرض إسلامي (مرابحة) — بدون فوائد", tr:"İslami Kredi (Murabaha) — Faizsiz", es:"Préstamo islámico (Murabaha) — Sin intereses", it:"Prestito islamico (Murabaha) — Senza interessi", pt:"Crédito islâmico (Murabaha) — Sem juros", nl:"Islamitische lening (Murabaha) — Rentevrij" },
+    standardLoan: { de:"Standardkredit — Festzins", fr:"Crédit standard — Taux fixe", en:"Standard loan — Fixed rate", ar:"قرض قياسي — سعر ثابت", tr:"Standart Kredi — Sabit Faiz", es:"Préstamo estándar — Tipo fijo", it:"Prestito standard — Tasso fisso", pt:"Crédito padrão — Taxa fixa", nl:"Standaardlening — Vaste rente" },
+    // Sections
+    confirmation: { de:"Bestätigung", fr:"Confirmation", en:"Confirmation", ar:"التأكيد", tr:"Onay", es:"Confirmación", it:"Conferma", pt:"Confirmação", nl:"Bevestiging" },
+    services: { de:"Leistungsumfang", fr:"Services inclus", en:"Included Services", ar:"الخدمات المشمولة", tr:"Dahil Hizmetler", es:"Servicios incluidos", it:"Servizi inclusi", pt:"Serviços incluídos", nl:"Inbegrepen diensten" },
+    terms: { de:"Vertragsbedingungen", fr:"Conditions contractuelles", en:"Contract Terms", ar:"شروط العقد", tr:"Sözleşme Koşulları", es:"Condiciones del contrato", it:"Condizioni contrattuali", pt:"Condições contratuais", nl:"Contractvoorwaarden" },
+    generalTerms: { de:"Allgemeine Bestimmungen", fr:"Dispositions générales", en:"General Provisions", ar:"الأحكام العامة", tr:"Genel Hükümler", es:"Disposiciones generales", it:"Disposizioni generali", pt:"Disposições gerais", nl:"Algemene bepalingen" },
+    // Signature area
+    direction: { de:"Direktion", fr:"Direction", en:"Management", ar:"الإدارة", tr:"Yönetim", es:"Dirección", it:"Direzione", pt:"Direção", nl:"Directie" },
+    accountManager: { de:"Kundenbetreuer", fr:"Conseiller clientèle", en:"Account Manager", ar:"مدير الحساب", tr:"Hesap Yöneticisi", es:"Gestor de cuenta", it:"Gestore del conto", pt:"Gestor de conta", nl:"Accountmanager" },
+    presignedBy: { de:"Vorgezeichnet durch", fr:"Pré-signé par", en:"Pre-signed by", ar:"موقّع مسبقاً من", tr:"Önceden imzalayan:", es:"Prefirmado por", it:"Prefirmato da", pt:"Pré-assinado por", nl:"Vooraf ondertekend door" },
+    signHint: { de:"Unterschrift / Signature", fr:"Signature", en:"Signature", ar:"التوقيع", tr:"İmza", es:"Firma", it:"Firma", pt:"Assinatura", nl:"Handtekening" },
+    // Account labels
+    iban: { de:"IBAN", fr:"IBAN", en:"IBAN", ar:"IBAN", tr:"IBAN", es:"IBAN", it:"IBAN", pt:"IBAN", nl:"IBAN" },
+    accountType: { de:"Kontotyp", fr:"Type de compte", en:"Account type", ar:"نوع الحساب", tr:"Hesap türü", es:"Tipo de cuenta", it:"Tipo di conto", pt:"Tipo de conta", nl:"Rekeningtype" },
+    currentAccount: { de:"Girokonto", fr:"Compte courant", en:"Current account", ar:"حساب جاري", tr:"Vadesiz hesap", es:"Cuenta corriente", it:"Conto corrente", pt:"Conta corrente", nl:"Betaalrekening" },
+    openDate: { de:"Eröffnungsdatum", fr:"Date d'ouverture", en:"Opening date", ar:"تاريخ الفتح", tr:"Açılış tarihi", es:"Fecha de apertura", it:"Data di apertura", pt:"Data de abertura", nl:"Openingsdatum" },
+    sepaTransfers: { de:"SEPA-Überweisungen", fr:"Virements SEPA", en:"SEPA transfers", ar:"تحويلات SEPA", tr:"SEPA transferleri", es:"Transferencias SEPA", it:"Bonifici SEPA", pt:"Transferências SEPA", nl:"SEPA-overboekingen" },
+    sepaDebit: { de:"SEPA-Lastschriften", fr:"Prélèvements SEPA", en:"SEPA direct debits", ar:"الخصم المباشر SEPA", tr:"SEPA otomatik ödemeler", es:"Domiciliaciones SEPA", it:"Addebiti diretti SEPA", pt:"Débitos diretos SEPA", nl:"SEPA-automatische incasso's" },
+    onlineBanking: { de:"Online-Banking", fr:"Banque en ligne", en:"Online banking", ar:"الخدمات المصرفية عبر الإنترنت", tr:"İnternet bankacılığı", es:"Banca en línea", it:"Banca online", pt:"Banca online", nl:"Online bankieren" },
+    statements: { de:"Kontoauszüge", fr:"Relevés de compte", en:"Account statements", ar:"كشوف الحساب", tr:"Hesap ekstreleri", es:"Extractos de cuenta", it:"Estratti conto", pt:"Extratos de conta", nl:"Rekeningafschriften" },
+    included: { de:"Inklusive", fr:"Inclus", en:"Included", ar:"مشمول", tr:"Dahil", es:"Incluido", it:"Incluso", pt:"Incluído", nl:"Inbegrepen" },
+    digital: { de:"Digital (kostenlos)", fr:"Numérique (gratuit)", en:"Digital (free)", ar:"رقمي (مجاني)", tr:"Dijital (ücretsiz)", es:"Digital (gratuito)", it:"Digitale (gratuito)", pt:"Digital (gratuito)", nl:"Digitaal (gratis)" },
+    nextSteps: { de:"Nächste Schritte", fr:"Prochaines étapes", en:"Next Steps", ar:"الخطوات التالية", tr:"Sonraki Adımlar", es:"Próximos pasos", it:"Prossimi passi", pt:"Próximos passos", nl:"Volgende stappen" },
+    // months
+    months_de: { de:"Januar,Februar,März,April,Mai,Juni,Juli,August,September,Oktober,November,Dezember", fr:"janvier,février,mars,avril,mai,juin,juillet,août,septembre,octobre,novembre,décembre", en:"January,February,March,April,May,June,July,August,September,October,November,December", ar:"يناير,فبراير,مارس,أبريل,مايو,يونيو,يوليو,أغسطس,سبتمبر,أكتوبر,نوفمبر,ديسمبر", tr:"Ocak,Şubat,Mart,Nisan,Mayıs,Haziran,Temmuz,Ağustos,Eylül,Ekim,Kasım,Aralık", es:"enero,febrero,marzo,abril,mayo,junio,julio,agosto,septiembre,octubre,noviembre,diciembre", it:"gennaio,febbraio,marzo,aprile,maggio,giugno,luglio,agosto,settembre,ottobre,novembre,dicembre", pt:"janeiro,fevereiro,março,abril,maio,junho,julho,agosto,setembro,outubro,novembro,dezembro", nl:"januari,februari,maart,april,mei,juni,juli,augustus,september,oktober,november,december" },
+    pdfBtn: { de:"↓ PDF", fr:"↓ PDF", en:"↓ PDF", ar:"↓ PDF", tr:"↓ PDF", es:"↓ PDF", it:"↓ PDF", pt:"↓ PDF", nl:"↓ PDF" },
+    legalNote: { de:"", fr:"Ce document est établi en langue officielle.", en:"This document is issued in the official language.", ar:"هذه الوثيقة صادرة باللغة الرسمية.", tr:"Bu belge resmi dilde düzenlenmiştir.", es:"Este documento está redactado en el idioma oficial.", it:"Questo documento è redatto nella lingua ufficiale.", pt:"Este documento é emitido no idioma oficial.", nl:"Dit document is opgesteld in de officiële taal." },
+  };
+  return (labels[key]?.[lang as DocLang] ?? labels[key]?.de ?? key);
+};
 
 function baseStyles() {
   return `
@@ -207,7 +282,7 @@ function letterhead() {
   `;
 }
 
-function footerBar(ref: string) {
+function footerBar(ref: string, lang = "de") {
   return `
     <div class="footer-bar">
       <p>
@@ -216,7 +291,7 @@ function footerBar(ref: string) {
       </p>
       <div style="text-align:right">
         <div class="badge">BaFin-reguliert</div><br/>
-        <p style="margin-top:4px;">Ref: ${ref} · ${docDate()}</p>
+        <p style="margin-top:4px;">Ref: ${ref} · ${docDate(lang)}</p>
       </div>
     </div>
   `;
@@ -232,12 +307,13 @@ function sigBlock(
   opts: SignatureOptions = {},
   bankRole = "Direktion",
   showClientLine = true,
+  lang = "de",
 ): string {
-  const date = docDate();
+  const date = docDate(lang);
 
   const bankContent = opts.presignedByBank
     ? `<div class="sig-presigned-wrap">
-        <span style="font-size:9px;color:#166534;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Vorgezeichnet durch</span>
+        <span style="font-size:9px;color:#166534;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">${DL("presignedBy", lang)}</span>
         <div style="display:flex;align-items:center;gap:10px;">
           <div style="flex-shrink:0;">${officialStamp(62)}</div>
           <div>
@@ -260,8 +336,8 @@ function sigBlock(
 
   const clientContent = opts.clientSignatureSpace
     ? `<div class="sig-client-box">
-        <span class="sig-client-hint">&#9997; Unterschrift / Signature</span>
-        <span class="sig-client-sub">Datum / Date: _______________</span>
+        <span class="sig-client-hint">&#9997; ${DL("signHint", lang)}</span>
+        <span class="sig-client-sub">Date: _______________</span>
       </div>`
     : `<div class="sig-empty-zone"></div>`;
 
@@ -274,73 +350,74 @@ function sigBlock(
   return `<div class="sig-row">${clientCol}${bankCol}</div>`;
 }
 
-function contPageHeader(ref: string, subtitle: string) {
+function contPageHeader(ref: string, subtitle: string, lang = "de") {
   return `<div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:2px solid #005F2D;margin-bottom:18px;">
     <div>
       <p style="color:#005F2D;font-size:14px;font-weight:800;margin:0;">KT Bank AG</p>
       <p style="color:#64748B;font-size:10px;margin:2px 0 0;">${subtitle}</p>
     </div>
-    <p style="color:#94A3B8;font-size:10px;margin:0;">Ref: ${ref} · ${docDate()}</p>
+    <p style="color:#94A3B8;font-size:10px;margin:0;">Ref: ${ref} · ${docDate(lang)}</p>
   </div>`;
 }
 
 /* ── 1. Kontoeröffnungsbestätigung ── */
-export function genKontoeröffnung(client: ClientInfo, sigOpts: SignatureOptions = {}): string {
+export function genKontoeröffnung(client: ClientInfo, sigOpts: SignatureOptions = {}, lang = "de"): string {
   const ref = docRef();
-  const openDate = new Date(client.created_at).toLocaleDateString("de-DE", { day: "2-digit", month: "long", year: "numeric" });
+  const localeMap: Record<string, string> = { de:"de-DE", fr:"fr-FR", en:"en-GB", ar:"ar-SA", tr:"tr-TR", es:"es-ES", it:"it-IT", pt:"pt-PT", nl:"nl-NL" };
+  const openDate = new Date(client.created_at).toLocaleDateString(localeMap[lang] ?? "de-DE", { day: "2-digit", month: "long", year: "numeric" });
 
-  return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
-<title>Kontoeröffnungsbestätigung — KT Bank AG</title>
+  return `<!DOCTYPE html><html lang="${lang}"><head><meta charset="utf-8"/>
+<title>${DL("accountConfirmTitle", lang)} — KT Bank AG</title>
 <style>${baseStyles()}</style><script>(function(){function mm2px(mm){var d=document.createElement('div');d.style.cssText='position:fixed;top:-9999px;left:-9999px;height:'+mm+'mm;';document.body.appendChild(d);var h=d.offsetHeight;d.remove();return h;}function run(){var MAX=mm2px(255);document.querySelectorAll('.page-bg>.page').forEach(function(page){if(page.offsetHeight<=MAX*1.08)return;var allKids=Array.from(page.children);var footer=null;var kids=allKids.filter(function(k){if(k.classList&&k.classList.contains('footer-bar')){footer=k;return false;}return true;});var hs=kids.map(function(k){return k.offsetHeight;});var pages=[],cur=page.cloneNode(false),curH=0;kids.forEach(function(k,i){var h=hs[i]||20;if(curH>60&&curH+h>MAX){pages.push(cur);cur=page.cloneNode(false);curH=0;}cur.appendChild(k);curH+=h;});if(footer)cur.appendChild(footer);pages.push(cur);if(pages.length<2)return;var bg=page.parentNode;pages.forEach(function(p){bg.insertBefore(p,page);});bg.removeChild(page);});}function addBtn(){var b=document.createElement('button');b.id='pdf-btn';b.innerHTML='&#8595;&nbsp;PDF';b.title='Als PDF speichern / Enregistrer en PDF';b.style.cssText='position:fixed;bottom:24px;right:24px;z-index:9999;background:#005F2D;color:#fff;border:none;border-radius:10px;padding:12px 22px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 18px rgba(0,95,45,0.5);font-family:Arial,sans-serif;letter-spacing:0.03em;';b.onmouseover=function(){this.style.background='#004020';};b.onmouseout=function(){this.style.background='#005F2D';};b.onclick=function(){window.print();};document.body.appendChild(b);}if(document.readyState==='complete'){setTimeout(run,80);addBtn();}else window.addEventListener('load',function(){setTimeout(run,80);addBtn();});})();</script></head><body><div class="page-bg"><div class="page">
 ${letterhead()}
 <div class="doc-title">
-  <h2>Kontoeröffnungsbestätigung</h2>
+  <h2>${DL("accountConfirmTitle", lang)}</h2>
   <span class="ref">Ref: ${ref}</span>
 </div>
 
 <div class="parties">
   <div class="party-box">
-    <h4>Kontoinhaber</h4>
+    <h4>${DL("accountHolder", lang)}</h4>
     <p class="highlight">${client.prenom} ${client.nom}</p>
     <p>${client.adresse ?? ""}<br/>${client.code_postal ?? ""} ${client.ville ?? ""}<br/>${client.pays_residence ?? ""}</p>
     <p style="margin-top:8px;">${client.email}</p>
   </div>
   <div class="party-box">
-    <h4>Kontodaten</h4>
-    <p><strong>IBAN:</strong><br/><span class="highlight">${client.iban ?? "—"}</span></p>
+    <h4>${DL("accountData", lang)}</h4>
+    <p><strong>${DL("iban", lang)}:</strong><br/><span class="highlight">${client.iban ?? "—"}</span></p>
     <p style="margin-top:6px;"><strong>BIC:</strong> ${client.bic ?? "KTAGDEFF"}</p>
-    <p style="margin-top:6px;"><strong>Kontotyp:</strong> Girokonto</p>
-    <p style="margin-top:6px;"><strong>Eröffnungsdatum:</strong> ${openDate}</p>
+    <p style="margin-top:6px;"><strong>${DL("accountType", lang)}:</strong> ${DL("currentAccount", lang)}</p>
+    <p style="margin-top:6px;"><strong>${DL("openDate", lang)}:</strong> ${openDate}</p>
   </div>
 </div>
 
 <div class="section">
-  <h3>Bestätigung</h3>
+  <h3>${DL("confirmation", lang)}</h3>
   <p class="body-text">Wir bestätigen hiermit die erfolgreiche Eröffnung Ihres Girokontos bei der KT Bank AG. Ihr Konto ist ab sofort aktiv und verfügt über alle SEPA-Funktionen für nationale und internationale Überweisungen.</p>
   <p class="body-text">Alle Transaktionen unterliegen den geltenden Allgemeinen Geschäftsbedingungen der KT Bank AG sowie den einschlägigen deutschen und europäischen Bankenvorschriften.</p>
 </div>
 
 <div class="section">
-  <h3>Leistungsumfang</h3>
-  <div class="info-row"><span class="info-label">SEPA-Überweisungen</span><span class="info-value">Inklusive</span></div>
-  <div class="info-row"><span class="info-label">SEPA-Lastschriften</span><span class="info-value">Inklusive</span></div>
-  <div class="info-row"><span class="info-label">Online-Banking</span><span class="info-value">Inklusive</span></div>
-  <div class="info-row"><span class="info-label">Kontoauszüge</span><span class="info-value">Digital (kostenlos)</span></div>
+  <h3>${DL("services", lang)}</h3>
+  <div class="info-row"><span class="info-label">${DL("sepaTransfers", lang)}</span><span class="info-value">${DL("included", lang)}</span></div>
+  <div class="info-row"><span class="info-label">${DL("sepaDebit", lang)}</span><span class="info-value">${DL("included", lang)}</span></div>
+  <div class="info-row"><span class="info-label">${DL("onlineBanking", lang)}</span><span class="info-value">${DL("included", lang)}</span></div>
+  <div class="info-row"><span class="info-label">${DL("statements", lang)}</span><span class="info-value">${DL("digital", lang)}</span></div>
   <div class="info-row"><span class="info-label">Kundenservice</span><span class="info-value">support@kt-bank-ag.com</span></div>
 </div>
 
-${sigBlock(client, sigOpts, "Direktion")}
+${sigBlock(client, sigOpts, DL("direction", lang), true, lang)}
 
-${footerBar(ref)}
+${footerBar(ref, lang)}
 </div></div></body></html>`;
 }
 
 /* ── 2. Willkommensschreiben ── */
-export function genWillkommen(client: ClientInfo, sigOpts: SignatureOptions = {}): string {
+export function genWillkommen(client: ClientInfo, sigOpts: SignatureOptions = {}, lang = "de"): string {
   const ref = docRef();
 
-  return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
-<title>Willkommen bei der KT Bank AG</title>
+  return `<!DOCTYPE html><html lang="${lang}"><head><meta charset="utf-8"/>
+<title>${DL("welcomeTitle", lang)} — KT Bank AG</title>
 <style>${baseStyles()}</style><script>(function(){function mm2px(mm){var d=document.createElement('div');d.style.cssText='position:fixed;top:-9999px;left:-9999px;height:'+mm+'mm;';document.body.appendChild(d);var h=d.offsetHeight;d.remove();return h;}function run(){var MAX=mm2px(255);document.querySelectorAll('.page-bg>.page').forEach(function(page){if(page.offsetHeight<=MAX*1.08)return;var allKids=Array.from(page.children);var footer=null;var kids=allKids.filter(function(k){if(k.classList&&k.classList.contains('footer-bar')){footer=k;return false;}return true;});var hs=kids.map(function(k){return k.offsetHeight;});var pages=[],cur=page.cloneNode(false),curH=0;kids.forEach(function(k,i){var h=hs[i]||20;if(curH>60&&curH+h>MAX){pages.push(cur);cur=page.cloneNode(false);curH=0;}cur.appendChild(k);curH+=h;});if(footer)cur.appendChild(footer);pages.push(cur);if(pages.length<2)return;var bg=page.parentNode;pages.forEach(function(p){bg.insertBefore(p,page);});bg.removeChild(page);});}function addBtn(){var b=document.createElement('button');b.id='pdf-btn';b.innerHTML='&#8595;&nbsp;PDF';b.title='Als PDF speichern / Enregistrer en PDF';b.style.cssText='position:fixed;bottom:24px;right:24px;z-index:9999;background:#005F2D;color:#fff;border:none;border-radius:10px;padding:12px 22px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 18px rgba(0,95,45,0.5);font-family:Arial,sans-serif;letter-spacing:0.03em;';b.onmouseover=function(){this.style.background='#004020';};b.onmouseout=function(){this.style.background='#005F2D';};b.onclick=function(){window.print();};document.body.appendChild(b);}if(document.readyState==='complete'){setTimeout(run,80);addBtn();}else window.addEventListener('load',function(){setTimeout(run,80);addBtn();});})();</script></head><body><div class="page-bg"><div class="page">
 ${letterhead()}
 
@@ -352,7 +429,7 @@ ${letterhead()}
 </p>
 
 <div class="doc-title">
-  <h2>Herzlich willkommen bei der KT Bank AG!</h2>
+  <h2>${DL("welcomeTitle", lang)}</h2>
   <span class="ref">Ref: ${ref}</span>
 </div>
 
@@ -363,15 +440,15 @@ ${letterhead()}
 </div>
 
 <div class="section">
-  <h3>Ihre Kontodaten im Überblick</h3>
+  <h3>${DL("loanOverview", lang)}</h3>
   <div class="info-row"><span class="info-label">Name</span><span class="info-value">${client.prenom} ${client.nom}</span></div>
-  <div class="info-row"><span class="info-label">IBAN</span><span class="info-value" style="color:#005F2D;font-weight:700;">${client.iban ?? "—"}</span></div>
+  <div class="info-row"><span class="info-label">${DL("iban", lang)}</span><span class="info-value" style="color:#005F2D;font-weight:700;">${client.iban ?? "—"}</span></div>
   <div class="info-row"><span class="info-label">BIC</span><span class="info-value">${client.bic ?? "KTAGDEFF"}</span></div>
-  <div class="info-row"><span class="info-label">Kontotyp</span><span class="info-value">Girokonto</span></div>
+  <div class="info-row"><span class="info-label">${DL("accountType", lang)}</span><span class="info-value">${DL("currentAccount", lang)}</span></div>
 </div>
 
 <div class="section">
-  <h3>Nächste Schritte</h3>
+  <h3>${DL("nextSteps", lang)}</h3>
   <p class="body-text">1. <strong>Identitätsverifizierung (KYC):</strong> Falls noch nicht abgeschlossen, reichen Sie bitte die erforderlichen Unterlagen über Ihr Online-Dashboard ein.<br/>
   2. <strong>Online-Banking:</strong> Melden Sie sich unter kt-bank-ag.com an, um alle Funktionen Ihres Kontos zu nutzen.<br/>
   3. <strong>Erster Transfer:</strong> Stellen Sie Ihren ersten SEPA-Überweisungsantrag direkt über das Dashboard.</p>
@@ -379,9 +456,9 @@ ${letterhead()}
 
 <p class="body-text">Bei Fragen stehen wir Ihnen jederzeit zur Verfügung: <strong>support@kt-bank-ag.com</strong></p>
 
-${sigBlock(client, sigOpts, "Kundenbetreuer")}
+${sigBlock(client, sigOpts, DL("accountManager", lang), true, lang)}
 
-${footerBar(ref)}
+${footerBar(ref, lang)}
 </div></div></body></html>`;
 }
 
@@ -394,7 +471,7 @@ export function genKreditvertrag(client: ClientInfo, loan: {
   total_repayment: number;
   interest_rate: number;
   purpose?: string;
-}, sigOpts: SignatureOptions = {}): string {
+}, sigOpts: SignatureOptions = {}, lang = "de"): string {
   const ref = docRef();
   const fmtMoney = (n: number) => n.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
   const rate = loan.interest_rate / 12;
@@ -412,26 +489,27 @@ export function genKreditvertrag(client: ClientInfo, loan: {
     </tr>`;
   });
 
-  const tableHead = `<thead><tr><th>Monat</th><th>Rate</th><th>Tilgung</th><th>Zinsen</th></tr></thead>`;
+  const tableHead = `<thead><tr><th>${DL("month", lang)}</th><th>${DL("monthlyRate", lang)}</th><th>${DL("tilgungEur", lang)}</th><th>${DL("zinsenEur", lang)}</th></tr></thead>`;
   const ROWS_PER_PAGE = 25;
 
+  const localeMap: Record<string, string> = { de:"de-DE", fr:"fr-FR", en:"en-GB", ar:"ar-SA", tr:"tr-TR", es:"es-ES", it:"it-IT", pt:"pt-PT", nl:"nl-NL" };
   // Page 1: contract terms + signature (no table)
   const page1 = `<div class="page">
 ${letterhead()}
 <div class="doc-title">
-  <h2>Kreditvertrag</h2>
-  <span class="ref">${loan.type === "islamic" ? "Islamischer Kredit (Mourabaha)" : "Standardkredit"} · Ref: ${ref}</span>
+  <h2>${DL("loanContractTitle", lang)}</h2>
+  <span class="ref">${loan.type === "islamic" ? DL("islamicLoan", lang) : DL("standardLoan", lang)} · Ref: ${ref}</span>
 </div>
 <div class="parties">
   <div class="party-box">
-    <h4>Kreditnehmer</h4>
+    <h4>${DL("borrower", lang)}</h4>
     <p class="highlight">${client.prenom} ${client.nom}</p>
     <p>${client.adresse ?? ""}<br/>${client.code_postal ?? ""} ${client.ville ?? ""}<br/>${client.pays_residence ?? ""}</p>
     <p style="margin-top:6px;">${client.email}</p>
-    <p style="margin-top:4px;"><strong>IBAN:</strong> ${client.iban ?? "—"}</p>
+    <p style="margin-top:4px;"><strong>${DL("iban", lang)}:</strong> ${client.iban ?? "—"}</p>
   </div>
   <div class="party-box">
-    <h4>Kreditgeber</h4>
+    <h4>${DL("lender", lang)}</h4>
     <p class="highlight">KT Bank AG</p>
     <p>Bockenheimer Anlage 46<br/>60322 Frankfurt am Main<br/>Deutschland</p>
     <p style="margin-top:6px;">BaFin-Reg. Nr. 12345678</p>
@@ -440,26 +518,26 @@ ${letterhead()}
 </div>
 <div class="highlight-box">
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
-    <div><p class="label">Kreditbetrag</p><p class="amount">${fmtMoney(loan.amount)}</p></div>
-    <div><p class="label">Monatliche Rate</p><p class="amount" style="font-size:20px;">${fmtMoney(loan.monthly_payment)}</p></div>
-    <div><p class="label">Laufzeit</p><p class="amount" style="font-size:20px;">${loan.duration_months} Monate</p></div>
-    <div><p class="label">Zinssatz p. a.</p><p class="amount" style="font-size:20px;color:${loan.type === "islamic" ? "#16A34A" : "#D97706"};">${loan.type === "islamic" ? "0 %" : "2 %"}</p></div>
+    <div><p class="label">${DL("loanAmount", lang)}</p><p class="amount">${fmtMoney(loan.amount)}</p></div>
+    <div><p class="label">${DL("monthlyRate", lang)}</p><p class="amount" style="font-size:20px;">${fmtMoney(loan.monthly_payment)}</p></div>
+    <div><p class="label">${DL("duration", lang)}</p><p class="amount" style="font-size:20px;">${loan.duration_months} Monate</p></div>
+    <div><p class="label">${DL("interestRate", lang)} p. a.</p><p class="amount" style="font-size:20px;color:${loan.type === "islamic" ? "#16A34A" : "#D97706"};">${loan.type === "islamic" ? "0 %" : "2 %"}</p></div>
   </div>
 </div>
 <div class="section">
-  <h3>Vertragsbedingungen</h3>
+  <h3>${DL("terms", lang)}</h3>
   ${loan.purpose ? `<div class="info-row"><span class="info-label">Kreditzweck</span><span class="info-value">${loan.purpose}</span></div>` : ""}
-  <div class="info-row"><span class="info-label">Kreditart</span><span class="info-value">${loan.type === "islamic" ? "Islamischer Kredit (Mourabaha) — Zinsfrei" : "Standardkredit — Festzins"}</span></div>
-  <div class="info-row"><span class="info-label">Gesamtrückzahlung</span><span class="info-value">${fmtMoney(loan.total_repayment)}</span></div>
-  <div class="info-row"><span class="info-label">Gesamtzinsen</span><span class="info-value" style="color:${loan.type === "standard" ? "#D97706" : "#16A34A"};">${fmtMoney(loan.total_repayment - loan.amount)}</span></div>
-  <div class="info-row"><span class="info-label">Vertragsdatum</span><span class="info-value">${docDate()}</span></div>
-  <div class="info-row"><span class="info-label">Erste Rate fällig am</span><span class="info-value">${new Date(Date.now() + 30 * 86400000).toLocaleDateString("de-DE", { day: "2-digit", month: "long", year: "numeric" })}</span></div>
+  <div class="info-row"><span class="info-label">Kreditart</span><span class="info-value">${loan.type === "islamic" ? DL("islamicLoan", lang) : DL("standardLoan", lang)}</span></div>
+  <div class="info-row"><span class="info-label">${DL("totalRepayment", lang)}</span><span class="info-value">${fmtMoney(loan.total_repayment)}</span></div>
+  <div class="info-row"><span class="info-label">${DL("totalInterest", lang)}</span><span class="info-value" style="color:${loan.type === "standard" ? "#D97706" : "#16A34A"};">${fmtMoney(loan.total_repayment - loan.amount)}</span></div>
+  <div class="info-row"><span class="info-label">${DL("contractDate", lang)}</span><span class="info-value">${docDate(lang)}</span></div>
+  <div class="info-row"><span class="info-label">${DL("firstPayment", lang)}</span><span class="info-value">${new Date(Date.now() + 30 * 86400000).toLocaleDateString(localeMap[lang] ?? "de-DE", { day: "2-digit", month: "long", year: "numeric" })}</span></div>
 </div>
 <div class="section">
-  <h3>Allgemeine Bestimmungen</h3>
+  <h3>${DL("generalTerms", lang)}</h3>
   <p class="body-text">Der Kreditnehmer verpflichtet sich, die monatlichen Raten pünktlich und vollständig zu entrichten. Bei Verzug werden Mahngebühren gemäß den geltenden Allgemeinen Geschäftsbedingungen der KT Bank AG erhoben. Der Kreditnehmer hat das Recht auf vorzeitige Rückzahlung ohne Vorfälligkeitsentschädigung.</p>
 </div>
-${sigBlock(client, sigOpts, "Kreditgeber")}
+${sigBlock(client, sigOpts, DL("lender", lang), true, lang)}
 </div>`;
 
   // Pages 2+: amortization table split into chunks of 25 rows
@@ -467,17 +545,16 @@ ${sigBlock(client, sigOpts, "Kreditgeber")}
   for (let p = 0; p < allRows.length; p += ROWS_PER_PAGE) {
     const chunk = allRows.slice(p, p + ROWS_PER_PAGE);
     const isLast = p + ROWS_PER_PAGE >= allRows.length;
-    const pageNum = Math.floor(p / ROWS_PER_PAGE) + 2;
     tablePages += `<div class="page">
-${contPageHeader(ref, `Kreditvertrag — Tilgungsplan${p > 0 ? " (Fortsetzung)" : ""}`)}
+${contPageHeader(ref, `${DL("loanContractTitle", lang)} — ${DL("tilgungsplanTitle", lang)}${p > 0 ? " (Fortsetzung)" : ""}`, lang)}
 <table style="margin-top:4px;">${tableHead}<tbody>${chunk.join("")}</tbody></table>
-${isLast ? `<p style="color:#64748B;font-size:11px;text-align:right;margin-top:8px;">Gesamtrückzahlung: <strong style="color:#005F2D;">${fmtMoney(loan.total_repayment)}</strong></p>` : ""}
-${isLast ? footerBar(ref) : ""}
+${isLast ? `<p style="color:#64748B;font-size:11px;text-align:right;margin-top:8px;">${DL("totalRepayment", lang)}: <strong style="color:#005F2D;">${fmtMoney(loan.total_repayment)}</strong></p>` : ""}
+${isLast ? footerBar(ref, lang) : ""}
 </div>`;
   }
 
-  return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
-<title>Kreditvertrag — KT Bank AG</title>
+  return `<!DOCTYPE html><html lang="${lang}"><head><meta charset="utf-8"/>
+<title>${DL("loanContractTitle", lang)} — KT Bank AG</title>
 <style>${baseStyles()}</style><script>(function(){function mm2px(mm){var d=document.createElement('div');d.style.cssText='position:fixed;top:-9999px;left:-9999px;height:'+mm+'mm;';document.body.appendChild(d);var h=d.offsetHeight;d.remove();return h;}function run(){var MAX=mm2px(255);document.querySelectorAll('.page-bg>.page').forEach(function(page){if(page.offsetHeight<=MAX*1.08)return;var allKids=Array.from(page.children);var footer=null;var kids=allKids.filter(function(k){if(k.classList&&k.classList.contains('footer-bar')){footer=k;return false;}return true;});var hs=kids.map(function(k){return k.offsetHeight;});var pages=[],cur=page.cloneNode(false),curH=0;kids.forEach(function(k,i){var h=hs[i]||20;if(curH>60&&curH+h>MAX){pages.push(cur);cur=page.cloneNode(false);curH=0;}cur.appendChild(k);curH+=h;});if(footer)cur.appendChild(footer);pages.push(cur);if(pages.length<2)return;var bg=page.parentNode;pages.forEach(function(p){bg.insertBefore(p,page);});bg.removeChild(page);});}function addBtn(){var b=document.createElement('button');b.id='pdf-btn';b.innerHTML='&#8595;&nbsp;PDF';b.title='Als PDF speichern / Enregistrer en PDF';b.style.cssText='position:fixed;bottom:24px;right:24px;z-index:9999;background:#005F2D;color:#fff;border:none;border-radius:10px;padding:12px 22px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 18px rgba(0,95,45,0.5);font-family:Arial,sans-serif;letter-spacing:0.03em;';b.onmouseover=function(){this.style.background='#004020';};b.onmouseout=function(){this.style.background='#005F2D';};b.onclick=function(){window.print();};document.body.appendChild(b);}if(document.readyState==='complete'){setTimeout(run,80);addBtn();}else window.addEventListener('load',function(){setTimeout(run,80);addBtn();});})();</script></head><body><div class="page-bg">
 ${page1}${tablePages}
 </div></body></html>`;
@@ -492,12 +569,12 @@ export function genTilgungsplan(client: ClientInfo, loan: {
   total_repayment: number;
   interest_rate: number;
   purpose?: string;
-}, sigOpts: SignatureOptions = {}): string {
+}, sigOpts: SignatureOptions = {}, lang = "de"): string {
   const ref = docRef();
   const fmtMoney = (n: number) => n.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
   const rate = loan.interest_rate / 12;
 
-  const GERMAN_MONTHS = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+  const MONTH_NAMES = DL("months_de", lang).split(",");
 
   const allRows = (() => {
     const rows: string[] = [];
@@ -510,7 +587,7 @@ export function genTilgungsplan(client: ClientInfo, loan: {
     for (let i = 0; i < loan.duration_months; i++) {
       const m = i + 1;
       const dateTotalMonths = startMonthIdx + m;
-      const datum = `${GERMAN_MONTHS[dateTotalMonths % 12]} ${startYear + Math.floor(dateTotalMonths / 12)}`;
+      const datum = `${MONTH_NAMES[dateTotalMonths % 12]} ${startYear + Math.floor(dateTotalMonths / 12)}`;
 
       const isLast = i === loan.duration_months - 1;
       let interest: number, principal: number, payment: number;
@@ -550,17 +627,17 @@ export function genTilgungsplan(client: ClientInfo, loan: {
   })();
 
   const tableHead = `<thead><tr>
-    <th style="text-align:center;width:6%;">Monat</th>
-    <th style="text-align:left;width:18%;">Datum</th>
-    <th style="width:13%;">Rate (EUR)</th>
-    <th style="width:13%;">Zinsen (EUR)</th>
-    <th style="width:13%;">Tilgung (EUR)</th>
-    <th style="width:13%;">Restschuld</th>
-    <th style="width:13%;">Kum. Tilgung</th>
+    <th style="text-align:center;width:6%;">${DL("month", lang)}</th>
+    <th style="text-align:left;width:18%;">${DL("date", lang)}</th>
+    <th style="width:13%;">${DL("rateEur", lang)}</th>
+    <th style="width:13%;">${DL("zinsenEur", lang)}</th>
+    <th style="width:13%;">${DL("tilgungEur", lang)}</th>
+    <th style="width:13%;">${DL("restschuld", lang)}</th>
+    <th style="width:13%;">${DL("kumTilgung", lang)}</th>
   </tr></thead>`;
 
   const gesamtRow = `<tr style="background:#F0FDF4;border-top:2px solid #005F2D;">
-    <td colspan="2" style="text-align:left;font-weight:700;color:#005F2D;padding:7px 10px;">GESAMT</td>
+    <td colspan="2" style="text-align:left;font-weight:700;color:#005F2D;padding:7px 10px;">${DL("gesamt", lang)}</td>
     <td style="font-weight:700;color:#005F2D;">${fmtMoney(loan.total_repayment)}</td>
     <td style="font-weight:700;color:${loan.type === "standard" ? "#D97706" : "#16A34A"};">${fmtMoney(loan.total_repayment - loan.amount)}</td>
     <td style="font-weight:700;color:#005F2D;">${fmtMoney(loan.amount)}</td>
@@ -568,16 +645,16 @@ export function genTilgungsplan(client: ClientInfo, loan: {
     <td style="font-weight:700;color:#005F2D;">${fmtMoney(loan.amount)}</td>
   </tr>`;
 
-  const annualNote = `<p style="color:#64748B;font-size:10px;margin-top:4px;">* Gelbe Zeilen = Jahresabschlüsse</p>`;
+  const annualNote = `<p style="color:#64748B;font-size:10px;margin-top:4px;">${DL("annualNote", lang)}</p>`;
 
   const ROWS_FIRST = 16;
   const ROWS_PER_PAGE = 28;
 
   const summaryCards = [
-    ["Kreditbetrag", fmtMoney(loan.amount), "#005F2D"],
-    ["Monatliche Rate", fmtMoney(loan.monthly_payment), "#005F2D"],
-    ["Laufzeit", `${loan.duration_months} Monate`, "#0F172A"],
-    ["Gesamtzinsen", fmtMoney(loan.total_repayment - loan.amount), loan.type === "standard" ? "#D97706" : "#16A34A"],
+    [DL("loanAmount", lang), fmtMoney(loan.amount), "#005F2D"],
+    [DL("monthlyRate", lang), fmtMoney(loan.monthly_payment), "#005F2D"],
+    [DL("duration", lang), `${loan.duration_months} Monate`, "#0F172A"],
+    [DL("totalInterest", lang), fmtMoney(loan.total_repayment - loan.amount), loan.type === "standard" ? "#D97706" : "#16A34A"],
   ].map(([l, v, c]) => `<div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px 16px;">
     <p style="color:#94A3B8;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px;">${l}</p>
     <p style="color:${c};font-weight:800;font-size:16px;">${v}</p>
@@ -589,32 +666,32 @@ export function genTilgungsplan(client: ClientInfo, loan: {
   const page1 = `<div class="page">
 ${letterhead()}
 <div class="doc-title">
-  <h2>Tilgungsplan</h2>
-  <span class="ref">${loan.type === "islamic" ? "Islamischer Kredit (Mourabaha)" : "Standardkredit (2% p. a.)"} · Ref: ${ref}</span>
+  <h2>${DL("tilgungsplanTitle", lang)}</h2>
+  <span class="ref">${loan.type === "islamic" ? DL("islamicLoan", lang) : DL("standardLoan", lang)} · Ref: ${ref}</span>
 </div>
 <div class="parties">
   <div class="party-box">
-    <h4>Kreditnehmer</h4>
+    <h4>${DL("borrower", lang)}</h4>
     <p class="highlight">${client.prenom} ${client.nom}</p>
     <p>${client.adresse ?? ""} ${client.code_postal ?? ""} ${client.ville ?? ""}</p>
     <p>${client.email}</p>
   </div>
   <div class="party-box">
-    <h4>Kreditübersicht</h4>
-    <p><strong>Betrag:</strong> <span class="highlight">${fmtMoney(loan.amount)}</span></p>
-    <p><strong>Laufzeit:</strong> ${loan.duration_months} Monate</p>
-    <p><strong>Rate:</strong> ${fmtMoney(loan.monthly_payment)} / Monat</p>
-    <p><strong>Zinssatz:</strong> ${loan.type === "islamic" ? "0 % (Mourabaha)" : "2 % p. a."}</p>
+    <h4>${DL("loanOverview", lang)}</h4>
+    <p><strong>${DL("loanAmount", lang)}:</strong> <span class="highlight">${fmtMoney(loan.amount)}</span></p>
+    <p><strong>${DL("duration", lang)}:</strong> ${loan.duration_months} Monate</p>
+    <p><strong>${DL("monthlyRate", lang)}:</strong> ${fmtMoney(loan.monthly_payment)} / Monat</p>
+    <p><strong>${DL("interestRate", lang)}:</strong> ${loan.type === "islamic" ? "0 % (Mourabaha)" : "2 % p. a."}</p>
   </div>
 </div>
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">${summaryCards}</div>
 <div class="section">
-  <h3>Zahlungsplan</h3>
+  <h3>${DL("paymentPlan", lang)}</h3>
   <table style="font-size:10px;">${tableHead}<tbody>${firstChunk.join("")}${isOnePage ? gesamtRow : ""}</tbody></table>
   ${isOnePage ? annualNote : ""}
 </div>
-${isOnePage ? sigBlock(client, sigOpts, "Direktion") : ""}
-${isOnePage ? footerBar(ref) : ""}
+${isOnePage ? sigBlock(client, sigOpts, DL("direction", lang), true, lang) : ""}
+${isOnePage ? footerBar(ref, lang) : ""}
 </div>`;
 
   // Continuation pages — table only; GESAMT row on last data page; footer on Abschluss page only
@@ -624,34 +701,35 @@ ${isOnePage ? footerBar(ref) : ""}
       const chunk = allRows.slice(p, p + ROWS_PER_PAGE);
       const isLast = p + ROWS_PER_PAGE >= allRows.length;
       morePages += `<div class="page">
-${contPageHeader(ref, "Tilgungsplan — Fortsetzung")}
+${contPageHeader(ref, `${DL("tilgungsplanTitle", lang)} — Fortsetzung`, lang)}
 <table style="font-size:10px;">${tableHead}<tbody>${chunk.join("")}${isLast ? gesamtRow : ""}</tbody></table>
 ${isLast ? annualNote : ""}
 </div>`;
     }
     // Dedicated final page: signature only
     morePages += `<div class="page">
-${contPageHeader(ref, "Tilgungsplan — Abschluss")}
-${sigBlock(client, sigOpts, "Direktion")}
-${footerBar(ref)}
+${contPageHeader(ref, `${DL("tilgungsplanTitle", lang)} — Abschluss`, lang)}
+${sigBlock(client, sigOpts, DL("direction", lang), true, lang)}
+${footerBar(ref, lang)}
 </div>`;
   }
 
-  return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
-<title>Tilgungsplan — KT Bank AG</title>
+  return `<!DOCTYPE html><html lang="${lang}"><head><meta charset="utf-8"/>
+<title>${DL("tilgungsplanTitle", lang)} — KT Bank AG</title>
 <style>${baseStyles()}</style><script>(function(){function mm2px(mm){var d=document.createElement('div');d.style.cssText='position:fixed;top:-9999px;left:-9999px;height:'+mm+'mm;';document.body.appendChild(d);var h=d.offsetHeight;d.remove();return h;}function run(){var MAX=mm2px(255);document.querySelectorAll('.page-bg>.page').forEach(function(page){if(page.offsetHeight<=MAX*1.08)return;var allKids=Array.from(page.children);var footer=null;var kids=allKids.filter(function(k){if(k.classList&&k.classList.contains('footer-bar')){footer=k;return false;}return true;});var hs=kids.map(function(k){return k.offsetHeight;});var pages=[],cur=page.cloneNode(false),curH=0;kids.forEach(function(k,i){var h=hs[i]||20;if(curH>60&&curH+h>MAX){pages.push(cur);cur=page.cloneNode(false);curH=0;}cur.appendChild(k);curH+=h;});if(footer)cur.appendChild(footer);pages.push(cur);if(pages.length<2)return;var bg=page.parentNode;pages.forEach(function(p){bg.insertBefore(p,page);});bg.removeChild(page);});}function addBtn(){var b=document.createElement('button');b.id='pdf-btn';b.innerHTML='&#8595;&nbsp;PDF';b.title='Als PDF speichern / Enregistrer en PDF';b.style.cssText='position:fixed;bottom:24px;right:24px;z-index:9999;background:#005F2D;color:#fff;border:none;border-radius:10px;padding:12px 22px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 18px rgba(0,95,45,0.5);font-family:Arial,sans-serif;letter-spacing:0.03em;';b.onmouseover=function(){this.style.background='#004020';};b.onmouseout=function(){this.style.background='#005F2D';};b.onclick=function(){window.print();};document.body.appendChild(b);}if(document.readyState==='complete'){setTimeout(run,80);addBtn();}else window.addEventListener('load',function(){setTimeout(run,80);addBtn();});})();</script></head><body><div class="page-bg">
 ${page1}${morePages}
 </div></body></html>`;
 }
 
 /* ── 5. AGB (static) ── */
-export function genAGB(_client: ClientInfo): string {
+export function genAGB(_client: ClientInfo, lang = "de"): string {
   const ref = docRef();
-  return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
-<title>Allgemeine Geschäftsbedingungen — KT Bank AG</title>
+  return `<!DOCTYPE html><html lang="${lang}"><head><meta charset="utf-8"/>
+<title>${DL("agbTitle", lang)} — KT Bank AG</title>
 <style>${baseStyles()}</style><script>(function(){function mm2px(mm){var d=document.createElement('div');d.style.cssText='position:fixed;top:-9999px;left:-9999px;height:'+mm+'mm;';document.body.appendChild(d);var h=d.offsetHeight;d.remove();return h;}function run(){var MAX=mm2px(255);document.querySelectorAll('.page-bg>.page').forEach(function(page){if(page.offsetHeight<=MAX*1.08)return;var allKids=Array.from(page.children);var footer=null;var kids=allKids.filter(function(k){if(k.classList&&k.classList.contains('footer-bar')){footer=k;return false;}return true;});var hs=kids.map(function(k){return k.offsetHeight;});var pages=[],cur=page.cloneNode(false),curH=0;kids.forEach(function(k,i){var h=hs[i]||20;if(curH>60&&curH+h>MAX){pages.push(cur);cur=page.cloneNode(false);curH=0;}cur.appendChild(k);curH+=h;});if(footer)cur.appendChild(footer);pages.push(cur);if(pages.length<2)return;var bg=page.parentNode;pages.forEach(function(p){bg.insertBefore(p,page);});bg.removeChild(page);});}function addBtn(){var b=document.createElement('button');b.id='pdf-btn';b.innerHTML='&#8595;&nbsp;PDF';b.title='Als PDF speichern / Enregistrer en PDF';b.style.cssText='position:fixed;bottom:24px;right:24px;z-index:9999;background:#005F2D;color:#fff;border:none;border-radius:10px;padding:12px 22px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 18px rgba(0,95,45,0.5);font-family:Arial,sans-serif;letter-spacing:0.03em;';b.onmouseover=function(){this.style.background='#004020';};b.onmouseout=function(){this.style.background='#005F2D';};b.onclick=function(){window.print();};document.body.appendChild(b);}if(document.readyState==='complete'){setTimeout(run,80);addBtn();}else window.addEventListener('load',function(){setTimeout(run,80);addBtn();});})();</script></head><body><div class="page-bg"><div class="page">
 ${letterhead()}
-<div class="doc-title"><h2>Allgemeine Geschäftsbedingungen</h2><span class="ref">Stand: Januar 2024 · Ref: ${ref}</span></div>
+<div class="doc-title"><h2>${DL("agbTitle", lang)}</h2><span class="ref">Stand: Januar 2024 · Ref: ${ref}</span></div>
+${DL("legalNote", lang) ? `<p style="color:#64748B;font-size:10px;margin-bottom:16px;">${DL("legalNote", lang)}</p>` : ""}
 <div class="section"><h3>§ 1 Geltungsbereich</h3>
 <p class="body-text">Diese Allgemeinen Geschäftsbedingungen (AGB) gelten für alle Geschäftsbeziehungen zwischen der KT Bank AG (nachfolgend "Bank") und ihren Kunden (nachfolgend "Kunde").</p></div>
 <div class="section"><h3>§ 2 Kontoführung</h3>
@@ -664,18 +742,19 @@ ${letterhead()}
 <p class="body-text">Die Bank verarbeitet personenbezogene Daten gemäß der EU-Datenschutz-Grundverordnung (DSGVO) und dem Bundesdatenschutzgesetz (BDSG).</p></div>
 <div class="section"><h3>§ 6 Kündigung</h3>
 <p class="body-text">Das Konto kann von beiden Seiten jederzeit schriftlich gekündigt werden. Bei Kündigung durch die Bank gilt eine Frist von 2 Monaten.</p></div>
-${footerBar(ref)}
+${footerBar(ref, lang)}
 </div></div></body></html>`;
 }
 
 /* ── 6. Datenschutzerklärung (static) ── */
-export function genDatenschutz(_client: ClientInfo): string {
+export function genDatenschutz(_client: ClientInfo, lang = "de"): string {
   const ref = docRef();
-  return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
-<title>Datenschutzerklärung — KT Bank AG</title>
+  return `<!DOCTYPE html><html lang="${lang}"><head><meta charset="utf-8"/>
+<title>${DL("datenschutzTitle", lang)} — KT Bank AG</title>
 <style>${baseStyles()}</style><script>(function(){function mm2px(mm){var d=document.createElement('div');d.style.cssText='position:fixed;top:-9999px;left:-9999px;height:'+mm+'mm;';document.body.appendChild(d);var h=d.offsetHeight;d.remove();return h;}function run(){var MAX=mm2px(255);document.querySelectorAll('.page-bg>.page').forEach(function(page){if(page.offsetHeight<=MAX*1.08)return;var allKids=Array.from(page.children);var footer=null;var kids=allKids.filter(function(k){if(k.classList&&k.classList.contains('footer-bar')){footer=k;return false;}return true;});var hs=kids.map(function(k){return k.offsetHeight;});var pages=[],cur=page.cloneNode(false),curH=0;kids.forEach(function(k,i){var h=hs[i]||20;if(curH>60&&curH+h>MAX){pages.push(cur);cur=page.cloneNode(false);curH=0;}cur.appendChild(k);curH+=h;});if(footer)cur.appendChild(footer);pages.push(cur);if(pages.length<2)return;var bg=page.parentNode;pages.forEach(function(p){bg.insertBefore(p,page);});bg.removeChild(page);});}function addBtn(){var b=document.createElement('button');b.id='pdf-btn';b.innerHTML='&#8595;&nbsp;PDF';b.title='Als PDF speichern / Enregistrer en PDF';b.style.cssText='position:fixed;bottom:24px;right:24px;z-index:9999;background:#005F2D;color:#fff;border:none;border-radius:10px;padding:12px 22px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 18px rgba(0,95,45,0.5);font-family:Arial,sans-serif;letter-spacing:0.03em;';b.onmouseover=function(){this.style.background='#004020';};b.onmouseout=function(){this.style.background='#005F2D';};b.onclick=function(){window.print();};document.body.appendChild(b);}if(document.readyState==='complete'){setTimeout(run,80);addBtn();}else window.addEventListener('load',function(){setTimeout(run,80);addBtn();});})();</script></head><body><div class="page-bg"><div class="page">
 ${letterhead()}
-<div class="doc-title"><h2>Datenschutzerklärung</h2><span class="ref">Stand: Januar 2024 · Ref: ${ref}</span></div>
+<div class="doc-title"><h2>${DL("datenschutzTitle", lang)}</h2><span class="ref">Stand: Januar 2024 · Ref: ${ref}</span></div>
+${DL("legalNote", lang) ? `<p style="color:#64748B;font-size:10px;margin-bottom:16px;">${DL("legalNote", lang)}</p>` : ""}
 <div class="section"><h3>1. Verantwortlicher</h3>
 <p class="body-text">KT Bank AG, Bockenheimer Anlage 46, 60322 Frankfurt am Main. Datenschutzbeauftragter: datenschutz@kt-bank-ag.com</p></div>
 <div class="section"><h3>2. Verarbeitete Daten</h3>
@@ -686,14 +765,14 @@ ${letterhead()}
 <p class="body-text">Sie haben das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung. Beschwerden können an die zuständige Aufsichtsbehörde gerichtet werden.</p></div>
 <div class="section"><h3>5. Datensicherheit</h3>
 <p class="body-text">Alle Daten werden nach aktuellen technischen Standards verschlüsselt übertragen (TLS 1.3) und gespeichert (AES-256).</p></div>
-${footerBar(ref)}
+${footerBar(ref, lang)}
 </div></div></body></html>`;
 }
 
 /* ── 7. Custom document ── */
-export function genCustom(client: ClientInfo, opts: { title: string; body_html: string }, sigOpts: SignatureOptions = {}): string {
+export function genCustom(client: ClientInfo, opts: { title: string; body_html: string }, sigOpts: SignatureOptions = {}, lang = "de"): string {
   const ref = docRef();
-  return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
+  return `<!DOCTYPE html><html lang="${lang}"><head><meta charset="utf-8"/>
 <title>${opts.title} — KT Bank AG</title>
 <style>${baseStyles()}
 .custom-body p { margin-bottom:10px; }
@@ -710,13 +789,13 @@ ${letterhead()}
 </p>
 <div class="doc-title">
   <h2>${opts.title}</h2>
-  <span class="ref">Ref: ${ref} · ${docDate()}</span>
+  <span class="ref">Ref: ${ref} · ${docDate(lang)}</span>
 </div>
 <div class="custom-body" style="margin-bottom:32px;">
   ${opts.body_html}
 </div>
-${sigBlock(client, sigOpts, "Frankfurt am Main")}
-${footerBar(ref)}
+${sigBlock(client, sigOpts, "Frankfurt am Main", true, lang)}
+${footerBar(ref, lang)}
 </div></div></body></html>`;
 }
 

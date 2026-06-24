@@ -85,15 +85,18 @@ export async function POST(req: NextRequest) {
 
   const sigOpts: SignatureOptions = signature_options ?? {};
 
+  const { data: profileLang } = await supabase.from("kt_profiles").select("lang").eq("id", client_id).single();
+  const clientLang = profileLang?.lang ?? "de";
+
   let contentHtml = "";
   switch (type) {
-    case "kontoeroeffnung": contentHtml = genKontoeröffnung(clientInfo, sigOpts); break;
-    case "willkommen":      contentHtml = genWillkommen(clientInfo, sigOpts); break;
-    case "kreditvertrag":   contentHtml = loan ? genKreditvertrag(clientInfo, loan, sigOpts) : ""; break;
-    case "tilgungsplan":    contentHtml = loan ? genTilgungsplan(clientInfo, loan, sigOpts) : ""; break;
-    case "agb":             contentHtml = genAGB(clientInfo); break;
-    case "datenschutz":     contentHtml = genDatenschutz(clientInfo); break;
-    case "custom":          contentHtml = body_html ? genCustom(clientInfo, { title, body_html }, sigOpts) : ""; break;
+    case "kontoeroeffnung": contentHtml = genKontoeröffnung(clientInfo, sigOpts, clientLang); break;
+    case "willkommen":      contentHtml = genWillkommen(clientInfo, sigOpts, clientLang); break;
+    case "kreditvertrag":   contentHtml = loan ? genKreditvertrag(clientInfo, loan, sigOpts, clientLang) : ""; break;
+    case "tilgungsplan":    contentHtml = loan ? genTilgungsplan(clientInfo, loan, sigOpts, clientLang) : ""; break;
+    case "agb":             contentHtml = genAGB(clientInfo, clientLang); break;
+    case "datenschutz":     contentHtml = genDatenschutz(clientInfo, clientLang); break;
+    case "custom":          contentHtml = body_html ? genCustom(clientInfo, { title, body_html }, sigOpts, clientLang) : ""; break;
   }
 
   const supabaseAdmin = getSupabaseAdmin();
@@ -113,12 +116,11 @@ export async function POST(req: NextRequest) {
 
   // Send document email to client (HTML attached as file)
   try {
-    const { data: profileLang } = await supabase.from("kt_profiles").select("lang").eq("id", client_id).single();
     await sendDocumentToClient(profile.email, {
       prenom: profile.prenom,
       docTitle: title,
       docType: type,
-      lang: profileLang?.lang ?? "de",
+      lang: clientLang,
       contentHtml,
     });
   } catch (err) {
