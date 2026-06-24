@@ -309,7 +309,7 @@ ${letterhead()}
   <div class="info-row"><span class="info-label">Kundenservice</span><span class="info-value">support@kt-bank-ag.com</span></div>
 </div>
 
-${sigBlock(client, sigOpts, "Direktion", false)}
+${sigBlock(client, sigOpts, "Direktion")}
 
 ${footerBar(ref)}
 </div></div></body></html>`;
@@ -359,7 +359,7 @@ ${letterhead()}
 
 <p class="body-text">Bei Fragen stehen wir Ihnen jederzeit zur Verfügung: <strong>support@kt-bank-ag.com</strong></p>
 
-${sigBlock(client, sigOpts, "Kundenbetreuer", false)}
+${sigBlock(client, sigOpts, "Kundenbetreuer")}
 
 ${footerBar(ref)}
 </div></div></body></html>`;
@@ -468,7 +468,7 @@ export function genTilgungsplan(client: ClientInfo, loan: {
   total_repayment: number;
   interest_rate: number;
   purpose?: string;
-}): string {
+}, sigOpts: SignatureOptions = {}): string {
   const ref = docRef();
   const fmtMoney = (n: number) => n.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
   const rate = loan.interest_rate / 12;
@@ -534,6 +534,8 @@ ${letterhead()}
   </table>
   <p style="color:#64748B;font-size:11px;text-align:right;">Gesamtrückzahlung: <strong style="color:#005F2D;">${fmtMoney(loan.total_repayment)}</strong></p>
 </div>
+
+${sigBlock(client, sigOpts, "Direktion")}
 
 ${footerBar(ref)}
 </div></div></body></html>`;

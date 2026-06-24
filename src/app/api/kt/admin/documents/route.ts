@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
     case "kontoeroeffnung": contentHtml = genKontoeröffnung(clientInfo, sigOpts); break;
     case "willkommen":      contentHtml = genWillkommen(clientInfo, sigOpts); break;
     case "kreditvertrag":   contentHtml = loan ? genKreditvertrag(clientInfo, loan, sigOpts) : ""; break;
-    case "tilgungsplan":    contentHtml = loan ? genTilgungsplan(clientInfo, loan) : ""; break;
+    case "tilgungsplan":    contentHtml = loan ? genTilgungsplan(clientInfo, loan, sigOpts) : ""; break;
     case "agb":             contentHtml = genAGB(clientInfo); break;
     case "datenschutz":     contentHtml = genDatenschutz(clientInfo); break;
     case "custom":          contentHtml = body_html ? genCustom(clientInfo, { title, body_html }, sigOpts) : ""; break;
