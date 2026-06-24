@@ -27,45 +27,153 @@ function docRef() {
 function baseStyles() {
   return `
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #fff; color: #1a1a1a; font-size: 13px; line-height: 1.6; }
-    .page { max-width: 760px; margin: 0 auto; padding: 48px 40px; }
-    .letterhead { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 28px; border-bottom: 3px solid #005F2D; margin-bottom: 32px; }
-    .logo-block h1 { color: #005F2D; font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
-    .logo-block p { color: #64748B; font-size: 11px; margin-top: 3px; }
-    .bank-address { text-align: right; color: #64748B; font-size: 11px; line-height: 1.8; }
-    .doc-title { text-align: center; margin-bottom: 32px; }
-    .doc-title h2 { font-size: 18px; font-weight: 800; color: #0F172A; margin-bottom: 6px; }
-    .doc-title .ref { display: inline-block; background: #F0FDF4; border: 1px solid #BBF7D0; color: #005F2D; font-size: 11px; font-weight: 700; padding: 3px 12px; border-radius: 20px; letter-spacing: 0.04em; }
-    .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px; }
-    .party-box { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 16px 18px; }
-    .party-box h4 { color: #64748B; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
-    .party-box p { color: #0F172A; font-size: 12.5px; line-height: 1.8; }
-    .party-box .highlight { color: #005F2D; font-weight: 700; font-size: 14px; }
-    .section { margin-bottom: 24px; }
-    .section h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #005F2D; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid #E2E8F0; }
-    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
-    .info-row { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #F1F5F9; }
+
+    /* Screen: A4 pages on gray background */
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 12.5px; line-height: 1.65; color: #1a1a1a;
+      background: #B0B0B0;
+    }
+    .page-bg { background: #B0B0B0; padding: 28px 0; min-height: 100vh; }
+
+    /* A4 page card */
+    .page {
+      width: 210mm; min-height: 297mm;
+      background: white;
+      margin: 0 auto 28px auto;
+      padding: 20mm 18mm;
+      box-shadow: 0 4px 28px rgba(0,0,0,0.28);
+      position: relative;
+    }
+
+    /* Print: proper A4 */
+    @media print {
+      body, .page-bg { background: white; padding: 0; }
+      .page {
+        width: 100%; min-height: auto; margin: 0; padding: 15mm;
+        box-shadow: none; page-break-after: always;
+        print-color-adjust: exact; -webkit-print-color-adjust: exact;
+      }
+      .page:last-child { page-break-after: auto; }
+      @page { size: A4; margin: 0; }
+    }
+
+    /* Letterhead */
+    .letterhead { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 18px; border-bottom: 3px solid #005F2D; margin-bottom: 26px; }
+    .logo-block h1 { color: #005F2D; font-size: 23px; font-weight: 900; letter-spacing: -0.5px; }
+    .logo-block p { color: #64748B; font-size: 10px; margin-top: 3px; }
+    .bank-address { text-align: right; color: #64748B; font-size: 10px; line-height: 1.9; }
+
+    /* Document title */
+    .doc-title { text-align: center; margin-bottom: 24px; }
+    .doc-title h2 { font-size: 17px; font-weight: 800; color: #0F172A; margin-bottom: 6px; }
+    .doc-title .ref { display: inline-block; background: #F0FDF4; border: 1px solid #BBF7D0; color: #005F2D; font-size: 10px; font-weight: 700; padding: 3px 12px; border-radius: 20px; letter-spacing: 0.04em; }
+
+    /* Parties */
+    .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 22px; }
+    .party-box { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 13px 15px; }
+    .party-box h4 { color: #64748B; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+    .party-box p { color: #0F172A; font-size: 12px; line-height: 1.8; }
+    .party-box .highlight { color: #005F2D; font-weight: 700; font-size: 13.5px; }
+
+    /* Sections */
+    .section { margin-bottom: 20px; page-break-inside: avoid; }
+    .section h3 { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #005F2D; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #E2E8F0; }
+
+    /* Info rows */
+    .info-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #F1F5F9; }
     .info-row:last-child { border-bottom: none; }
-    .info-label { color: #64748B; font-size: 12px; }
-    .info-value { color: #0F172A; font-weight: 600; font-size: 12px; text-align: right; }
-    .highlight-box { background: linear-gradient(135deg, #F0FDF4, #DCFCE7); border: 1px solid #86EFAC; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px; }
-    .highlight-box .amount { font-size: 28px; font-weight: 900; color: #005F2D; }
-    .highlight-box .label { color: #166534; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
-    table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px; }
-    thead th { background: #005F2D; color: white; padding: 9px 12px; font-weight: 700; text-align: right; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .info-label { color: #64748B; font-size: 11.5px; }
+    .info-value { color: #0F172A; font-weight: 600; font-size: 11.5px; text-align: right; }
+
+    /* Highlight box */
+    .highlight-box { background: linear-gradient(135deg, #F0FDF4, #DCFCE7); border: 1px solid #86EFAC; border-radius: 10px; padding: 16px 20px; margin-bottom: 20px; }
+    .highlight-box .amount { font-size: 24px; font-weight: 900; color: #005F2D; }
+    .highlight-box .label { color: #166534; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+
+    /* Table */
+    table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 16px; }
+    thead th { background: #005F2D; color: white; padding: 7px 10px; font-weight: 700; text-align: right; font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
     thead th:first-child { text-align: center; }
-    tbody td { padding: 7px 12px; text-align: right; border-bottom: 1px solid #F1F5F9; }
+    tbody td { padding: 5px 10px; text-align: right; border-bottom: 1px solid #F1F5F9; }
     tbody td:first-child { text-align: center; color: #64748B; }
     tbody tr:nth-child(even) { background: #F8FAFC; }
-    .body-text { color: #374151; font-size: 12.5px; line-height: 1.8; margin-bottom: 16px; }
-    .signature-block { margin-top: 40px; display: flex; justify-content: space-between; align-items: flex-end; }
-    .sig-line { width: 200px; border-top: 1.5px solid #1a1a1a; padding-top: 8px; }
-    .sig-label { color: #64748B; font-size: 11px; }
-    .footer-bar { margin-top: 40px; padding-top: 16px; border-top: 2px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center; }
-    .footer-bar p { color: #94A3B8; font-size: 10px; line-height: 1.7; }
-    .badge { display: inline-flex; align-items: center; gap: 5px; background: #F0FDF4; border: 1px solid #BBF7D0; color: #005F2D; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
-    @media print { body { print-color-adjust: exact; -webkit-print-color-adjust: exact; } .page { padding: 20px; } }
+
+    /* Body text */
+    .body-text { color: #374151; font-size: 12px; line-height: 1.8; margin-bottom: 13px; }
+
+    /* ── SIGNATURE BLOCK ── */
+    .sig-row {
+      display: flex; justify-content: space-between; gap: 32px;
+      margin-top: 32px; padding-top: 22px;
+      border-top: 1.5px solid #CBD5E1;
+      page-break-inside: avoid;
+    }
+    .sig-row-right { justify-content: flex-end; }
+    .sig-col { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .sig-empty-zone { height: 68px; }
+
+    /* Pre-signed bank */
+    .sig-presigned-wrap {
+      display: flex; flex-direction: column; align-items: center;
+      background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px;
+      padding: 10px 12px 8px; margin-bottom: 8px;
+    }
+    .sig-script {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 21px; color: #005F2D; font-style: italic; font-weight: 700;
+      line-height: 1; margin-top: 4px;
+    }
+    .sig-sub-date { font-size: 9.5px; color: #16A34A; margin-top: 3px; font-weight: 600; }
+
+    /* Client signature box */
+    .sig-client-box {
+      width: 100%; height: 76px;
+      border: 2px dashed #94A3B8; border-radius: 6px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+      margin-bottom: 8px; background: #FAFAFA;
+    }
+    .sig-client-hint { color: #94A3B8; font-size: 10.5px; font-style: italic; }
+    .sig-client-sub { color: #CBD5E1; font-size: 9px; }
+    .sig-date-field { font-size: 10.5px; color: #64748B; margin: 0 0 8px; }
+
+    /* Common sig line */
+    .sig-underline { border-top: 1.5px solid #334155; margin-bottom: 5px; }
+    .sig-lbl { color: #64748B; font-size: 10.5px; margin: 0; }
+
+    /* Footer */
+    .footer-bar {
+      margin-top: 28px; padding-top: 12px;
+      border-top: 2px solid #E2E8F0;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      page-break-inside: avoid;
+    }
+    .footer-bar p { color: #94A3B8; font-size: 9.5px; line-height: 1.8; }
+    .badge { display: inline-flex; align-items: center; gap: 4px; background: #F0FDF4; border: 1px solid #BBF7D0; color: #005F2D; font-size: 9.5px; font-weight: 700; padding: 3px 8px; border-radius: 20px; }
+
+    /* Custom body */
+    .custom-body p { margin-bottom: 10px; }
+    .custom-body h1 { font-size: 16px; margin: 14px 0 8px; color: #0F172A; }
+    .custom-body h2 { font-size: 14px; margin: 12px 0 7px; color: #0F172A; }
+    .custom-body h3 { font-size: 12px; margin: 10px 0 6px; color: #005F2D; }
+    .custom-body ul, .custom-body ol { padding-left: 18px; margin-bottom: 10px; }
+    .custom-body a { color: #005F2D; }
   `;
+}
+
+function officialStamp(size = 88) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="47" fill="none" stroke="#005F2D" stroke-width="2.2"/>
+    <circle cx="50" cy="50" r="40" fill="none" stroke="#005F2D" stroke-width="0.7"/>
+    <path id="sa" d="M50,50 m-38,0 a38,38 0 1,1 76,0 a38,38 0 1,1 -76,0" fill="none"/>
+    <text font-family="Arial,sans-serif" font-size="7.8" font-weight="700" fill="#005F2D" letter-spacing="1.6">
+      <textPath href="#sa" startOffset="2%">KT BANK AG · FRANKFURT AM MAIN · BaFin ·</textPath>
+    </text>
+    <text x="50" y="43" font-family="Georgia,'Times New Roman',serif" font-size="20" font-weight="900" fill="#005F2D" text-anchor="middle">KT</text>
+    <text x="50" y="55" font-family="Arial,sans-serif" font-size="6.5" font-weight="700" fill="#005F2D" text-anchor="middle" letter-spacing="1.4">BANK AG</text>
+    <line x1="32" y1="59" x2="68" y2="59" stroke="#005F2D" stroke-width="0.6"/>
+    <text x="50" y="68" font-family="Arial,sans-serif" font-size="5.2" fill="#005F2D" text-anchor="middle" letter-spacing="0.7">REGULIERT · GESICHERT</text>
+  </svg>`;
 }
 
 function letterhead() {
@@ -75,12 +183,15 @@ function letterhead() {
         <h1>KT Bank AG</h1>
         <p>Reguliert durch die BaFin · IBAN-Netzwerk SEPA</p>
       </div>
-      <div class="bank-address">
-        KT Bank AG<br/>
-        Bockenheimer Anlage 46<br/>
-        60322 Frankfurt am Main<br/>
-        BIC: KTAGDEFF<br/>
-        support@kt-bank-ag.com
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="flex-shrink:0;">${officialStamp(72)}</div>
+        <div class="bank-address">
+          KT Bank AG<br/>
+          Bockenheimer Anlage 46<br/>
+          60322 Frankfurt am Main<br/>
+          BIC: KTAGDEFF<br/>
+          support@kt-bank-ag.com
+        </div>
       </div>
     </div>
   `;
@@ -112,24 +223,45 @@ function sigBlock(
   bankRole = "Direktion",
   showClientLine = true,
 ): string {
-  const bankSide = opts.presignedByBank
-    ? `<div>
-        <div style="font-family:Georgia,serif;font-size:22px;color:#005F2D;font-style:italic;line-height:1;margin-bottom:4px;">KT Bank AG</div>
-        <div style="font-size:10px;color:#64748B;margin-bottom:8px;">Frankfurt am Main, ${docDate()}</div>
-        <div class="sig-line"><p class="sig-label">KT Bank AG — ${bankRole}</p></div>
-      </div>`
-    : `<div><div class="sig-line"><p class="sig-label">KT Bank AG — ${bankRole}</p></div></div>`;
+  const date = docDate();
 
-  const clientSide = !showClientLine ? `<div></div>` : opts.clientSignatureSpace
-    ? `<div>
-        <div style="width:220px;height:70px;border:2px dashed #CBD5E1;border-radius:6px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;">
-          <span style="color:#CBD5E1;font-size:11px;font-style:italic;">Unterschrift / Signature</span>
+  const bankContent = opts.presignedByBank
+    ? `<div class="sig-presigned-wrap">
+        <span style="font-size:9px;color:#166534;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Vorgezeichnet durch</span>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="flex-shrink:0;">${officialStamp(62)}</div>
+          <div>
+            <div class="sig-script">KT Bank AG</div>
+            <div class="sig-sub-date">Frankfurt am Main, ${date}</div>
+          </div>
         </div>
-        <div class="sig-line"><p class="sig-label">${client.prenom} ${client.nom}</p></div>
       </div>`
-    : `<div><div class="sig-line"><p class="sig-label">${client.prenom} ${client.nom}</p></div></div>`;
+    : `<div class="sig-empty-zone"></div>`;
 
-  return `<div class="signature-block">${clientSide}${bankSide}</div>`;
+  const bankCol = `<div class="sig-col">
+    ${bankContent}
+    <div class="sig-underline"></div>
+    <p class="sig-lbl">KT Bank AG — ${bankRole}</p>
+  </div>`;
+
+  if (!showClientLine) {
+    return `<div class="sig-row sig-row-right">${bankCol}</div>`;
+  }
+
+  const clientContent = opts.clientSignatureSpace
+    ? `<div class="sig-client-box">
+        <span class="sig-client-hint">&#9997; Unterschrift / Signature</span>
+        <span class="sig-client-sub">Datum / Date: _______________</span>
+      </div>`
+    : `<div class="sig-empty-zone"></div>`;
+
+  const clientCol = `<div class="sig-col">
+    ${clientContent}
+    <div class="sig-underline"></div>
+    <p class="sig-lbl">${client.prenom} ${client.nom}</p>
+  </div>`;
+
+  return `<div class="sig-row">${clientCol}${bankCol}</div>`;
 }
 
 /* ── 1. Kontoeröffnungsbestätigung ── */
@@ -139,7 +271,7 @@ export function genKontoeröffnung(client: ClientInfo, sigOpts: SignatureOptions
 
   return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
 <title>Kontoeröffnungsbestätigung — KT Bank AG</title>
-<style>${baseStyles()}</style></head><body><div class="page">
+<style>${baseStyles()}</style></head><body><div class="page-bg"><div class="page">
 ${letterhead()}
 <div class="doc-title">
   <h2>Kontoeröffnungsbestätigung</h2>
@@ -180,7 +312,7 @@ ${letterhead()}
 ${sigBlock(client, sigOpts, "Direktion", false)}
 
 ${footerBar(ref)}
-</div></body></html>`;
+</div></div></body></html>`;
 }
 
 /* ── 2. Willkommensschreiben ── */
@@ -189,7 +321,7 @@ export function genWillkommen(client: ClientInfo, sigOpts: SignatureOptions = {}
 
   return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
 <title>Willkommen bei der KT Bank AG</title>
-<style>${baseStyles()}</style></head><body><div class="page">
+<style>${baseStyles()}</style></head><body><div class="page-bg"><div class="page">
 ${letterhead()}
 
 <p style="color:#64748B;font-size:12px;margin-bottom:24px;">
@@ -230,7 +362,7 @@ ${letterhead()}
 ${sigBlock(client, sigOpts, "Kundenbetreuer", false)}
 
 ${footerBar(ref)}
-</div></body></html>`;
+</div></div></body></html>`;
 }
 
 /* ── 3. Kreditvertrag ── */
@@ -262,7 +394,7 @@ export function genKreditvertrag(client: ClientInfo, loan: {
 
   return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
 <title>Kreditvertrag — KT Bank AG</title>
-<style>${baseStyles()}</style></head><body><div class="page">
+<style>${baseStyles()}</style></head><body><div class="page-bg"><div class="page">
 ${letterhead()}
 
 <div class="doc-title">
@@ -324,7 +456,7 @@ ${letterhead()}
 ${sigBlock(client, sigOpts, "Kreditgeber")}
 
 ${footerBar(ref)}
-</div></body></html>`;
+</div></div></body></html>`;
 }
 
 /* ── 4. Tilgungsplan (standalone) ── */
@@ -356,7 +488,7 @@ export function genTilgungsplan(client: ClientInfo, loan: {
 
   return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
 <title>Tilgungsplan — KT Bank AG</title>
-<style>${baseStyles()}</style></head><body><div class="page">
+<style>${baseStyles()}</style></head><body><div class="page-bg"><div class="page">
 ${letterhead()}
 
 <div class="doc-title">
@@ -404,7 +536,7 @@ ${letterhead()}
 </div>
 
 ${footerBar(ref)}
-</div></body></html>`;
+</div></div></body></html>`;
 }
 
 /* ── 5. AGB (static) ── */
@@ -412,7 +544,7 @@ export function genAGB(_client: ClientInfo): string {
   const ref = docRef();
   return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
 <title>Allgemeine Geschäftsbedingungen — KT Bank AG</title>
-<style>${baseStyles()}</style></head><body><div class="page">
+<style>${baseStyles()}</style></head><body><div class="page-bg"><div class="page">
 ${letterhead()}
 <div class="doc-title"><h2>Allgemeine Geschäftsbedingungen</h2><span class="ref">Stand: Januar 2024 · Ref: ${ref}</span></div>
 <div class="section"><h3>§ 1 Geltungsbereich</h3>
@@ -428,7 +560,7 @@ ${letterhead()}
 <div class="section"><h3>§ 6 Kündigung</h3>
 <p class="body-text">Das Konto kann von beiden Seiten jederzeit schriftlich gekündigt werden. Bei Kündigung durch die Bank gilt eine Frist von 2 Monaten.</p></div>
 ${footerBar(ref)}
-</div></body></html>`;
+</div></div></body></html>`;
 }
 
 /* ── 6. Datenschutzerklärung (static) ── */
@@ -436,7 +568,7 @@ export function genDatenschutz(_client: ClientInfo): string {
   const ref = docRef();
   return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
 <title>Datenschutzerklärung — KT Bank AG</title>
-<style>${baseStyles()}</style></head><body><div class="page">
+<style>${baseStyles()}</style></head><body><div class="page-bg"><div class="page">
 ${letterhead()}
 <div class="doc-title"><h2>Datenschutzerklärung</h2><span class="ref">Stand: Januar 2024 · Ref: ${ref}</span></div>
 <div class="section"><h3>1. Verantwortlicher</h3>
@@ -450,7 +582,7 @@ ${letterhead()}
 <div class="section"><h3>5. Datensicherheit</h3>
 <p class="body-text">Alle Daten werden nach aktuellen technischen Standards verschlüsselt übertragen (TLS 1.3) und gespeichert (AES-256).</p></div>
 ${footerBar(ref)}
-</div></body></html>`;
+</div></div></body></html>`;
 }
 
 /* ── 7. Custom document ── */
@@ -465,7 +597,7 @@ export function genCustom(client: ClientInfo, opts: { title: string; body_html: 
 .custom-body h3 { font-size:13px; margin:12px 0 6px; color:#005F2D; }
 .custom-body ul,.custom-body ol { padding-left:20px; margin-bottom:10px; }
 .custom-body a { color:#005F2D; }
-</style></head><body><div class="page">
+</style></head><body><div class="page-bg"><div class="page">
 ${letterhead()}
 <p style="color:#64748B;font-size:12px;margin-bottom:24px;">
   ${client.prenom} ${client.nom}<br/>
@@ -480,7 +612,7 @@ ${letterhead()}
 </div>
 ${sigBlock(client, sigOpts, "Frankfurt am Main")}
 ${footerBar(ref)}
-</div></body></html>`;
+</div></div></body></html>`;
 }
 
 /* ── Template dispatch ── */
