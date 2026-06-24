@@ -552,7 +552,7 @@ ${isOnePage ? sigBlock(client, sigOpts, "Direktion") : ""}
 ${isOnePage ? footerBar(ref) : ""}
 </div>`;
 
-  // Continuation pages — table only (no sigBlock here, see dedicated final page)
+  // Continuation pages — table only (no footer, no sigBlock; footer is on the Abschluss page only)
   let morePages = "";
   if (!isOnePage) {
     for (let p = ROWS_FIRST; p < allRows.length; p += ROWS_PER_PAGE) {
@@ -560,7 +560,6 @@ ${isOnePage ? footerBar(ref) : ""}
       morePages += `<div class="page">
 ${contPageHeader(ref, "Tilgungsplan — Fortsetzung")}
 <table>${tableHead}<tbody>${chunk.join("")}</tbody></table>
-${footerBar(ref)}
 </div>`;
     }
     // Dedicated final page: total summary + signature (never overflows)
