@@ -281,7 +281,7 @@ export function genKontoeröffnung(client: ClientInfo, sigOpts: SignatureOptions
 
   return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
 <title>Kontoeröffnungsbestätigung — KT Bank AG</title>
-<style>${baseStyles()}</style></head><body><div class="page-bg"><div class="page">
+<style>${baseStyles()}</style><script>(function(){function mm2px(mm){var d=document.createElement('div');d.style.cssText='position:fixed;top:-9999px;left:-9999px;height:'+mm+'mm;';document.body.appendChild(d);var h=d.offsetHeight;d.remove();return h;}function run(){var MAX=mm2px(255);document.querySelectorAll('.page-bg>.page').forEach(function(page){if(page.offsetHeight<=MAX*1.08)return;var kids=Array.from(page.children);var hs=kids.map(function(k){return k.offsetHeight;});var pages=[],cur=page.cloneNode(false),curH=0;kids.forEach(function(k,i){var h=hs[i]||20;if(curH>60&&curH+h>MAX){pages.push(cur);cur=page.cloneNode(false);curH=0;}cur.appendChild(k);curH+=h;});pages.push(cur);if(pages.length<2)return;var bg=page.parentNode;pages.forEach(function(p){bg.insertBefore(p,page);});bg.removeChild(page);});}if(document.readyState==='complete')setTimeout(run,80);else window.addEventListener('load',function(){setTimeout(run,80);});})();</script></head><body><div class="page-bg"><div class="page">
 ${letterhead()}
 <div class="doc-title">
   <h2>Kontoeröffnungsbestätigung</h2>
@@ -331,7 +331,7 @@ export function genWillkommen(client: ClientInfo, sigOpts: SignatureOptions = {}
 
   return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
 <title>Willkommen bei der KT Bank AG</title>
-<style>${baseStyles()}</style></head><body><div class="page-bg"><div class="page">
+<style>${baseStyles()}</style><script>(function(){function mm2px(mm){var d=document.createElement('div');d.style.cssText='position:fixed;top:-9999px;left:-9999px;height:'+mm+'mm;';document.body.appendChild(d);var h=d.offsetHeight;d.remove();return h;}function run(){var MAX=mm2px(255);document.querySelectorAll('.page-bg>.page').forEach(function(page){if(page.offsetHeight<=MAX*1.08)return;var kids=Array.from(page.children);var hs=kids.map(function(k){return k.offsetHeight;});var pages=[],cur=page.cloneNode(false),curH=0;kids.forEach(function(k,i){var h=hs[i]||20;if(curH>60&&curH+h>MAX){pages.push(cur);cur=page.cloneNode(false);curH=0;}cur.appendChild(k);curH+=h;});pages.push(cur);if(pages.length<2)return;var bg=page.parentNode;pages.forEach(function(p){bg.insertBefore(p,page);});bg.removeChild(page);});}if(document.readyState==='complete')setTimeout(run,80);else window.addEventListener('load',function(){setTimeout(run,80);});})();</script></head><body><div class="page-bg"><div class="page">
 ${letterhead()}
 
 <p style="color:#64748B;font-size:12px;margin-bottom:24px;">
@@ -469,7 +469,7 @@ ${footerBar(ref)}
 
   return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
 <title>Kreditvertrag — KT Bank AG</title>
-<style>${baseStyles()}</style></head><body><div class="page-bg">
+<style>${baseStyles()}</style><script>(function(){function mm2px(mm){var d=document.createElement('div');d.style.cssText='position:fixed;top:-9999px;left:-9999px;height:'+mm+'mm;';document.body.appendChild(d);var h=d.offsetHeight;d.remove();return h;}function run(){var MAX=mm2px(255);document.querySelectorAll('.page-bg>.page').forEach(function(page){if(page.offsetHeight<=MAX*1.08)return;var kids=Array.from(page.children);var hs=kids.map(function(k){return k.offsetHeight;});var pages=[],cur=page.cloneNode(false),curH=0;kids.forEach(function(k,i){var h=hs[i]||20;if(curH>60&&curH+h>MAX){pages.push(cur);cur=page.cloneNode(false);curH=0;}cur.appendChild(k);curH+=h;});pages.push(cur);if(pages.length<2)return;var bg=page.parentNode;pages.forEach(function(p){bg.insertBefore(p,page);});bg.removeChild(page);});}if(document.readyState==='complete')setTimeout(run,80);else window.addEventListener('load',function(){setTimeout(run,80);});})();</script></head><body><div class="page-bg">
 ${page1}${tablePages}
 </div></body></html>`;
 }
@@ -566,7 +566,7 @@ ${footerBar(ref)}
 
   return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
 <title>Tilgungsplan — KT Bank AG</title>
-<style>${baseStyles()}</style></head><body><div class="page-bg">
+<style>${baseStyles()}</style><script>(function(){function mm2px(mm){var d=document.createElement('div');d.style.cssText='position:fixed;top:-9999px;left:-9999px;height:'+mm+'mm;';document.body.appendChild(d);var h=d.offsetHeight;d.remove();return h;}function run(){var MAX=mm2px(255);document.querySelectorAll('.page-bg>.page').forEach(function(page){if(page.offsetHeight<=MAX*1.08)return;var kids=Array.from(page.children);var hs=kids.map(function(k){return k.offsetHeight;});var pages=[],cur=page.cloneNode(false),curH=0;kids.forEach(function(k,i){var h=hs[i]||20;if(curH>60&&curH+h>MAX){pages.push(cur);cur=page.cloneNode(false);curH=0;}cur.appendChild(k);curH+=h;});pages.push(cur);if(pages.length<2)return;var bg=page.parentNode;pages.forEach(function(p){bg.insertBefore(p,page);});bg.removeChild(page);});}if(document.readyState==='complete')setTimeout(run,80);else window.addEventListener('load',function(){setTimeout(run,80);});})();</script></head><body><div class="page-bg">
 ${page1}${morePages}
 </div></body></html>`;
 }
@@ -576,7 +576,7 @@ export function genAGB(_client: ClientInfo): string {
   const ref = docRef();
   return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
 <title>Allgemeine Geschäftsbedingungen — KT Bank AG</title>
-<style>${baseStyles()}</style></head><body><div class="page-bg"><div class="page">
+<style>${baseStyles()}</style><script>(function(){function mm2px(mm){var d=document.createElement('div');d.style.cssText='position:fixed;top:-9999px;left:-9999px;height:'+mm+'mm;';document.body.appendChild(d);var h=d.offsetHeight;d.remove();return h;}function run(){var MAX=mm2px(255);document.querySelectorAll('.page-bg>.page').forEach(function(page){if(page.offsetHeight<=MAX*1.08)return;var kids=Array.from(page.children);var hs=kids.map(function(k){return k.offsetHeight;});var pages=[],cur=page.cloneNode(false),curH=0;kids.forEach(function(k,i){var h=hs[i]||20;if(curH>60&&curH+h>MAX){pages.push(cur);cur=page.cloneNode(false);curH=0;}cur.appendChild(k);curH+=h;});pages.push(cur);if(pages.length<2)return;var bg=page.parentNode;pages.forEach(function(p){bg.insertBefore(p,page);});bg.removeChild(page);});}if(document.readyState==='complete')setTimeout(run,80);else window.addEventListener('load',function(){setTimeout(run,80);});})();</script></head><body><div class="page-bg"><div class="page">
 ${letterhead()}
 <div class="doc-title"><h2>Allgemeine Geschäftsbedingungen</h2><span class="ref">Stand: Januar 2024 · Ref: ${ref}</span></div>
 <div class="section"><h3>§ 1 Geltungsbereich</h3>
@@ -600,7 +600,7 @@ export function genDatenschutz(_client: ClientInfo): string {
   const ref = docRef();
   return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"/>
 <title>Datenschutzerklärung — KT Bank AG</title>
-<style>${baseStyles()}</style></head><body><div class="page-bg"><div class="page">
+<style>${baseStyles()}</style><script>(function(){function mm2px(mm){var d=document.createElement('div');d.style.cssText='position:fixed;top:-9999px;left:-9999px;height:'+mm+'mm;';document.body.appendChild(d);var h=d.offsetHeight;d.remove();return h;}function run(){var MAX=mm2px(255);document.querySelectorAll('.page-bg>.page').forEach(function(page){if(page.offsetHeight<=MAX*1.08)return;var kids=Array.from(page.children);var hs=kids.map(function(k){return k.offsetHeight;});var pages=[],cur=page.cloneNode(false),curH=0;kids.forEach(function(k,i){var h=hs[i]||20;if(curH>60&&curH+h>MAX){pages.push(cur);cur=page.cloneNode(false);curH=0;}cur.appendChild(k);curH+=h;});pages.push(cur);if(pages.length<2)return;var bg=page.parentNode;pages.forEach(function(p){bg.insertBefore(p,page);});bg.removeChild(page);});}if(document.readyState==='complete')setTimeout(run,80);else window.addEventListener('load',function(){setTimeout(run,80);});})();</script></head><body><div class="page-bg"><div class="page">
 ${letterhead()}
 <div class="doc-title"><h2>Datenschutzerklärung</h2><span class="ref">Stand: Januar 2024 · Ref: ${ref}</span></div>
 <div class="section"><h3>1. Verantwortlicher</h3>
@@ -629,7 +629,7 @@ export function genCustom(client: ClientInfo, opts: { title: string; body_html: 
 .custom-body h3 { font-size:13px; margin:12px 0 6px; color:#005F2D; }
 .custom-body ul,.custom-body ol { padding-left:20px; margin-bottom:10px; }
 .custom-body a { color:#005F2D; }
-</style></head><body><div class="page-bg"><div class="page">
+</style><script>(function(){function mm2px(mm){var d=document.createElement('div');d.style.cssText='position:fixed;top:-9999px;left:-9999px;height:'+mm+'mm;';document.body.appendChild(d);var h=d.offsetHeight;d.remove();return h;}function run(){var MAX=mm2px(255);document.querySelectorAll('.page-bg>.page').forEach(function(page){if(page.offsetHeight<=MAX*1.08)return;var kids=Array.from(page.children);var hs=kids.map(function(k){return k.offsetHeight;});var pages=[],cur=page.cloneNode(false),curH=0;kids.forEach(function(k,i){var h=hs[i]||20;if(curH>60&&curH+h>MAX){pages.push(cur);cur=page.cloneNode(false);curH=0;}cur.appendChild(k);curH+=h;});pages.push(cur);if(pages.length<2)return;var bg=page.parentNode;pages.forEach(function(p){bg.insertBefore(p,page);});bg.removeChild(page);});}if(document.readyState==='complete')setTimeout(run,80);else window.addEventListener('load',function(){setTimeout(run,80);});})();</script></head><body><div class="page-bg"><div class="page">
 ${letterhead()}
 <p style="color:#64748B;font-size:12px;margin-bottom:24px;">
   ${client.prenom} ${client.nom}<br/>

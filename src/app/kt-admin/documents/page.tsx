@@ -316,7 +316,7 @@ export default function AdminDocumentsPage() {
                             <div>
                               <label style={lbl}>Laufzeit (Monate)</label>
                               <select value={loanDur} onChange={(e) => setLoanDur(e.target.value)} style={{ ...inp, appearance: "none" }}>
-                                {[6, 12, 18, 24, 36, 48, 60, 72, 84, 96, 108, 120].map((m) => <option key={m} value={m}>{m} Monate</option>)}
+                                {[6, 12, 18, 24, 36, 48, 60, 72, 84, 96, 108, 120, 144, 168, 180, 192, 216, 240, 264, 300, 320].map((m) => <option key={m} value={m}>{m} Monate</option>)}
                               </select>
                             </div>
                             <div>
