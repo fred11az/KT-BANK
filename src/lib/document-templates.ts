@@ -44,7 +44,6 @@ function baseStyles() {
       padding: 20mm 18mm;
       box-shadow: 0 4px 28px rgba(0,0,0,0.28);
       position: relative;
-      display: flex; flex-direction: column;
     }
 
     /* Print: proper A4 */
@@ -143,9 +142,8 @@ function baseStyles() {
     .sig-underline { border-top: 1.5px solid #334155; margin-bottom: 5px; }
     .sig-lbl { color: #64748B; font-size: 10.5px; margin: 0; }
 
-    /* Footer — always at the bottom of each page */
     .footer-bar {
-      margin-top: auto; padding-top: 12px;
+      margin-top: 28px; padding-top: 12px;
       border-top: 2px solid #E2E8F0;
       display: flex; justify-content: space-between; align-items: flex-start;
       page-break-inside: avoid;
