@@ -135,6 +135,18 @@ export default function AdminDocumentsPage() {
     if (w) { w.document.write(html); w.document.close(); }
   }
 
+  function downloadDoc(html: string, title: string) {
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${title.replace(/[^a-zA-Z0-9\s\-_]/g, "").trim() || "document"}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   const filteredClients = clients.filter((c) => {
     const q = clientSearch.toLowerCase();
     return !q || `${c.prenom} ${c.nom} ${c.email}`.toLowerCase().includes(q);
@@ -364,10 +376,16 @@ export default function AdminDocumentsPage() {
                                   <Eye size={12} /> Anzeigen
                                 </button>
                               )}
+                              {doc.content_html && (
+                                <button onClick={() => downloadDoc(doc.content_html!, doc.title)}
+                                  style={{ display: "flex", alignItems: "center", gap: 5, padding: "7px 14px", background: "rgba(0,95,45,0.15)", border: "1px solid rgba(0,95,45,0.3)", borderRadius: 8, color: "#4CAF82", fontSize: "0.78rem", cursor: "pointer" }}>
+                                  <Download size={12} /> Herunterladen
+                                </button>
+                              )}
                               {doc.file_url && (
                                 <a href={doc.file_url} target="_blank" rel="noopener noreferrer"
                                   style={{ display: "flex", alignItems: "center", gap: 5, padding: "7px 14px", background: "rgba(0,95,45,0.2)", border: "1px solid rgba(0,95,45,0.4)", borderRadius: 8, color: "#4CAF82", fontSize: "0.78rem", textDecoration: "none" }}>
-                                  <Download size={12} /> Herunterladen
+                                  <Download size={12} /> Datei
                                 </a>
                               )}
                               <button onClick={() => deleteDoc(doc.id)}
