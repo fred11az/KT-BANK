@@ -135,16 +135,12 @@ export default function AdminDocumentsPage() {
     if (w) { w.document.write(html); w.document.close(); }
   }
 
-  function downloadDoc(html: string, title: string) {
-    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${title.replace(/[^a-zA-Z0-9\s\-_]/g, "").trim() || "document"}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  function downloadDoc(html: string, _title: string) {
+    const w = window.open("", "_blank");
+    if (!w) return;
+    w.document.write(html);
+    w.document.close();
+    setTimeout(() => { w.focus(); w.print(); }, 300);
   }
 
   const filteredClients = clients.filter((c) => {
