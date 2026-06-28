@@ -639,8 +639,10 @@ export default function InboxPage() {
   const [compAttachments, setCompAttachments] = useState<AttachFile[]>([]);
   const [replyAttachments, setReplyAttachments] = useState<AttachFile[]>([]);
   const [uploadingAttach, setUploadingAttach] = useState(false);
-  const compFileRef = useRef<HTMLInputElement>(null);
-  const replyFileRef = useRef<HTMLInputElement>(null);
+  const compDocFileRef = useRef<HTMLInputElement>(null);
+  const compImgFileRef = useRef<HTMLInputElement>(null);
+  const replyDocFileRef = useRef<HTMLInputElement>(null);
+  const replyImgFileRef = useRef<HTMLInputElement>(null);
 
   async function uploadAttachment(file: File, setter: React.Dispatch<React.SetStateAction<AttachFile[]>>) {
     setUploadingAttach(true);
@@ -910,8 +912,11 @@ export default function InboxPage() {
                 </div>
                 {/* Attachment bar — reply */}
                 <div style={{ padding: "4px 14px 6px" }}>
-                  <input ref={replyFileRef} type="file" hidden
-                    accept="*/*"
+                  <input ref={replyDocFileRef} type="file" hidden
+                    accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/plain"
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadAttachment(f, setReplyAttachments); e.target.value = ""; }} />
+                  <input ref={replyImgFileRef} type="file" hidden
+                    accept="image/*"
                     onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadAttachment(f, setReplyAttachments); e.target.value = ""; }} />
                   {replyAttachments.length > 0 && (
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 6 }}>
@@ -929,9 +934,13 @@ export default function InboxPage() {
                   )}
                 </div>
                 <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 8, padding: "0 14px 10px" }}>
-                  <button type="button" onClick={() => replyFileRef.current?.click()} disabled={uploadingAttach}
-                    style={{ display: "flex", alignItems: "center", gap: 5, height: 38, padding: "0 12px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 9, color: "rgba(255,255,255,0.5)", fontSize: "0.8rem", cursor: uploadingAttach ? "not-allowed" : "pointer", fontFamily: "inherit" }}>
-                    <Paperclip size={13} />
+                  <button type="button" onClick={() => replyDocFileRef.current?.click()} disabled={uploadingAttach} title="PDF / Document"
+                    style={{ display: "flex", alignItems: "center", gap: 4, height: 38, padding: "0 10px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 9, color: "rgba(255,255,255,0.5)", fontSize: "0.75rem", cursor: uploadingAttach ? "not-allowed" : "pointer", fontFamily: "inherit" }}>
+                    <Paperclip size={13} /> Doc
+                  </button>
+                  <button type="button" onClick={() => replyImgFileRef.current?.click()} disabled={uploadingAttach} title="Photo / Image"
+                    style={{ display: "flex", alignItems: "center", gap: 4, height: 38, padding: "0 10px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 9, color: "rgba(255,255,255,0.5)", fontSize: "0.75rem", cursor: uploadingAttach ? "not-allowed" : "pointer", fontFamily: "inherit" }}>
+                    <Image size={13} /> Photo
                   </button>
                   <button onClick={sendReply} disabled={sending || !hasReplyContent}
                     style={{
@@ -997,13 +1006,22 @@ export default function InboxPage() {
 
             {/* Attachment bar — compose */}
             <div style={{ padding: "8px 20px 0", flexShrink: 0 }}>
-              <input ref={compFileRef} type="file" hidden
-                accept="*/*"
+              <input ref={compDocFileRef} type="file" hidden
+                accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/plain"
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadAttachment(f, setCompAttachments); e.target.value = ""; }} />
-              <button type="button" onClick={() => compFileRef.current?.click()} disabled={uploadingAttach}
-                style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 8, color: "rgba(255,255,255,0.55)", padding: "6px 12px", fontSize: "0.78rem", cursor: uploadingAttach ? "not-allowed" : "pointer", fontFamily: "inherit" }}>
-                <Paperclip size={13} /> {uploadingAttach ? "Upload…" : "Joindre un fichier"}
-              </button>
+              <input ref={compImgFileRef} type="file" hidden
+                accept="image/*"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadAttachment(f, setCompAttachments); e.target.value = ""; }} />
+              <div style={{ display: "flex", gap: 6 }}>
+                <button type="button" onClick={() => compDocFileRef.current?.click()} disabled={uploadingAttach}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 8, color: "rgba(255,255,255,0.55)", padding: "6px 11px", fontSize: "0.78rem", cursor: uploadingAttach ? "not-allowed" : "pointer", fontFamily: "inherit" }}>
+                  <Paperclip size={13} /> {uploadingAttach ? "Upload…" : "PDF / Doc"}
+                </button>
+                <button type="button" onClick={() => compImgFileRef.current?.click()} disabled={uploadingAttach}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 8, color: "rgba(255,255,255,0.55)", padding: "6px 11px", fontSize: "0.78rem", cursor: uploadingAttach ? "not-allowed" : "pointer", fontFamily: "inherit" }}>
+                  <Image size={13} /> Photo
+                </button>
+              </div>
               {compAttachments.length > 0 && (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
                   {compAttachments.map((a, i) => (
