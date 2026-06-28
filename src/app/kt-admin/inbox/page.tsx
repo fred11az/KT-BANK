@@ -911,7 +911,7 @@ export default function InboxPage() {
                 {/* Attachment bar — reply */}
                 <div style={{ padding: "4px 14px 6px" }}>
                   <input ref={replyFileRef} type="file" hidden
-                    accept=".pdf,.docx,.xlsx,.jpg,.jpeg,.png,.gif,.webp"
+                    accept="*/*"
                     onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadAttachment(f, setReplyAttachments); e.target.value = ""; }} />
                   {replyAttachments.length > 0 && (
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 6 }}>
@@ -998,7 +998,7 @@ export default function InboxPage() {
             {/* Attachment bar — compose */}
             <div style={{ padding: "8px 20px 0", flexShrink: 0 }}>
               <input ref={compFileRef} type="file" hidden
-                accept=".pdf,.docx,.xlsx,.jpg,.jpeg,.png,.gif,.webp"
+                accept="*/*"
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadAttachment(f, setCompAttachments); e.target.value = ""; }} />
               <button type="button" onClick={() => compFileRef.current?.click()} disabled={uploadingAttach}
                 style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 8, color: "rgba(255,255,255,0.55)", padding: "6px 12px", fontSize: "0.78rem", cursor: uploadingAttach ? "not-allowed" : "pointer", fontFamily: "inherit" }}>
