@@ -634,6 +634,32 @@ export default function InboxPage() {
   const [compText, setCompText] = useState("");
   const compEditorKey = useRef(0);
 
+  // Attachments
+  type AttachFile = { url: string; name: string; type: string };
+  const [compAttachments, setCompAttachments] = useState<AttachFile[]>([]);
+  const [replyAttachments, setReplyAttachments] = useState<AttachFile[]>([]);
+  const [uploadingAttach, setUploadingAttach] = useState(false);
+  const compFileRef = useRef<HTMLInputElement>(null);
+  const replyFileRef = useRef<HTMLInputElement>(null);
+
+  async function uploadAttachment(file: File, setter: React.Dispatch<React.SetStateAction<AttachFile[]>>) {
+    setUploadingAttach(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/kt/admin/inbox/upload", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: fd,
+      });
+      const data = await res.json();
+      if (data.url) setter((prev) => [...prev, { url: data.url, name: data.name, type: data.type }]);
+    } catch (e) {
+      console.error("upload failed", e);
+    }
+    setUploadingAttach(false);
+  }
+
   useEffect(() => {
     function check() { setIsMobile(window.innerWidth < 768); }
     check();
@@ -697,11 +723,13 @@ export default function InboxPage() {
         to: selected.client_email, subject,
         body: replyText, body_html: replyHtml,
         thread_id: selected.id,
+        attachments: replyAttachments,
       }),
     });
     setSending(false);
     setReplyHtml("");
     setReplyText("");
+    setReplyAttachments([]);
     replyEditorKey.current += 1;
     load(true);
   }
@@ -712,11 +740,12 @@ export default function InboxPage() {
     await fetch("/api/kt/admin/inbox", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ to: compTo, subject: compSubject, body: compText, body_html: compHtml }),
+      body: JSON.stringify({ to: compTo, subject: compSubject, body: compText, body_html: compHtml, attachments: compAttachments }),
     });
     setSending(false);
     setComposing(false);
     setCompTo(""); setCompSubject(""); setCompHtml(""); setCompText("");
+    setCompAttachments([]);
     compEditorKey.current += 1;
     load(true);
   }
@@ -879,7 +908,31 @@ export default function InboxPage() {
                     minHeight={isMobile ? 120 : 110}
                   />
                 </div>
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, padding: "0 14px 10px" }}>
+                {/* Attachment bar — reply */}
+                <div style={{ padding: "4px 14px 6px" }}>
+                  <input ref={replyFileRef} type="file" hidden
+                    accept=".pdf,.docx,.xlsx,.jpg,.jpeg,.png,.gif,.webp"
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadAttachment(f, setReplyAttachments); e.target.value = ""; }} />
+                  {replyAttachments.length > 0 && (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 6 }}>
+                      {replyAttachments.map((a, i) => (
+                        <div key={i} style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(0,95,45,0.15)", border: "1px solid rgba(0,95,45,0.35)", borderRadius: 7, padding: "3px 8px", fontSize: "0.73rem", color: "#4CAF82" }}>
+                          <FileText size={10} />
+                          <span style={{ maxWidth: 130, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.name}</span>
+                          <button type="button" onClick={() => setReplyAttachments((prev) => prev.filter((_, j) => j !== i))}
+                            style={{ background: "none", border: "none", color: "rgba(255,255,255,0.35)", cursor: "pointer", padding: 0, display: "flex", lineHeight: 1 }}>
+                            <X size={10} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 8, padding: "0 14px 10px" }}>
+                  <button type="button" onClick={() => replyFileRef.current?.click()} disabled={uploadingAttach}
+                    style={{ display: "flex", alignItems: "center", gap: 5, height: 38, padding: "0 12px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 9, color: "rgba(255,255,255,0.5)", fontSize: "0.8rem", cursor: uploadingAttach ? "not-allowed" : "pointer", fontFamily: "inherit" }}>
+                    <Paperclip size={13} />
+                  </button>
                   <button onClick={sendReply} disabled={sending || !hasReplyContent}
                     style={{
                       display: "flex", alignItems: "center", gap: 6,
@@ -940,6 +993,31 @@ export default function InboxPage() {
                 onHtmlChange={(html, text) => { setCompHtml(html); setCompText(text); }}
                 minHeight={isMobile ? 120 : 200}
               />
+            </div>
+
+            {/* Attachment bar — compose */}
+            <div style={{ padding: "8px 20px 0", flexShrink: 0 }}>
+              <input ref={compFileRef} type="file" hidden
+                accept=".pdf,.docx,.xlsx,.jpg,.jpeg,.png,.gif,.webp"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadAttachment(f, setCompAttachments); e.target.value = ""; }} />
+              <button type="button" onClick={() => compFileRef.current?.click()} disabled={uploadingAttach}
+                style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 8, color: "rgba(255,255,255,0.55)", padding: "6px 12px", fontSize: "0.78rem", cursor: uploadingAttach ? "not-allowed" : "pointer", fontFamily: "inherit" }}>
+                <Paperclip size={13} /> {uploadingAttach ? "Upload…" : "Joindre un fichier"}
+              </button>
+              {compAttachments.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+                  {compAttachments.map((a, i) => (
+                    <div key={i} style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(0,95,45,0.15)", border: "1px solid rgba(0,95,45,0.4)", borderRadius: 8, padding: "3px 8px", fontSize: "0.75rem", color: "#4CAF82" }}>
+                      <FileText size={11} />
+                      <span style={{ maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.name}</span>
+                      <button type="button" onClick={() => setCompAttachments((prev) => prev.filter((_, j) => j !== i))}
+                        style={{ background: "none", border: "none", color: "rgba(255,255,255,0.35)", cursor: "pointer", padding: 0, display: "flex", lineHeight: 1 }}>
+                        <X size={11} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Send button */}

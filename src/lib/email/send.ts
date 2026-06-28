@@ -29,9 +29,14 @@ function getResend() {
 
 const FROM = () => "KT Bank AG <support@kt-bank-ag.com>";
 
-export async function send(to: string, subject: string, html: string) {
+type Attachment = { filename: string; path: string };
+
+export async function send(to: string, subject: string, html: string, attachments?: Attachment[]) {
   try {
-    const { error } = await getResend().emails.send({ from: FROM(), to, subject, html });
+    const payload: Record<string, unknown> = { from: FROM(), to, subject, html };
+    if (attachments?.length) payload.attachments = attachments;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await getResend().emails.send(payload as any);
     if (error) console.error("[Resend error]", error);
     return !error;
   } catch (err) {
