@@ -117,6 +117,18 @@ export async function POST(req: NextRequest) {
       status: "processing",
     });
 
+    // Send confirmation email immediately for fee-free transfers
+    await sendTransferStatus(email, {
+      prenom: profile.prenom ?? "Client",
+      status: "processing",
+      amount: Number(amount),
+      currency: "EUR",
+      to_name,
+      reference: reference || undefined,
+      balance: newBalance,
+      lang: (profile.lang as string) ?? "de",
+    });
+
     return NextResponse.json({
       ok: true,
       transfer_id: transfer?.id,
