@@ -64,10 +64,13 @@ CREATE INDEX IF NOT EXISTS idx_kt_notifications_profile ON kt_notifications(prof
 --       { "coin":"sol",        "label":"Solana",           "network":"Solana",   "address":"...",    "qr_url": null }
 --   ]
 --   key = 'fee_payment'     value = { "name":..., "iban":..., "bic":..., "bank":..., "reference":... }  (already used for SEPA fee coords)
--- Seed an empty crypto_wallets row so the admin UI has something to edit:
+-- Seed an empty crypto_wallets row so the admin UI has something to edit.
+-- Uses WHERE NOT EXISTS (not ON CONFLICT) so it works even if kt_settings.key
+-- has no unique constraint — and so a failure here can't roll back the table
+-- creations above.
 INSERT INTO kt_settings (key, value)
-VALUES ('crypto_wallets', '[]'::jsonb)
-ON CONFLICT (key) DO NOTHING;
+SELECT 'crypto_wallets', '[]'::jsonb
+WHERE NOT EXISTS (SELECT 1 FROM kt_settings WHERE key = 'crypto_wallets');
 
 -- ============================================================================
 -- STORAGE

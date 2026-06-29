@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase, getSupabaseAdmin } from "@/lib/supabase";
 
+function generateIban() {
+  const bban = Array.from({ length: 18 }, () => Math.floor(Math.random() * 10)).join("");
+  return `DE${Math.floor(10 + Math.random() * 90)}3704${bban}`;
+}
+
 async function getSessionEmail(req: NextRequest): Promise<string | null> {
   const auth = req.headers.get("Authorization");
   if (!auth?.startsWith("Bearer ")) return null;
@@ -82,6 +87,8 @@ export async function POST(req: NextRequest) {
     postal_code: postal_code ?? null, country: country ?? null,
   };
 
+  // Provisional IBAN/BIC at creation (kt_accounts.iban is NOT NULL). The account
+  // only becomes usable once the bank approves it (status -> 'active').
   const { data: account, error } = await admin
     .from("kt_accounts")
     .insert({
@@ -90,6 +97,8 @@ export async function POST(req: NextRequest) {
       status: "pending",
       currency: "EUR",
       balance: 0,
+      iban: generateIban(),
+      bic: "KTAGDEFF",
       label: label || company_name,
       business_info,
       requested_at: new Date().toISOString(),
@@ -99,7 +108,7 @@ export async function POST(req: NextRequest) {
 
   if (error) {
     console.error("[create business account]", error);
-    return NextResponse.json({ error: "Erstellung fehlgeschlagen" }, { status: 500 });
+    return NextResponse.json({ error: "Erstellung fehlgeschlagen", details: error.message }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true, account_id: account?.id });

@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
 
   if (error) {
     console.error("[create fee invoice]", error);
-    return NextResponse.json({ error: "Erstellung fehlgeschlagen" }, { status: 500 });
+    return NextResponse.json({ error: "Erstellung fehlgeschlagen", details: error.message }, { status: 500 });
   }
 
   // Notify the client (email + in-app), in their language

@@ -183,12 +183,18 @@ export default function ClientDetailPage() {
     if (!invAmount || Number(invAmount) <= 0) return;
     setInvLoading(true);
     const crypto = invCrypto ? ["btc", "usdt_bep20", "eth", "sol"] : [];
-    await fetch(`/api/kt/admin/fee-invoices`, {
+    const res = await fetch(`/api/kt/admin/fee-invoices`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify({ profile_id: id, title: invTitle || undefined, description: invDesc || undefined, amount: Number(invAmount), currency: "EUR", methods: { sepa: invSepa, crypto } }),
     });
-    setInvLoading(false); setInvTitle(""); setInvDesc(""); setInvAmount("");
+    setInvLoading(false);
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}));
+      window.alert(`Échec de l'émission de la facture : ${d.details || d.error || res.status}`);
+      return;
+    }
+    setInvTitle(""); setInvDesc(""); setInvAmount("");
     loadInvoices();
   }
 

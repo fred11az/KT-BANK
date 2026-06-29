@@ -25,8 +25,7 @@ export async function GET(req: NextRequest) {
   const profile = await getProfile(req);
   if (!profile) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
 
-  const supabase = getSupabase();
-  const { data } = await supabase
+  const { data } = await getSupabaseAdmin()
     .from("kt_notifications")
     .select("*")
     .eq("profile_id", profile.id)

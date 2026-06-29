@@ -274,7 +274,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const adminDb = getSupabaseAdmin();
     const { data: acct } = await adminDb
       .from("kt_accounts")
-      .select("id, status, business_info")
+      .select("id, status, iban, business_info")
       .eq("id", body.business_account_id)
       .eq("profile_id", id)
       .single();
@@ -284,7 +284,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       const lang = profile?.lang ?? "de";
 
       if (body.business_action === "approve") {
-        const iban = generateIban();
+        const iban = acct.iban || generateIban();
         await adminDb.from("kt_accounts").update({
           status: "active",
           iban,

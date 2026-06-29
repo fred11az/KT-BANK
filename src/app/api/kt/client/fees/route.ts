@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabase } from "@/lib/supabase";
+import { getSupabase, getSupabaseAdmin } from "@/lib/supabase";
 
 async function getProfile(req: NextRequest) {
   const auth = req.headers.get("Authorization");
@@ -26,16 +26,18 @@ export async function GET(req: NextRequest) {
   const profile = await getProfile(req);
   if (!profile) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
 
-  const supabase = getSupabase();
+  // Read with the service role so row-level security can never hide a client's
+  // own invoices/config (access is already scoped to their profile_id).
+  const admin = getSupabaseAdmin();
 
-  const { data: invoices } = await supabase
+  const { data: invoices } = await admin
     .from("kt_fee_invoices")
     .select("*")
     .eq("profile_id", profile.id)
     .order("created_at", { ascending: false });
 
   // Payment configuration set by the bank in admin settings
-  const { data: settingsRows } = await supabase
+  const { data: settingsRows } = await admin
     .from("kt_settings")
     .select("key, value")
     .in("key", ["crypto_wallets", "fee_payment"]);

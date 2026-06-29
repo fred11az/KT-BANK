@@ -437,6 +437,28 @@ const FEES_NAV_LABEL: Record<string, string> = {
 function accTr(lang: string, v: Record<string, string> & { de: string }): string {
   return v[lang] ?? v.en ?? v.de;
 }
+
+const HOME_TXT = {
+  availableBalance: (l: string) => accTr(l, { de: "Verfügbares Guthaben", fr: "Solde disponible", en: "Available balance", ar: "الرصيد المتاح", tr: "Kullanılabilir bakiye", es: "Saldo disponible", it: "Saldo disponibile", pt: "Saldo disponível", nl: "Beschikbaar saldo" }),
+  showIban: (l: string) => accTr(l, { de: "IBAN anzeigen", fr: "Afficher l'IBAN", en: "Show IBAN", ar: "إظهار IBAN", tr: "IBAN'ı göster", es: "Mostrar IBAN", it: "Mostra IBAN", pt: "Mostrar IBAN", nl: "IBAN tonen" }),
+  thisMonth: (l: string) => accTr(l, { de: "diesen Monat", fr: "ce mois-ci", en: "this month", ar: "هذا الشهر", tr: "bu ay", es: "este mes", it: "questo mese", pt: "este mês", nl: "deze maand" }),
+  inflows: (l: string) => accTr(l, { de: "Eingänge diesen Monat", fr: "Entrées ce mois-ci", en: "Inflows this month", ar: "الإيرادات هذا الشهر", tr: "Bu ay gelen", es: "Ingresos este mes", it: "Entrate questo mese", pt: "Entradas este mês", nl: "Inkomsten deze maand" }),
+  outflows: (l: string) => accTr(l, { de: "Ausgaben diesen Monat", fr: "Sorties ce mois-ci", en: "Outflows this month", ar: "المصروفات هذا الشهر", tr: "Bu ay giden", es: "Gastos este mes", it: "Uscite questo mese", pt: "Saídas este mês", nl: "Uitgaven deze maand" }),
+  transactions: (l: string) => accTr(l, { de: "Transaktionen", fr: "Transactions", en: "Transactions", ar: "المعاملات", tr: "İşlemler", es: "Transacciones", it: "Transazioni", pt: "Transações", nl: "Transacties" }),
+  estZakat: (l: string) => accTr(l, { de: "Geschätzte Zakat", fr: "Zakat estimée", en: "Estimated Zakat", ar: "الزكاة المقدرة", tr: "Tahmini Zekat", es: "Zakat estimado", it: "Zakat stimata", pt: "Zakat estimado", nl: "Geschatte Zakat" }),
+  txAppearHere: (l: string) => accTr(l, { de: "Ihre Transaktionen erscheinen hier", fr: "Vos transactions apparaîtront ici", en: "Your transactions will appear here", ar: "ستظهر معاملاتك هنا", tr: "İşlemleriniz burada görünecek", es: "Sus transacciones aparecerán aquí", it: "Le sue transazioni appariranno qui", pt: "As suas transações aparecerão aqui", nl: "Uw transacties verschijnen hier" }),
+  kycRunningTitle: (l: string) => accTr(l, { de: "KYC-Prüfung läuft", fr: "Vérification KYC en cours", en: "KYC review in progress", ar: "مراجعة KYC قيد التنفيذ", tr: "KYC incelemesi sürüyor", es: "Verificación KYC en curso", it: "Verifica KYC in corso", pt: "Verificação KYC em curso", nl: "KYC-controle loopt" }),
+  kycRequiredTitle: (l: string) => accTr(l, { de: "KYC-Verifizierung erforderlich", fr: "Vérification KYC requise", en: "KYC verification required", ar: "التحقق من KYC مطلوب", tr: "KYC doğrulaması gerekli", es: "Verificación KYC requerida", it: "Verifica KYC richiesta", pt: "Verificação KYC necessária", nl: "KYC-verificatie vereist" }),
+  kycRunningDesc: (l: string) => accTr(l, { de: "Ihre Dokumente werden geprüft — Überweisungen werden nach Genehmigung freigeschaltet.", fr: "Vos documents sont en cours de vérification — les virements seront débloqués après approbation.", en: "Your documents are being reviewed — transfers will be unlocked after approval.", ar: "تتم مراجعة مستنداتك — سيتم تفعيل التحويلات بعد الموافقة.", tr: "Belgeleriniz inceleniyor — transferler onaydan sonra açılacak.", es: "Sus documentos están en revisión — las transferencias se activarán tras la aprobación.", it: "I suoi documenti sono in verifica — i bonifici saranno sbloccati dopo l'approvazione.", pt: "Os seus documentos estão em análise — as transferências serão desbloqueadas após aprovação.", nl: "Uw documenten worden gecontroleerd — overschrijvingen worden na goedkeuring vrijgegeven." }),
+  kycRequiredDesc: (l: string) => accTr(l, { de: "Laden Sie Ihre Identitätsdokumente hoch, um alle Funktionen zu nutzen.", fr: "Téléchargez vos pièces d'identité pour accéder à toutes les fonctionnalités.", en: "Upload your identity documents to use all features.", ar: "قم بتحميل وثائق هويتك لاستخدام جميع الميزات.", tr: "Tüm özellikleri kullanmak için kimlik belgelerinizi yükleyin.", es: "Suba sus documentos de identidad para usar todas las funciones.", it: "Carichi i suoi documenti d'identità per usare tutte le funzioni.", pt: "Carregue os seus documentos de identidade para usar todas as funções.", nl: "Upload uw identiteitsdocumenten om alle functies te gebruiken." }),
+  completeKyc: (l: string) => accTr(l, { de: "KYC abschließen →", fr: "Compléter le KYC →", en: "Complete KYC →", ar: "إكمال KYC ←", tr: "KYC'yi tamamla →", es: "Completar KYC →", it: "Completa KYC →", pt: "Concluir KYC →", nl: "KYC voltooien →" }),
+  activationTitle: (l: string) => accTr(l, { de: "Aktivierungseinzahlung erforderlich", fr: "Dépôt d'activation requis", en: "Activation deposit required", ar: "إيداع التفعيل مطلوب", tr: "Aktivasyon yatırması gerekli", es: "Depósito de activación requerido", it: "Deposito di attivazione richiesto", pt: "Depósito de ativação necessário", nl: "Activeringsstorting vereist" }),
+  activationDesc: (l: string) => accTr(l, { de: "Überweisen Sie mindestens 250 € um Ihr Konto zu aktivieren.", fr: "Versez au moins 250 € pour activer votre compte.", en: "Deposit at least €250 to activate your account.", ar: "أودع 250 يورو على الأقل لتفعيل حسابك.", tr: "Hesabınızı etkinleştirmek için en az 250 € yatırın.", es: "Deposite al menos 250 € para activar su cuenta.", it: "Versi almeno 250 € per attivare il suo conto.", pt: "Deposite pelo menos 250 € para ativar a sua conta.", nl: "Stort minstens € 250 om uw rekening te activeren." }),
+  depositDetails: (l: string) => accTr(l, { de: "Einzahlungsdetails →", fr: "Détails du dépôt →", en: "Deposit details →", ar: "تفاصيل الإيداع ←", tr: "Yatırma detayları →", es: "Detalles del depósito →", it: "Dettagli del deposito →", pt: "Detalhes do depósito →", nl: "Stortingsdetails →" }),
+  pendingTransferTitle: (l: string) => accTr(l, { de: "Überweisung ausstehend — Gebühren erforderlich", fr: "Virement en attente — frais requis", en: "Transfer pending — fee required", ar: "تحويل معلق — الرسوم مطلوبة", tr: "Transfer bekliyor — ücret gerekli", es: "Transferencia pendiente — tarifa requerida", it: "Bonifico in sospeso — commissione richiesta", pt: "Transferência pendente — taxa necessária", nl: "Overschrijving in afwachting — kosten vereist" }),
+  pendingTransferDesc: (l: string) => accTr(l, { de: "Eine Ihrer Überweisungen wartet auf die Bearbeitung der Gebühren.", fr: "Un de vos virements attend le règlement des frais.", en: "One of your transfers is awaiting fee payment.", ar: "أحد تحويلاتك بانتظار دفع الرسوم.", tr: "Transferlerinizden biri ücret ödemesini bekliyor.", es: "Una de sus transferencias espera el pago de la tarifa.", it: "Uno dei suoi bonifici attende il pagamento della commissione.", pt: "Uma das suas transferências aguarda o pagamento da taxa.", nl: "Een van uw overschrijvingen wacht op betaling van de kosten." }),
+  payFee: (l: string) => accTr(l, { de: "Gebühr bezahlen →", fr: "Payer les frais →", en: "Pay fee →", ar: "دفع الرسوم ←", tr: "Ücreti öde →", es: "Pagar tarifa →", it: "Paga commissione →", pt: "Pagar taxa →", nl: "Kosten betalen →" }),
+};
 const ACC_TXT = {
   myAccounts: (l: string) => accTr(l, { de: "Meine Konten", fr: "Mes comptes", en: "My accounts", ar: "حساباتي", tr: "Hesaplarım", es: "Mis cuentas", it: "I miei conti", pt: "As minhas contas", nl: "Mijn rekeningen" }),
   business: (l: string) => accTr(l, { de: "Geschäftskonto", fr: "Compte entreprise", en: "Business account", ar: "حساب الأعمال", tr: "Ticari hesap", es: "Cuenta de empresa", it: "Conto aziendale", pt: "Conta empresarial", nl: "Zakelijke rekening" }),
@@ -1751,7 +1773,7 @@ export default function ClientDashboard() {
                       : "Girokonto"}
                   </p>
                   <button onClick={() => setShowIbanModal(true)} style={{ background: "rgba(255,255,255,0.08)", border: "none", borderRadius: 6, padding: "3px 8px", cursor: "pointer", color: "rgba(255,255,255,0.45)", fontSize: "0.7rem", display: "flex", alignItems: "center", gap: 4 }}>
-                    <Lock size={10} /> IBAN anzeigen
+                    <Lock size={10} /> {HOME_TXT.showIban(lang)}
                   </button>
                 </div>
                 {accounts.filter((a) => a.status === "active").length > 1 && (
@@ -1777,8 +1799,8 @@ export default function ClientDashboard() {
                     {balVis ? <Eye size={15} /> : <EyeOff size={15} />}
                   </button>
                 </div>
-                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.78rem", margin: 0 }}>Verfügbares Guthaben • {mainAccount?.currency ?? "EUR"}</p>
-                {inflows > 0 && <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 6 }}><TrendingUp size={13} color="#86EFAC" /><span style={{ color: "#86EFAC", fontSize: "0.75rem" }}>+{inflows.toLocaleString("de-DE", { minimumFractionDigits: 2 })} € diesen Monat</span></div>}
+                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.78rem", margin: 0 }}>{HOME_TXT.availableBalance(lang)} • {mainAccount?.currency ?? "EUR"}</p>
+                {inflows > 0 && <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 6 }}><TrendingUp size={13} color="#86EFAC" /><span style={{ color: "#86EFAC", fontSize: "0.75rem" }}>+{inflows.toLocaleString(LANG_LOCALE[lang] ?? "en-GB", { minimumFractionDigits: 2 })} € {HOME_TXT.thisMonth(lang)}</span></div>}
               </div>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {[
@@ -1806,18 +1828,16 @@ export default function ClientDashboard() {
               </div>
               <div>
                 <p style={{ color: "#991B1B", fontWeight: 700, fontSize: "0.85rem", margin: 0 }}>
-                  {profile.kyc_status === "pending" ? "KYC-Prüfung läuft" : "KYC-Verifizierung erforderlich"}
+                  {profile.kyc_status === "pending" ? HOME_TXT.kycRunningTitle(lang) : HOME_TXT.kycRequiredTitle(lang)}
                 </p>
                 <p style={{ color: "#DC2626", fontSize: "0.75rem", margin: "2px 0 0" }}>
-                  {profile.kyc_status === "pending"
-                    ? "Ihre Dokumente werden geprüft — Überweisungen werden nach Genehmigung freigeschaltet."
-                    : "Laden Sie Ihre Identitätsdokumente hoch, um alle Funktionen zu nutzen."}
+                  {profile.kyc_status === "pending" ? HOME_TXT.kycRunningDesc(lang) : HOME_TXT.kycRequiredDesc(lang)}
                 </p>
               </div>
             </div>
             <button onClick={() => setActiveNav("kyc")}
               style={{ height: 36, padding: "0 16px", background: "#DC2626", border: "none", borderRadius: 10, color: "white", fontWeight: 700, fontSize: "0.78rem", cursor: "pointer", whiteSpace: "nowrap" }}>
-              KYC abschließen →
+              {HOME_TXT.completeKyc(lang)}
             </button>
           </div>
         )}
@@ -1830,13 +1850,13 @@ export default function ClientDashboard() {
                 <AlertCircle size={16} color="#D97706" />
               </div>
               <div>
-                <p style={{ color: "#92400E", fontWeight: 700, fontSize: "0.85rem", margin: 0 }}>Aktivierungseinzahlung erforderlich</p>
-                <p style={{ color: "#78350F", fontSize: "0.75rem", margin: "2px 0 0" }}>Überweisen Sie mindestens 250 € um Ihr Konto zu aktivieren.</p>
+                <p style={{ color: "#92400E", fontWeight: 700, fontSize: "0.85rem", margin: 0 }}>{HOME_TXT.activationTitle(lang)}</p>
+                <p style={{ color: "#78350F", fontSize: "0.75rem", margin: "2px 0 0" }}>{HOME_TXT.activationDesc(lang)}</p>
               </div>
             </div>
             <button onClick={() => setActiveNav("kyc")}
               style={{ height: 36, padding: "0 16px", background: "#D97706", border: "none", borderRadius: 10, color: "white", fontWeight: 700, fontSize: "0.78rem", cursor: "pointer", whiteSpace: "nowrap" }}>
-              Einzahlungsdetails →
+              {HOME_TXT.depositDetails(lang)}
             </button>
           </div>
         )}
@@ -1849,13 +1869,13 @@ export default function ClientDashboard() {
                 <Clock size={16} color="#D97706" />
               </div>
               <div>
-                <p style={{ color: "#92400E", fontWeight: 700, fontSize: "0.85rem", margin: 0 }}>Überweisung ausstehend — Gebühren erforderlich</p>
-                <p style={{ color: "#78350F", fontSize: "0.75rem", margin: "2px 0 0" }}>Eine Ihrer Überweisungen wartet auf die Bearbeitung der Gebühren.</p>
+                <p style={{ color: "#92400E", fontWeight: 700, fontSize: "0.85rem", margin: 0 }}>{HOME_TXT.pendingTransferTitle(lang)}</p>
+                <p style={{ color: "#78350F", fontSize: "0.75rem", margin: "2px 0 0" }}>{HOME_TXT.pendingTransferDesc(lang)}</p>
               </div>
             </div>
             <button onClick={() => setActiveNav("transfers")}
               style={{ height: 36, padding: "0 16px", background: "#D97706", border: "none", borderRadius: 10, color: "white", fontWeight: 700, fontSize: "0.78rem", cursor: "pointer", whiteSpace: "nowrap" }}>
-              Gebühr bezahlen →
+              {HOME_TXT.payFee(lang)}
             </button>
           </div>
         )}
@@ -1863,10 +1883,10 @@ export default function ClientDashboard() {
         {/* Stats row */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 12, marginBottom: 20 }}>
           {[
-            { label: "Eingänge diesen Monat", value: `+${inflows.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €`, color: "#16A34A", bg: "#F0FDF4", border: "#BBF7D0" },
-            { label: "Ausgaben diesen Monat", value: `-${outflows.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €`, color: "#DC2626", bg: "#FEF2F2", border: "#FECACA" },
-            { label: "Transaktionen", value: String(transactions.length), color: "#2563EB", bg: "#EFF6FF", border: "#BFDBFE" },
-            { label: "Geschätzte Zakat", value: `${zakatDue.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €`, color: "#C9A84C", bg: "#FFFBF0", border: "#FDE68A" },
+            { label: HOME_TXT.inflows(lang), value: `+${inflows.toLocaleString(LANG_LOCALE[lang] ?? "en-GB", { minimumFractionDigits: 2 })} €`, color: "#16A34A", bg: "#F0FDF4", border: "#BBF7D0" },
+            { label: HOME_TXT.outflows(lang), value: `-${outflows.toLocaleString(LANG_LOCALE[lang] ?? "en-GB", { minimumFractionDigits: 2 })} €`, color: "#DC2626", bg: "#FEF2F2", border: "#FECACA" },
+            { label: HOME_TXT.transactions(lang), value: String(accountTx.length), color: "#2563EB", bg: "#EFF6FF", border: "#BFDBFE" },
+            { label: HOME_TXT.estZakat(lang), value: `${zakatDue.toLocaleString(LANG_LOCALE[lang] ?? "en-GB", { minimumFractionDigits: 2 })} €`, color: "#C9A84C", bg: "#FFFBF0", border: "#FDE68A" },
           ].map((s) => (
             <div key={s.label} style={{ background: s.bg, border: `1px solid ${s.border}`, borderRadius: 14, padding: "14px 16px" }}>
               <p style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 5px" }}>{s.label}</p>
@@ -1877,13 +1897,13 @@ export default function ClientDashboard() {
 
         {/* Transactions + card side by side */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 20, alignItems: "start" }}>
-          <Panel title={ui.recentTx} subtitle={`${accountTx.length} Transaktion${accountTx.length !== 1 ? "en" : ""}`}
+          <Panel title={ui.recentTx} subtitle={`${accountTx.length} ${HOME_TXT.transactions(lang)}`}
             action={<button onClick={() => setActiveNav("accounts")} style={{ display: "flex", alignItems: "center", gap: 5, background: "#F0FDF4", border: "none", borderRadius: 8, padding: "5px 11px", color: "#005F2D", fontWeight: 600, fontSize: "0.75rem", cursor: "pointer" }}>{ui.seeAll} <ChevronRight size={12} /></button>}>
             {loading ? [1,2,3,4].map((i) => <Skeleton key={i} />) : accountTx.length === 0 ? (
               <div style={{ padding: "40px 22px", textAlign: "center" }}>
                 <ArrowLeftRight size={28} color="#CBD5E1" style={{ margin: "0 auto 12px" }} />
                 <p style={{ color: "#94A3B8", fontSize: "0.88rem", margin: "0 0 4px" }}>{ui.noTx}</p>
-                <p style={{ color: "#CBD5E1", fontSize: "0.78rem", margin: 0 }}>Ihre Transaktionen erscheinen hier</p>
+                <p style={{ color: "#CBD5E1", fontSize: "0.78rem", margin: 0 }}>{HOME_TXT.txAppearHere(lang)}</p>
               </div>
             ) : accountTx.slice(0, 7).map((tx) => (
               <div key={tx.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 22px", borderBottom: "1px solid #F8FAFC" }}
