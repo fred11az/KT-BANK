@@ -16,6 +16,9 @@ import {
   kycRejectedEmail,
   adminKycSubmittedEmail,
   documentNotificationEmail,
+  businessAccountApprovedEmail,
+  businessAccountRejectedEmail,
+  feeInvoiceEmail,
 } from "./templates";
 
 type Lang = "de" | "fr" | "en" | "ar" | "tr" | "es" | "it" | "pt" | "nl";
@@ -200,5 +203,18 @@ export async function sendDocumentToClient(
   opts: { prenom: string; docTitle: string; docType: string; lang?: Lang; contentHtml?: string }
 ) {
   const { subject, html } = documentNotificationEmail(opts);
+  return send(email, subject, html);
+}
+
+export async function sendBusinessApproved(email: string, opts: { prenom: string; companyName?: string; iban?: string; lang?: Lang }) {
+  const { subject, html } = businessAccountApprovedEmail(opts);
+  return send(email, subject, html);
+}
+export async function sendBusinessRejected(email: string, opts: { prenom: string; companyName?: string; reason?: string; lang?: Lang }) {
+  const { subject, html } = businessAccountRejectedEmail(opts);
+  return send(email, subject, html);
+}
+export async function sendFeeInvoice(email: string, opts: { prenom: string; title?: string; amount: number; currency: string; description?: string; link: string; lang?: Lang }) {
+  const { subject, html } = feeInvoiceEmail(opts);
   return send(email, subject, html);
 }

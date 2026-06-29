@@ -2,13 +2,16 @@
 import React, { useEffect, useState, useRef } from "react";
 import {
   LayoutDashboard, Wallet, ArrowLeftRight, CreditCard, PiggyBank,
-  Heart, FileText, User, LogOut, Bell, Send, RefreshCw, Banknote,
+  Heart, FileText, User, LogOut, Send, RefreshCw, Banknote,
   Eye, EyeOff, TrendingUp, TrendingDown, Menu, X, ChevronRight, ChevronDown,
   Shield, Calculator, Check, Wifi, Info, Phone, Mail, MapPin,
   Lock, Plus, AlertCircle, Building2, Clock, Download
 } from "lucide-react";
 import { genTilgungsplan } from "@/lib/document-templates";
 import { useLanguage } from "@/contexts/LanguageContext";
+import FeesPage from "@/components/client/FeesPage";
+import BusinessAccountForm from "@/components/client/BusinessAccountForm";
+import NotificationsBell from "@/components/client/NotificationsBell";
 
 const DASHBOARD_UI = {
   de: {
@@ -402,7 +405,7 @@ function getDUI(lang: string): DUI {
 
 /* ── Types ── */
 type KtCard = { id: string; last4: string; expiry_month: number; expiry_year: number; type: string; status: string };
-type Account = { id: string; iban: string; bic: string; type: string; currency: string; balance: number; status: string; opened_at: string; created_at: string; kt_cards: KtCard[] };
+type Account = { id: string; iban: string; bic: string; type: string; currency: string; balance: number; status: string; opened_at: string; created_at: string; kt_cards: KtCard[]; label?: string | null; business_info?: Record<string, string> | null };
 type Transaction = { id: string; type: string; amount: number; currency: string; description: string; counterpart_name: string; created_at: string };
 type TransferRequest = { id: string; to_name: string; to_iban: string; amount: number; fee_amount: number; fee_paid: boolean; status: string; reference?: string; rejection_reason?: string; created_at: string };
 type KycDocument = { id: string; document_type: string; status: string; notes?: string; created_at: string };
@@ -425,11 +428,35 @@ function fmtIbanMasked(iban: string) {
   return `${clean.slice(0, 4)} •••• •••• •••• ${clean.slice(-4)}`;
 }
 
-function buildNav(ui: DUI) {
+const FEES_NAV_LABEL: Record<string, string> = {
+  de: "Gebühren begleichen", fr: "Règlement de frais", en: "Fee settlement",
+  ar: "تسوية الرسوم", tr: "Ücret ödemesi", es: "Pago de tarifas",
+  it: "Pagamento commissioni", pt: "Pagamento de taxas", nl: "Kosten betalen",
+};
+
+function accTr(lang: string, v: Record<string, string> & { de: string }): string {
+  return v[lang] ?? v.en ?? v.de;
+}
+const ACC_TXT = {
+  myAccounts: (l: string) => accTr(l, { de: "Meine Konten", fr: "Mes comptes", en: "My accounts", ar: "حساباتي", tr: "Hesaplarım", es: "Mis cuentas", it: "I miei conti", pt: "As minhas contas", nl: "Mijn rekeningen" }),
+  business: (l: string) => accTr(l, { de: "Geschäftskonto", fr: "Compte entreprise", en: "Business account", ar: "حساب الأعمال", tr: "Ticari hesap", es: "Cuenta de empresa", it: "Conto aziendale", pt: "Conta empresarial", nl: "Zakelijke rekening" }),
+  openBusiness: (l: string) => accTr(l, { de: "Geschäftskonto eröffnen", fr: "Ouvrir un compte entreprise", en: "Open a business account", ar: "فتح حساب أعمال", tr: "Ticari hesap aç", es: "Abrir cuenta de empresa", it: "Apri un conto aziendale", pt: "Abrir conta empresarial", nl: "Zakelijke rekening openen" }),
+  pending: (l: string) => accTr(l, { de: "Wird geprüft", fr: "En attente de validation", en: "Pending approval", ar: "قيد المراجعة", tr: "Onay bekliyor", es: "Pendiente de aprobación", it: "In attesa di approvazione", pt: "Aguarda aprovação", nl: "In afwachting van goedkeuring" }),
+  rejected: (l: string) => accTr(l, { de: "Abgelehnt", fr: "Refusé", en: "Rejected", ar: "مرفوض", tr: "Reddedildi", es: "Rechazado", it: "Rifiutato", pt: "Recusado", nl: "Afgewezen" }),
+  selected: (l: string) => accTr(l, { de: "Ausgewählt", fr: "Sélectionné", en: "Selected", ar: "محدد", tr: "Seçili", es: "Seleccionado", it: "Selezionato", pt: "Selecionado", nl: "Geselecteerd" }),
+  select: (l: string) => accTr(l, { de: "Auswählen", fr: "Sélectionner", en: "Select", ar: "تحديد", tr: "Seç", es: "Seleccionar", it: "Seleziona", pt: "Selecionar", nl: "Selecteren" }),
+  currency: (l: string) => accTr(l, { de: "Währung", fr: "Devise", en: "Currency", ar: "العملة", tr: "Para birimi", es: "Moneda", it: "Valuta", pt: "Moeda", nl: "Valuta" }),
+  openedOn: (l: string) => accTr(l, { de: "Eröffnet am", fr: "Ouvert le", en: "Opened on", ar: "تاريخ الفتح", tr: "Açılış tarihi", es: "Abierto el", it: "Aperto il", pt: "Aberto em", nl: "Geopend op" }),
+  showFull: (l: string) => accTr(l, { de: "Vollständig anzeigen", fr: "Afficher en entier", en: "Show full", ar: "عرض كامل", tr: "Tamamını göster", es: "Mostrar completo", it: "Mostra intero", pt: "Mostrar completo", nl: "Volledig tonen" }),
+  pendingNote: (l: string) => accTr(l, { de: "Dieses Konto ist erst nach Freigabe durch die Bank nutzbar.", fr: "Ce compte sera utilisable après validation par la banque.", en: "This account becomes usable once the bank approves it.", ar: "يصبح هذا الحساب قابلاً للاستخدام بعد موافقة البنك.", tr: "Bu hesap banka onayladıktan sonra kullanılabilir.", es: "Esta cuenta será utilizable tras la aprobación del banco.", it: "Questo conto sarà utilizzabile dopo l'approvazione della banca.", pt: "Esta conta ficará utilizável após aprovação do banco.", nl: "Deze rekening is bruikbaar zodra de bank deze goedkeurt." }),
+};
+
+function buildNav(ui: DUI, lang: string) {
   return [
     { icon: LayoutDashboard, label: ui.nav[0], id: "dashboard" },
     { icon: Wallet, label: ui.nav[1], id: "accounts" },
     { icon: ArrowLeftRight, label: ui.nav[2], id: "transfers" },
+    { icon: Banknote, label: FEES_NAV_LABEL[lang] ?? FEES_NAV_LABEL.en, id: "fees" },
     { icon: Calculator, label: ui.nav[3], id: "credits" },
     { icon: CreditCard, label: ui.nav[4], id: "cards" },
     { icon: PiggyBank, label: ui.nav[5], id: "savings" },
@@ -1550,7 +1577,7 @@ function LangPicker({ lang, onChange }: { lang: string; onChange: (l: string) =>
 export default function ClientDashboard() {
   const { lang, setLang } = useLanguage();
   const ui = getDUI(lang);
-  const nav = buildNav(ui);
+  const nav = buildNav(ui, lang);
   const [token, setToken] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -1559,6 +1586,8 @@ export default function ClientDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeNav, setActiveNav] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
+  const [pendingFees, setPendingFees] = useState(0);
 
   // IBAN modal
   const [showIbanModal, setShowIbanModal] = useState(false);
@@ -1572,6 +1601,12 @@ export default function ClientDashboard() {
     const t = sessionStorage.getItem("kt_token");
     if (!t) { window.location.href = "/client/login"; return; }
     setToken(t);
+    // Deep link from emails: ?nav=fees opens the fee-settlement section
+    try {
+      const navParam = new URLSearchParams(window.location.search).get("nav");
+      if (navParam) setActiveNav(navParam);
+    } catch { /* ignore */ }
+
     fetch("/api/kt/client/me", { headers: { Authorization: `Bearer ${t}` } })
       .then((r) => { if (r.status === 401) { window.location.href = "/client/login"; return null; } return r.json(); })
       .then((d) => {
@@ -1580,10 +1615,21 @@ export default function ClientDashboard() {
         setAccounts(d.accounts ?? []);
         setTransactions(d.transactions ?? []);
         setTransferRequests(d.transfers ?? []);
-        if (d.profile) sessionStorage.setItem("kt_profile", JSON.stringify({ prenom: d.profile.prenom, nom: d.profile.nom, email: d.profile.email }));
+        const active = (d.accounts ?? []).find((a: Account) => a.status === "active") ?? (d.accounts ?? [])[0];
+        if (active) setSelectedAccountId(active.id);
+        if (d.profile) sessionStorage.setItem("kt_profile", JSON.stringify({ prenom: d.profile.prenom, nom: d.profile.nom, email: d.profile.email, lang: d.profile.lang }));
         setLoading(false);
       })
       .catch(() => { setFetchError(true); setLoading(false); });
+
+    // Fee-settlement badge: count invoices still awaiting payment
+    fetch("/api/kt/client/fees", { headers: { Authorization: `Bearer ${t}` } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!d?.invoices) return;
+        setPendingFees(d.invoices.filter((i: { status: string }) => i.status === "pending").length);
+      })
+      .catch(() => { /* ignore */ });
   }, []);
 
   function logout() { sessionStorage.removeItem("kt_token"); sessionStorage.removeItem("kt_email"); window.location.href = "/client/login"; }
@@ -1606,13 +1652,21 @@ export default function ClientDashboard() {
     </div>
   );
 
-  const mainAccount = accounts[0] ?? null;
+  const mainAccount =
+    accounts.find((a) => a.id === selectedAccountId) ??
+    accounts.find((a) => a.status === "active") ??
+    accounts[0] ?? null;
   const mainCard = mainAccount?.kt_cards?.[0] ?? null;
   const balance = Number(mainAccount?.balance ?? 0);
   const zakatDue = balance * 0.025;
 
+  // Show transactions for the selected account (fall back to all if account_id absent)
+  const accountTx = mainAccount
+    ? transactions.filter((tx) => !(tx as { account_id?: string }).account_id || (tx as { account_id?: string }).account_id === mainAccount.id)
+    : transactions;
+
   const now = new Date();
-  const thisMonth = transactions.filter((tx) => { const d = new Date(tx.created_at); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); });
+  const thisMonth = accountTx.filter((tx) => { const d = new Date(tx.created_at); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); });
   const inflows = thisMonth.filter((t) => t.type === "credit").reduce((s, t) => s + Number(t.amount), 0);
   const outflows = thisMonth.filter((t) => t.type === "debit").reduce((s, t) => s + Number(t.amount), 0);
   const holderName = profile ? `${profile.prenom} ${profile.nom}` : "";
@@ -1661,7 +1715,10 @@ export default function ClientDashboard() {
               style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderRadius: 10, border: "none", background: activeNav === id ? "rgba(201,168,76,0.12)" : "transparent", color: activeNav === id ? "#C9A84C" : "rgba(255,255,255,0.5)", fontSize: "0.83rem", fontWeight: activeNav === id ? 600 : 400, cursor: "pointer", textAlign: "left", transition: "all 0.12s", borderLeft: `3px solid ${activeNav === id ? "#C9A84C" : "transparent"}`, marginBottom: 2 }}>
               <Icon size={16} />
               <span style={{ flex: 1 }}>{label}</span>
-              {activeNav === id && <ChevronRight size={13} />}
+              {id === "fees" && pendingFees > 0 && (
+                <span style={{ minWidth: 18, height: 18, padding: "0 5px", borderRadius: 9, background: "#EF4444", color: "white", fontSize: "0.66rem", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>{pendingFees}</span>
+              )}
+              {activeNav === id && id !== "fees" && <ChevronRight size={13} />}
             </button>
           ))}
         </nav>
@@ -1688,11 +1745,30 @@ export default function ClientDashboard() {
             <div style={{ position: "relative", display: "flex", flexWrap: "wrap", gap: 24, justifyContent: "space-between", alignItems: "flex-end" }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-                  <p style={{ color: "rgba(201,168,76,0.7)", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", margin: 0 }}>GiroKonto Principal</p>
+                  <p style={{ color: "rgba(201,168,76,0.7)", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", margin: 0 }}>
+                    {mainAccount?.type === "business"
+                      ? (mainAccount?.business_info?.company_name || ACC_TXT.business(lang))
+                      : "Girokonto"}
+                  </p>
                   <button onClick={() => setShowIbanModal(true)} style={{ background: "rgba(255,255,255,0.08)", border: "none", borderRadius: 6, padding: "3px 8px", cursor: "pointer", color: "rgba(255,255,255,0.45)", fontSize: "0.7rem", display: "flex", alignItems: "center", gap: 4 }}>
                     <Lock size={10} /> IBAN anzeigen
                   </button>
                 </div>
+                {accounts.filter((a) => a.status === "active").length > 1 && (
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
+                    {accounts.filter((a) => a.status === "active").map((a) => {
+                      const on = a.id === mainAccount?.id;
+                      const name = a.type === "business" ? (a.business_info?.company_name || ACC_TXT.business(lang)) : "Girokonto";
+                      return (
+                        <button key={a.id} onClick={() => setSelectedAccountId(a.id)}
+                          style={{ display: "flex", alignItems: "center", gap: 6, padding: "5px 11px", borderRadius: 9, border: `1px solid ${on ? "rgba(201,168,76,0.6)" : "rgba(255,255,255,0.14)"}`, background: on ? "rgba(201,168,76,0.18)" : "rgba(255,255,255,0.06)", color: on ? "#E8D08A" : "rgba(255,255,255,0.6)", fontSize: "0.72rem", fontWeight: on ? 700 : 500, cursor: "pointer", maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {a.type === "business" ? <Building2 size={12} /> : <Wallet size={12} />}
+                          <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
                   <p style={{ color: "white", fontWeight: 800, fontSize: "clamp(2rem,5vw,2.8rem)", margin: 0, letterSpacing: "-0.02em", lineHeight: 1 }}>
                     {balVis ? `${balance.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €` : "•••••• €"}
@@ -1801,15 +1877,15 @@ export default function ClientDashboard() {
 
         {/* Transactions + card side by side */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 20, alignItems: "start" }}>
-          <Panel title={ui.recentTx} subtitle={`${transactions.length} Transaktion${transactions.length !== 1 ? "en" : ""}`}
+          <Panel title={ui.recentTx} subtitle={`${accountTx.length} Transaktion${accountTx.length !== 1 ? "en" : ""}`}
             action={<button onClick={() => setActiveNav("accounts")} style={{ display: "flex", alignItems: "center", gap: 5, background: "#F0FDF4", border: "none", borderRadius: 8, padding: "5px 11px", color: "#005F2D", fontWeight: 600, fontSize: "0.75rem", cursor: "pointer" }}>{ui.seeAll} <ChevronRight size={12} /></button>}>
-            {loading ? [1,2,3,4].map((i) => <Skeleton key={i} />) : transactions.length === 0 ? (
+            {loading ? [1,2,3,4].map((i) => <Skeleton key={i} />) : accountTx.length === 0 ? (
               <div style={{ padding: "40px 22px", textAlign: "center" }}>
                 <ArrowLeftRight size={28} color="#CBD5E1" style={{ margin: "0 auto 12px" }} />
                 <p style={{ color: "#94A3B8", fontSize: "0.88rem", margin: "0 0 4px" }}>{ui.noTx}</p>
                 <p style={{ color: "#CBD5E1", fontSize: "0.78rem", margin: 0 }}>Ihre Transaktionen erscheinen hier</p>
               </div>
-            ) : transactions.slice(0, 7).map((tx) => (
+            ) : accountTx.slice(0, 7).map((tx) => (
               <div key={tx.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 22px", borderBottom: "1px solid #F8FAFC" }}
                 onMouseEnter={(e) => (e.currentTarget.style.background = "#FAFBFC")}
                 onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
@@ -1863,38 +1939,87 @@ export default function ClientDashboard() {
   }
 
   function AccountsPage() {
+    const [showBizForm, setShowBizForm] = useState(false);
+    const locale = LANG_LOCALE[lang] ?? "en-GB";
+    const hasBusiness = accounts.some((a) => a.type === "business");
+    function statusBadge(status: string) {
+      if (status === "active") return { bg: "rgba(74,222,128,0.15)", fg: "#4ADE80", label: ui.active };
+      if (status === "pending") return { bg: "rgba(251,184,36,0.15)", fg: "#FBB824", label: ACC_TXT.pending(lang) };
+      if (status === "rejected") return { bg: "rgba(252,165,165,0.15)", fg: "#FCA5A5", label: ACC_TXT.rejected(lang) };
+      return { bg: "rgba(252,165,165,0.15)", fg: "#FCA5A5", label: status };
+    }
     return (
       <div style={{ padding: 24, maxWidth: 800 }}>
-        <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 20px" }}>{ui.myAccount}</h2>
-        {accounts.map((acc) => (
-          <div key={acc.id} style={{ background: "white", borderRadius: 18, border: "1px solid #E9EEF4", marginBottom: 16, overflow: "hidden" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
+          <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: 0 }}>{ACC_TXT.myAccounts(lang)}</h2>
+          {!hasBusiness && !showBizForm && (
+            <button onClick={() => setShowBizForm(true)}
+              style={{ display: "flex", alignItems: "center", gap: 7, background: "#005F2D", border: "none", borderRadius: 12, color: "white", fontWeight: 700, fontSize: "0.82rem", padding: "10px 16px", cursor: "pointer" }}>
+              <Building2 size={15} /> {ACC_TXT.openBusiness(lang)}
+            </button>
+          )}
+        </div>
+
+        {accounts.map((acc) => {
+          const badge = statusBadge(acc.status);
+          const isBiz = acc.type === "business";
+          const isSelectable = acc.status === "active";
+          const isSelected = acc.id === selectedAccountId;
+          const biz = acc.business_info as { company_name?: string } | null;
+          return (
+          <div key={acc.id} style={{ background: "white", borderRadius: 18, border: `1px solid ${isSelected ? "#005F2D" : "#E9EEF4"}`, marginBottom: 16, overflow: "hidden" }}>
             <div style={{ background: "linear-gradient(135deg,#001A0D,#003319)", padding: "20px 24px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <div>
-                <p style={{ color: "rgba(201,168,76,0.8)", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 6px" }}>{acc.type.toUpperCase()} · {acc.currency}</p>
+                <p style={{ color: "rgba(201,168,76,0.8)", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 6px" }}>
+                  {isBiz ? ACC_TXT.business(lang) : (acc.type || "").toUpperCase()} · {acc.currency}
+                </p>
+                {isBiz && biz?.company_name && (
+                  <p style={{ color: "rgba(255,255,255,0.85)", fontSize: "0.82rem", fontWeight: 600, margin: "0 0 4px" }}>{biz.company_name}</p>
+                )}
                 <p style={{ color: "white", fontWeight: 800, fontSize: "1.8rem", margin: 0, letterSpacing: "-0.01em" }}>
-                  {Number(acc.balance).toLocaleString("de-DE", { minimumFractionDigits: 2 })} €
+                  {Number(acc.balance).toLocaleString(locale, { minimumFractionDigits: 2 })} €
                 </p>
               </div>
-              <span style={{ background: acc.status === "active" ? "rgba(74,222,128,0.15)" : "rgba(252,165,165,0.15)", color: acc.status === "active" ? "#4ADE80" : "#FCA5A5", fontSize: "0.72rem", fontWeight: 700, padding: "4px 10px", borderRadius: 20 }}>
-                {acc.status === "active" ? ui.active : acc.status}
+              <span style={{ background: badge.bg, color: badge.fg, fontSize: "0.72rem", fontWeight: 700, padding: "4px 10px", borderRadius: 20 }}>
+                {badge.label}
               </span>
             </div>
             <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 24px", borderBottom: "1px solid #F1F5F9" }}>
-                <span style={{ color: "#64748B", fontSize: "0.82rem" }}>IBAN</span>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ color: "#0F172A", fontFamily: "monospace", fontSize: "0.85rem", fontWeight: 500 }}>{fmtIbanMasked(acc.iban)}</span>
-                  <button onClick={() => setShowIbanModal(true)} style={{ background: "#F1F5F9", border: "none", borderRadius: 6, padding: "3px 8px", cursor: "pointer", color: "#64748B", fontSize: "0.7rem", display: "flex", alignItems: "center", gap: 4 }}>
-                    <Lock size={10} /> Vollständig anzeigen
+              {acc.status === "pending" ? (
+                <div style={{ padding: "14px 24px", color: "#64748B", fontSize: "0.82rem", lineHeight: 1.6 }}>{ACC_TXT.pendingNote(lang)}</div>
+              ) : (
+                <>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 24px", borderBottom: "1px solid #F1F5F9" }}>
+                    <span style={{ color: "#64748B", fontSize: "0.82rem" }}>IBAN</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ color: "#0F172A", fontFamily: "monospace", fontSize: "0.85rem", fontWeight: 500 }}>{fmtIbanMasked(acc.iban)}</span>
+                      <button onClick={() => setShowIbanModal(true)} style={{ background: "#F1F5F9", border: "none", borderRadius: 6, padding: "3px 8px", cursor: "pointer", color: "#64748B", fontSize: "0.7rem", display: "flex", alignItems: "center", gap: 4 }}>
+                        <Lock size={10} /> {ACC_TXT.showFull(lang)}
+                      </button>
+                    </div>
+                  </div>
+                  <InfoRow label="BIC / SWIFT" value={acc.bic || "KTAGDEFF"} mono />
+                  <InfoRow label={ACC_TXT.currency(lang)} value={acc.currency} />
+                  <InfoRow label={ACC_TXT.openedOn(lang)} value={fmtDate(acc.opened_at ?? acc.created_at)} />
+                </>
+              )}
+              {isSelectable && (
+                <div style={{ padding: "12px 24px", borderTop: "1px solid #F1F5F9" }}>
+                  <button onClick={() => { setSelectedAccountId(acc.id); setActiveNav("dashboard"); }} disabled={isSelected}
+                    style={{ width: "100%", height: 40, borderRadius: 10, border: isSelected ? "1px solid #86EFAC" : "1px solid #E2E8F0", background: isSelected ? "#F0FDF4" : "white", color: isSelected ? "#16A34A" : "#005F2D", fontWeight: 700, fontSize: "0.82rem", cursor: isSelected ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                    {isSelected ? <><Check size={14} /> {ACC_TXT.selected(lang)}</> : ACC_TXT.select(lang)}
                   </button>
                 </div>
-              </div>
-              <InfoRow label="BIC / SWIFT" value={acc.bic || "KTAGDEFF"} mono />
-              <InfoRow label="Währung" value={acc.currency} />
-              <InfoRow label="Eröffnet am" value={fmtDate(acc.opened_at ?? acc.created_at)} />
+              )}
             </div>
           </div>
-        ))}
+        );})}
+
+        {showBizForm && token && (
+          <div style={{ marginTop: 8 }}>
+            <BusinessAccountForm token={token} lang={lang} onCreated={() => { setShowBizForm(false); window.location.reload(); }} />
+          </div>
+        )}
       </div>
     );
   }
@@ -2391,6 +2516,7 @@ export default function ClientDashboard() {
   const pages: Record<string, React.ReactNode> = {
     dashboard: <DashboardHome />,
     accounts: <AccountsPage />,
+    fees: <FeesPage token={token!} lang={lang} />,
     transfers: <TransfersPage token={token!} balance={balance} transferRequests={transferRequests}
       kycStatus={profile?.kyc_status ?? "unverified"} accountStatus={profile?.status ?? "pending"}
       onGoToKyc={() => setActiveNav("kyc")} />,
@@ -2445,10 +2571,7 @@ export default function ClientDashboard() {
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <LangPicker lang={lang} onChange={(l) => setLang(l as Parameters<typeof setLang>[0])} />
-            <button style={{ position: "relative", background: "#F5F7FA", border: "none", borderRadius: 10, padding: 8, cursor: "pointer", display: "flex" }}>
-              <Bell size={17} color="#64748B" />
-              <span style={{ position: "absolute", top: 5, right: 5, width: 7, height: 7, borderRadius: "50%", background: "#EF4444", border: "2px solid white" }} />
-            </button>
+            {token && <NotificationsBell token={token} lang={lang} onNavigate={(link) => { setActiveNav(link); setSidebarOpen(false); }} />}
             {profile && (
               <div style={{ width: 36, height: 36, borderRadius: 11, background: "linear-gradient(135deg,#001A0D,#003319)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 700, fontSize: "0.78rem" }}>
                 {initials(profile.prenom, profile.nom)}

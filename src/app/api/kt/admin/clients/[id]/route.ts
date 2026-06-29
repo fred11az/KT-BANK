@@ -3,11 +3,36 @@ import { getSupabase, getSupabaseAdmin } from "@/lib/supabase";
 import {
   sendTransactionNotification, sendTransferStatus,
   sendKycApproved, sendAccountActivationRequired, sendKycRejected, sendAccountActivated,
+  sendBusinessApproved, sendBusinessRejected,
 } from "@/lib/email/send";
+import { createNotification } from "@/lib/notify";
 
 function auth(req: NextRequest) {
   const key = process.env.KT_ADMIN_KEY;
   return key && req.headers.get("Authorization") === `Bearer ${key}`;
+}
+
+function generateIban() {
+  const bban = Array.from({ length: 18 }, () => Math.floor(Math.random() * 10)).join("");
+  return `DE${Math.floor(10 + Math.random() * 90)}3704${bban}`;
+}
+
+// Localized in-app notification copy for business-account decisions
+function bizNotif(lang: string, approved: boolean, company?: string) {
+  const c = company ? ` „${company}"` : "";
+  const map: Record<string, { okT: string; okB: string; noT: string; noB: string }> = {
+    de: { okT: "Geschäftskonto genehmigt", okB: `Ihr Geschäftskonto${c} ist jetzt aktiv und in Ihrem Dashboard verfügbar.`, noT: "Geschäftskontoantrag abgelehnt", noB: `Ihr Antrag auf ein Geschäftskonto${c} konnte nicht genehmigt werden.` },
+    fr: { okT: "Compte entreprise approuvé", okB: `Votre compte entreprise${c} est désormais actif et accessible dans votre tableau de bord.`, noT: "Demande de compte entreprise refusée", noB: `Votre demande de compte entreprise${c} n'a pas pu être approuvée.` },
+    en: { okT: "Business account approved", okB: `Your business account${c} is now active and available in your dashboard.`, noT: "Business account request declined", noB: `Your business account request${c} could not be approved.` },
+    ar: { okT: "تمت الموافقة على حساب الأعمال", okB: `حساب أعمالك${c} نشط الآن ومتاح في لوحة التحكم.`, noT: "تم رفض طلب حساب الأعمال", noB: `تعذرت الموافقة على طلب حساب الأعمال${c}.` },
+    tr: { okT: "Ticari hesap onaylandı", okB: `Ticari hesabınız${c} artık aktif ve panelinizde mevcut.`, noT: "Ticari hesap talebi reddedildi", noB: `Ticari hesap talebiniz${c} onaylanamadı.` },
+    es: { okT: "Cuenta de empresa aprobada", okB: `Su cuenta de empresa${c} ya está activa y disponible en su panel.`, noT: "Solicitud de cuenta de empresa rechazada", noB: `Su solicitud de cuenta de empresa${c} no pudo ser aprobada.` },
+    it: { okT: "Conto aziendale approvato", okB: `Il suo conto aziendale${c} è ora attivo e disponibile nella sua dashboard.`, noT: "Richiesta di conto aziendale rifiutata", noB: `La sua richiesta di conto aziendale${c} non è stata approvata.` },
+    pt: { okT: "Conta empresarial aprovada", okB: `A sua conta empresarial${c} está agora ativa e disponível no seu painel.`, noT: "Pedido de conta empresarial recusado", noB: `O seu pedido de conta empresarial${c} não pôde ser aprovado.` },
+    nl: { okT: "Zakelijke rekening goedgekeurd", okB: `Uw zakelijke rekening${c} is nu actief en beschikbaar in uw dashboard.`, noT: "Aanvraag zakelijke rekening afgewezen", noB: `Uw aanvraag voor een zakelijke rekening${c} kon niet worden goedgekeurd.` },
+  };
+  const m = map[lang] ?? map.en;
+  return approved ? { title: m.okT, body: m.okB } : { title: m.noT, body: m.noB };
 }
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -100,16 +125,28 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
   }
 
-  // Credit / debit balance
+  // Credit / debit balance — optionally targeting a specific account
+  // (body.account_id, e.g. a business account); defaults to the main account.
   if (body.credit_amount !== undefined) {
     const adminDb = getSupabaseAdmin();
-    const { data: accounts } = await adminDb
-      .from("kt_accounts")
-      .select("id, balance")
-      .eq("profile_id", id)
-      .order("balance", { ascending: false })
-      .order("created_at", { ascending: true });
-    const account = accounts?.[0] ?? null;
+    let account: { id: string; balance: number } | null = null;
+    if (body.account_id) {
+      const { data: a } = await adminDb
+        .from("kt_accounts")
+        .select("id, balance")
+        .eq("id", body.account_id)
+        .eq("profile_id", id)
+        .single();
+      account = a ?? null;
+    } else {
+      const { data: accounts } = await adminDb
+        .from("kt_accounts")
+        .select("id, balance")
+        .eq("profile_id", id)
+        .order("balance", { ascending: false })
+        .order("created_at", { ascending: true });
+      account = accounts?.[0] ?? null;
+    }
     if (account) {
       const delta = Number(body.credit_amount);
       const newBalance = Number(account.balance) + delta;
@@ -228,6 +265,55 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
             lang: profile.lang ?? "de",
           });
         }
+      }
+    }
+  }
+
+  // Approve / reject a business account
+  if (body.business_account_id && (body.business_action === "approve" || body.business_action === "reject")) {
+    const adminDb = getSupabaseAdmin();
+    const { data: acct } = await adminDb
+      .from("kt_accounts")
+      .select("id, status, business_info")
+      .eq("id", body.business_account_id)
+      .eq("profile_id", id)
+      .single();
+
+    if (acct) {
+      const company = (acct.business_info as { company_name?: string } | null)?.company_name;
+      const lang = profile?.lang ?? "de";
+
+      if (body.business_action === "approve") {
+        const iban = generateIban();
+        await adminDb.from("kt_accounts").update({
+          status: "active",
+          iban,
+          bic: "KTAGDEFF",
+          approved_at: new Date().toISOString(),
+        }).eq("id", acct.id);
+
+        if (profile?.email) {
+          await sendBusinessApproved(profile.email, {
+            prenom: profile.prenom ?? "Client",
+            companyName: company,
+            iban,
+            lang,
+          });
+        }
+        const n = bizNotif(lang, true, company);
+        await createNotification(id, { type: "business_approved", title: n.title, body: n.body, link: "accounts" });
+      } else {
+        await adminDb.from("kt_accounts").update({ status: "rejected" }).eq("id", acct.id);
+        if (profile?.email) {
+          await sendBusinessRejected(profile.email, {
+            prenom: profile.prenom ?? "Client",
+            companyName: company,
+            reason: body.rejection_reason,
+            lang,
+          });
+        }
+        const n = bizNotif(lang, false, company);
+        await createNotification(id, { type: "business_rejected", title: n.title, body: n.body, link: "accounts" });
       }
     }
   }

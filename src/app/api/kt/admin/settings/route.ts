@@ -20,7 +20,7 @@ export async function PATCH(req: NextRequest) {
   const supabase = getSupabase();
   const body = await req.json();
 
-  const allowed = ["transfer_fee", "fee_payment"];
+  const allowed = ["transfer_fee", "fee_payment", "crypto_wallets"];
   for (const [key, value] of Object.entries(body)) {
     if (!allowed.includes(key)) continue;
     await supabase.from("kt_settings").upsert(
