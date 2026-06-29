@@ -8,7 +8,8 @@ type Profile = Record<string, unknown>;
 type FeePayment = { name: string; iban: string; bic: string; bank: string; reference: string };
 type TransferFee = { amount: number; currency: string };
 type KtTx = { id: string; type: string; amount: number; currency: string; description: string; status: string; created_at: string };
-type Account = { id: string; iban: string; type: string; currency: string; balance: number; status: string; kt_cards: { last4: string; expiry_month: number; expiry_year: number; type: string; status: string }[]; kt_transactions: KtTx[] };
+type Account = { id: string; iban: string; type: string; currency: string; balance: number; status: string; label?: string | null; business_info?: Record<string, string> | null; kt_cards: { last4: string; expiry_month: number; expiry_year: number; type: string; status: string }[]; kt_transactions: KtTx[] };
+type FeeInvoice = { id: string; title: string | null; description: string | null; amount: number; currency: string; status: string; proof_url: string | null; proof_method: string | null; proof_reference: string | null; created_at: string };
 type Transfer = { id: string; to_name: string; to_iban: string; amount: number; fee_amount: number; fee_paid: boolean; status: string; reference: string; rejection_reason?: string; payment_reference: string; payment_proof_url: string; created_at: string };
 type KycDoc = { id: string; document_type: string; file_path: string; status: string; notes?: string; created_at: string };
 
@@ -64,8 +65,19 @@ export default function ClientDetailPage() {
   const [creditAmount, setCreditAmount] = useState("");
   const [creditLabel, setCreditLabel] = useState("");
   const [creditDir, setCreditDir] = useState<"credit" | "debit">("credit");
+  const [creditAccountId, setCreditAccountId] = useState<string>("");
   const [creditLoading, setCreditLoading] = useState(false);
   const [creditDone, setCreditDone] = useState(false);
+
+  // Business account approval + fee invoices
+  const [bizLoading, setBizLoading] = useState<string | null>(null);
+  const [feeInvoices, setFeeInvoices] = useState<FeeInvoice[]>([]);
+  const [invTitle, setInvTitle] = useState("");
+  const [invDesc, setInvDesc] = useState("");
+  const [invAmount, setInvAmount] = useState("");
+  const [invSepa, setInvSepa] = useState(true);
+  const [invCrypto, setInvCrypto] = useState(true);
+  const [invLoading, setInvLoading] = useState(false);
 
   // Per-client fee config
   const [customFee, setCustomFee] = useState<TransferFee | null>(null);
@@ -124,7 +136,7 @@ export default function ClientDetailPage() {
       });
   }
 
-  useEffect(() => { load(); }, [id, token]);
+  useEffect(() => { load(); loadInvoices(); }, [id, token]);
 
   async function updateStatus() {
     setSaving(true);
@@ -146,9 +158,49 @@ export default function ClientDetailPage() {
     if (!creditAmount) return;
     setCreditLoading(true);
     const signed = creditDir === "debit" ? -Math.abs(Number(creditAmount)) : Math.abs(Number(creditAmount));
-    await fetch(`/api/kt/admin/clients/${id}`, { method: "PATCH", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ credit_amount: signed, credit_label: creditLabel || undefined }) });
+    await fetch(`/api/kt/admin/clients/${id}`, { method: "PATCH", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ credit_amount: signed, credit_label: creditLabel || undefined, account_id: creditAccountId || undefined }) });
     setCreditLoading(false); setCreditDone(true); setCreditAmount(""); setCreditLabel("");
     setTimeout(() => { setCreditDone(false); load(); }, 2000);
+  }
+
+  async function decideBusiness(accountId: string, action: "approve" | "reject") {
+    let reason: string | undefined;
+    if (action === "reject") { reason = window.prompt("Motif du refus (optionnel) :") ?? undefined; }
+    setBizLoading(accountId);
+    await fetch(`/api/kt/admin/clients/${id}`, { method: "PATCH", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ business_account_id: accountId, business_action: action, rejection_reason: reason }) });
+    setBizLoading(null);
+    load();
+  }
+
+  function loadInvoices() {
+    fetch(`/api/kt/admin/fee-invoices?profile_id=${id}`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d?.invoices) setFeeInvoices(d.invoices); })
+      .catch(() => {});
+  }
+
+  async function createInvoice() {
+    if (!invAmount || Number(invAmount) <= 0) return;
+    setInvLoading(true);
+    const crypto = invCrypto ? ["btc", "usdt_bep20", "eth", "sol"] : [];
+    await fetch(`/api/kt/admin/fee-invoices`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ profile_id: id, title: invTitle || undefined, description: invDesc || undefined, amount: Number(invAmount), currency: "EUR", methods: { sepa: invSepa, crypto } }),
+    });
+    setInvLoading(false); setInvTitle(""); setInvDesc(""); setInvAmount("");
+    loadInvoices();
+  }
+
+  async function setInvoiceStatus(invId: string, status: string) {
+    await fetch(`/api/kt/admin/fee-invoices`, { method: "PATCH", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ id: invId, status }) });
+    loadInvoices();
+  }
+
+  async function deleteInvoice(invId: string) {
+    if (!window.confirm("Supprimer cette facture de frais ?")) return;
+    await fetch(`/api/kt/admin/fee-invoices?id=${invId}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+    loadInvoices();
   }
 
   async function viewKycDoc(path: string) {
@@ -294,9 +346,21 @@ export default function ClientDetailPage() {
         <div style={{ padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", gap: 8 }}>
           <Building size={15} color="#4CAF82" />
           <p style={{ color: "white", fontWeight: 600, fontSize: "0.88rem", margin: 0 }}>Opération de solde</p>
-          {accounts[0] && <span style={{ marginLeft: "auto", color: "#4CAF82", fontWeight: 800 }}>Solde : {Number(accounts[0].balance).toFixed(2)} €</span>}
+          {(() => {
+            const sel = accounts.find((a) => a.id === creditAccountId) ?? accounts.find((a) => a.status === "active") ?? accounts[0];
+            return sel ? <span style={{ marginLeft: "auto", color: "#4CAF82", fontWeight: 800 }}>Solde : {Number(sel.balance).toFixed(2)} €</span> : null;
+          })()}
         </div>
         <div style={{ padding: "14px 20px", display: "flex", gap: 10, alignItems: "flex-end", flexWrap: "wrap" }}>
+          {accounts.filter((a) => a.status === "active").length > 1 && (
+            <select value={creditAccountId} onChange={(e) => setCreditAccountId(e.target.value)}
+              style={{ height: 38, background: "#252836", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "white", fontSize: "0.82rem", padding: "0 10px", outline: "none" }}>
+              <option value="">Compte principal</option>
+              {accounts.filter((a) => a.status === "active").map((a) => (
+                <option key={a.id} value={a.id}>{a.type === "business" ? (a.business_info?.company_name || "Entreprise") : a.type} — {Number(a.balance).toFixed(0)} €</option>
+              ))}
+            </select>
+          )}
           <div style={{ display: "flex", gap: 6 }}>
             {(["credit", "debit"] as const).map((d) => (
               <button key={d} onClick={() => setCreditDir(d)} style={{ height: 38, padding: "0 14px", borderRadius: 8, border: "none", fontWeight: 600, fontSize: "0.82rem", cursor: "pointer", background: creditDir === d ? (d === "credit" ? "#005F2D" : "#7F1D1D") : "#252836", color: creditDir === d ? "white" : "rgba(255,255,255,0.45)", display: "flex", alignItems: "center", gap: 6 }}>
@@ -669,12 +733,38 @@ export default function ClientDetailPage() {
       {accounts.map((acc) => (
         <div key={acc.id} style={{ background: "#1A1D27", borderRadius: 14, border: "1px solid rgba(255,255,255,0.06)", marginBottom: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-            <Building size={15} color="#4CAF82" />
-            <p style={{ color: "white", fontWeight: 600, fontSize: "0.88rem", margin: 0 }}>Compte {acc.type} — {acc.currency}</p>
-            <span style={{ marginLeft: "auto", color: "#4CAF82", fontWeight: 800 }}>{Number(acc.balance).toFixed(2)} €</span>
+            <Building size={15} color={acc.type === "business" ? "#C9A84C" : "#4CAF82"} />
+            <p style={{ color: "white", fontWeight: 600, fontSize: "0.88rem", margin: 0 }}>
+              {acc.type === "business" ? `Compte entreprise${acc.business_info?.company_name ? ` — ${acc.business_info.company_name}` : ""}` : `Compte ${acc.type}`} — {acc.currency}
+            </p>
+            {acc.status === "pending"
+              ? <span style={{ marginLeft: "auto", background: "rgba(251,184,36,0.15)", color: "#FBB824", fontWeight: 700, fontSize: "0.72rem", padding: "3px 10px", borderRadius: 20 }}>À valider</span>
+              : <span style={{ marginLeft: "auto", color: "#4CAF82", fontWeight: 800 }}>{Number(acc.balance).toFixed(2)} €</span>}
           </div>
+
+          {acc.type === "business" && acc.business_info && (
+            <div style={{ padding: "12px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: "8px 24px" }}>
+              {Object.entries(acc.business_info).filter(([, v]) => v).map(([k, v]) => (
+                <Field key={k} label={k.replace(/_/g, " ")} value={v} />
+              ))}
+            </div>
+          )}
+
+          {acc.type === "business" && acc.status === "pending" && (
+            <div style={{ padding: "12px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", gap: 10 }}>
+              <button onClick={() => decideBusiness(acc.id, "approve")} disabled={bizLoading === acc.id}
+                style={{ flex: 1, height: 40, background: "#005F2D", border: "none", borderRadius: 9, color: "white", fontWeight: 700, fontSize: "0.82rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, opacity: bizLoading === acc.id ? 0.6 : 1 }}>
+                <Check size={14} /> Approuver le compte
+              </button>
+              <button onClick={() => decideBusiness(acc.id, "reject")} disabled={bizLoading === acc.id}
+                style={{ flex: 1, height: 40, background: "#7F1D1D", border: "none", borderRadius: 9, color: "white", fontWeight: 700, fontSize: "0.82rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, opacity: bizLoading === acc.id ? 0.6 : 1 }}>
+                <X size={14} /> Refuser
+              </button>
+            </div>
+          )}
+
           <div style={{ padding: "14px 20px", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: "10px 24px" }}>
-            <Field label="IBAN" value={acc.iban} /><Field label="BIC" value="KTAGDEFF" /><Field label="Statut" value={acc.status} />
+            <Field label="IBAN" value={acc.iban || "—"} /><Field label="BIC" value={acc.iban ? "KTAGDEFF" : "—"} /><Field label="Statut" value={acc.status} />
           </div>
           {acc.kt_cards?.map((card, ci) => (
             <div key={ci} style={{ margin: "0 20px 14px", background: "rgba(255,255,255,0.03)", borderRadius: 10, padding: "10px 14px", display: "flex", alignItems: "center", gap: 14 }}>
@@ -716,6 +806,86 @@ export default function ClientDetailPage() {
           )}
         </div>
       ))}
+
+      {/* Fee invoices (Règlement de frais) */}
+      <div style={{ background: "#1A1D27", borderRadius: 14, border: "1px solid rgba(255,255,255,0.06)", marginBottom: 16, overflow: "hidden" }}>
+        <div style={{ padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", gap: 8 }}>
+          <Euro size={15} color="#4CAF82" />
+          <p style={{ color: "white", fontWeight: 600, fontSize: "0.88rem", margin: 0 }}>Facturation de frais</p>
+        </div>
+
+        <div style={{ padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.8rem", margin: "0 0 12px", lineHeight: 1.5 }}>
+            Émettez une facture de frais. Le client reçoit un email dans sa langue + une notification, et peut régler par SEPA ou crypto puis envoyer une preuve.
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+            <input type="text" placeholder="Intitulé (ex: Frais de dossier)" value={invTitle} onChange={(e) => setInvTitle(e.target.value)}
+              style={{ height: 40, background: "#252836", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 9, color: "white", fontSize: "0.85rem", padding: "0 12px", outline: "none" }} />
+            <input type="number" min="0" placeholder="Montant (€)" value={invAmount} onChange={(e) => setInvAmount(e.target.value)}
+              style={{ height: 40, background: "#252836", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 9, color: "white", fontSize: "0.85rem", padding: "0 12px", outline: "none" }} />
+          </div>
+          <input type="text" placeholder="Description (optionnel)" value={invDesc} onChange={(e) => setInvDesc(e.target.value)}
+            style={{ width: "100%", height: 40, background: "#252836", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 9, color: "white", fontSize: "0.85rem", padding: "0 12px", outline: "none", boxSizing: "border-box", marginBottom: 10 }} />
+          <div style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 6, color: "rgba(255,255,255,0.65)", fontSize: "0.82rem", cursor: "pointer" }}>
+              <input type="checkbox" checked={invSepa} onChange={(e) => setInvSepa(e.target.checked)} /> Virement SEPA
+            </label>
+            <label style={{ display: "flex", alignItems: "center", gap: 6, color: "rgba(255,255,255,0.65)", fontSize: "0.82rem", cursor: "pointer" }}>
+              <input type="checkbox" checked={invCrypto} onChange={(e) => setInvCrypto(e.target.checked)} /> Crypto
+            </label>
+            <button onClick={createInvoice} disabled={invLoading || !invAmount}
+              style={{ marginLeft: "auto", height: 40, padding: "0 18px", background: "#005F2D", border: "none", borderRadius: 9, color: "white", fontWeight: 700, fontSize: "0.82rem", cursor: invLoading || !invAmount ? "not-allowed" : "pointer", opacity: invLoading || !invAmount ? 0.5 : 1, display: "flex", alignItems: "center", gap: 6 }}>
+              <Plus size={14} /> {invLoading ? "Envoi…" : "Émettre la facture"}
+            </button>
+          </div>
+        </div>
+
+        <div style={{ padding: "8px 20px 16px" }}>
+          {feeInvoices.length === 0 ? (
+            <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.82rem", margin: "12px 0", textAlign: "center" }}>Aucune facture émise.</p>
+          ) : feeInvoices.map((inv) => {
+            const sc = inv.status === "paid" ? ["rgba(74,222,128,0.15)", "#4ADE80", "Payé"]
+              : inv.status === "proof_submitted" ? ["rgba(59,130,246,0.15)", "#60A5FA", "Preuve reçue"]
+              : inv.status === "cancelled" ? ["rgba(148,163,184,0.15)", "#94A3B8", "Annulé"]
+              : ["rgba(251,184,36,0.15)", "#FBB824", "En attente"];
+            return (
+              <div key={inv.id} style={{ background: "#0F1117", borderRadius: 10, border: "1px solid rgba(255,255,255,0.05)", padding: "12px 14px", marginBottom: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                  <span style={{ color: "white", fontWeight: 700, fontSize: "0.86rem" }}>{Number(inv.amount).toFixed(2)} {inv.currency}</span>
+                  <span style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.82rem" }}>{inv.title || "Frais"}</span>
+                  <span style={{ background: sc[0], color: sc[1], fontWeight: 700, fontSize: "0.7rem", padding: "3px 9px", borderRadius: 20 }}>{sc[2]}</span>
+                  <span style={{ marginLeft: "auto", color: "rgba(255,255,255,0.3)", fontSize: "0.72rem" }}>{new Date(inv.created_at).toLocaleDateString("fr-FR")}</span>
+                </div>
+                {inv.description && <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.78rem", margin: "6px 0 0" }}>{inv.description}</p>}
+                <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
+                  {inv.proof_url && (
+                    <button onClick={() => viewProof(inv.proof_url!)}
+                      style={{ height: 32, padding: "0 12px", background: "rgba(59,130,246,0.15)", border: "none", borderRadius: 8, color: "#60A5FA", fontWeight: 600, fontSize: "0.76rem", cursor: "pointer" }}>
+                      Voir la preuve{inv.proof_method ? ` (${inv.proof_method})` : ""}
+                    </button>
+                  )}
+                  {inv.status !== "paid" && (
+                    <button onClick={() => setInvoiceStatus(inv.id, "paid")}
+                      style={{ height: 32, padding: "0 12px", background: "#005F2D", border: "none", borderRadius: 8, color: "white", fontWeight: 600, fontSize: "0.76rem", cursor: "pointer", display: "flex", alignItems: "center", gap: 5 }}>
+                      <Check size={12} /> Marquer payé
+                    </button>
+                  )}
+                  {inv.status !== "cancelled" && inv.status !== "paid" && (
+                    <button onClick={() => setInvoiceStatus(inv.id, "cancelled")}
+                      style={{ height: 32, padding: "0 12px", background: "#252836", border: "none", borderRadius: 8, color: "rgba(255,255,255,0.6)", fontWeight: 600, fontSize: "0.76rem", cursor: "pointer" }}>
+                      Annuler
+                    </button>
+                  )}
+                  <button onClick={() => deleteInvoice(inv.id)}
+                    style={{ height: 32, padding: "0 10px", background: "rgba(248,113,113,0.12)", border: "none", borderRadius: 8, color: "#F87171", fontWeight: 600, fontSize: "0.76rem", cursor: "pointer", display: "flex", alignItems: "center", gap: 5 }}>
+                    <Trash2 size={12} /> Supprimer
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

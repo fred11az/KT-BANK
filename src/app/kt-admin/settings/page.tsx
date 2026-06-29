@@ -1,10 +1,20 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useAdmin } from "../layout";
-import { Settings, Save, Euro, Building2, RefreshCw, Check } from "lucide-react";
+import { Settings, Save, Euro, Building2, RefreshCw, Check, Bitcoin, Plus, Trash2 } from "lucide-react";
 
 type FeePayment = { name: string; iban: string; bic: string; bank: string; reference: string };
 type TransferFee = { amount: number; currency: string };
+type CryptoWallet = { coin: string; label: string; network: string; address: string; qr_url?: string | null };
+
+const CRYPTO_PRESETS: { coin: string; label: string; network: string }[] = [
+  { coin: "btc", label: "Bitcoin", network: "Bitcoin" },
+  { coin: "usdt_bep20", label: "USDT (BEP-20)", network: "BNB Smart Chain" },
+  { coin: "usdt_trc20", label: "USDT (TRC-20)", network: "Tron" },
+  { coin: "eth", label: "Ethereum", network: "ERC-20" },
+  { coin: "sol", label: "Solana", network: "Solana" },
+  { coin: "usdc", label: "USDC", network: "ERC-20" },
+];
 
 function Field({ label, value, onChange, type = "text", mono = false }: {
   label: string; value: string; onChange: (v: string) => void; type?: string; mono?: boolean;
@@ -26,6 +36,7 @@ export default function SettingsPage() {
 
   const [fee, setFee] = useState<TransferFee>({ amount: 50, currency: "EUR" });
   const [payment, setPayment] = useState<FeePayment>({ name: "", iban: "", bic: "", bank: "", reference: "FRAIS-VIREMENT" });
+  const [wallets, setWallets] = useState<CryptoWallet[]>([]);
 
   useEffect(() => {
     fetch("/api/kt/admin/settings", { headers: { Authorization: `Bearer ${token}` } })
@@ -33,16 +44,28 @@ export default function SettingsPage() {
       .then((d) => {
         if (d.transfer_fee) setFee(d.transfer_fee);
         if (d.fee_payment) setPayment(d.fee_payment);
+        if (Array.isArray(d.crypto_wallets)) setWallets(d.crypto_wallets);
         setLoading(false);
       });
   }, [token]);
+
+  function addWallet(preset?: { coin: string; label: string; network: string }) {
+    setWallets((w) => [...w, preset ? { ...preset, address: "" } : { coin: "", label: "", network: "", address: "" }]);
+  }
+  function updateWallet(i: number, patch: Partial<CryptoWallet>) {
+    setWallets((w) => w.map((x, j) => (j === i ? { ...x, ...patch } : x)));
+  }
+  function removeWallet(i: number) {
+    setWallets((w) => w.filter((_, j) => j !== i));
+  }
 
   async function save() {
     setSaving(true);
     await fetch("/api/kt/admin/settings", {
       method: "PATCH",
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ transfer_fee: fee, fee_payment: payment }),
+      // keep only wallets that actually have an address
+      body: JSON.stringify({ transfer_fee: fee, fee_payment: payment, crypto_wallets: wallets.filter((w) => w.address.trim() && w.label.trim()) }),
     });
     setSaving(false);
     setSaved(true);
@@ -112,6 +135,60 @@ export default function SettingsPage() {
           <Field label="BIC / SWIFT" value={payment.bic} onChange={(v) => setPayment((p) => ({ ...p, bic: v }))} mono />
           <Field label="Banque" value={payment.bank} onChange={(v) => setPayment((p) => ({ ...p, bank: v }))} />
           <Field label="Référence à indiquer" value={payment.reference} onChange={(v) => setPayment((p) => ({ ...p, reference: v }))} />
+        </div>
+      </div>
+
+      {/* Crypto wallets */}
+      <div style={{ background: "#1A1D27", borderRadius: 14, border: "1px solid rgba(255,255,255,0.06)", marginBottom: 20, overflow: "hidden" }}>
+        <div style={{ padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", gap: 8 }}>
+          <Bitcoin size={15} color="#4CAF82" />
+          <p style={{ color: "white", fontWeight: 600, fontSize: "0.88rem", margin: 0 }}>Portefeuilles crypto (règlement de frais)</p>
+        </div>
+        <div style={{ padding: "16px 20px" }}>
+          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.8rem", marginBottom: 16, lineHeight: 1.6 }}>
+            Adresses crypto vers lesquelles les clients peuvent régler leurs frais. Un QR code est généré automatiquement à partir de l&apos;adresse. Laissez vide pour ne pas proposer une crypto.
+          </p>
+
+          {wallets.map((w, i) => (
+            <div key={i} style={{ background: "#0F1117", borderRadius: 12, border: "1px solid rgba(255,255,255,0.06)", padding: "14px 16px", marginBottom: 12 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                <span style={{ color: "#4CAF82", fontWeight: 700, fontSize: "0.82rem" }}>{w.label || "Nouvelle crypto"}</span>
+                <button onClick={() => removeWallet(i)} style={{ background: "rgba(248,113,113,0.12)", border: "none", borderRadius: 8, padding: "5px 8px", cursor: "pointer", color: "#F87171", display: "flex", alignItems: "center", gap: 4, fontSize: "0.72rem" }}>
+                  <Trash2 size={12} /> Retirer
+                </button>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <div>
+                  <label style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.68rem", fontWeight: 600, display: "block", marginBottom: 5, textTransform: "uppercase" }}>Nom affiché</label>
+                  <input value={w.label} onChange={(e) => updateWallet(i, { label: e.target.value })} placeholder="USDT (BEP-20)"
+                    style={{ width: "100%", height: 40, background: "#252836", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 9, color: "white", fontSize: "0.85rem", padding: "0 12px", boxSizing: "border-box", outline: "none" }} />
+                </div>
+                <div>
+                  <label style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.68rem", fontWeight: 600, display: "block", marginBottom: 5, textTransform: "uppercase" }}>Réseau</label>
+                  <input value={w.network} onChange={(e) => updateWallet(i, { network: e.target.value })} placeholder="BNB Smart Chain"
+                    style={{ width: "100%", height: 40, background: "#252836", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 9, color: "white", fontSize: "0.85rem", padding: "0 12px", boxSizing: "border-box", outline: "none" }} />
+                </div>
+              </div>
+              <div style={{ marginTop: 10 }}>
+                <label style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.68rem", fontWeight: 600, display: "block", marginBottom: 5, textTransform: "uppercase" }}>Adresse du portefeuille</label>
+                <input value={w.address} onChange={(e) => updateWallet(i, { address: e.target.value })} placeholder="0x…"
+                  style={{ width: "100%", height: 40, background: "#252836", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 9, color: "white", fontSize: "0.85rem", padding: "0 12px", boxSizing: "border-box", outline: "none", fontFamily: "monospace" }} />
+              </div>
+            </div>
+          ))}
+
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 6 }}>
+            {CRYPTO_PRESETS.filter((p) => !wallets.some((w) => w.coin === p.coin)).map((p) => (
+              <button key={p.coin} onClick={() => addWallet(p)}
+                style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(0,95,45,0.18)", border: "1px solid rgba(0,95,45,0.4)", borderRadius: 9, padding: "7px 11px", color: "#4CAF82", fontSize: "0.76rem", fontWeight: 600, cursor: "pointer" }}>
+                <Plus size={12} /> {p.label}
+              </button>
+            ))}
+            <button onClick={() => addWallet()}
+              style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 9, padding: "7px 11px", color: "rgba(255,255,255,0.7)", fontSize: "0.76rem", fontWeight: 600, cursor: "pointer" }}>
+              <Plus size={12} /> Autre
+            </button>
+          </div>
         </div>
       </div>
 
