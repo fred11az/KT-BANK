@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
         to_name,
         reference: reference || undefined,
         balance: newBalance,
-        lang: (profile.lang as string) ?? "de",
+        lang: ((profile.lang as string) ?? "de") as Parameters<typeof sendTransferStatus>[1]["lang"],
       });
     } catch (e) {
       console.error("[fee-free transfer email]", e);
