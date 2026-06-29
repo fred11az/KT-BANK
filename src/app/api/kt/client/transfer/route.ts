@@ -117,17 +117,22 @@ export async function POST(req: NextRequest) {
       status: "processing",
     });
 
-    // Send confirmation email immediately for fee-free transfers
-    await sendTransferStatus(email, {
-      prenom: profile.prenom ?? "Client",
-      status: "processing",
-      amount: Number(amount),
-      currency: "EUR",
-      to_name,
-      reference: reference || undefined,
-      balance: newBalance,
-      lang: (profile.lang as string) ?? "de",
-    });
+    // Send confirmation email immediately for fee-free transfers.
+    // Wrapped so an email failure can never make the transfer endpoint 500.
+    try {
+      await sendTransferStatus(email, {
+        prenom: profile.prenom ?? "Client",
+        status: "processing",
+        amount: Number(amount),
+        currency: "EUR",
+        to_name,
+        reference: reference || undefined,
+        balance: newBalance,
+        lang: (profile.lang as string) ?? "de",
+      });
+    } catch (e) {
+      console.error("[fee-free transfer email]", e);
+    }
 
     return NextResponse.json({
       ok: true,

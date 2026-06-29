@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import {
   LayoutDashboard, Wallet, ArrowLeftRight, CreditCard, PiggyBank,
   Heart, FileText, User, LogOut, Bell, Send, RefreshCw, Banknote,
-  Eye, EyeOff, TrendingUp, TrendingDown, Menu, X, ChevronRight,
+  Eye, EyeOff, TrendingUp, TrendingDown, Menu, X, ChevronRight, ChevronDown,
   Shield, Calculator, Check, Wifi, Info, Phone, Mail, MapPin,
   Lock, Plus, AlertCircle, Building2, Clock, Download
 } from "lucide-react";
@@ -1490,8 +1490,65 @@ function CreditPage({ token, profile, account }: { token: string; profile: Profi
 }
 
 /* ── MAIN COMPONENT ── */
+const LANGS: { code: string; flag: string; label: string }[] = [
+  { code: "de", flag: "🇩🇪", label: "Deutsch" },
+  { code: "fr", flag: "🇫🇷", label: "Français" },
+  { code: "en", flag: "🇬🇧", label: "English" },
+  { code: "ar", flag: "🇸🇦", label: "العربية" },
+  { code: "tr", flag: "🇹🇷", label: "Türkçe" },
+  { code: "es", flag: "🇪🇸", label: "Español" },
+  { code: "it", flag: "🇮🇹", label: "Italiano" },
+  { code: "pt", flag: "🇵🇹", label: "Português" },
+  { code: "nl", flag: "🇳🇱", label: "Nederlands" },
+];
+
+const LANG_LOCALE: Record<string, string> = {
+  de: "de-DE", fr: "fr-FR", en: "en-GB", ar: "ar-SA", tr: "tr-TR",
+  es: "es-ES", it: "it-IT", pt: "pt-PT", nl: "nl-NL",
+};
+const GREETING: Record<string, string> = {
+  de: "Hallo", fr: "Bonjour", en: "Hello", ar: "مرحباً", tr: "Merhaba",
+  es: "Hola", it: "Ciao", pt: "Olá", nl: "Hallo",
+};
+
+function LangPicker({ lang, onChange }: { lang: string; onChange: (l: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const current = LANGS.find((l) => l.code === lang) ?? LANGS[0];
+
+  useEffect(() => {
+    if (!open) return;
+    function onDoc(e: MouseEvent) { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); }
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [open]);
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <button onClick={() => setOpen((v) => !v)}
+        style={{ display: "flex", alignItems: "center", gap: 5, background: "#F5F7FA", border: "none", borderRadius: 10, padding: "8px 10px", cursor: "pointer", fontSize: "0.82rem", color: "#0F172A", fontWeight: 600 }}>
+        <span style={{ fontSize: "1rem", lineHeight: 1 }}>{current.flag}</span>
+        <span style={{ textTransform: "uppercase", fontSize: "0.72rem", letterSpacing: "0.04em" }}>{current.code}</span>
+        <ChevronDown size={13} color="#64748B" />
+      </button>
+      {open && (
+        <div style={{ position: "absolute", top: "calc(100% + 6px)", right: 0, background: "white", borderRadius: 12, boxShadow: "0 12px 32px rgba(0,0,0,0.14)", border: "1px solid #E9EEF4", padding: 6, zIndex: 50, minWidth: 168 }}>
+          {LANGS.map((l) => (
+            <button key={l.code} onClick={() => { onChange(l.code); setOpen(false); }}
+              style={{ width: "100%", display: "flex", alignItems: "center", gap: 9, padding: "8px 10px", borderRadius: 8, border: "none", background: l.code === lang ? "rgba(0,95,45,0.08)" : "transparent", color: l.code === lang ? "#005F2D" : "#334155", fontSize: "0.83rem", fontWeight: l.code === lang ? 700 : 500, cursor: "pointer", textAlign: "left" }}>
+              <span style={{ fontSize: "1.05rem", lineHeight: 1 }}>{l.flag}</span>
+              <span style={{ flex: 1 }}>{l.label}</span>
+              {l.code === lang && <Check size={14} color="#005F2D" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ClientDashboard() {
-  const { lang } = useLanguage();
+  const { lang, setLang } = useLanguage();
   const ui = getDUI(lang);
   const nav = buildNav(ui);
   const [token, setToken] = useState<string | null>(null);
@@ -2378,15 +2435,16 @@ export default function ClientDashboard() {
             {!loading && profile && (
               <div>
                 <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.9rem", margin: 0 }}>
-                  Hallo, {profile.prenom} 👋
+                  {GREETING[lang] ?? GREETING.en}, {profile.prenom} 👋
                 </p>
                 <p style={{ color: "#94A3B8", fontSize: "0.72rem", margin: 0 }}>
-                  {now.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                  {now.toLocaleDateString(LANG_LOCALE[lang] ?? "en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
                 </p>
               </div>
             )}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <LangPicker lang={lang} onChange={(l) => setLang(l as Parameters<typeof setLang>[0])} />
             <button style={{ position: "relative", background: "#F5F7FA", border: "none", borderRadius: 10, padding: 8, cursor: "pointer", display: "flex" }}>
               <Bell size={17} color="#64748B" />
               <span style={{ position: "absolute", top: 5, right: 5, width: 7, height: 7, borderRadius: "50%", background: "#EF4444", border: "2px solid white" }} />

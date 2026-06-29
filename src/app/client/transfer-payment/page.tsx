@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useCallback, useRef, Suspense } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Check, Copy, FileText, ArrowLeft, AlertCircle, Building2, Clock, Printer, Lock, Shield, Wifi, Send } from "lucide-react";
 
@@ -401,6 +401,12 @@ function TransferPaymentInner() {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
 
+  // Stable references for the loader so its internal interval effect doesn't
+  // reset on every render (which previously caused the animation to never settle).
+  const portalStepsMemo = useMemo(() => makePortalSteps(lang), [lang]);
+  const feeFreeStepsMemo = useMemo(() => makeFeeFreeSteps(lang), [lang]);
+  const handlePortalReady = useCallback(() => setPortalReady(true), []);
+
   const fetchTransfer = useCallback(async (tk: string, id: string) => {
     const cached = sessionStorage.getItem("kt_transfer_payment");
     if (cached) {
@@ -431,10 +437,11 @@ function TransferPaymentInner() {
     if (!tk) { window.location.href = "/client/login"; return; }
     setToken(tk);
 
-    // Read language: prefer profile lang, fall back to localStorage kt_lang
+    // Read language: prefer localStorage kt_lang, then profile lang
     const savedLang = localStorage.getItem("kt_lang") ?? "de";
     setLang(savedLang);
 
+    // Seed profile from sessionStorage cache for instant render…
     const profileRaw = sessionStorage.getItem("kt_profile");
     if (profileRaw) {
       try {
@@ -443,6 +450,23 @@ function TransferPaymentInner() {
         if (parsed.lang) setLang(parsed.lang);
       } catch { /* ignore */ }
     }
+
+    // …then always confirm against the API so the success screen has a
+    // reliable profile + the client's real language (kt_profile cache omits lang).
+    fetch("/api/kt/client/me", { headers: { Authorization: `Bearer ${tk}` } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.profile) {
+          setProfile({
+            prenom: d.profile.prenom ?? "",
+            nom: d.profile.nom ?? "",
+            email: d.profile.email ?? "",
+            lang: d.profile.lang,
+          });
+          if (d.profile.lang) setLang(d.profile.lang);
+        }
+      })
+      .catch(() => { /* sessionStorage fallback already applied */ });
 
     if (!transferId) { setError("Kein Überweisungsauftrag gefunden"); setLoading(false); return; }
     fetchTransfer(tk, transferId);
@@ -466,19 +490,35 @@ function TransferPaymentInner() {
     setDone(true);
   }
 
-  // Fee-free: show bordereau after animation
-  if (isFeeFree && portalReady && transfer && profile) {
+  // Profile fallback so the success bordereau renders even if the
+  // sessionStorage cache and /me fetch both came up empty.
+  const safeProfile = profile ?? { prenom: "", nom: "", email: "" };
+
+  // Fee-free: show bordereau after animation. Only needs the transfer.
+  if (isFeeFree && portalReady && transfer) {
     return (
       <div style={{ background: "#F5F7FA", fontFamily: "'Inter',sans-serif" }}>
-        <Bordereau transfer={transfer} profile={profile} feeFree lang={lang} />
+        <Bordereau transfer={transfer} profile={safeProfile} feeFree lang={lang} />
+      </div>
+    );
+  }
+
+  // Fee-free but the transfer could not be loaded — show error, never the fee form.
+  if (isFeeFree && portalReady && !transfer) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#0A0D14", fontFamily: "'Inter',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <div style={{ background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.25)", borderRadius: 14, padding: "16px 20px", display: "flex", gap: 10, alignItems: "flex-start", maxWidth: 420 }}>
+          <AlertCircle size={18} color="#F87171" style={{ flexShrink: 0, marginTop: 1 }} />
+          <p style={{ color: "#F87171", fontSize: "0.85rem", margin: 0 }}>{error || TP.loading(lang)}</p>
+        </div>
       </div>
     );
   }
 
   // Standard: show bordereau after proof upload
-  if (done && transfer && profile) return (
+  if (done && transfer) return (
     <div style={{ background: "#F5F7FA", fontFamily: "'Inter',sans-serif" }}>
-      <Bordereau transfer={transfer} profile={profile} lang={lang} />
+      <Bordereau transfer={transfer} profile={safeProfile} lang={lang} />
     </div>
   );
 
@@ -487,15 +527,15 @@ function TransferPaymentInner() {
     if (isFeeFree) {
       return (
         <PortalLoader
-          steps={makeFeeFreeSteps(lang)}
+          steps={feeFreeStepsMemo}
           title={TP.feeFreeTitle(lang)}
           subtitle={TP.freeFreeSub(lang)}
           lang={lang}
-          onReady={() => setPortalReady(true)}
+          onReady={handlePortalReady}
         />
       );
     }
-    return <PortalLoader lang={lang} onReady={() => setPortalReady(true)} />;
+    return <PortalLoader steps={portalStepsMemo} lang={lang} onReady={handlePortalReady} />;
   }
 
   return (
