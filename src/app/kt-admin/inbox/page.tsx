@@ -964,12 +964,10 @@ export default function InboxPage() {
                           {" · "}
                           {new Date(msg.created_at).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
                         </p>
-                        {isOut && (
-                          <button onClick={() => deleteMessage(msg.id)} title="Supprimer ce message"
-                            style={{ background: "none", border: "none", color: "rgba(248,113,113,0.55)", cursor: "pointer", padding: 0, display: "flex", lineHeight: 1 }}>
-                            <Trash2 size={12} />
-                          </button>
-                        )}
+                        <button onClick={() => deleteMessage(msg.id)} title="Supprimer ce message"
+                          style={{ background: "none", border: "none", color: "rgba(248,113,113,0.55)", cursor: "pointer", padding: 0, display: "flex", lineHeight: 1 }}>
+                          <Trash2 size={12} />
+                        </button>
                       </div>
                     </div>
                   );
