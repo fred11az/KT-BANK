@@ -98,3 +98,24 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ ok: true });
 }
+
+// Delete a single message (?message_id=) or a whole thread (?thread_id=).
+// Only removes the local inbox record — the already-sent email is not recalled.
+export async function DELETE(req: NextRequest) {
+  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const supabase = getSupabase();
+  const url = new URL(req.url);
+  const messageId = url.searchParams.get("message_id");
+  const threadId = url.searchParams.get("thread_id");
+
+  if (messageId) {
+    await supabase.from("kt_email_messages").delete().eq("id", messageId);
+    return NextResponse.json({ ok: true });
+  }
+  if (threadId) {
+    await supabase.from("kt_email_messages").delete().eq("thread_id", threadId);
+    await supabase.from("kt_email_threads").delete().eq("id", threadId);
+    return NextResponse.json({ ok: true });
+  }
+  return NextResponse.json({ error: "message_id ou thread_id requis" }, { status: 400 });
+}

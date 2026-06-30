@@ -5,7 +5,7 @@ import {
   Send, RefreshCw, Edit3, X, ArrowLeft, MessageSquare,
   Bold, Italic, Underline, Strikethrough, List, ListOrdered,
   Heading1, Heading2, Heading3, Link2, Image, MousePointerClick,
-  Palette, Highlighter, Upload, FileText, Paperclip, ChevronDown, Code2,
+  Palette, Highlighter, Upload, FileText, Paperclip, ChevronDown, Code2, Trash2,
 } from "lucide-react";
 import { useEditor, EditorContent, Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -794,6 +794,18 @@ export default function InboxPage() {
     load(true);
   }
 
+  async function deleteMessage(messageId: string) {
+    if (!window.confirm("Supprimer ce message ? (l'e-mail déjà envoyé ne sera pas rappelé)")) return;
+    // Optimistic local removal
+    setSelected((prev) => prev ? { ...prev, kt_email_messages: (prev.kt_email_messages ?? []).filter((m) => m.id !== messageId) } : prev);
+    setThreads((prev) => prev.map((t) => ({ ...t, kt_email_messages: (t.kt_email_messages ?? []).filter((m) => m.id !== messageId) })));
+    await fetch(`/api/kt/admin/inbox?message_id=${messageId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    }).catch(() => {});
+    silentRefresh();
+  }
+
   const selectedMsgs = (selected?.kt_email_messages ?? [])
     .slice()
     .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
@@ -930,11 +942,19 @@ export default function InboxPage() {
                       }}>
                         <MessageContent msg={msg} />
                       </div>
-                      <p style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.65rem", margin: "4px 4px 0" }}>
-                        {isOut ? "Vous" : (selected.client_name || selected.client_email)}
-                        {" · "}
-                        {new Date(msg.created_at).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
-                      </p>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "4px 4px 0" }}>
+                        <p style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.65rem", margin: 0 }}>
+                          {isOut ? "Vous" : (selected.client_name || selected.client_email)}
+                          {" · "}
+                          {new Date(msg.created_at).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                        </p>
+                        {isOut && (
+                          <button onClick={() => deleteMessage(msg.id)} title="Supprimer ce message"
+                            style={{ background: "none", border: "none", color: "rgba(248,113,113,0.55)", cursor: "pointer", padding: 0, display: "flex", lineHeight: 1 }}>
+                            <Trash2 size={12} />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
