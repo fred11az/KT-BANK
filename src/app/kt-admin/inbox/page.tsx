@@ -794,6 +794,18 @@ export default function InboxPage() {
     load(true);
   }
 
+  async function deleteThread(threadId: string) {
+    if (!window.confirm("Supprimer toute cette conversation ? Cette action est irréversible.")) return;
+    setThreads((prev) => prev.filter((t) => t.id !== threadId));
+    setSelected((prev) => (prev?.id === threadId ? null : prev));
+    if (isMobile) setShowChat(false);
+    await fetch(`/api/kt/admin/inbox?thread_id=${threadId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    }).catch(() => {});
+    silentRefresh();
+  }
+
   async function deleteMessage(messageId: string) {
     if (!window.confirm("Supprimer ce message ? (l'e-mail déjà envoyé ne sera pas rappelé)")) return;
     // Optimistic local removal
@@ -922,6 +934,10 @@ export default function InboxPage() {
                     color: selected.status === "open" ? "#4CAF82" : "rgba(255,255,255,0.35)",
                   }}>
                   {selected.status === "open" ? "Ouvert" : "Fermé"}
+                </button>
+                <button onClick={() => deleteThread(selected.id)} title="Supprimer la conversation"
+                  style={{ background: "rgba(248,113,113,0.12)", border: "none", borderRadius: 6, padding: "5px 8px", cursor: "pointer", color: "#F87171", flexShrink: 0, display: "flex" }}>
+                  <Trash2 size={14} />
                 </button>
               </div>
 
