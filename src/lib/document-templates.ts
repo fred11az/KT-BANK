@@ -147,6 +147,8 @@ function baseStyles() {
     /* Letterhead */
     .letterhead { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 18px; border-bottom: 3px solid #005F2D; margin-bottom: 26px; }
     .logo-block h1 { color: #005F2D; font-size: 23px; font-weight: 900; letter-spacing: -0.5px; }
+    .doc-logo { height: 34px; width: auto; display: block; margin-bottom: 6px; }
+    .cont-logo { height: 20px; width: auto; display: block; }
     .logo-block p { color: #64748B; font-size: 10px; margin-top: 3px; }
     .bank-address { text-align: right; color: #64748B; font-size: 10px; line-height: 1.9; }
 
@@ -265,7 +267,9 @@ function letterhead() {
   return `
     <div class="letterhead">
       <div class="logo-block">
-        <h1>KT Bank AG</h1>
+        <img src="/kt-logo.png" alt="KT Bank AG" class="doc-logo"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='block';" />
+        <h1 style="display:none;">KT Bank AG</h1>
         <p>Reguliert durch die BaFin · IBAN-Netzwerk SEPA</p>
       </div>
       <div style="display:flex;align-items:center;gap:14px;">
@@ -353,7 +357,9 @@ function sigBlock(
 function contPageHeader(ref: string, subtitle: string, lang = "de") {
   return `<div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:2px solid #005F2D;margin-bottom:18px;">
     <div>
-      <p style="color:#005F2D;font-size:14px;font-weight:800;margin:0;">KT Bank AG</p>
+      <img src="/kt-logo.png" alt="KT Bank AG" class="cont-logo"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='block';" />
+      <p style="display:none;color:#005F2D;font-size:14px;font-weight:800;margin:0;">KT Bank AG</p>
       <p style="color:#64748B;font-size:10px;margin:2px 0 0;">${subtitle}</p>
     </div>
     <p style="color:#94A3B8;font-size:10px;margin:0;">Ref: ${ref} · ${docDate(lang)}</p>

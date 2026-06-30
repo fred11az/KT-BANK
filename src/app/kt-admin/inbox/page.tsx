@@ -684,9 +684,51 @@ export default function InboxPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  // Keep the currently open thread id available to the silent poller
+  // without re-creating the interval on every selection.
+  const selectedIdRef = useRef<string | null>(null);
+  useEffect(() => { selectedIdRef.current = selected?.id ?? null; }, [selected?.id]);
+
+  // Silent background refresh — pulls new messages without the loading flash.
+  const silentRefresh = useCallback(() => {
+    fetch("/api/kt/admin/inbox", { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!d?.threads) return;
+        const fetched: Thread[] = d.threads;
+        const openId = selectedIdRef.current;
+        // Don't show the open thread as unread while it's being viewed.
+        setThreads(fetched.map((t) => (t.id === openId ? { ...t, unread: false } : t)));
+        if (openId) {
+          const fresh = fetched.find((t) => t.id === openId);
+          if (fresh) {
+            // A new inbound message arrived in the open thread → mark it read server-side.
+            if (fresh.unread) {
+              fetch("/api/kt/admin/inbox", {
+                method: "PATCH",
+                headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ thread_id: openId }),
+              }).catch(() => {});
+            }
+            setSelected({ ...fresh, unread: false });
+          }
+        }
+      })
+      .catch(() => { /* keep last-known state on transient errors */ });
+  }, [token]);
+
+  // Poll every 12s and refresh immediately when the tab regains focus.
+  useEffect(() => {
+    if (!token) return;
+    const id = setInterval(silentRefresh, 12000);
+    const onVis = () => { if (document.visibilityState === "visible") silentRefresh(); };
+    document.addEventListener("visibilitychange", onVis);
+    return () => { clearInterval(id); document.removeEventListener("visibilitychange", onVis); };
+  }, [token, silentRefresh]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [selected?.id, showChat]);
+  }, [selected?.id, showChat, selected?.kt_email_messages?.length]);
 
   function selectThread(t: Thread) {
     setSelected(t);
