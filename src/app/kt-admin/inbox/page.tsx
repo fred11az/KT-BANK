@@ -717,10 +717,13 @@ export default function InboxPage() {
       .catch(() => { /* keep last-known state on transient errors */ });
   }, [token]);
 
-  // Poll every 12s and refresh immediately when the tab regains focus.
+  // Poll only while the tab is visible (skip background tabs), and refresh
+  // immediately when the tab regains focus.
   useEffect(() => {
     if (!token) return;
-    const id = setInterval(silentRefresh, 12000);
+    const id = setInterval(() => {
+      if (document.visibilityState === "visible") silentRefresh();
+    }, 20000);
     const onVis = () => { if (document.visibilityState === "visible") silentRefresh(); };
     document.addEventListener("visibilitychange", onVis);
     return () => { clearInterval(id); document.removeEventListener("visibilitychange", onVis); };

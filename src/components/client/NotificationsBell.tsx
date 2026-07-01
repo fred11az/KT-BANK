@@ -182,8 +182,13 @@ export default function NotificationsBell({ token, lang, onNavigate }: Notificat
 
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
+    // Only poll while the tab is visible — avoids wasted requests in background tabs.
+    const interval = setInterval(() => {
+      if (document.visibilityState === "visible") fetchNotifications();
+    }, 45000);
+    const onVis = () => { if (document.visibilityState === "visible") fetchNotifications(); };
+    document.addEventListener("visibilitychange", onVis);
+    return () => { clearInterval(interval); document.removeEventListener("visibilitychange", onVis); };
   }, [fetchNotifications]);
 
   useEffect(() => {

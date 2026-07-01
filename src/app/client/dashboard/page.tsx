@@ -7,11 +7,18 @@ import {
   Shield, Calculator, Check, Wifi, Info, Phone, Mail, MapPin,
   Lock, Plus, AlertCircle, Building2, Clock, Download
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { genTilgungsplan } from "@/lib/document-templates";
 import { useLanguage } from "@/contexts/LanguageContext";
-import FeesPage from "@/components/client/FeesPage";
 import BusinessAccountForm from "@/components/client/BusinessAccountForm";
 import NotificationsBell from "@/components/client/NotificationsBell";
+
+// Lazy-loaded so its dependencies (incl. the QR-code library) stay out of the
+// dashboard's initial bundle and only load when the fees section is opened.
+const FeesPage = dynamic(() => import("@/components/client/FeesPage"), {
+  ssr: false,
+  loading: () => <div style={{ padding: 24, color: "#64748B" }}>…</div>,
+});
 
 const DASHBOARD_UI = {
   de: {
