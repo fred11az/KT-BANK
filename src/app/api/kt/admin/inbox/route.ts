@@ -11,9 +11,23 @@ function auth(req: NextRequest) {
 export async function GET(req: NextRequest) {
   if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   const supabase = getSupabase();
+  const threadId = new URL(req.url).searchParams.get("thread_id");
+
+  // Single-thread mode: full messages for the currently open conversation only.
+  if (threadId) {
+    const { data } = await supabase
+      .from("kt_email_threads")
+      .select("*, kt_email_messages(id, direction, from_email, to_email, subject, body_text, body_html, created_at)")
+      .eq("id", threadId)
+      .single();
+    return NextResponse.json({ thread: data ?? null });
+  }
+
+  // Lightweight list: thread metadata only (no message bodies) — keeps the
+  // polling payload small so it doesn't slow the app / saturate the DB.
   const { data, error } = await supabase
     .from("kt_email_threads")
-    .select("*, kt_email_messages(id, direction, from_email, to_email, subject, body_text, body_html, created_at)")
+    .select("id, subject, client_email, client_name, status, unread, message_count, last_message_at")
     .order("last_message_at", { ascending: false })
     .limit(50);
   if (error) return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

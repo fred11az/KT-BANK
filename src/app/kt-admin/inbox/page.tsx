@@ -144,7 +144,7 @@ type Thread = {
   unread: boolean;
   message_count: number;
   last_message_at: string;
-  kt_email_messages: Message[];
+  kt_email_messages?: Message[];   // present only for the fully-loaded open thread
 };
 
 /* ── Message HTML renderer ── */
@@ -669,27 +669,36 @@ export default function InboxPage() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
+  // Keep the currently open thread id available to the pollers without
+  // re-creating callbacks/intervals on every selection.
+  const selectedIdRef = useRef<string | null>(null);
+  useEffect(() => { selectedIdRef.current = selected?.id ?? null; }, [selected?.id]);
+
+  // Fetch the full messages of a single thread (only the open one is loaded fully).
+  const loadThreadMessages = useCallback((threadId: string) => {
+    fetch(`/api/kt/admin/inbox?thread_id=${threadId}`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.thread) setSelected((prev) => (prev && prev.id === threadId ? { ...prev, ...d.thread, unread: false } : prev));
+      })
+      .catch(() => {});
+  }, [token]);
+
+  // Lightweight thread list (no message bodies). keepSelected → also refresh the open thread's messages.
   const load = useCallback((keepSelected = false) => {
     setLoading(true);
     fetch("/api/kt/admin/inbox", { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
       .then((d) => {
-        const fetched: Thread[] = d.threads ?? [];
-        setThreads(fetched);
+        setThreads(d.threads ?? []);
         setLoading(false);
-        if (keepSelected)
-          setSelected((prev) => prev ? (fetched.find((t) => t.id === prev.id) ?? prev) : null);
+        if (keepSelected && selectedIdRef.current) loadThreadMessages(selectedIdRef.current);
       });
-  }, [token]);
+  }, [token, loadThreadMessages]);
 
   useEffect(() => { load(); }, [load]);
 
-  // Keep the currently open thread id available to the silent poller
-  // without re-creating the interval on every selection.
-  const selectedIdRef = useRef<string | null>(null);
-  useEffect(() => { selectedIdRef.current = selected?.id ?? null; }, [selected?.id]);
-
-  // Silent background refresh — pulls new messages without the loading flash.
+  // Silent background refresh — light list poll + refresh the open thread only.
   const silentRefresh = useCallback(() => {
     fetch("/api/kt/admin/inbox", { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => (r.ok ? r.json() : null))
@@ -701,21 +710,19 @@ export default function InboxPage() {
         setThreads(fetched.map((t) => (t.id === openId ? { ...t, unread: false } : t)));
         if (openId) {
           const fresh = fetched.find((t) => t.id === openId);
-          if (fresh) {
-            // A new inbound message arrived in the open thread → mark it read server-side.
-            if (fresh.unread) {
-              fetch("/api/kt/admin/inbox", {
-                method: "PATCH",
-                headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-                body: JSON.stringify({ thread_id: openId }),
-              }).catch(() => {});
-            }
-            setSelected({ ...fresh, unread: false });
+          // A new inbound message arrived in the open thread → mark read + pull its messages.
+          if (fresh?.unread) {
+            fetch("/api/kt/admin/inbox", {
+              method: "PATCH",
+              headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+              body: JSON.stringify({ thread_id: openId }),
+            }).catch(() => {});
           }
+          loadThreadMessages(openId);
         }
       })
       .catch(() => { /* keep last-known state on transient errors */ });
-  }, [token]);
+  }, [token, loadThreadMessages]);
 
   // Poll only while the tab is visible (skip background tabs), and refresh
   // immediately when the tab regains focus.
@@ -734,8 +741,10 @@ export default function InboxPage() {
   }, [selected?.id, showChat, selected?.kt_email_messages?.length]);
 
   function selectThread(t: Thread) {
-    setSelected(t);
+    // The list is lightweight (no bodies) — show it immediately, then pull the messages.
+    setSelected({ ...t, unread: false, kt_email_messages: t.kt_email_messages ?? [] });
     if (isMobile) setShowChat(true);
+    loadThreadMessages(t.id);
     if (t.unread) {
       fetch("/api/kt/admin/inbox", {
         method: "PATCH",
@@ -743,7 +752,6 @@ export default function InboxPage() {
         body: JSON.stringify({ thread_id: t.id }),
       });
       setThreads((prev) => prev.map((th) => th.id === t.id ? { ...th, unread: false } : th));
-      setSelected({ ...t, unread: false });
     }
   }
 
