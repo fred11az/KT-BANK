@@ -1187,7 +1187,7 @@ type CreditRequest = {
   purpose?: string; status: string; rejection_reason?: string; created_at: string;
 };
 
-function CreditPage({ token, profile, account }: { token: string; profile: Profile | null; account: Account | null }) {
+function CreditPage({ token, profile, account, onViewDoc }: { token: string; profile: Profile | null; account: Account | null; onViewDoc: (html: string) => void }) {
   const [step, setStep] = useState<"list" | "form" | "amortization" | "done">("list");
   const [requests, setRequests] = useState<CreditRequest[]>([]);
   const [loadingReqs, setLoadingReqs] = useState(true);
@@ -1281,8 +1281,7 @@ function CreditPage({ token, profile, account }: { token: string; profile: Profi
       interest_rate: creditType === "islamic" ? 0 : 0.02,
       purpose: purpose || undefined,
     });
-    const w = window.open("", "_blank");
-    if (w) { w.document.write(html); w.document.close(); w.focus(); w.print(); }
+    onViewDoc(html);
   }
 
   const statusMap: Record<string, [string, string, string]> = {
@@ -1620,6 +1619,8 @@ export default function ClientDashboard() {
 
   // IBAN modal
   const [showIbanModal, setShowIbanModal] = useState(false);
+  const [viewerHtml, setViewerHtml] = useState<string | null>(null);
+  const docIframeRef = useRef<HTMLIFrameElement>(null);
   // Card request modal
   const [showCardRequest, setShowCardRequest] = useState(false);
   const [cardTier, setCardTier] = useState<"standard" | "premium">("standard");
@@ -2209,17 +2210,9 @@ export default function ClientDashboard() {
     }
 
     function openDocBlob(html: string) {
-      const pdfScript = `<script>(function(){function ov(){var b=document.getElementById('pdf-btn');if(!b)return;b.onclick=function(){window.print();};}if(document.readyState==='complete'){setTimeout(ov,300);}else{window.addEventListener('load',function(){setTimeout(ov,300);});}})();<\/script>`;
-      const fixedHtml = html.includes("</head>") ? html.replace("</head>", pdfScript + "</head>") : html;
-      const blob = new Blob([fixedHtml], { type: "text/html;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const win = window.open(url, "_blank");
-      if (!win) {
-        alert("Le navigateur a bloqué l'ouverture du document. Veuillez autoriser les popups pour ce site, puis réessayez.");
-        URL.revokeObjectURL(url);
-        return;
-      }
-      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      // Render in an in-app iframe overlay — reliable on mobile (blob-URL
+      // popups render blank / get blocked on Android).
+      setViewerHtml(html);
     }
 
     function downloadDoc(html: string, _title: string) {
@@ -2547,7 +2540,7 @@ export default function ClientDashboard() {
     transfers: <TransfersPage token={token!} balance={balance} transferRequests={transferRequests}
       kycStatus={profile?.kyc_status ?? "unverified"} accountStatus={profile?.status ?? "pending"}
       onGoToKyc={() => setActiveNav("kyc")} />,
-    credits: <CreditPage token={token!} profile={profile} account={mainAccount} />,
+    credits: <CreditPage token={token!} profile={profile} account={mainAccount} onViewDoc={setViewerHtml} />,
     cards: <CardsPage />,
     savings: <SavingsPage />,
     zakat: <ZakatPage />,
@@ -2616,6 +2609,24 @@ export default function ClientDashboard() {
       {/* Modals */}
       {showIbanModal && <IbanModal />}
       {showCardRequest && <CardRequestModal />}
+
+      {/* Document viewer — in-app iframe (works on mobile, unlike blob popups) */}
+      {viewerHtml && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 300, background: "#5A5A5A", display: "flex", flexDirection: "column" }}>
+          <div style={{ height: 52, flexShrink: 0, background: "#0F1219", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 14px" }}>
+            <button onClick={() => setViewerHtml(null)}
+              style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.1)", border: "none", borderRadius: 9, color: "white", padding: "8px 12px", fontSize: "0.82rem", fontWeight: 600, cursor: "pointer" }}>
+              <X size={15} /> {ui.close}
+            </button>
+            <button onClick={() => { try { docIframeRef.current?.contentWindow?.focus(); docIframeRef.current?.contentWindow?.print(); } catch { /* ignore */ } }}
+              style={{ display: "flex", alignItems: "center", gap: 6, background: "#005F2D", border: "none", borderRadius: 9, color: "white", padding: "8px 14px", fontSize: "0.82rem", fontWeight: 700, cursor: "pointer" }}>
+              <Download size={15} /> PDF
+            </button>
+          </div>
+          <iframe ref={docIframeRef} srcDoc={viewerHtml} title="Document"
+            style={{ flex: 1, width: "100%", border: "none", background: "white" }} />
+        </div>
+      )}
 
       {/* Suspended account overlay */}
       {!loading && profile?.status === "suspended" && (

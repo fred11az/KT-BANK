@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useAdmin } from "../layout";
 import { FileText, Send, Trash2, Check, X, Eye, RefreshCw, ChevronDown, User, Plus, Download, ArrowLeft } from "lucide-react";
 import { DOC_TYPES, SUBMISSION_TYPES } from "@/lib/document-templates";
@@ -130,18 +130,12 @@ export default function AdminDocumentsPage() {
     load(selectedClient?.id);
   }
 
+  const [viewerHtml, setViewerHtml] = useState<string | null>(null);
+  const docIframeRef = useRef<HTMLIFrameElement>(null);
+
   function openDocBlob(html: string) {
-    const pdfScript = `<script>(function(){function ov(){var b=document.getElementById('pdf-btn');if(!b)return;b.onclick=function(){window.print();};}if(document.readyState==='complete'){setTimeout(ov,300);}else{window.addEventListener('load',function(){setTimeout(ov,300);});}})();<\/script>`;
-    const fixedHtml = html.includes("</head>") ? html.replace("</head>", pdfScript + "</head>") : html;
-    const blob = new Blob([fixedHtml], { type: "text/html;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const win = window.open(url, "_blank");
-    if (!win) {
-      alert("Le navigateur a bloqué l'ouverture du document. Veuillez autoriser les popups pour ce site, puis réessayez.");
-      URL.revokeObjectURL(url);
-      return;
-    }
-    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    // In-app iframe overlay — reliable on mobile (blob popups render blank).
+    setViewerHtml(html);
   }
 
   function downloadDoc(html: string, _title: string) {
@@ -465,6 +459,24 @@ export default function AdminDocumentsPage() {
               </div>
             </>
           )}
+        </div>
+      )}
+
+      {/* Document viewer — in-app iframe (works on mobile, unlike blob popups) */}
+      {viewerHtml && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 400, background: "#5A5A5A", display: "flex", flexDirection: "column" }}>
+          <div style={{ height: 52, flexShrink: 0, background: "#0F1219", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 14px" }}>
+            <button onClick={() => setViewerHtml(null)}
+              style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.1)", border: "none", borderRadius: 9, color: "white", padding: "8px 12px", fontSize: "0.82rem", fontWeight: 600, cursor: "pointer" }}>
+              <X size={15} /> Fermer
+            </button>
+            <button onClick={() => { try { docIframeRef.current?.contentWindow?.focus(); docIframeRef.current?.contentWindow?.print(); } catch { /* ignore */ } }}
+              style={{ display: "flex", alignItems: "center", gap: 6, background: "#005F2D", border: "none", borderRadius: 9, color: "white", padding: "8px 14px", fontSize: "0.82rem", fontWeight: 700, cursor: "pointer" }}>
+              <Download size={15} /> PDF
+            </button>
+          </div>
+          <iframe ref={docIframeRef} srcDoc={viewerHtml} title="Document"
+            style={{ flex: 1, width: "100%", border: "none", background: "white" }} />
         </div>
       )}
     </div>
