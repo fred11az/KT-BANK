@@ -633,6 +633,10 @@ export default function InboxPage() {
   const [compHtml, setCompHtml] = useState("");
   const [compText, setCompText] = useState("");
   const compEditorKey = useRef(0);
+  // Raw-HTML compose mode: paste a full HTML email and send it verbatim.
+  const [compRawMode, setCompRawMode] = useState(false);
+  const [compRawHtml, setCompRawHtml] = useState("");
+  const compReady = !!compTo && !!compSubject && (compRawMode ? !!compRawHtml.trim() : (!!compHtml && compHtml !== "<p></p>"));
 
   // Attachments
   type AttachFile = { url: string; name: string; type: string };
@@ -790,16 +794,24 @@ export default function InboxPage() {
   }
 
   async function sendCompose() {
-    if (!compTo || !compSubject || !compHtml || compHtml === "<p></p>") return;
+    if (!compReady) return;
+    const htmlToSend = compRawMode ? compRawHtml : compHtml;
     setSending(true);
     await fetch("/api/kt/admin/inbox", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ to: compTo, subject: compSubject, body: compText, body_html: compHtml, attachments: compAttachments }),
+      body: JSON.stringify({
+        to: compTo, subject: compSubject,
+        body: compRawMode ? "" : compText,
+        body_html: htmlToSend,
+        attachments: compAttachments,
+        raw: compRawMode,
+      }),
     });
     setSending(false);
     setComposing(false);
     setCompTo(""); setCompSubject(""); setCompHtml(""); setCompText("");
+    setCompRawMode(false); setCompRawHtml("");
     setCompAttachments([]);
     compEditorKey.current += 1;
     load(true);
@@ -1080,16 +1092,47 @@ export default function InboxPage() {
               ))}
             </div>
 
-            {/* Rich editor */}
-            <div style={{ flex: 1, overflow: "hidden", margin: "10px 20px 0", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, display: "flex", flexDirection: "column" }}>
-              <RichEditor
-                key={compEditorKey.current}
-                token={token}
-                placeholder="Rédigez votre message…"
-                onHtmlChange={(html, text) => { setCompHtml(html); setCompText(text); }}
-                minHeight={isMobile ? 120 : 200}
-              />
+            {/* Mode toggle: rich editor vs paste a formatted HTML email */}
+            <div style={{ display: "flex", gap: 6, margin: "8px 20px 0" }}>
+              <button type="button" onClick={() => setCompRawMode(false)}
+                style={{ flex: 1, height: 32, borderRadius: 8, border: "none", cursor: "pointer", fontSize: "0.76rem", fontWeight: 600, background: !compRawMode ? "#005F2D" : "#252836", color: !compRawMode ? "white" : "rgba(255,255,255,0.5)" }}>
+                Éditeur
+              </button>
+              <button type="button" onClick={() => setCompRawMode(true)}
+                style={{ flex: 1, height: 32, borderRadius: 8, border: "none", cursor: "pointer", fontSize: "0.76rem", fontWeight: 600, background: compRawMode ? "#005F2D" : "#252836", color: compRawMode ? "white" : "rgba(255,255,255,0.5)", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
+                <Code2 size={12} /> Coller un email HTML
+              </button>
             </div>
+
+            {!compRawMode ? (
+              /* Rich editor */
+              <div style={{ flex: 1, overflow: "hidden", margin: "8px 20px 0", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, display: "flex", flexDirection: "column" }}>
+                <RichEditor
+                  key={compEditorKey.current}
+                  token={token}
+                  placeholder="Rédigez votre message…"
+                  onHtmlChange={(html, text) => { setCompHtml(html); setCompText(text); }}
+                  minHeight={isMobile ? 120 : 200}
+                />
+              </div>
+            ) : (
+              /* Paste a full HTML email → the client receives it rendered (not the code) */
+              <div style={{ flex: 1, overflow: "auto", margin: "8px 20px 0", display: "flex", flexDirection: "column", gap: 8 }}>
+                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.72rem", margin: 0, lineHeight: 1.5 }}>
+                  Collez le code HTML de votre email. Le client le recevra <strong style={{ color: "#4CAF82" }}>mis en forme</strong> (il ne verra pas le code) — voir l&apos;aperçu en dessous.
+                </p>
+                <textarea value={compRawHtml} onChange={(e) => setCompRawHtml(e.target.value)}
+                  placeholder="<!DOCTYPE html> …"
+                  style={{ width: "100%", minHeight: isMobile ? 120 : 150, background: "#0F1117", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "rgba(255,255,255,0.85)", fontSize: "0.76rem", fontFamily: "monospace", padding: 10, boxSizing: "border-box", outline: "none", resize: "vertical" }} />
+                {compRawHtml.trim() && (
+                  <div>
+                    <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.72rem", margin: "0 0 5px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Aperçu (ce que verra le client)</p>
+                    <iframe srcDoc={compRawHtml} title="Aperçu email"
+                      style={{ width: "100%", height: isMobile ? 260 : 320, border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, background: "white" }} />
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Attachment bar — compose */}
             <div style={{ padding: "8px 20px 0", flexShrink: 0 }}>
@@ -1128,12 +1171,12 @@ export default function InboxPage() {
             {/* Send button */}
             <div style={{ padding: "12px 20px 16px", flexShrink: 0 }}>
               <button onClick={sendCompose}
-                disabled={sending || !compTo || !compSubject || !compHtml || compHtml === "<p></p>"}
+                disabled={sending || !compReady}
                 style={{
                   width: "100%", height: 44, background: "#005F2D", color: "white",
                   border: "none", borderRadius: 10, fontWeight: 700, fontSize: "0.9rem",
                   cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                  opacity: (sending || !compTo || !compSubject || !compHtml || compHtml === "<p></p>") ? 0.6 : 1,
+                  opacity: (sending || !compReady) ? 0.6 : 1,
                 }}>
                 <Send size={15} /> {sending ? "Envoi…" : "Envoyer le message"}
               </button>

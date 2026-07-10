@@ -54,10 +54,11 @@ type AttachmentMeta = { url: string; name: string; type: string };
 export async function POST(req: NextRequest) {
   if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   const supabase = getSupabase();
-  const { to, subject, body, body_html, thread_id, client_name, attachments } = await req.json() as {
+  const { to, subject, body, body_html, thread_id, client_name, attachments, raw } = await req.json() as {
     to: string; subject: string; body?: string; body_html?: string;
     thread_id?: string; client_name?: string;
     attachments?: AttachmentMeta[];
+    raw?: boolean;   // when true, body_html is a complete email — send it verbatim
   };
   if (!to || !subject || (!body && !body_html))
     return NextResponse.json({ error: "Champs manquants" }, { status: 400 });
@@ -106,9 +107,13 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const { html } = bankAdminMessageEmail({ subject, body: body ?? "", body_html: storedHtml ?? undefined });
+  // Raw mode: the admin pasted a complete HTML email → send it exactly as-is,
+  // without wrapping it in the bank template (which would nest <html>/<body>).
+  const emailHtml = raw && body_html
+    ? body_html
+    : bankAdminMessageEmail({ subject, body: body ?? "", body_html: storedHtml ?? undefined }).html;
   const resendAttachments = attachments?.map((a) => ({ filename: a.name, path: a.url }));
-  await sendEmail(to, subject, html, resendAttachments);
+  await sendEmail(to, subject, emailHtml, resendAttachments);
 
   return NextResponse.json({ ok: true });
 }
