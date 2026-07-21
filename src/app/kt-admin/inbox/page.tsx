@@ -1171,7 +1171,7 @@ export default function InboxPage() {
               </div>
               <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.7rem", margin: "0 0 10px 44px" }}>
                 Le client verra : <span style={{ color: "#4CAF82" }}>
-                  {(senders.find((s) => s.email === compFrom)?.label ?? "Support KT Bank")}{compRole.trim() ? ` - ${compRole.trim()}` : ""}
+                  {(senders.find((s) => s.email.toLowerCase() === compFrom.toLowerCase())?.label ?? compFrom)}{compRole.trim() ? ` - ${compRole.trim()}` : ""}
                 </span>
               </p>
               {[
