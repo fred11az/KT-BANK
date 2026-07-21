@@ -76,10 +76,11 @@ export async function POST(req: NextRequest) {
   let senderEmail = "support@kt-bank-ag.com";
   let fromHeader: string | undefined;
   if (from_email) {
+    // Case-insensitive match (stored emails may be mixed-case, e.g. David.lenian@…).
     const { data: ident } = await supabase
       .from("kt_sender_identities")
       .select("email, label, active")
-      .eq("email", String(from_email).toLowerCase())
+      .ilike("email", String(from_email).trim())
       .maybeSingle();
     if (ident?.active) {
       senderEmail = ident.email;
