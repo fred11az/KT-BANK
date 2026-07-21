@@ -135,7 +135,7 @@ export default function SettingsPage() {
         </div>
         <div style={{ padding: "16px 20px" }}>
           <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.8rem", marginBottom: 16, lineHeight: 1.6 }}>
-            Les adresses depuis lesquelles vous pouvez envoyer des emails aux clients. Uniquement le domaine <strong style={{ color: "#4CAF82" }}>@kt-bank-ag.com</strong> (vérifié sur Resend). Les réponses des clients sont rangées par adresse dans la messagerie.
+            Les adresses depuis lesquelles vous pouvez envoyer des emails aux clients. Le <strong style={{ color: "#4CAF82" }}>Nom affiché</strong> est juste le nom (ex: David Lenian) — l&apos;intitulé/rôle (Account manager, Kontobetreuer…) se choisit <strong>à chaque message</strong> selon la langue du client. Uniquement le domaine <strong style={{ color: "#4CAF82" }}>@kt-bank-ag.com</strong>.
           </p>
 
           {senders.map((s) => (
@@ -157,7 +157,7 @@ export default function SettingsPage() {
 
           <div style={{ marginTop: 14, borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 14 }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 8 }}>
-              <input value={newLabel} onChange={(e) => setNewLabel(e.target.value)} placeholder="Libellé (ex: David Lenian — Gestionnaire)"
+              <input value={newLabel} onChange={(e) => setNewLabel(e.target.value)} placeholder="Nom affiché (ex: David Lenian)"
                 style={{ height: 40, background: "#252836", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 9, color: "white", fontSize: "0.84rem", padding: "0 12px", boxSizing: "border-box", outline: "none" }} />
               <input value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="prenom.nom@kt-bank-ag.com"
                 style={{ height: 40, background: "#252836", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 9, color: "white", fontSize: "0.84rem", padding: "0 12px", boxSizing: "border-box", outline: "none", fontFamily: "monospace" }} />

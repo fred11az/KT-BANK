@@ -57,18 +57,22 @@ type AttachmentMeta = { url: string; name: string; type: string };
 export async function POST(req: NextRequest) {
   if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   const supabase = getSupabase();
-  const { to, subject, body, body_html, thread_id, client_name, attachments, raw, from_email } = await req.json() as {
+  const { to, subject, body, body_html, thread_id, client_name, attachments, raw, from_email, from_role } = await req.json() as {
     to: string; subject: string; body?: string; body_html?: string;
     thread_id?: string; client_name?: string;
     attachments?: AttachmentMeta[];
     raw?: boolean;   // when true, body_html is a complete email — send it verbatim
     from_email?: string;  // chosen system sender address
+    from_role?: string;   // free-text role/title shown after the name (any language)
   };
   if (!to || !subject || (!body && !body_html))
     return NextResponse.json({ error: "Champs manquants" }, { status: 400 });
 
   // Resolve the chosen sender against active identities (security: only known
   // addresses may be used as From). Falls back to the default support mailbox.
+  // The display name is "<name> - <role>" where role is typed per message in
+  // the client's language (strip header-breaking characters).
+  const role = String(from_role ?? "").replace(/[<>\r\n"]/g, "").trim();
   let senderEmail = "support@kt-bank-ag.com";
   let fromHeader: string | undefined;
   if (from_email) {
@@ -79,7 +83,8 @@ export async function POST(req: NextRequest) {
       .maybeSingle();
     if (ident?.active) {
       senderEmail = ident.email;
-      fromHeader = `${ident.label} <${ident.email}>`;
+      const name = String(ident.label).replace(/[<>\r\n"]/g, "").trim();
+      fromHeader = role ? `${name} - ${role} <${ident.email}>` : `${name} <${ident.email}>`;
     }
   }
 

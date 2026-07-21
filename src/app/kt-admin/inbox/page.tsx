@@ -634,6 +634,9 @@ export default function InboxPage() {
   const [mailboxFilter, setMailboxFilter] = useState<string>("");   // "" = toutes
   const [compFrom, setCompFrom] = useState("support@kt-bank-ag.com");
   const [replyFrom, setReplyFrom] = useState("support@kt-bank-ag.com");
+  const [compRole, setCompRole] = useState("");   // free-text title shown after the name
+  const [replyRole, setReplyRole] = useState("");
+  const ROLE_PRESETS = ["Account manager", "Gestionnaire de compte", "Kontobetreuer", "Conseiller clientèle", "Kundenberater"];
   const [compTo, setCompTo] = useState("");
   const [compSubject, setCompSubject] = useState("");
   const [compHtml, setCompHtml] = useState("");
@@ -804,11 +807,13 @@ export default function InboxPage() {
         thread_id: selected.id,
         attachments: replyAttachments,
         from_email: replyFrom,
+        from_role: replyRole,
       }),
     });
     setSending(false);
     setReplyHtml("");
     setReplyText("");
+    setReplyRole("");
     setReplyAttachments([]);
     replyEditorKey.current += 1;
     load(true);
@@ -828,12 +833,13 @@ export default function InboxPage() {
         attachments: compAttachments,
         raw: compRawMode,
         from_email: compFrom,
+        from_role: compRole,
       }),
     });
     setSending(false);
     setComposing(false);
     setCompTo(""); setCompSubject(""); setCompHtml(""); setCompText("");
-    setCompRawMode(false); setCompRawHtml("");
+    setCompRawMode(false); setCompRawHtml(""); setCompRole("");
     setCompAttachments([]);
     compEditorKey.current += 1;
     load(true);
@@ -1046,17 +1052,21 @@ export default function InboxPage() {
 
               {/* Reply editor */}
               <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", flexShrink: 0, display: "flex", flexDirection: "column" }}>
-                {senders.filter((s) => s.active).length > 1 && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "8px 14px 0" }}>
-                    <span style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.72rem", flexShrink: 0 }}>Répondre en tant que</span>
-                    <select value={replyFrom} onChange={(e) => setReplyFrom(e.target.value)}
-                      style={{ flex: 1, height: 32, background: "#252836", border: "1px solid rgba(0,95,45,0.4)", borderRadius: 8, color: "white", fontSize: "0.78rem", padding: "0 8px", outline: "none" }}>
-                      {senders.filter((s) => s.active).map((s) => (
-                        <option key={s.id} value={s.email}>{s.label.split(" — ")[0]} — {s.email}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
+                <div style={{ display: "flex", alignItems: "center", gap: 6, margin: "8px 14px 0", flexWrap: "wrap" }}>
+                  {senders.filter((s) => s.active).length > 1 && (
+                    <>
+                      <span style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.72rem", flexShrink: 0 }}>En tant que</span>
+                      <select value={replyFrom} onChange={(e) => setReplyFrom(e.target.value)}
+                        style={{ height: 32, background: "#252836", border: "1px solid rgba(0,95,45,0.4)", borderRadius: 8, color: "white", fontSize: "0.76rem", padding: "0 8px", outline: "none", maxWidth: 150 }}>
+                        {senders.filter((s) => s.active).map((s) => (
+                          <option key={s.id} value={s.email}>{s.label.split(" — ")[0]}</option>
+                        ))}
+                      </select>
+                    </>
+                  )}
+                  <input value={replyRole} onChange={(e) => setReplyRole(e.target.value)} placeholder="Rôle affiché (optionnel)"
+                    style={{ flex: 1, minWidth: 120, height: 32, background: "#252836", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "white", fontSize: "0.76rem", padding: "0 10px", outline: "none" }} />
+                </div>
                 <div style={{ border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, margin: "10px 14px 6px", overflow: "hidden", background: "#1A1D27" }}>
                   <RichEditor
                     key={replyEditorKey.current}
@@ -1146,6 +1156,24 @@ export default function InboxPage() {
                   ))}
                 </select>
               </div>
+              <div style={{ marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.78rem", width: 36, flexShrink: 0 }}>Rôle</span>
+                <input value={compRole} onChange={(e) => setCompRole(e.target.value)} placeholder="Intitulé affiché au client (ex: Account manager, Kontobetreuer…)"
+                  style={{ flex: 1, height: 38, background: "#252836", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "white", fontSize: "0.85rem", padding: "0 12px", outline: "none" }} />
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 5, margin: "0 0 8px 44px" }}>
+                {ROLE_PRESETS.map((r) => (
+                  <button key={r} type="button" onClick={() => setCompRole(r)}
+                    style={{ background: compRole === r ? "rgba(0,95,45,0.35)" : "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, color: "rgba(255,255,255,0.7)", fontSize: "0.7rem", padding: "3px 10px", cursor: "pointer" }}>
+                    {r}
+                  </button>
+                ))}
+              </div>
+              <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.7rem", margin: "0 0 10px 44px" }}>
+                Le client verra : <span style={{ color: "#4CAF82" }}>
+                  {(senders.find((s) => s.email === compFrom)?.label ?? "Support KT Bank")}{compRole.trim() ? ` - ${compRole.trim()}` : ""}
+                </span>
+              </p>
               {[
                 { label: "À", value: compTo, set: setCompTo, placeholder: "client@example.com", type: "email" },
                 { label: "Objet", value: compSubject, set: setCompSubject, placeholder: "Sujet du message", type: "text" },
