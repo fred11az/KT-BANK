@@ -1145,6 +1145,9 @@ export default function InboxPage() {
               </button>
             </div>
 
+            {/* Scrollable body so no field is pushed off-screen on mobile */}
+            <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
+
             {/* From + To + Subject */}
             <div style={{ padding: "14px 20px 0", flexShrink: 0 }}>
               <div style={{ marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
@@ -1161,10 +1164,10 @@ export default function InboxPage() {
                 <input value={compRole} onChange={(e) => setCompRole(e.target.value)} placeholder="Intitulé affiché au client (ex: Account manager, Kontobetreuer…)"
                   style={{ flex: 1, height: 38, background: "#252836", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "white", fontSize: "0.85rem", padding: "0 12px", outline: "none" }} />
               </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 5, margin: "0 0 8px 44px" }}>
+              <div style={{ display: "flex", flexWrap: "nowrap", gap: 5, margin: "0 0 8px 44px", overflowX: "auto", paddingBottom: 2 }}>
                 {ROLE_PRESETS.map((r) => (
                   <button key={r} type="button" onClick={() => setCompRole(r)}
-                    style={{ background: compRole === r ? "rgba(0,95,45,0.35)" : "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, color: "rgba(255,255,255,0.7)", fontSize: "0.7rem", padding: "3px 10px", cursor: "pointer" }}>
+                    style={{ flexShrink: 0, whiteSpace: "nowrap", background: compRole === r ? "rgba(0,95,45,0.35)" : "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, color: "rgba(255,255,255,0.7)", fontSize: "0.7rem", padding: "3px 10px", cursor: "pointer" }}>
                     {r}
                   </button>
                 ))}
@@ -1200,7 +1203,7 @@ export default function InboxPage() {
 
             {!compRawMode ? (
               /* Rich editor */
-              <div style={{ flex: 1, overflow: "hidden", margin: "8px 20px 0", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, display: "flex", flexDirection: "column" }}>
+              <div style={{ overflow: "hidden", margin: "8px 20px 0", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, display: "flex", flexDirection: "column" }}>
                 <RichEditor
                   key={compEditorKey.current}
                   token={token}
@@ -1211,7 +1214,7 @@ export default function InboxPage() {
               </div>
             ) : (
               /* Paste a full HTML email → the client receives it rendered (not the code) */
-              <div style={{ flex: 1, overflow: "auto", margin: "8px 20px 0", display: "flex", flexDirection: "column", gap: 8 }}>
+              <div style={{ margin: "8px 20px 0", display: "flex", flexDirection: "column", gap: 8 }}>
                 <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.72rem", margin: 0, lineHeight: 1.5 }}>
                   Collez le code HTML de votre email. Le client le recevra <strong style={{ color: "#4CAF82" }}>mis en forme</strong> (il ne verra pas le code) — voir l&apos;aperçu en dessous.
                 </p>
@@ -1260,6 +1263,8 @@ export default function InboxPage() {
                   ))}
                 </div>
               )}
+            </div>
+            {/* end scrollable body */}
             </div>
 
             {/* Send button */}
