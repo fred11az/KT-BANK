@@ -144,8 +144,10 @@ type Thread = {
   unread: boolean;
   message_count: number;
   last_message_at: string;
+  system_email?: string | null;    // which KT system address this thread is on
   kt_email_messages?: Message[];   // present only for the fully-loaded open thread
 };
+type Sender = { id: string; email: string; label: string; active: boolean };
 
 /* ── Message HTML renderer ── */
 function MessageContent({ msg }: { msg: Message }) {
@@ -628,6 +630,10 @@ export default function InboxPage() {
   const replyEditorKey = useRef(0); // force remount after send
 
   // Compose fields
+  const [senders, setSenders] = useState<Sender[]>([]);
+  const [mailboxFilter, setMailboxFilter] = useState<string>("");   // "" = toutes
+  const [compFrom, setCompFrom] = useState("support@kt-bank-ag.com");
+  const [replyFrom, setReplyFrom] = useState("support@kt-bank-ag.com");
   const [compTo, setCompTo] = useState("");
   const [compSubject, setCompSubject] = useState("");
   const [compHtml, setCompHtml] = useState("");
@@ -701,6 +707,20 @@ export default function InboxPage() {
   }, [token, loadThreadMessages]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Load the system sender identities (for the "De" selector + filter tabs).
+  useEffect(() => {
+    if (!token) return;
+    fetch("/api/kt/admin/senders", { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (Array.isArray(d?.senders)) setSenders(d.senders); })
+      .catch(() => {});
+  }, [token]);
+
+  // When a thread opens, reply from the mailbox it belongs to by default.
+  useEffect(() => {
+    if (selected?.system_email) setReplyFrom(selected.system_email);
+  }, [selected?.id, selected?.system_email]);
 
   // Silent background refresh — light list poll + refresh the open thread only.
   const silentRefresh = useCallback(() => {
@@ -783,6 +803,7 @@ export default function InboxPage() {
         body: replyText, body_html: replyHtml,
         thread_id: selected.id,
         attachments: replyAttachments,
+        from_email: replyFrom,
       }),
     });
     setSending(false);
@@ -806,6 +827,7 @@ export default function InboxPage() {
         body_html: htmlToSend,
         attachments: compAttachments,
         raw: compRawMode,
+        from_email: compFrom,
       }),
     });
     setSending(false);
@@ -845,6 +867,10 @@ export default function InboxPage() {
     .slice()
     .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
 
+  const normMbx = (e?: string | null) => (e || "support@kt-bank-ag.com").toLowerCase();
+  const visibleThreads = mailboxFilter ? threads.filter((t) => normMbx(t.system_email) === mailboxFilter) : threads;
+  const senderLabel = (email?: string | null) => senders.find((s) => s.email.toLowerCase() === normMbx(email))?.label ?? (email || "support");
+
   const unreadCount = threads.filter((t) => t.unread).length;
   const showListPanel = !isMobile || !showChat;
   const showChatPanel = !isMobile || showChat;
@@ -882,15 +908,30 @@ export default function InboxPage() {
             </div>
           </div>
 
+          {/* Mailbox filter tabs (by system address) */}
+          {senders.filter((s) => s.active).length > 1 && (
+            <div style={{ display: "flex", gap: 6, padding: "8px 12px", overflowX: "auto", borderBottom: "1px solid rgba(255,255,255,0.06)", flexShrink: 0 }}>
+              {[{ email: "", label: "Toutes" }, ...senders.filter((s) => s.active).map((s) => ({ email: s.email, label: s.label.split(" — ")[0].split(" ")[0] }))].map((tab) => {
+                const on = mailboxFilter === tab.email;
+                return (
+                  <button key={tab.email || "all"} onClick={() => setMailboxFilter(tab.email)}
+                    style={{ flexShrink: 0, background: on ? "#005F2D" : "rgba(255,255,255,0.06)", border: "none", borderRadius: 20, color: on ? "white" : "rgba(255,255,255,0.5)", fontSize: "0.72rem", fontWeight: 600, padding: "5px 12px", cursor: "pointer", whiteSpace: "nowrap" }}>
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
           <div style={{ flex: 1, overflowY: "auto" }}>
             {loading ? (
               <p style={{ padding: 24, color: "rgba(255,255,255,0.3)", fontSize: "0.85rem", textAlign: "center" }}>Chargement…</p>
-            ) : threads.length === 0 ? (
+            ) : visibleThreads.length === 0 ? (
               <div style={{ padding: 48, textAlign: "center" }}>
                 <MessageSquare size={36} color="rgba(255,255,255,0.1)" style={{ display: "block", margin: "0 auto 12px" }} />
                 <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.85rem", margin: 0 }}>Aucun message</p>
               </div>
-            ) : threads.map((t) => {
+            ) : visibleThreads.map((t) => {
               const isActive = selected?.id === t.id && !isMobile;
               return (
                 <button key={t.id} onClick={() => selectThread(t)}
@@ -909,6 +950,11 @@ export default function InboxPage() {
                       <p style={{ color: t.unread ? "rgba(255,255,255,0.65)" : "rgba(255,255,255,0.38)", fontSize: "0.76rem", margin: "0 0 2px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                         {t.subject}
                       </p>
+                      {senders.filter((s) => s.active).length > 1 && !mailboxFilter && (
+                        <span style={{ display: "inline-block", background: "rgba(201,168,76,0.14)", color: "#C9A84C", fontSize: "0.62rem", fontWeight: 600, padding: "1px 7px", borderRadius: 10 }}>
+                          {senderLabel(t.system_email).split(" — ")[0].split(" ")[0]}
+                        </span>
+                      )}
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, flexShrink: 0 }}>
                       <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.65rem", margin: 0 }}>
@@ -1000,6 +1046,17 @@ export default function InboxPage() {
 
               {/* Reply editor */}
               <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", flexShrink: 0, display: "flex", flexDirection: "column" }}>
+                {senders.filter((s) => s.active).length > 1 && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "8px 14px 0" }}>
+                    <span style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.72rem", flexShrink: 0 }}>Répondre en tant que</span>
+                    <select value={replyFrom} onChange={(e) => setReplyFrom(e.target.value)}
+                      style={{ flex: 1, height: 32, background: "#252836", border: "1px solid rgba(0,95,45,0.4)", borderRadius: 8, color: "white", fontSize: "0.78rem", padding: "0 8px", outline: "none" }}>
+                      {senders.filter((s) => s.active).map((s) => (
+                        <option key={s.id} value={s.email}>{s.label.split(" — ")[0]} — {s.email}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 <div style={{ border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, margin: "10px 14px 6px", overflow: "hidden", background: "#1A1D27" }}>
                   <RichEditor
                     key={replyEditorKey.current}
@@ -1078,8 +1135,17 @@ export default function InboxPage() {
               </button>
             </div>
 
-            {/* To + Subject */}
+            {/* From + To + Subject */}
             <div style={{ padding: "14px 20px 0", flexShrink: 0 }}>
+              <div style={{ marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.78rem", width: 36, flexShrink: 0 }}>De</span>
+                <select value={compFrom} onChange={(e) => setCompFrom(e.target.value)}
+                  style={{ flex: 1, height: 38, background: "#252836", border: "1px solid rgba(0,95,45,0.4)", borderRadius: 8, color: "white", fontSize: "0.85rem", padding: "0 10px", outline: "none" }}>
+                  {(senders.filter((s) => s.active).length ? senders.filter((s) => s.active) : [{ id: "d", email: "support@kt-bank-ag.com", label: "Support KT Bank", active: true }]).map((s) => (
+                    <option key={s.id} value={s.email}>{s.label} — {s.email}</option>
+                  ))}
+                </select>
+              </div>
               {[
                 { label: "À", value: compTo, set: setCompTo, placeholder: "client@example.com", type: "email" },
                 { label: "Objet", value: compSubject, set: setCompSubject, placeholder: "Sujet du message", type: "text" },

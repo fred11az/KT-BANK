@@ -32,11 +32,22 @@ function getResend() {
 
 const FROM = () => "KT Bank AG <support@kt-bank-ag.com>";
 
+// Only addresses on the verified domain may be used as a sender.
+const SENDER_DOMAIN = "kt-bank-ag.com";
+export function safeFrom(from?: string | null): string {
+  if (!from) return FROM();
+  // Accept "Label <email>" or a bare email; enforce the verified domain.
+  const emailMatch = from.match(/<([^>]+)>/);
+  const email = (emailMatch ? emailMatch[1] : from).trim().toLowerCase();
+  if (!email.endsWith(`@${SENDER_DOMAIN}`)) return FROM();
+  return from.includes("<") ? from : `KT Bank AG <${email}>`;
+}
+
 type Attachment = { filename: string; path: string };
 
-export async function send(to: string, subject: string, html: string, attachments?: Attachment[]) {
+export async function send(to: string, subject: string, html: string, attachments?: Attachment[], from?: string) {
   try {
-    const payload: Record<string, unknown> = { from: FROM(), to, subject, html };
+    const payload: Record<string, unknown> = { from: safeFrom(from), to, subject, html };
     if (attachments?.length) payload.attachments = attachments;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await getResend().emails.send(payload as any);

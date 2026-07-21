@@ -1,11 +1,12 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAdmin } from "../layout";
-import { Settings, Save, Euro, Building2, RefreshCw, Check, Bitcoin, Plus, Trash2 } from "lucide-react";
+import { Settings, Save, Euro, Building2, RefreshCw, Check, Bitcoin, Plus, Trash2, Mail, Power } from "lucide-react";
 
 type FeePayment = { name: string; iban: string; bic: string; bank: string; reference: string };
 type TransferFee = { amount: number; currency: string };
 type CryptoWallet = { coin: string; label: string; network: string; address: string; qr_url?: string | null };
+type Sender = { id: string; email: string; label: string; active: boolean };
 
 const CRYPTO_PRESETS: { coin: string; label: string; network: string }[] = [
   { coin: "btc", label: "Bitcoin", network: "Bitcoin" },
@@ -38,6 +39,13 @@ export default function SettingsPage() {
   const [payment, setPayment] = useState<FeePayment>({ name: "", iban: "", bic: "", bank: "", reference: "FRAIS-VIREMENT" });
   const [wallets, setWallets] = useState<CryptoWallet[]>([]);
 
+  // System sender identities
+  const [senders, setSenders] = useState<Sender[]>([]);
+  const [newEmail, setNewEmail] = useState("");
+  const [newLabel, setNewLabel] = useState("");
+  const [senderErr, setSenderErr] = useState("");
+  const [senderBusy, setSenderBusy] = useState(false);
+
   useEffect(() => {
     fetch("/api/kt/admin/settings", { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
@@ -48,6 +56,39 @@ export default function SettingsPage() {
         setLoading(false);
       });
   }, [token]);
+
+  const loadSenders = useCallback(() => {
+    fetch("/api/kt/admin/senders", { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (Array.isArray(d?.senders)) setSenders(d.senders); })
+      .catch(() => {});
+  }, [token]);
+  useEffect(() => { loadSenders(); }, [loadSenders]);
+
+  async function addSender() {
+    setSenderErr("");
+    if (!newEmail.trim() || !newLabel.trim()) { setSenderErr("Adresse et libellé requis."); return; }
+    setSenderBusy(true);
+    const res = await fetch("/api/kt/admin/senders", {
+      method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ email: newEmail.trim(), label: newLabel.trim() }),
+    });
+    setSenderBusy(false);
+    if (!res.ok) { const d = await res.json().catch(() => ({})); setSenderErr(d.error || "Ajout échoué"); return; }
+    setNewEmail(""); setNewLabel(""); loadSenders();
+  }
+  async function toggleSender(s: Sender) {
+    await fetch("/api/kt/admin/senders", {
+      method: "PATCH", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ id: s.id, active: !s.active }),
+    });
+    loadSenders();
+  }
+  async function removeSender(s: Sender) {
+    if (!window.confirm(`Supprimer l'adresse ${s.email} ?`)) return;
+    await fetch(`/api/kt/admin/senders?id=${s.id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+    loadSenders();
+  }
 
   function addWallet(preset?: { coin: string; label: string; network: string }) {
     setWallets((w) => [...w, preset ? { ...preset, address: "" } : { coin: "", label: "", network: "", address: "" }]);
@@ -83,6 +124,53 @@ export default function SettingsPage() {
         <div>
           <h1 style={{ color: "white", fontWeight: 800, fontSize: "1.2rem", margin: 0 }}>Paramètres</h1>
           <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.8rem", margin: 0 }}>Frais de virement et coordonnées de paiement</p>
+        </div>
+      </div>
+
+      {/* Sender identities */}
+      <div style={{ background: "#1A1D27", borderRadius: 14, border: "1px solid rgba(255,255,255,0.06)", marginBottom: 20, overflow: "hidden" }}>
+        <div style={{ padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", gap: 8 }}>
+          <Mail size={15} color="#4CAF82" />
+          <p style={{ color: "white", fontWeight: 600, fontSize: "0.88rem", margin: 0 }}>Adresses expéditrices (messagerie)</p>
+        </div>
+        <div style={{ padding: "16px 20px" }}>
+          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.8rem", marginBottom: 16, lineHeight: 1.6 }}>
+            Les adresses depuis lesquelles vous pouvez envoyer des emails aux clients. Uniquement le domaine <strong style={{ color: "#4CAF82" }}>@kt-bank-ag.com</strong> (vérifié sur Resend). Les réponses des clients sont rangées par adresse dans la messagerie.
+          </p>
+
+          {senders.map((s) => (
+            <div key={s.id} style={{ display: "flex", alignItems: "center", gap: 10, background: "#0F1117", borderRadius: 10, border: "1px solid rgba(255,255,255,0.06)", padding: "10px 14px", marginBottom: 8 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ color: s.active ? "white" : "rgba(255,255,255,0.4)", fontWeight: 600, fontSize: "0.84rem", margin: 0 }}>{s.label}</p>
+                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.76rem", margin: "2px 0 0", fontFamily: "monospace" }}>{s.email}</p>
+              </div>
+              <button onClick={() => toggleSender(s)} title={s.active ? "Désactiver" : "Activer"}
+                style={{ background: s.active ? "rgba(74,222,128,0.12)" : "rgba(255,255,255,0.06)", border: "none", borderRadius: 8, padding: "6px 8px", cursor: "pointer", color: s.active ? "#4ADE80" : "rgba(255,255,255,0.35)", display: "flex", alignItems: "center", gap: 5, fontSize: "0.72rem", fontWeight: 600 }}>
+                <Power size={12} /> {s.active ? "Actif" : "Inactif"}
+              </button>
+              <button onClick={() => removeSender(s)} title="Supprimer"
+                style={{ background: "rgba(248,113,113,0.12)", border: "none", borderRadius: 8, padding: "6px 8px", cursor: "pointer", color: "#F87171", display: "flex" }}>
+                <Trash2 size={13} />
+              </button>
+            </div>
+          ))}
+
+          <div style={{ marginTop: 14, borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 14 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 8 }}>
+              <input value={newLabel} onChange={(e) => setNewLabel(e.target.value)} placeholder="Libellé (ex: David Lenian — Gestionnaire)"
+                style={{ height: 40, background: "#252836", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 9, color: "white", fontSize: "0.84rem", padding: "0 12px", boxSizing: "border-box", outline: "none" }} />
+              <input value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="prenom.nom@kt-bank-ag.com"
+                style={{ height: 40, background: "#252836", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 9, color: "white", fontSize: "0.84rem", padding: "0 12px", boxSizing: "border-box", outline: "none", fontFamily: "monospace" }} />
+            </div>
+            {senderErr && <p style={{ color: "#F87171", fontSize: "0.78rem", margin: "0 0 8px" }}>{senderErr}</p>}
+            <button onClick={addSender} disabled={senderBusy}
+              style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#005F2D", border: "none", borderRadius: 9, color: "white", fontWeight: 700, fontSize: "0.82rem", padding: "9px 16px", cursor: senderBusy ? "not-allowed" : "pointer", opacity: senderBusy ? 0.6 : 1 }}>
+              <Plus size={14} /> {senderBusy ? "Ajout…" : "Ajouter une adresse"}
+            </button>
+            <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.72rem", margin: "10px 0 0", lineHeight: 1.5 }}>
+              ⚠ Pour recevoir les réponses à une nouvelle adresse, elle doit aussi être routée vers le Worker dans Cloudflare → Email Routing (ou activer le catch-all).
+            </p>
+          </div>
         </div>
       </div>
 

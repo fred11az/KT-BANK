@@ -85,9 +85,13 @@ export async function POST(req: NextRequest) {
     const clientName = from.includes("<")
       ? from.split("<")[0].trim().replace(/"/g, "")
       : from.split("@")[0];
+    // The KT system address this client wrote to (groups replies by mailbox).
+    const toRaw = String(to ?? "");
+    const toMatch = toRaw.match(/<([^>]+)>/);
+    const systemEmail = (toMatch ? toMatch[1] : toRaw).trim().toLowerCase() || "support@kt-bank-ag.com";
     const { data: thread } = await supabase
       .from("kt_email_threads")
-      .insert({ subject, client_email: from, client_name: clientName, status: "open", unread: true })
+      .insert({ subject, client_email: from, client_name: clientName, status: "open", unread: true, system_email: systemEmail })
       .select("id").single();
     threadId = thread?.id ?? null;
   }

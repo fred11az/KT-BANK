@@ -25,11 +25,14 @@ export async function GET(req: NextRequest) {
 
   // Lightweight list: thread metadata only (no message bodies) — keeps the
   // polling payload small so it doesn't slow the app / saturate the DB.
-  const { data, error } = await supabase
+  const mailbox = new URL(req.url).searchParams.get("mailbox");
+  let listQ = supabase
     .from("kt_email_threads")
-    .select("id, subject, client_email, client_name, status, unread, message_count, last_message_at")
+    .select("id, subject, client_email, client_name, status, unread, message_count, last_message_at, system_email")
     .order("last_message_at", { ascending: false })
     .limit(50);
+  if (mailbox) listQ = listQ.eq("system_email", mailbox);
+  const { data, error } = await listQ;
   if (error) return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   return NextResponse.json({ threads: data });
 }
@@ -54,14 +57,31 @@ type AttachmentMeta = { url: string; name: string; type: string };
 export async function POST(req: NextRequest) {
   if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   const supabase = getSupabase();
-  const { to, subject, body, body_html, thread_id, client_name, attachments, raw } = await req.json() as {
+  const { to, subject, body, body_html, thread_id, client_name, attachments, raw, from_email } = await req.json() as {
     to: string; subject: string; body?: string; body_html?: string;
     thread_id?: string; client_name?: string;
     attachments?: AttachmentMeta[];
     raw?: boolean;   // when true, body_html is a complete email — send it verbatim
+    from_email?: string;  // chosen system sender address
   };
   if (!to || !subject || (!body && !body_html))
     return NextResponse.json({ error: "Champs manquants" }, { status: 400 });
+
+  // Resolve the chosen sender against active identities (security: only known
+  // addresses may be used as From). Falls back to the default support mailbox.
+  let senderEmail = "support@kt-bank-ag.com";
+  let fromHeader: string | undefined;
+  if (from_email) {
+    const { data: ident } = await supabase
+      .from("kt_sender_identities")
+      .select("email, label, active")
+      .eq("email", String(from_email).toLowerCase())
+      .maybeSingle();
+    if (ident?.active) {
+      senderEmail = ident.email;
+      fromHeader = `${ident.label} <${ident.email}>`;
+    }
+  }
 
   // Append attachment section to HTML body for thread view display
   let storedHtml = body_html ?? null;
@@ -84,6 +104,7 @@ export async function POST(req: NextRequest) {
         client_email: to,
         client_name: client_name ?? to.split("@")[0],
         status: "open",
+        system_email: senderEmail,
         last_message_at: new Date().toISOString(),
       })
       .select("id")
@@ -99,7 +120,7 @@ export async function POST(req: NextRequest) {
     await supabase.from("kt_email_messages").insert({
       thread_id: threadId,
       direction: "outbound",
-      from_email: "support@kt-bank-ag.com",
+      from_email: senderEmail,
       to_email: to,
       subject,
       body_text: body ?? "",
@@ -113,7 +134,7 @@ export async function POST(req: NextRequest) {
     ? body_html
     : bankAdminMessageEmail({ subject, body: body ?? "", body_html: storedHtml ?? undefined }).html;
   const resendAttachments = attachments?.map((a) => ({ filename: a.name, path: a.url }));
-  await sendEmail(to, subject, emailHtml, resendAttachments);
+  await sendEmail(to, subject, emailHtml, resendAttachments, fromHeader);
 
   return NextResponse.json({ ok: true });
 }
