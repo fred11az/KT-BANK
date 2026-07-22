@@ -23,7 +23,7 @@ const base = (content: string, lang: string = "de") => `<!DOCTYPE html>
   <!-- Logo header -->
   <tr>
     <td align="center" style="background:linear-gradient(135deg,#002d15,#005F2D);padding:24px 32px;">
-      <img src="${LOGO_URL}" alt="KT Bank AG" width="150" style="display:block;max-width:150px;height:auto;filter:brightness(0) invert(1);" onerror="this.style.display='none'"/>
+      <img src="${LOGO_URL}" alt="KT Bank AG" width="140" height="40" style="display:block;max-width:140px;height:auto;" onerror="this.style.display='none'"/>
     </td>
   </tr>
 
