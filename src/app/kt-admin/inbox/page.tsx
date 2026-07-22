@@ -16,6 +16,7 @@ import Highlight from "@tiptap/extension-highlight";
 import Link from "@tiptap/extension-link";
 import ImageExt from "@tiptap/extension-image";
 import { Node, mergeAttributes } from "@tiptap/core";
+import { COMPOSER_PRESETS } from "@/lib/email/composer-presets";
 
 /* ── Attachment type ── */
 type EmailAttachment = {
@@ -1199,6 +1200,22 @@ export default function InboxPage() {
                 style={{ flex: 1, height: 32, borderRadius: 8, border: "none", cursor: "pointer", fontSize: "0.76rem", fontWeight: 600, background: compRawMode ? "#005F2D" : "#252836", color: compRawMode ? "white" : "rgba(255,255,255,0.5)", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
                 <Code2 size={12} /> Coller un email HTML
               </button>
+            </div>
+            {/* Ready-made branded templates */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "8px 20px 0" }}>
+              <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.72rem", flexShrink: 0 }}>Modèle brandé</span>
+              <select value=""
+                onChange={(e) => {
+                  const p = COMPOSER_PRESETS.find((x) => x.id === e.target.value);
+                  if (!p) return;
+                  setCompRawMode(true);
+                  setCompRawHtml(p.html);
+                  if (!compSubject.trim()) setCompSubject(p.subject);
+                }}
+                style={{ flex: 1, height: 32, background: "#252836", border: "1px solid rgba(201,168,76,0.4)", borderRadius: 8, color: "white", fontSize: "0.76rem", padding: "0 8px", outline: "none" }}>
+                <option value="">— Choisir un modèle (avec logo) —</option>
+                {COMPOSER_PRESETS.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
             </div>
 
             {!compRawMode ? (
