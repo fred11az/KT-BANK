@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useAdmin } from "../../layout";
 import { useParams, useRouter } from "next/navigation";
-import { ChevronLeft, User, Briefcase, Home, Heart, Shield, CreditCard, Building, Plus, Minus, PowerOff, Power, ArrowLeftRight, Check, X, TrendingUp, TrendingDown, History, Euro, RotateCcw, Trash2 } from "lucide-react";
+import { ChevronLeft, User, Briefcase, Home, Heart, Shield, CreditCard, Building, Plus, Minus, PowerOff, Power, ArrowLeftRight, Check, X, TrendingUp, TrendingDown, History, Euro, RotateCcw, Trash2, Mail } from "lucide-react";
 
 type Profile = Record<string, unknown>;
 type FeePayment = { name: string; iban: string; bic: string; bank: string; reference: string };
@@ -330,6 +330,15 @@ export default function ClientDetailPage() {
           {isSuspended && <span style={{ display: "inline-flex", marginTop: 6, background: "rgba(248,113,113,0.15)", color: "#F87171", fontSize: "0.72rem", fontWeight: 700, padding: "3px 10px", borderRadius: 20 }}>⚠ Compte désactivé</span>}
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+          <button onClick={() => {
+              const email = String(profile.email ?? "");
+              const name = `${String(profile.prenom ?? "")} ${String(profile.nom ?? "")}`.trim();
+              router.push(`/kt-admin/inbox?to=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}`);
+            }}
+            disabled={!profile.email}
+            style={{ height: 38, padding: "0 14px", background: "rgba(0,95,45,0.15)", color: "#4ADE80", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 8, fontSize: "0.82rem", fontWeight: 600, cursor: profile.email ? "pointer" : "not-allowed", opacity: profile.email ? 1 : 0.5, display: "flex", alignItems: "center", gap: 6 }}>
+            <Mail size={14} /> Envoyer un mail
+          </button>
           <button onClick={() => setDeleteConfirm(true)}
             style={{ height: 38, padding: "0 14px", background: "rgba(248,113,113,0.08)", color: "#F87171", border: "1px solid rgba(248,113,113,0.25)", borderRadius: 8, fontSize: "0.82rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
             <Trash2 size={14} /> Supprimer

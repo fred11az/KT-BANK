@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useAdmin } from "../layout";
 import {
   Send, RefreshCw, Edit3, X, ArrowLeft, MessageSquare,
@@ -613,8 +614,10 @@ function RichEditor({
 }
 
 /* ── Main page ── */
-export default function InboxPage() {
+function InboxPageInner() {
   const { token } = useAdmin();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [threads, setThreads] = useState<Thread[]>([]);
   const [selected, setSelected] = useState<Thread | null>(null);
   const [sending, setSending] = useState(false);
@@ -724,6 +727,20 @@ export default function InboxPage() {
   useEffect(() => {
     if (selected?.system_email) setReplyFrom(selected.system_email);
   }, [selected?.id, selected?.system_email]);
+
+  // Deep link from a client's profile page (?to=email&name=…&subject=…):
+  // open the composer pre-filled so the admin only has to write the message.
+  useEffect(() => {
+    const to = searchParams.get("to");
+    if (!to) return;
+    setCompTo(to);
+    const name = searchParams.get("name");
+    setCompSubject(searchParams.get("subject") || (name ? `KT Bank AG — ${name}` : ""));
+    setComposing(true);
+    // Clear the query params so a refresh doesn't reopen/reset the composer.
+    router.replace("/kt-admin/inbox");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   // Silent background refresh — light list poll + refresh the open thread only.
   const silentRefresh = useCallback(() => {
@@ -1284,5 +1301,13 @@ export default function InboxPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function InboxPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: 24, color: "rgba(255,255,255,0.4)" }}>Chargement…</div>}>
+      <InboxPageInner />
+    </Suspense>
   );
 }
