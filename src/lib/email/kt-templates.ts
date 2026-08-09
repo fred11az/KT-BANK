@@ -14,7 +14,7 @@
  */
 
 export type TplLang = "de" | "fr" | "en" | "ar" | "tr" | "es" | "it" | "pt" | "nl";
-export type TplId = "welcome" | "promo_islamic" | "contact_manager" | "financing_proposal";
+export type TplId = "welcome" | "promo_islamic" | "contact_manager" | "financing_proposal" | "document_request";
 
 /* ── Brand constants ── */
 const LOGO_URL = "https://www.kt-bank-ag.com/kt-logo.png";
@@ -724,6 +724,191 @@ ${row(c.kValidity, `${v.validityDays} ${c.days}`)}
   };
 }
 
+/* ═════════════ 5. DOCUMENT REQUEST (credit application) ═════════════ */
+type DocReqC = {
+  subject: string; h1: string; subtitle: string; intro: string;
+  docsTitle: string; docs: [string, string, string];
+  optLabel: string; optDoc: string;
+  how: string; cta: string; closing: string;
+};
+
+const DOCREQ: Record<TplLang, DocReqC> = {
+  fr: {
+    subject: "Documents requis pour votre demande de financement",
+    h1: "Documents requis", subtitle: "Votre demande de financement",
+    intro: "Nous avons bien reçu votre demande de financement et vous en remercions. Afin de poursuivre l'étude de votre dossier, nous vous invitons à nous transmettre les documents suivants.",
+    docsTitle: "📎 Documents à fournir",
+    docs: [
+      "<strong>Justificatif d'identité</strong> — carte d'identité ou passeport en cours de validité (inutile si vous l'avez déjà téléversé dans votre Espace Client)",
+      "<strong>Relevé de compte</strong> — vos relevés bancaires des trois derniers mois",
+      "<strong>Preuve de revenus réguliers</strong> — bulletins de salaire, attestation d'employeur ou avis d'imposition",
+    ],
+    optLabel: "Optionnel",
+    optDoc: "<strong>Facture pro forma ou devis</strong> du bien à financer (véhicule, équipement, projet…), si vous en disposez",
+    how: "Vous pouvez téléverser ces documents directement dans votre Espace Client ou, plus simplement, répondre à cet e-mail en les joignant.",
+    cta: "Téléverser mes documents",
+    closing: "Dès réception, nous poursuivrons l'étude de votre dossier dans les meilleurs délais. {MANAGER_NAME} reste à votre entière disposition pour toute question.",
+  },
+  de: {
+    subject: "Erforderliche Unterlagen für Ihren Finanzierungsantrag",
+    h1: "Erforderliche Unterlagen", subtitle: "Ihr Finanzierungsantrag",
+    intro: "Wir haben Ihren Finanzierungsantrag erhalten und bedanken uns dafür. Um die Prüfung Ihres Antrags fortzusetzen, bitten wir Sie, uns die folgenden Unterlagen zu übermitteln.",
+    docsTitle: "📎 Einzureichende Unterlagen",
+    docs: [
+      "<strong>Identitätsnachweis</strong> — gültiger Personalausweis oder Reisepass (nicht erforderlich, wenn Sie ihn bereits in Ihrem Kundenbereich hochgeladen haben)",
+      "<strong>Kontoauszüge</strong> — Ihre Kontoauszüge der letzten drei Monate",
+      "<strong>Nachweis regelmäßiger Einkünfte</strong> — Lohnabrechnungen, Arbeitgeberbescheinigung oder Steuerbescheid",
+    ],
+    optLabel: "Optional",
+    optDoc: "<strong>Pro-forma-Rechnung oder Kostenangebot</strong> für das zu finanzierende Objekt (Fahrzeug, Ausstattung, Projekt …), sofern vorhanden",
+    how: "Sie können diese Unterlagen direkt in Ihrem Kundenbereich hochladen oder einfach auf diese E-Mail antworten und sie als Anhang beifügen.",
+    cta: "Unterlagen hochladen",
+    closing: "Nach Erhalt setzen wir die Prüfung Ihres Antrags zeitnah fort. {MANAGER_NAME} steht Ihnen für Fragen jederzeit gerne zur Verfügung.",
+  },
+  en: {
+    subject: "Documents required for your financing application",
+    h1: "Required Documents", subtitle: "Your financing application",
+    intro: "We have received your financing application and thank you for it. In order to continue reviewing your file, please send us the following documents.",
+    docsTitle: "📎 Documents to provide",
+    docs: [
+      "<strong>Proof of identity</strong> — valid ID card or passport (not needed if you have already uploaded it in your Client Area)",
+      "<strong>Bank statements</strong> — your account statements for the last three months",
+      "<strong>Proof of regular income</strong> — payslips, employer's certificate or tax assessment",
+    ],
+    optLabel: "Optional",
+    optDoc: "<strong>Pro forma invoice or quotation</strong> for the item to be financed (vehicle, equipment, project…), if available",
+    how: "You can upload these documents directly in your Client Area, or simply reply to this email with them attached.",
+    cta: "Upload my documents",
+    closing: "Once received, we will continue reviewing your file as quickly as possible. {MANAGER_NAME} remains at your disposal for any questions.",
+  },
+  ar: {
+    subject: "المستندات المطلوبة لطلب التمويل الخاص بكم",
+    h1: "المستندات المطلوبة", subtitle: "طلب التمويل الخاص بكم",
+    intro: "لقد استلمنا طلب التمويل الخاص بكم ونشكركم عليه. لمتابعة دراسة ملفكم، نرجو منكم تزويدنا بالمستندات التالية.",
+    docsTitle: "📎 المستندات المطلوب تقديمها",
+    docs: [
+      "<strong>إثبات الهوية</strong> — بطاقة هوية أو جواز سفر ساري المفعول (لا حاجة لذلك إذا كنتم قد حمّلتموه مسبقاً في منطقة العملاء)",
+      "<strong>كشف الحساب البنكي</strong> — كشوف حسابكم لآخر ثلاثة أشهر",
+      "<strong>إثبات دخل منتظم</strong> — قسائم الراتب أو شهادة من صاحب العمل أو الإقرار الضريبي",
+    ],
+    optLabel: "اختياري",
+    optDoc: "<strong>فاتورة مبدئية (Pro forma) أو عرض سعر</strong> للأصل المطلوب تمويله (سيارة، معدات، مشروع…)، إن توفّر",
+    how: "يمكنكم تحميل هذه المستندات مباشرة في منطقة العملاء، أو ببساطة الرد على هذا البريد الإلكتروني وإرفاقها.",
+    cta: "تحميل مستنداتي",
+    closing: "بعد الاستلام، سنواصل دراسة ملفكم في أسرع وقت ممكن. ويبقى {MANAGER_NAME} رهن إشارتكم لأي استفسار.",
+  },
+  tr: {
+    subject: "Finansman başvurunuz için gerekli belgeler",
+    h1: "Gerekli Belgeler", subtitle: "Finansman başvurunuz",
+    intro: "Finansman başvurunuzu aldık, teşekkür ederiz. Dosyanızın incelenmesine devam edebilmemiz için aşağıdaki belgeleri bize iletmenizi rica ederiz.",
+    docsTitle: "📎 İletilmesi gereken belgeler",
+    docs: [
+      "<strong>Kimlik belgesi</strong> — geçerli kimlik kartı veya pasaport (müşteri alanınıza daha önce yüklediyseniz gerekmez)",
+      "<strong>Hesap dökümü</strong> — son üç aya ait banka hesap ekstreleriniz",
+      "<strong>Düzenli gelir belgesi</strong> — maaş bordroları, işveren yazısı veya vergi beyannamesi",
+    ],
+    optLabel: "İsteğe bağlı",
+    optDoc: "<strong>Proforma fatura veya teklif</strong> — finanse edilecek varlık için (taşıt, ekipman, proje…), mevcutsa",
+    how: "Bu belgeleri doğrudan müşteri alanınıza yükleyebilir veya bu e-postayı yanıtlayarak ek olarak gönderebilirsiniz.",
+    cta: "Belgelerimi yükle",
+    closing: "Belgeleri aldıktan sonra dosyanızın incelenmesine en kısa sürede devam edeceğiz. Sorularınız için {MANAGER_NAME} her zaman hizmetinizdedir.",
+  },
+  es: {
+    subject: "Documentos necesarios para su solicitud de financiación",
+    h1: "Documentos Necesarios", subtitle: "Su solicitud de financiación",
+    intro: "Hemos recibido su solicitud de financiación y le agradecemos su confianza. Para continuar con el estudio de su expediente, le rogamos que nos envíe los siguientes documentos.",
+    docsTitle: "📎 Documentos a aportar",
+    docs: [
+      "<strong>Documento de identidad</strong> — DNI o pasaporte en vigor (no es necesario si ya lo ha subido en su Área de Cliente)",
+      "<strong>Extractos bancarios</strong> — sus extractos de cuenta de los últimos tres meses",
+      "<strong>Justificante de ingresos regulares</strong> — nóminas, certificado de la empresa o declaración de la renta",
+    ],
+    optLabel: "Opcional",
+    optDoc: "<strong>Factura pro forma o presupuesto</strong> del bien a financiar (vehículo, equipamiento, proyecto…), si dispone de él",
+    how: "Puede subir estos documentos directamente en su Área de Cliente o, más sencillo, responder a este correo adjuntándolos.",
+    cta: "Subir mis documentos",
+    closing: "Una vez recibidos, continuaremos con el estudio de su expediente lo antes posible. {MANAGER_NAME} queda a su disposición para cualquier consulta.",
+  },
+  it: {
+    subject: "Documenti necessari per la sua richiesta di finanziamento",
+    h1: "Documenti Necessari", subtitle: "La sua richiesta di finanziamento",
+    intro: "Abbiamo ricevuto la sua richiesta di finanziamento e la ringraziamo. Per proseguire l'esame della sua pratica, la invitiamo a trasmetterci i seguenti documenti.",
+    docsTitle: "📎 Documenti da fornire",
+    docs: [
+      "<strong>Documento d'identità</strong> — carta d'identità o passaporto in corso di validità (non necessario se lo ha già caricato nella sua Area Clienti)",
+      "<strong>Estratti conto</strong> — i suoi estratti conto degli ultimi tre mesi",
+      "<strong>Prova di redditi regolari</strong> — buste paga, attestazione del datore di lavoro o dichiarazione dei redditi",
+    ],
+    optLabel: "Facoltativo",
+    optDoc: "<strong>Fattura pro forma o preventivo</strong> del bene da finanziare (veicolo, attrezzatura, progetto…), se disponibile",
+    how: "Può caricare questi documenti direttamente nella sua Area Clienti oppure, più semplicemente, rispondere a questa e-mail allegandoli.",
+    cta: "Carica i miei documenti",
+    closing: "Alla ricezione, proseguiremo l'esame della sua pratica nel più breve tempo possibile. {MANAGER_NAME} resta a sua disposizione per qualsiasi domanda.",
+  },
+  pt: {
+    subject: "Documentos necessários para o seu pedido de financiamento",
+    h1: "Documentos Necessários", subtitle: "O seu pedido de financiamento",
+    intro: "Recebemos o seu pedido de financiamento e agradecemos a sua confiança. Para prosseguir com a análise do seu processo, solicitamos o envio dos seguintes documentos.",
+    docsTitle: "📎 Documentos a apresentar",
+    docs: [
+      "<strong>Documento de identificação</strong> — cartão de cidadão ou passaporte válido (não é necessário se já o carregou na sua Área de Cliente)",
+      "<strong>Extratos bancários</strong> — os seus extratos de conta dos últimos três meses",
+      "<strong>Comprovativo de rendimentos regulares</strong> — recibos de vencimento, declaração da entidade patronal ou declaração de IRS",
+    ],
+    optLabel: "Opcional",
+    optDoc: "<strong>Fatura pro forma ou orçamento</strong> do bem a financiar (veículo, equipamento, projeto…), se disponível",
+    how: "Pode carregar estes documentos diretamente na sua Área de Cliente ou, mais simplesmente, responder a este e-mail anexando-os.",
+    cta: "Carregar os meus documentos",
+    closing: "Após a receção, prosseguiremos com a análise do seu processo com a maior brevidade. {MANAGER_NAME} permanece à sua disposição para qualquer questão.",
+  },
+  nl: {
+    subject: "Benodigde documenten voor uw financieringsaanvraag",
+    h1: "Benodigde Documenten", subtitle: "Uw financieringsaanvraag",
+    intro: "Wij hebben uw financieringsaanvraag ontvangen en danken u daarvoor. Om de beoordeling van uw dossier voort te zetten, verzoeken wij u ons de volgende documenten toe te sturen.",
+    docsTitle: "📎 Aan te leveren documenten",
+    docs: [
+      "<strong>Identiteitsbewijs</strong> — geldig identiteitsbewijs of paspoort (niet nodig als u dit al in uw klantomgeving hebt geüpload)",
+      "<strong>Rekeningafschriften</strong> — uw bankafschriften van de afgelopen drie maanden",
+      "<strong>Bewijs van regelmatig inkomen</strong> — loonstroken, werkgeversverklaring of belastingaanslag",
+    ],
+    optLabel: "Optioneel",
+    optDoc: "<strong>Pro forma factuur of prijsopgave</strong> van het te financieren object (voertuig, apparatuur, project…), indien beschikbaar",
+    how: "U kunt deze documenten rechtstreeks in uw klantomgeving uploaden of eenvoudig op deze e-mail antwoorden met de bijlagen.",
+    cta: "Mijn documenten uploaden",
+    closing: "Na ontvangst zetten wij de beoordeling van uw dossier zo snel mogelijk voort. {MANAGER_NAME} blijft tot uw beschikking voor vragen.",
+  },
+};
+
+function renderDocRequest(lang: TplLang, clientName: string, managerName: string): { subject: string; html: string } {
+  const c = DOCREQ[lang];
+  const content = `            <div class="greeting">${HELLO[lang]} ${clientName},</div>
+            <div class="message">
+                ${c.intro}
+            </div>
+            <div class="features">
+                <div><strong>${c.docsTitle}</strong></div>
+                <div class="feature">1. ${c.docs[0]}</div>
+                <div class="feature">2. ${c.docs[1]}</div>
+                <div class="feature">3. ${c.docs[2]}</div>
+            </div>
+            <div class="benefits">
+                <div class="benefit"><span style="display:inline-block;background:${GOLD};color:#ffffff;font-size:11px;font-weight:bold;padding:2px 8px;border-radius:10px;margin-bottom:6px;">${c.optLabel}</span><br/>${c.optDoc}</div>
+            </div>
+            <div class="message">
+                ${c.how}
+            </div>
+            <div style="text-align: center; margin: 20px 0;">
+                <a href="${PORTAL_URL}" class="cta-button">${c.cta}</a>
+            </div>
+            <div class="message">
+                ${c.closing.replace(/\{MANAGER_NAME\}/g, managerName)}
+            </div>`;
+  return {
+    subject: c.subject,
+    html: shell({ lang, title: c.subject, h1: c.h1, subtitle: c.subtitle, content, footer: FOOTER[lang] }),
+  };
+}
+
 /* ══════════════════════ Public API ══════════════════════ */
 
 /** Variables each template needs (drives the dynamic form in the admin UI). */
@@ -733,6 +918,7 @@ export const KT_TEMPLATES: {
   { id: "welcome", name: "Email de bienvenue", vars: ["CLIENT_NAME"] },
   { id: "promo_islamic", name: "Promotion — Financement islamique 0 %", vars: ["CLIENT_NAME"] },
   { id: "contact_manager", name: "Contact gestionnaire (WhatsApp)", vars: ["CLIENT_NAME", "MANAGER_NAME"] },
+  { id: "document_request", name: "Demande de documents (dossier de crédit)", vars: ["CLIENT_NAME", "MANAGER_NAME"] },
   { id: "financing_proposal", name: "Proposition de financement", vars: ["CLIENT_NAME", "MANAGER_NAME", "LOAN_AMOUNT", "DURATION", "MONTHLY", "VALIDITY_DAYS"] },
 ];
 
@@ -772,6 +958,8 @@ export function renderKtTemplate(id: TplId, lang: TplLang, vars: TplVars = {}): 
       return renderPromo(lang, clientName);
     case "contact_manager":
       return renderManager(lang, clientName, managerName);
+    case "document_request":
+      return renderDocRequest(lang, clientName, managerName);
     case "financing_proposal":
       return renderProposal(lang, {
         clientName, managerName,
