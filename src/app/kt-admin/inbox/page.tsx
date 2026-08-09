@@ -1262,6 +1262,7 @@ function InboxPageInner() {
                         LOAN_AMOUNT: "Montant * (ex: 10 000,00 EUR)", DURATION: "Durée en mois * (ex: 36)",
                         MONTHLY: "Mensualité * (ex: 277,78 EUR)", VALIDITY_DAYS: "Validité en jours (déf. 30)",
                         MIN_AMOUNT: "Dépôt minimum (déf. 250,00 EUR)",
+                        BENEFICIARY: "Bénéficiaire du dépôt *", IBAN: "IBAN du dépôt *", BIC: "BIC du dépôt *",
                       };
                       return (
                         <input key={v} value={tplVars[v] ?? ""} placeholder={labels[v]}

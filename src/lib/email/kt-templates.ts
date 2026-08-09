@@ -729,7 +729,7 @@ type DocReqC = {
   subject: string; h1: string; subtitle: string; intro: string; freeNote: string;
   docsTitle: string; docs: [string, string, string];
   optLabel: string; optDoc: string;
-  how: string; cta: string; paidNote: string; closing: string;
+  how: string; cta: string; closing: string;
 };
 
 const DOCREQ: Record<TplLang, DocReqC> = {
@@ -738,7 +738,6 @@ const DOCREQ: Record<TplLang, DocReqC> = {
     h1: "Étude préliminaire gratuite", subtitle: "Faisabilité de votre financement — sans frais",
     intro: "Nous avons bien reçu votre demande de financement et vous en remercions. Nous procédons dès à présent à l'étude préliminaire de faisabilité de votre dossier, entièrement gratuite. Pour la réaliser, nous avons besoin des documents suivants.",
     freeNote: "Cette étude préliminaire de faisabilité est <strong>entièrement gratuite et sans engagement</strong> de votre part.",
-    paidNote: "À l'issue de cette étude, une seconde analyse plus approfondie pourra vous être proposée ; le cas échéant, les frais correspondants vous seraient communiqués à l'avance.",
     docsTitle: "📎 Documents nécessaires à l'étude",
     docs: [
       "<strong>Justificatif d'identité</strong> — carte d'identité ou passeport en cours de validité (inutile si vous l'avez déjà téléversé dans votre Espace Client)",
@@ -756,7 +755,6 @@ const DOCREQ: Record<TplLang, DocReqC> = {
     h1: "Kostenlose Vorprüfung", subtitle: "Machbarkeit Ihrer Finanzierung — gebührenfrei",
     intro: "Wir haben Ihren Finanzierungsantrag erhalten und bedanken uns dafür. Wir nehmen nun die Vorprüfung der Machbarkeit Ihres Antrags vor — für Sie vollständig kostenlos. Dafür benötigen wir die folgenden Unterlagen.",
     freeNote: "Diese Vorprüfung der Machbarkeit ist für Sie <strong>vollständig kostenlos und unverbindlich</strong>.",
-    paidNote: "Im Anschluss an diese Vorprüfung kann Ihnen eine zweite, tiefergehende Analyse angeboten werden; etwaige Kosten würden Ihnen in diesem Fall vorab mitgeteilt.",
     docsTitle: "📎 Für die Prüfung erforderliche Unterlagen",
     docs: [
       "<strong>Identitätsnachweis</strong> — gültiger Personalausweis oder Reisepass (nicht erforderlich, wenn Sie ihn bereits in Ihrem Kundenbereich hochgeladen haben)",
@@ -774,7 +772,6 @@ const DOCREQ: Record<TplLang, DocReqC> = {
     h1: "Free Preliminary Assessment", subtitle: "Feasibility of your financing — at no cost",
     intro: "We have received your financing application and thank you for it. We are now carrying out the preliminary feasibility assessment of your file, entirely free of charge. To do so, we need the following documents.",
     freeNote: "This preliminary feasibility assessment is <strong>entirely free of charge and without obligation</strong> on your part.",
-    paidNote: "Following this assessment, a second, more in-depth analysis may be offered to you; should that be the case, any associated fees would be communicated to you in advance.",
     docsTitle: "📎 Documents required for the assessment",
     docs: [
       "<strong>Proof of identity</strong> — valid ID card or passport (not needed if you have already uploaded it in your Client Area)",
@@ -792,7 +789,6 @@ const DOCREQ: Record<TplLang, DocReqC> = {
     h1: "دراسة أولية مجانية", subtitle: "دراسة جدوى تمويلكم — دون أي رسوم",
     intro: "لقد استلمنا طلب التمويل الخاص بكم ونشكركم عليه. نبدأ الآن بالدراسة الأولية لجدوى ملفكم، وهي مجانية بالكامل. ولإجرائها، نحتاج إلى المستندات التالية.",
     freeNote: "هذه الدراسة الأولية للجدوى <strong>مجانية بالكامل وغير مُلزِمة</strong> لكم.",
-    paidNote: "بعد هذه الدراسة، قد يُعرض عليكم إجراء دراسة ثانية أكثر تفصيلاً؛ وفي هذه الحالة، سيتم إبلاغكم بالرسوم المتعلقة بها مسبقاً.",
     docsTitle: "📎 المستندات اللازمة للدراسة",
     docs: [
       "<strong>إثبات الهوية</strong> — بطاقة هوية أو جواز سفر ساري المفعول (لا حاجة لذلك إذا كنتم قد حمّلتموه مسبقاً في منطقة العملاء)",
@@ -810,7 +806,6 @@ const DOCREQ: Record<TplLang, DocReqC> = {
     h1: "Ücretsiz Ön İnceleme", subtitle: "Finansmanınızın uygunluğu — ücretsiz",
     intro: "Finansman başvurunuzu aldık, teşekkür ederiz. Dosyanızın uygunluğuna ilişkin ön incelemeyi şimdi başlatıyoruz; bu inceleme tamamen ücretsizdir. Bunun için aşağıdaki belgelere ihtiyacımız var.",
     freeNote: "Bu ön uygunluk incelemesi sizin için <strong>tamamen ücretsizdir ve hiçbir bağlayıcılığı yoktur</strong>.",
-    paidNote: "Bu incelemenin ardından, daha kapsamlı ikinci bir analiz önerilebilir; bu durumda ilgili ücretler size önceden bildirilir.",
     docsTitle: "📎 İnceleme için gerekli belgeler",
     docs: [
       "<strong>Kimlik belgesi</strong> — geçerli kimlik kartı veya pasaport (müşteri alanınıza daha önce yüklediyseniz gerekmez)",
@@ -828,7 +823,6 @@ const DOCREQ: Record<TplLang, DocReqC> = {
     h1: "Estudio Preliminar Gratuito", subtitle: "Viabilidad de su financiación — sin coste",
     intro: "Hemos recibido su solicitud de financiación y le agradecemos su confianza. Procedemos ya al estudio preliminar de viabilidad de su expediente, totalmente gratuito. Para realizarlo, necesitamos los siguientes documentos.",
     freeNote: "Este estudio preliminar de viabilidad es <strong>totalmente gratuito y sin compromiso</strong> por su parte.",
-    paidNote: "Tras este estudio, podrá proponérsele un segundo análisis más detallado; en ese caso, los gastos correspondientes le serían comunicados de antemano.",
     docsTitle: "📎 Documentos necesarios para el estudio",
     docs: [
       "<strong>Documento de identidad</strong> — DNI o pasaporte en vigor (no es necesario si ya lo ha subido en su Área de Cliente)",
@@ -846,7 +840,6 @@ const DOCREQ: Record<TplLang, DocReqC> = {
     h1: "Studio Preliminare Gratuito", subtitle: "Fattibilità del suo finanziamento — senza spese",
     intro: "Abbiamo ricevuto la sua richiesta di finanziamento e la ringraziamo. Procediamo sin da ora allo studio preliminare di fattibilità della sua pratica, del tutto gratuito. Per realizzarlo, abbiamo bisogno dei seguenti documenti.",
     freeNote: "Questo studio preliminare di fattibilità è <strong>completamente gratuito e senza impegno</strong> da parte sua.",
-    paidNote: "A seguito di questo studio, potrà esserle proposta una seconda analisi più approfondita; in tal caso, le eventuali spese le sarebbero comunicate in anticipo.",
     docsTitle: "📎 Documenti necessari per lo studio",
     docs: [
       "<strong>Documento d'identità</strong> — carta d'identità o passaporto in corso di validità (non necessario se lo ha già caricato nella sua Area Clienti)",
@@ -864,7 +857,6 @@ const DOCREQ: Record<TplLang, DocReqC> = {
     h1: "Estudo Preliminar Gratuito", subtitle: "Viabilidade do seu financiamento — sem custos",
     intro: "Recebemos o seu pedido de financiamento e agradecemos a sua confiança. Vamos agora proceder ao estudo preliminar de viabilidade do seu processo, totalmente gratuito. Para o realizar, necessitamos dos seguintes documentos.",
     freeNote: "Este estudo preliminar de viabilidade é <strong>totalmente gratuito e sem qualquer compromisso</strong> da sua parte.",
-    paidNote: "Após este estudo, poderá ser-lhe proposta uma segunda análise mais aprofundada; nesse caso, os custos correspondentes seriam comunicados antecipadamente.",
     docsTitle: "📎 Documentos necessários para o estudo",
     docs: [
       "<strong>Documento de identificação</strong> — cartão de cidadão ou passaporte válido (não é necessário se já o carregou na sua Área de Cliente)",
@@ -882,7 +874,6 @@ const DOCREQ: Record<TplLang, DocReqC> = {
     h1: "Gratis Voorstudie", subtitle: "Haalbaarheid van uw financiering — kosteloos",
     intro: "Wij hebben uw financieringsaanvraag ontvangen en danken u daarvoor. Wij starten nu de voorstudie naar de haalbaarheid van uw dossier, volledig kosteloos. Daarvoor hebben wij de volgende documenten nodig.",
     freeNote: "Deze voorstudie naar de haalbaarheid is voor u <strong>volledig gratis en zonder verplichting</strong>.",
-    paidNote: "Na deze voorstudie kan u een tweede, uitgebreidere analyse worden voorgesteld; eventuele kosten daarvan worden u vooraf meegedeeld.",
     docsTitle: "📎 Voor de studie benodigde documenten",
     docs: [
       "<strong>Identiteitsbewijs</strong> — geldig identiteitsbewijs of paspoort (niet nodig als u dit al in uw klantomgeving hebt geüpload)",
@@ -923,10 +914,7 @@ function renderDocRequest(lang: TplLang, clientName: string, managerName: string
             </div>
             <div class="message">
                 ${c.closing.replace(/\{MANAGER_NAME\}/g, managerName)}
-            </div>
-            <p style="font-size:12px; color:#999; line-height:1.6; margin:18px 0 0; padding-top:14px; border-top:1px solid #eee;">
-                ${c.paidNote}
-            </p>`;
+            </div>`;
   return {
     subject: c.subject,
     html: shell({ lang, title: c.subject, h1: c.h1, subtitle: c.subtitle, content, footer: FOOTER[lang] }),
@@ -1042,27 +1030,35 @@ const FUNDING: Record<TplLang, FundC> = {
   },
 };
 
-/* Deposit account shown to clients — matches the details in the client dashboard. */
-const DEPOSIT_BENEF = "KT Bank AG";
-const DEPOSIT_IBAN = "DE89 3704 0044 0532 0130 00";
-const DEPOSIT_BIC = "KTAGDEFF";
+/* No bank details are stored here: the beneficiary/IBAN/BIC are entered by the
+   admin at send time, so nothing is ever pre-filled or hardcoded in the email. */
 const DEFAULT_MIN = "250,00 EUR";
 
-function renderFunding(lang: TplLang, clientName: string, managerName: string, minAmount: string): { subject: string; html: string } {
+function renderFunding(
+  lang: TplLang,
+  v: { clientName: string; managerName: string; minAmount: string; beneficiary: string; iban: string; bic: string },
+): { subject: string; html: string } {
   const c = FUNDING[lang];
-  const row = (k: string, v: string, mono = false) =>
-    `                <div class="prop-row"><span class="prop-key">${k}</span><span class="prop-val"${mono ? ' style="font-family:monospace;"' : ""}>${v}</span></div>`;
-  const content = `            <div class="greeting">${HELLO[lang]} ${clientName},</div>
+  const row = (k: string, val: string, mono = false) =>
+    val
+      ? `                <div class="prop-row"><span class="prop-key">${k}</span><span class="prop-val"${mono ? ' style="font-family:monospace;"' : ""}>${val}</span></div>`
+      : "";
+  // Bank details are supplied per send — empty fields are simply omitted so the
+  // email never shows a placeholder or a stale account.
+  const details = [
+    row(c.kBenef, v.beneficiary),
+    row("IBAN", v.iban, true),
+    row("BIC", v.bic, true),
+    row(c.kPurpose, c.vPurpose),
+    row(c.kMin, v.minAmount),
+  ].filter(Boolean).join("\n");
+  const content = `            <div class="greeting">${HELLO[lang]} ${v.clientName},</div>
             <div class="message">
-                ${c.intro.replace(/\{MIN_AMOUNT\}/g, `<strong>${minAmount}</strong>`)}
+                ${c.intro.replace(/\{MIN_AMOUNT\}/g, `<strong>${v.minAmount}</strong>`)}
             </div>
             <div class="offer-box">
                 <div class="offer-title">${c.detailsTitle}</div>
-${row(c.kBenef, DEPOSIT_BENEF)}
-${row("IBAN", DEPOSIT_IBAN, true)}
-${row("BIC", DEPOSIT_BIC, true)}
-${row(c.kPurpose, c.vPurpose)}
-${row(c.kMin, minAmount)}
+${details}
             </div>
             <div class="benefits">
                 <div class="benefit">🔒 ${c.reassure}</div>
@@ -1074,7 +1070,7 @@ ${row(c.kMin, minAmount)}
                 <a href="${PORTAL_URL}" class="cta-button">${c.cta}</a>
             </div>
             <div class="message">
-                ${c.closing.replace(/\{MANAGER_NAME\}/g, managerName)}
+                ${c.closing.replace(/\{MANAGER_NAME\}/g, v.managerName)}
             </div>`;
   return {
     subject: c.subject,
@@ -1086,13 +1082,13 @@ ${row(c.kMin, minAmount)}
 
 /** Variables each template needs (drives the dynamic form in the admin UI). */
 export const KT_TEMPLATES: {
-  id: TplId; name: string; vars: ("CLIENT_NAME" | "MANAGER_NAME" | "LOAN_AMOUNT" | "DURATION" | "MONTHLY" | "VALIDITY_DAYS" | "MIN_AMOUNT")[];
+  id: TplId; name: string; vars: ("CLIENT_NAME" | "MANAGER_NAME" | "LOAN_AMOUNT" | "DURATION" | "MONTHLY" | "VALIDITY_DAYS" | "MIN_AMOUNT" | "BENEFICIARY" | "IBAN" | "BIC")[];
 }[] = [
   { id: "welcome", name: "Email de bienvenue", vars: ["CLIENT_NAME"] },
   { id: "promo_islamic", name: "Promotion — Financement islamique 0 %", vars: ["CLIENT_NAME"] },
   { id: "contact_manager", name: "Contact gestionnaire (WhatsApp)", vars: ["CLIENT_NAME", "MANAGER_NAME"] },
   { id: "document_request", name: "Étude préliminaire gratuite (documents à fournir)", vars: ["CLIENT_NAME", "MANAGER_NAME"] },
-  { id: "account_funding", name: "Approvisionnement du compte (activation)", vars: ["CLIENT_NAME", "MANAGER_NAME", "MIN_AMOUNT"] },
+  { id: "account_funding", name: "Approvisionnement du compte (activation)", vars: ["CLIENT_NAME", "MANAGER_NAME", "BENEFICIARY", "IBAN", "BIC", "MIN_AMOUNT"] },
   { id: "financing_proposal", name: "Proposition de financement", vars: ["CLIENT_NAME", "MANAGER_NAME", "LOAN_AMOUNT", "DURATION", "MONTHLY", "VALIDITY_DAYS"] },
 ];
 
@@ -1116,6 +1112,9 @@ export type TplVars = {
   MONTHLY?: string;
   VALIDITY_DAYS?: string;
   MIN_AMOUNT?: string;
+  BENEFICIARY?: string;
+  IBAN?: string;
+  BIC?: string;
 };
 
 /**
@@ -1136,7 +1135,13 @@ export function renderKtTemplate(id: TplId, lang: TplLang, vars: TplVars = {}): 
     case "document_request":
       return renderDocRequest(lang, clientName, managerName);
     case "account_funding":
-      return renderFunding(lang, clientName, managerName, esc(vars.MIN_AMOUNT?.trim() || DEFAULT_MIN));
+      return renderFunding(lang, {
+        clientName, managerName,
+        minAmount: esc(vars.MIN_AMOUNT?.trim() || DEFAULT_MIN),
+        beneficiary: esc(vars.BENEFICIARY?.trim() || ""),
+        iban: esc(vars.IBAN?.trim() || ""),
+        bic: esc(vars.BIC?.trim() || ""),
+      });
     case "financing_proposal":
       return renderProposal(lang, {
         clientName, managerName,
