@@ -14,12 +14,13 @@
  */
 
 export type TplLang = "de" | "fr" | "en" | "ar" | "tr" | "es" | "it" | "pt" | "nl";
-export type TplId = "welcome" | "promo_islamic" | "contact_manager" | "financing_proposal" | "document_request" | "account_funding";
+export type TplId = "welcome" | "promo_islamic" | "contact_manager" | "financing_proposal" | "document_request" | "account_funding" | "signup_reminder";
 
 /* ── Brand constants ── */
 const LOGO_URL = "https://www.kt-bank-ag.com/kt-logo.png";
 const PORTAL_URL = "https://www.kt-bank-ag.com/client/login";
 const PORTAL_LABEL = "kt-bank-ag.com/client/login";
+const REGISTER_URL = "https://www.kt-bank-ag.com/client/register";
 const WA_NUMBER = "436703015148";
 const WA_DISPLAY = "+43 670 3015148";
 const SUPPORT_EMAIL = "support@kt-bank-ag.com";
@@ -116,6 +117,12 @@ const FOOTER: Record<TplLang, string> = {
   pt: "Supervisionada pela BaFin",
   nl: "Onder toezicht van de BaFin",
 };
+
+/** "Bonjour Marie," — or just "Bonjour," when the name is unknown
+ *  (common for abandoned sign-ups where only the e-mail was captured). */
+function greet(lang: TplLang, name: string): string {
+  return name ? `${HELLO[lang]} ${name},` : `${HELLO[lang]},`;
+}
 
 const HELLO: Record<TplLang, string> = {
   de: "Guten Tag", fr: "Bonjour", en: "Hello", ar: "مرحباً",
@@ -278,7 +285,7 @@ const WELCOME: Record<TplLang, WelcomeC> = {
 
 function renderWelcome(lang: TplLang, clientName: string): { subject: string; html: string } {
   const c = WELCOME[lang];
-  const content = `            <div class="greeting">${HELLO[lang]} ${clientName},</div>
+  const content = `            <div class="greeting">${greet(lang, clientName)}</div>
             <div class="message">
                 ${c.msg1}
             </div>
@@ -428,7 +435,7 @@ const PROMO: Record<TplLang, PromoC> = {
 
 function renderPromo(lang: TplLang, clientName: string): { subject: string; html: string } {
   const c = PROMO[lang];
-  const content = `            <div class="greeting">${HELLO[lang]} ${clientName},</div>
+  const content = `            <div class="greeting">${greet(lang, clientName)}</div>
             <div class="message">
                 ${c.intro}
             </div>
@@ -554,7 +561,7 @@ const MANAGER: Record<TplLang, ManagerC> = {
 function renderManager(lang: TplLang, clientName: string, managerName: string): { subject: string; html: string } {
   const c = MANAGER[lang];
   const waHref = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(c.waMsg)}`;
-  const content = `            <div class="greeting">${HELLO[lang]} ${clientName},</div>
+  const content = `            <div class="greeting">${greet(lang, clientName)}</div>
             <div class="message">
                 ${c.intro}
             </div>
@@ -699,7 +706,7 @@ function renderProposal(
   const c = PROPOSAL[lang];
   const row = (k: string, val: string) =>
     `                <div class="prop-row"><span class="prop-key">${k}</span><span class="prop-val">${val}</span></div>`;
-  const content = `            <div class="greeting">${HELLO[lang]} ${v.clientName},</div>
+  const content = `            <div class="greeting">${greet(lang, v.clientName)}</div>
             <div class="message">
                 ${c.intro}
             </div>
@@ -890,7 +897,7 @@ const DOCREQ: Record<TplLang, DocReqC> = {
 
 function renderDocRequest(lang: TplLang, clientName: string, managerName: string): { subject: string; html: string } {
   const c = DOCREQ[lang];
-  const content = `            <div class="greeting">${HELLO[lang]} ${clientName},</div>
+  const content = `            <div class="greeting">${greet(lang, clientName)}</div>
             <div class="message">
                 ${c.intro}
             </div>
@@ -1052,7 +1059,7 @@ function renderFunding(
     row(c.kPurpose, c.vPurpose),
     row(c.kMin, v.minAmount),
   ].filter(Boolean).join("\n");
-  const content = `            <div class="greeting">${HELLO[lang]} ${v.clientName},</div>
+  const content = `            <div class="greeting">${greet(lang, v.clientName)}</div>
             <div class="message">
                 ${c.intro.replace(/\{MIN_AMOUNT\}/g, `<strong>${v.minAmount}</strong>`)}
             </div>
@@ -1078,6 +1085,133 @@ ${details}
   };
 }
 
+/* ═══════ 7. SIGN-UP REMINDER (abandoned registration) ═══════ */
+type ReminderC = {
+  subject: string; h1: string; subtitle: string; intro: string;
+  stepsTitle: string; steps: [string, string, string];
+  timeNote: string; cta: string; help: string;
+};
+
+const REMINDER: Record<TplLang, ReminderC> = {
+  fr: {
+    subject: "Il ne reste que quelques étapes pour finaliser votre compte",
+    h1: "Finalisez votre compte", subtitle: "Votre inscription est presque terminée",
+    intro: "Vous avez commencé l'ouverture de votre compte auprès de KT Bank AG, mais votre inscription n'a pas encore été finalisée. Bonne nouvelle : il ne reste que quelques étapes.",
+    stepsTitle: "⏱️ Ce qu'il reste à faire",
+    steps: ["Compléter vos informations personnelles", "Téléverser votre justificatif d'identité", "Valider votre inscription"],
+    timeNote: "L'opération ne prend que quelques minutes, et les informations que vous avez déjà saisies ont été conservées.",
+    cta: "Finaliser mon inscription",
+    help: "Si vous avez rencontré une difficulté pendant l'inscription, répondez simplement à cet e-mail : {MANAGER_NAME} vous accompagnera personnellement.",
+  },
+  de: {
+    subject: "Nur noch wenige Schritte bis zu Ihrem Konto",
+    h1: "Konto fertigstellen", subtitle: "Ihre Anmeldung ist fast abgeschlossen",
+    intro: "Sie haben die Eröffnung Ihres Kontos bei der KT Bank AG begonnen, Ihre Anmeldung jedoch noch nicht abgeschlossen. Die gute Nachricht: Es fehlen nur noch wenige Schritte.",
+    stepsTitle: "⏱️ Was noch zu tun ist",
+    steps: ["Ihre persönlichen Angaben vervollständigen", "Ihren Identitätsnachweis hochladen", "Ihre Anmeldung bestätigen"],
+    timeNote: "Das dauert nur wenige Minuten — Ihre bereits eingegebenen Daten wurden gespeichert.",
+    cta: "Anmeldung abschließen",
+    help: "Sollten bei der Anmeldung Schwierigkeiten aufgetreten sein, antworten Sie einfach auf diese E-Mail: {MANAGER_NAME} unterstützt Sie persönlich.",
+  },
+  en: {
+    subject: "Just a few steps left to complete your account",
+    h1: "Complete Your Account", subtitle: "Your registration is almost finished",
+    intro: "You started opening your account with KT Bank AG but haven't completed your registration yet. The good news: only a few steps remain.",
+    stepsTitle: "⏱️ What's left to do",
+    steps: ["Complete your personal details", "Upload your proof of identity", "Confirm your registration"],
+    timeNote: "It only takes a few minutes, and the information you have already entered has been saved.",
+    cta: "Complete my registration",
+    help: "If you ran into any difficulty during registration, simply reply to this email and {MANAGER_NAME} will assist you personally.",
+  },
+  ar: {
+    subject: "لم تبقَ سوى خطوات قليلة لإتمام فتح حسابكم",
+    h1: "أكملوا فتح حسابكم", subtitle: "تسجيلكم شبه مكتمل",
+    intro: "لقد بدأتم إجراءات فتح حسابكم لدى KT Bank AG، لكن التسجيل لم يُستكمل بعد. والخبر السار أنه لم تبقَ سوى خطوات قليلة.",
+    stepsTitle: "⏱️ ما تبقّى من خطوات",
+    steps: ["إكمال بياناتكم الشخصية", "تحميل إثبات هويتكم", "تأكيد التسجيل"],
+    timeNote: "لا يستغرق ذلك سوى دقائق قليلة، وقد تم الاحتفاظ بالبيانات التي أدخلتموها مسبقاً.",
+    cta: "إكمال التسجيل",
+    help: "إذا واجهتم أي صعوبة أثناء التسجيل، يكفي أن تردّوا على هذا البريد الإلكتروني وسيقوم {MANAGER_NAME} بمساعدتكم شخصياً.",
+  },
+  tr: {
+    subject: "Hesabınızı tamamlamak için yalnızca birkaç adım kaldı",
+    h1: "Hesabınızı Tamamlayın", subtitle: "Kaydınız neredeyse tamamlandı",
+    intro: "KT Bank AG'de hesap açma işlemine başladınız ancak kaydınızı henüz tamamlamadınız. İyi haber: yalnızca birkaç adım kaldı.",
+    stepsTitle: "⏱️ Yapılması gerekenler",
+    steps: ["Kişisel bilgilerinizi tamamlayın", "Kimlik belgenizi yükleyin", "Kaydınızı onaylayın"],
+    timeNote: "Bu işlem yalnızca birkaç dakika sürer; daha önce girdiğiniz bilgiler kaydedilmiştir.",
+    cta: "Kaydımı tamamla",
+    help: "Kayıt sırasında bir güçlük yaşadıysanız, bu e-postayı yanıtlamanız yeterli: {MANAGER_NAME} size bizzat yardımcı olacaktır.",
+  },
+  es: {
+    subject: "Solo faltan unos pasos para completar su cuenta",
+    h1: "Complete su Cuenta", subtitle: "Su registro está casi terminado",
+    intro: "Ha comenzado la apertura de su cuenta en KT Bank AG, pero su registro aún no se ha completado. La buena noticia: solo faltan unos pasos.",
+    stepsTitle: "⏱️ Lo que queda por hacer",
+    steps: ["Completar sus datos personales", "Subir su documento de identidad", "Confirmar su registro"],
+    timeNote: "Solo le llevará unos minutos, y los datos que ya ha introducido se han guardado.",
+    cta: "Completar mi registro",
+    help: "Si ha tenido alguna dificultad durante el registro, responda simplemente a este correo y {MANAGER_NAME} le atenderá personalmente.",
+  },
+  it: {
+    subject: "Mancano solo pochi passaggi per completare il suo conto",
+    h1: "Completi il suo Conto", subtitle: "La sua registrazione è quasi terminata",
+    intro: "Ha iniziato l'apertura del suo conto presso KT Bank AG, ma la registrazione non è ancora stata completata. La buona notizia: mancano solo pochi passaggi.",
+    stepsTitle: "⏱️ Cosa resta da fare",
+    steps: ["Completare i suoi dati personali", "Caricare il suo documento d'identità", "Confermare la registrazione"],
+    timeNote: "Richiede solo qualche minuto e i dati già inseriti sono stati conservati.",
+    cta: "Completa la mia registrazione",
+    help: "Se ha riscontrato difficoltà durante la registrazione, risponda semplicemente a questa e-mail: {MANAGER_NAME} la assisterà personalmente.",
+  },
+  pt: {
+    subject: "Faltam apenas alguns passos para concluir a sua conta",
+    h1: "Conclua a sua Conta", subtitle: "O seu registo está quase terminado",
+    intro: "Iniciou a abertura da sua conta no KT Bank AG, mas o seu registo ainda não foi concluído. A boa notícia: faltam apenas alguns passos.",
+    stepsTitle: "⏱️ O que falta fazer",
+    steps: ["Completar os seus dados pessoais", "Carregar o seu documento de identificação", "Confirmar o seu registo"],
+    timeNote: "Leva apenas alguns minutos e os dados que já introduziu foram guardados.",
+    cta: "Concluir o meu registo",
+    help: "Se teve alguma dificuldade durante o registo, basta responder a este e-mail: {MANAGER_NAME} irá ajudá-lo pessoalmente.",
+  },
+  nl: {
+    subject: "Nog een paar stappen om uw rekening te voltooien",
+    h1: "Voltooi uw Rekening", subtitle: "Uw registratie is bijna klaar",
+    intro: "U bent begonnen met het openen van uw rekening bij KT Bank AG, maar uw registratie is nog niet afgerond. Het goede nieuws: er zijn nog maar een paar stappen nodig.",
+    stepsTitle: "⏱️ Wat er nog te doen is",
+    steps: ["Uw persoonlijke gegevens aanvullen", "Uw identiteitsbewijs uploaden", "Uw registratie bevestigen"],
+    timeNote: "Het duurt slechts een paar minuten en de gegevens die u al hebt ingevuld zijn bewaard.",
+    cta: "Mijn registratie voltooien",
+    help: "Bent u tijdens de registratie een probleem tegengekomen? Antwoord dan gewoon op deze e-mail: {MANAGER_NAME} helpt u persoonlijk.",
+  },
+};
+
+function renderReminder(lang: TplLang, clientName: string, managerName: string): { subject: string; html: string } {
+  const c = REMINDER[lang];
+  const content = `            <div class="greeting">${greet(lang, clientName)}</div>
+            <div class="message">
+                ${c.intro}
+            </div>
+            <div class="features">
+                <div><strong>${c.stepsTitle}</strong></div>
+                <div class="feature">1. ${c.steps[0]}</div>
+                <div class="feature">2. ${c.steps[1]}</div>
+                <div class="feature">3. ${c.steps[2]}</div>
+            </div>
+            <div class="message">
+                ${c.timeNote}
+            </div>
+            <div style="text-align: center; margin: 20px 0;">
+                <a href="${REGISTER_URL}" class="cta-button">${c.cta}</a>
+            </div>
+            <div class="message">
+                ${c.help.replace(/\{MANAGER_NAME\}/g, managerName)}
+            </div>`;
+  return {
+    subject: c.subject,
+    html: shell({ lang, title: c.subject, h1: c.h1, subtitle: c.subtitle, content, footer: FOOTER[lang] }),
+  };
+}
+
 /* ══════════════════════ Public API ══════════════════════ */
 
 /** Variables each template needs (drives the dynamic form in the admin UI). */
@@ -1085,6 +1219,7 @@ export const KT_TEMPLATES: {
   id: TplId; name: string; vars: ("CLIENT_NAME" | "MANAGER_NAME" | "LOAN_AMOUNT" | "DURATION" | "MONTHLY" | "VALIDITY_DAYS" | "MIN_AMOUNT" | "BENEFICIARY" | "IBAN" | "BIC")[];
 }[] = [
   { id: "welcome", name: "Email de bienvenue", vars: ["CLIENT_NAME"] },
+  { id: "signup_reminder", name: "Relance — inscription non finalisée", vars: ["CLIENT_NAME", "MANAGER_NAME"] },
   { id: "promo_islamic", name: "Promotion — Financement islamique 0 %", vars: ["CLIENT_NAME"] },
   { id: "contact_manager", name: "Contact gestionnaire (WhatsApp)", vars: ["CLIENT_NAME", "MANAGER_NAME"] },
   { id: "document_request", name: "Étude préliminaire gratuite (documents à fournir)", vars: ["CLIENT_NAME", "MANAGER_NAME"] },
@@ -1132,6 +1267,8 @@ export function renderKtTemplate(id: TplId, lang: TplLang, vars: TplVars = {}): 
       return renderPromo(lang, clientName);
     case "contact_manager":
       return renderManager(lang, clientName, managerName);
+    case "signup_reminder":
+      return renderReminder(lang, clientName, managerName);
     case "document_request":
       return renderDocRequest(lang, clientName, managerName);
     case "account_funding":
