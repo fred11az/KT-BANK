@@ -17,6 +17,7 @@ import Highlight from "@tiptap/extension-highlight";
 import Link from "@tiptap/extension-link";
 import ImageExt from "@tiptap/extension-image";
 import { Node, mergeAttributes } from "@tiptap/core";
+import { KT_TEMPLATES, TPL_LANGS, renderKtTemplate, type TplId, type TplLang, type TplVars } from "@/lib/email/kt-templates";
 
 /* ── Attachment type ── */
 type EmailAttachment = {
@@ -648,6 +649,10 @@ function InboxPageInner() {
   // Raw-HTML compose mode: paste a full HTML email and send it verbatim.
   const [compRawMode, setCompRawMode] = useState(false);
   const [compRawHtml, setCompRawHtml] = useState("");
+  // Ready-made KT templates: pick a template + language, fill the variables.
+  const [tplId, setTplId] = useState<TplId | "">("");
+  const [tplLang, setTplLang] = useState<TplLang>("de");
+  const [tplVars, setTplVars] = useState<TplVars>({});
   const compReady = !!compTo && !!compSubject && (compRawMode ? !!compRawHtml.trim() : (!!compHtml && compHtml !== "<p></p>"));
 
   // Attachments
@@ -736,11 +741,26 @@ function InboxPageInner() {
     setCompTo(to);
     const name = searchParams.get("name");
     setCompSubject(searchParams.get("subject") || (name ? `KT Bank AG — ${name}` : ""));
+    // Pre-fill the template variables + language with the client's own data.
+    if (name) setTplVars((v) => ({ ...v, CLIENT_NAME: name }));
+    const cl = searchParams.get("lang");
+    if (cl && TPL_LANGS.some((l) => l.code === cl)) setTplLang(cl as TplLang);
     setComposing(true);
     // Clear the query params so a refresh doesn't reopen/reset the composer.
     router.replace("/kt-admin/inbox");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
+
+  // Regenerate the ready-made template whenever the choice, language or a
+  // variable changes. Output goes through the raw-HTML pipeline (live preview
+  // + sent verbatim), so the design reaches the client exactly as designed.
+  useEffect(() => {
+    if (!tplId) return;
+    const { subject, html } = renderKtTemplate(tplId, tplLang, tplVars);
+    setCompRawHtml(html);
+    setCompSubject(subject);
+    setCompRawMode(true);
+  }, [tplId, tplLang, tplVars]);
 
   // Silent background refresh — light list poll + refresh the open thread only.
   const silentRefresh = useCallback(() => {
@@ -857,6 +877,7 @@ function InboxPageInner() {
     setComposing(false);
     setCompTo(""); setCompSubject(""); setCompHtml(""); setCompText("");
     setCompRawMode(false); setCompRawHtml(""); setCompRole("");
+    setTplId(""); setTplVars({});
     setCompAttachments([]);
     compEditorKey.current += 1;
     load(true);
@@ -1208,14 +1229,51 @@ function InboxPageInner() {
 
             {/* Mode toggle: rich editor vs paste a formatted HTML email */}
             <div style={{ display: "flex", gap: 6, margin: "8px 20px 0" }}>
-              <button type="button" onClick={() => setCompRawMode(false)}
+              <button type="button" onClick={() => { setCompRawMode(false); setTplId(""); }}
                 style={{ flex: 1, height: 32, borderRadius: 8, border: "none", cursor: "pointer", fontSize: "0.76rem", fontWeight: 600, background: !compRawMode ? "#005F2D" : "#252836", color: !compRawMode ? "white" : "rgba(255,255,255,0.5)" }}>
                 Éditeur
               </button>
               <button type="button" onClick={() => setCompRawMode(true)}
                 style={{ flex: 1, height: 32, borderRadius: 8, border: "none", cursor: "pointer", fontSize: "0.76rem", fontWeight: 600, background: compRawMode ? "#005F2D" : "#252836", color: compRawMode ? "white" : "rgba(255,255,255,0.5)", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
-                <Code2 size={12} /> Coller un email HTML
+                <Code2 size={12} /> HTML
               </button>
+            </div>
+
+            {/* Ready-made KT Bank templates (design fixe, 9 langues) */}
+            <div style={{ margin: "10px 20px 0", padding: "10px 12px", background: "#0F1117", border: "1px solid rgba(201,168,76,0.25)", borderRadius: 10 }}>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                <select value={tplId} onChange={(e) => setTplId(e.target.value as TplId | "")}
+                  style={{ flex: "2 1 180px", height: 34, background: "#252836", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 8, color: "white", fontSize: "0.78rem", padding: "0 8px", outline: "none" }}>
+                  <option value="">— Modèle prêt à l&apos;emploi —</option>
+                  {KT_TEMPLATES.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+                </select>
+                <select value={tplLang} onChange={(e) => setTplLang(e.target.value as TplLang)} disabled={!tplId}
+                  style={{ flex: "1 1 130px", height: 34, background: "#252836", border: `1px solid ${tplId ? "rgba(201,168,76,0.5)" : "rgba(255,255,255,0.1)"}`, borderRadius: 8, color: tplId ? "white" : "rgba(255,255,255,0.35)", fontSize: "0.78rem", padding: "0 8px", outline: "none" }}>
+                  {TPL_LANGS.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
+                </select>
+              </div>
+
+              {tplId && (
+                <>
+                  <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 6, marginTop: 8 }}>
+                    {(KT_TEMPLATES.find((t) => t.id === tplId)?.vars ?? []).map((v) => {
+                      const labels: Record<string, string> = {
+                        CLIENT_NAME: "Nom du client *", MANAGER_NAME: "Gestionnaire (déf. David LENIAN)",
+                        LOAN_AMOUNT: "Montant * (ex: 10 000,00 EUR)", DURATION: "Durée en mois * (ex: 36)",
+                        MONTHLY: "Mensualité * (ex: 277,78 EUR)", VALIDITY_DAYS: "Validité en jours (déf. 30)",
+                      };
+                      return (
+                        <input key={v} value={tplVars[v] ?? ""} placeholder={labels[v]}
+                          onChange={(e) => setTplVars((p) => ({ ...p, [v]: e.target.value }))}
+                          style={{ height: 34, background: "#252836", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "white", fontSize: "0.78rem", padding: "0 10px", boxSizing: "border-box", outline: "none" }} />
+                      );
+                    })}
+                  </div>
+                  <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.68rem", margin: "8px 0 0", lineHeight: 1.5 }}>
+                    Objet et contenu générés automatiquement dans la langue choisie — aperçu en bas.
+                  </p>
+                </>
+              )}
             </div>
 
             {!compRawMode ? (

@@ -333,7 +333,8 @@ export default function ClientDetailPage() {
           <button onClick={() => {
               const email = String(profile.email ?? "");
               const name = `${String(profile.prenom ?? "")} ${String(profile.nom ?? "")}`.trim();
-              router.push(`/kt-admin/inbox?to=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}`);
+              const clientLang = String(profile.lang ?? "de");
+              router.push(`/kt-admin/inbox?to=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&lang=${encodeURIComponent(clientLang)}`);
             }}
             disabled={!profile.email}
             style={{ height: 38, padding: "0 14px", background: "rgba(0,95,45,0.15)", color: "#4ADE80", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 8, fontSize: "0.82rem", fontWeight: 600, cursor: profile.email ? "pointer" : "not-allowed", opacity: profile.email ? 1 : 0.5, display: "flex", alignItems: "center", gap: 6 }}>
