@@ -14,7 +14,7 @@
  */
 
 export type TplLang = "de" | "fr" | "en" | "ar" | "tr" | "es" | "it" | "pt" | "nl";
-export type TplId = "welcome" | "promo_islamic" | "contact_manager" | "financing_proposal" | "document_request";
+export type TplId = "welcome" | "promo_islamic" | "contact_manager" | "financing_proposal" | "document_request" | "account_funding";
 
 /* ── Brand constants ── */
 const LOGO_URL = "https://www.kt-bank-ag.com/kt-logo.png";
@@ -726,18 +726,20 @@ ${row(c.kValidity, `${v.validityDays} ${c.days}`)}
 
 /* ═════════════ 5. DOCUMENT REQUEST (credit application) ═════════════ */
 type DocReqC = {
-  subject: string; h1: string; subtitle: string; intro: string;
+  subject: string; h1: string; subtitle: string; intro: string; freeNote: string;
   docsTitle: string; docs: [string, string, string];
   optLabel: string; optDoc: string;
-  how: string; cta: string; closing: string;
+  how: string; cta: string; paidNote: string; closing: string;
 };
 
 const DOCREQ: Record<TplLang, DocReqC> = {
   fr: {
-    subject: "Documents requis pour votre demande de financement",
-    h1: "Documents requis", subtitle: "Votre demande de financement",
-    intro: "Nous avons bien reçu votre demande de financement et vous en remercions. Afin de poursuivre l'étude de votre dossier, nous vous invitons à nous transmettre les documents suivants.",
-    docsTitle: "📎 Documents à fournir",
+    subject: "Étude préliminaire gratuite — documents à fournir",
+    h1: "Étude préliminaire gratuite", subtitle: "Faisabilité de votre financement — sans frais",
+    intro: "Nous avons bien reçu votre demande de financement et vous en remercions. Nous procédons dès à présent à l'étude préliminaire de faisabilité de votre dossier, entièrement gratuite. Pour la réaliser, nous avons besoin des documents suivants.",
+    freeNote: "Cette étude préliminaire de faisabilité est <strong>entièrement gratuite et sans engagement</strong> de votre part.",
+    paidNote: "À l'issue de cette étude, une seconde analyse plus approfondie pourra vous être proposée ; le cas échéant, les frais correspondants vous seraient communiqués à l'avance.",
+    docsTitle: "📎 Documents nécessaires à l'étude",
     docs: [
       "<strong>Justificatif d'identité</strong> — carte d'identité ou passeport en cours de validité (inutile si vous l'avez déjà téléversé dans votre Espace Client)",
       "<strong>Relevé de compte</strong> — vos relevés bancaires des trois derniers mois",
@@ -750,10 +752,12 @@ const DOCREQ: Record<TplLang, DocReqC> = {
     closing: "Dès réception, nous poursuivrons l'étude de votre dossier dans les meilleurs délais. {MANAGER_NAME} reste à votre entière disposition pour toute question.",
   },
   de: {
-    subject: "Erforderliche Unterlagen für Ihren Finanzierungsantrag",
-    h1: "Erforderliche Unterlagen", subtitle: "Ihr Finanzierungsantrag",
-    intro: "Wir haben Ihren Finanzierungsantrag erhalten und bedanken uns dafür. Um die Prüfung Ihres Antrags fortzusetzen, bitten wir Sie, uns die folgenden Unterlagen zu übermitteln.",
-    docsTitle: "📎 Einzureichende Unterlagen",
+    subject: "Kostenlose Vorprüfung — erforderliche Unterlagen",
+    h1: "Kostenlose Vorprüfung", subtitle: "Machbarkeit Ihrer Finanzierung — gebührenfrei",
+    intro: "Wir haben Ihren Finanzierungsantrag erhalten und bedanken uns dafür. Wir nehmen nun die Vorprüfung der Machbarkeit Ihres Antrags vor — für Sie vollständig kostenlos. Dafür benötigen wir die folgenden Unterlagen.",
+    freeNote: "Diese Vorprüfung der Machbarkeit ist für Sie <strong>vollständig kostenlos und unverbindlich</strong>.",
+    paidNote: "Im Anschluss an diese Vorprüfung kann Ihnen eine zweite, tiefergehende Analyse angeboten werden; etwaige Kosten würden Ihnen in diesem Fall vorab mitgeteilt.",
+    docsTitle: "📎 Für die Prüfung erforderliche Unterlagen",
     docs: [
       "<strong>Identitätsnachweis</strong> — gültiger Personalausweis oder Reisepass (nicht erforderlich, wenn Sie ihn bereits in Ihrem Kundenbereich hochgeladen haben)",
       "<strong>Kontoauszüge</strong> — Ihre Kontoauszüge der letzten drei Monate",
@@ -766,10 +770,12 @@ const DOCREQ: Record<TplLang, DocReqC> = {
     closing: "Nach Erhalt setzen wir die Prüfung Ihres Antrags zeitnah fort. {MANAGER_NAME} steht Ihnen für Fragen jederzeit gerne zur Verfügung.",
   },
   en: {
-    subject: "Documents required for your financing application",
-    h1: "Required Documents", subtitle: "Your financing application",
-    intro: "We have received your financing application and thank you for it. In order to continue reviewing your file, please send us the following documents.",
-    docsTitle: "📎 Documents to provide",
+    subject: "Free preliminary assessment — documents required",
+    h1: "Free Preliminary Assessment", subtitle: "Feasibility of your financing — at no cost",
+    intro: "We have received your financing application and thank you for it. We are now carrying out the preliminary feasibility assessment of your file, entirely free of charge. To do so, we need the following documents.",
+    freeNote: "This preliminary feasibility assessment is <strong>entirely free of charge and without obligation</strong> on your part.",
+    paidNote: "Following this assessment, a second, more in-depth analysis may be offered to you; should that be the case, any associated fees would be communicated to you in advance.",
+    docsTitle: "📎 Documents required for the assessment",
     docs: [
       "<strong>Proof of identity</strong> — valid ID card or passport (not needed if you have already uploaded it in your Client Area)",
       "<strong>Bank statements</strong> — your account statements for the last three months",
@@ -782,10 +788,12 @@ const DOCREQ: Record<TplLang, DocReqC> = {
     closing: "Once received, we will continue reviewing your file as quickly as possible. {MANAGER_NAME} remains at your disposal for any questions.",
   },
   ar: {
-    subject: "المستندات المطلوبة لطلب التمويل الخاص بكم",
-    h1: "المستندات المطلوبة", subtitle: "طلب التمويل الخاص بكم",
-    intro: "لقد استلمنا طلب التمويل الخاص بكم ونشكركم عليه. لمتابعة دراسة ملفكم، نرجو منكم تزويدنا بالمستندات التالية.",
-    docsTitle: "📎 المستندات المطلوب تقديمها",
+    subject: "دراسة أولية مجانية — المستندات المطلوبة",
+    h1: "دراسة أولية مجانية", subtitle: "دراسة جدوى تمويلكم — دون أي رسوم",
+    intro: "لقد استلمنا طلب التمويل الخاص بكم ونشكركم عليه. نبدأ الآن بالدراسة الأولية لجدوى ملفكم، وهي مجانية بالكامل. ولإجرائها، نحتاج إلى المستندات التالية.",
+    freeNote: "هذه الدراسة الأولية للجدوى <strong>مجانية بالكامل وغير مُلزِمة</strong> لكم.",
+    paidNote: "بعد هذه الدراسة، قد يُعرض عليكم إجراء دراسة ثانية أكثر تفصيلاً؛ وفي هذه الحالة، سيتم إبلاغكم بالرسوم المتعلقة بها مسبقاً.",
+    docsTitle: "📎 المستندات اللازمة للدراسة",
     docs: [
       "<strong>إثبات الهوية</strong> — بطاقة هوية أو جواز سفر ساري المفعول (لا حاجة لذلك إذا كنتم قد حمّلتموه مسبقاً في منطقة العملاء)",
       "<strong>كشف الحساب البنكي</strong> — كشوف حسابكم لآخر ثلاثة أشهر",
@@ -798,10 +806,12 @@ const DOCREQ: Record<TplLang, DocReqC> = {
     closing: "بعد الاستلام، سنواصل دراسة ملفكم في أسرع وقت ممكن. ويبقى {MANAGER_NAME} رهن إشارتكم لأي استفسار.",
   },
   tr: {
-    subject: "Finansman başvurunuz için gerekli belgeler",
-    h1: "Gerekli Belgeler", subtitle: "Finansman başvurunuz",
-    intro: "Finansman başvurunuzu aldık, teşekkür ederiz. Dosyanızın incelenmesine devam edebilmemiz için aşağıdaki belgeleri bize iletmenizi rica ederiz.",
-    docsTitle: "📎 İletilmesi gereken belgeler",
+    subject: "Ücretsiz ön inceleme — gerekli belgeler",
+    h1: "Ücretsiz Ön İnceleme", subtitle: "Finansmanınızın uygunluğu — ücretsiz",
+    intro: "Finansman başvurunuzu aldık, teşekkür ederiz. Dosyanızın uygunluğuna ilişkin ön incelemeyi şimdi başlatıyoruz; bu inceleme tamamen ücretsizdir. Bunun için aşağıdaki belgelere ihtiyacımız var.",
+    freeNote: "Bu ön uygunluk incelemesi sizin için <strong>tamamen ücretsizdir ve hiçbir bağlayıcılığı yoktur</strong>.",
+    paidNote: "Bu incelemenin ardından, daha kapsamlı ikinci bir analiz önerilebilir; bu durumda ilgili ücretler size önceden bildirilir.",
+    docsTitle: "📎 İnceleme için gerekli belgeler",
     docs: [
       "<strong>Kimlik belgesi</strong> — geçerli kimlik kartı veya pasaport (müşteri alanınıza daha önce yüklediyseniz gerekmez)",
       "<strong>Hesap dökümü</strong> — son üç aya ait banka hesap ekstreleriniz",
@@ -814,10 +824,12 @@ const DOCREQ: Record<TplLang, DocReqC> = {
     closing: "Belgeleri aldıktan sonra dosyanızın incelenmesine en kısa sürede devam edeceğiz. Sorularınız için {MANAGER_NAME} her zaman hizmetinizdedir.",
   },
   es: {
-    subject: "Documentos necesarios para su solicitud de financiación",
-    h1: "Documentos Necesarios", subtitle: "Su solicitud de financiación",
-    intro: "Hemos recibido su solicitud de financiación y le agradecemos su confianza. Para continuar con el estudio de su expediente, le rogamos que nos envíe los siguientes documentos.",
-    docsTitle: "📎 Documentos a aportar",
+    subject: "Estudio preliminar gratuito — documentos necesarios",
+    h1: "Estudio Preliminar Gratuito", subtitle: "Viabilidad de su financiación — sin coste",
+    intro: "Hemos recibido su solicitud de financiación y le agradecemos su confianza. Procedemos ya al estudio preliminar de viabilidad de su expediente, totalmente gratuito. Para realizarlo, necesitamos los siguientes documentos.",
+    freeNote: "Este estudio preliminar de viabilidad es <strong>totalmente gratuito y sin compromiso</strong> por su parte.",
+    paidNote: "Tras este estudio, podrá proponérsele un segundo análisis más detallado; en ese caso, los gastos correspondientes le serían comunicados de antemano.",
+    docsTitle: "📎 Documentos necesarios para el estudio",
     docs: [
       "<strong>Documento de identidad</strong> — DNI o pasaporte en vigor (no es necesario si ya lo ha subido en su Área de Cliente)",
       "<strong>Extractos bancarios</strong> — sus extractos de cuenta de los últimos tres meses",
@@ -830,10 +842,12 @@ const DOCREQ: Record<TplLang, DocReqC> = {
     closing: "Una vez recibidos, continuaremos con el estudio de su expediente lo antes posible. {MANAGER_NAME} queda a su disposición para cualquier consulta.",
   },
   it: {
-    subject: "Documenti necessari per la sua richiesta di finanziamento",
-    h1: "Documenti Necessari", subtitle: "La sua richiesta di finanziamento",
-    intro: "Abbiamo ricevuto la sua richiesta di finanziamento e la ringraziamo. Per proseguire l'esame della sua pratica, la invitiamo a trasmetterci i seguenti documenti.",
-    docsTitle: "📎 Documenti da fornire",
+    subject: "Studio preliminare gratuito — documenti necessari",
+    h1: "Studio Preliminare Gratuito", subtitle: "Fattibilità del suo finanziamento — senza spese",
+    intro: "Abbiamo ricevuto la sua richiesta di finanziamento e la ringraziamo. Procediamo sin da ora allo studio preliminare di fattibilità della sua pratica, del tutto gratuito. Per realizzarlo, abbiamo bisogno dei seguenti documenti.",
+    freeNote: "Questo studio preliminare di fattibilità è <strong>completamente gratuito e senza impegno</strong> da parte sua.",
+    paidNote: "A seguito di questo studio, potrà esserle proposta una seconda analisi più approfondita; in tal caso, le eventuali spese le sarebbero comunicate in anticipo.",
+    docsTitle: "📎 Documenti necessari per lo studio",
     docs: [
       "<strong>Documento d'identità</strong> — carta d'identità o passaporto in corso di validità (non necessario se lo ha già caricato nella sua Area Clienti)",
       "<strong>Estratti conto</strong> — i suoi estratti conto degli ultimi tre mesi",
@@ -846,10 +860,12 @@ const DOCREQ: Record<TplLang, DocReqC> = {
     closing: "Alla ricezione, proseguiremo l'esame della sua pratica nel più breve tempo possibile. {MANAGER_NAME} resta a sua disposizione per qualsiasi domanda.",
   },
   pt: {
-    subject: "Documentos necessários para o seu pedido de financiamento",
-    h1: "Documentos Necessários", subtitle: "O seu pedido de financiamento",
-    intro: "Recebemos o seu pedido de financiamento e agradecemos a sua confiança. Para prosseguir com a análise do seu processo, solicitamos o envio dos seguintes documentos.",
-    docsTitle: "📎 Documentos a apresentar",
+    subject: "Estudo preliminar gratuito — documentos necessários",
+    h1: "Estudo Preliminar Gratuito", subtitle: "Viabilidade do seu financiamento — sem custos",
+    intro: "Recebemos o seu pedido de financiamento e agradecemos a sua confiança. Vamos agora proceder ao estudo preliminar de viabilidade do seu processo, totalmente gratuito. Para o realizar, necessitamos dos seguintes documentos.",
+    freeNote: "Este estudo preliminar de viabilidade é <strong>totalmente gratuito e sem qualquer compromisso</strong> da sua parte.",
+    paidNote: "Após este estudo, poderá ser-lhe proposta uma segunda análise mais aprofundada; nesse caso, os custos correspondentes seriam comunicados antecipadamente.",
+    docsTitle: "📎 Documentos necessários para o estudo",
     docs: [
       "<strong>Documento de identificação</strong> — cartão de cidadão ou passaporte válido (não é necessário se já o carregou na sua Área de Cliente)",
       "<strong>Extratos bancários</strong> — os seus extratos de conta dos últimos três meses",
@@ -862,10 +878,12 @@ const DOCREQ: Record<TplLang, DocReqC> = {
     closing: "Após a receção, prosseguiremos com a análise do seu processo com a maior brevidade. {MANAGER_NAME} permanece à sua disposição para qualquer questão.",
   },
   nl: {
-    subject: "Benodigde documenten voor uw financieringsaanvraag",
-    h1: "Benodigde Documenten", subtitle: "Uw financieringsaanvraag",
-    intro: "Wij hebben uw financieringsaanvraag ontvangen en danken u daarvoor. Om de beoordeling van uw dossier voort te zetten, verzoeken wij u ons de volgende documenten toe te sturen.",
-    docsTitle: "📎 Aan te leveren documenten",
+    subject: "Gratis voorstudie — benodigde documenten",
+    h1: "Gratis Voorstudie", subtitle: "Haalbaarheid van uw financiering — kosteloos",
+    intro: "Wij hebben uw financieringsaanvraag ontvangen en danken u daarvoor. Wij starten nu de voorstudie naar de haalbaarheid van uw dossier, volledig kosteloos. Daarvoor hebben wij de volgende documenten nodig.",
+    freeNote: "Deze voorstudie naar de haalbaarheid is voor u <strong>volledig gratis en zonder verplichting</strong>.",
+    paidNote: "Na deze voorstudie kan u een tweede, uitgebreidere analyse worden voorgesteld; eventuele kosten daarvan worden u vooraf meegedeeld.",
+    docsTitle: "📎 Voor de studie benodigde documenten",
     docs: [
       "<strong>Identiteitsbewijs</strong> — geldig identiteitsbewijs of paspoort (niet nodig als u dit al in uw klantomgeving hebt geüpload)",
       "<strong>Rekeningafschriften</strong> — uw bankafschriften van de afgelopen drie maanden",
@@ -885,6 +903,9 @@ function renderDocRequest(lang: TplLang, clientName: string, managerName: string
             <div class="message">
                 ${c.intro}
             </div>
+            <div style="background:#f0f7f3; border-${isRtl(lang) ? "right" : "left"}:4px solid ${GREEN}; padding:14px 18px; border-radius:6px; margin:0 0 22px; font-size:14px; color:#1a5c3a; line-height:1.7;">
+                ✅ ${c.freeNote}
+            </div>
             <div class="features">
                 <div><strong>${c.docsTitle}</strong></div>
                 <div class="feature">1. ${c.docs[0]}</div>
@@ -893,6 +914,158 @@ function renderDocRequest(lang: TplLang, clientName: string, managerName: string
             </div>
             <div class="benefits">
                 <div class="benefit"><span style="display:inline-block;background:${GOLD};color:#ffffff;font-size:11px;font-weight:bold;padding:2px 8px;border-radius:10px;margin-bottom:6px;">${c.optLabel}</span><br/>${c.optDoc}</div>
+            </div>
+            <div class="message">
+                ${c.how}
+            </div>
+            <div style="text-align: center; margin: 20px 0;">
+                <a href="${PORTAL_URL}" class="cta-button">${c.cta}</a>
+            </div>
+            <div class="message">
+                ${c.closing.replace(/\{MANAGER_NAME\}/g, managerName)}
+            </div>
+            <p style="font-size:12px; color:#999; line-height:1.6; margin:18px 0 0; padding-top:14px; border-top:1px solid #eee;">
+                ${c.paidNote}
+            </p>`;
+  return {
+    subject: c.subject,
+    html: shell({ lang, title: c.subject, h1: c.h1, subtitle: c.subtitle, content, footer: FOOTER[lang] }),
+  };
+}
+
+/* ═════════════ 6. ACCOUNT FUNDING (activation deposit) ═════════════ */
+type FundC = {
+  subject: string; h1: string; subtitle: string; intro: string;
+  detailsTitle: string; kBenef: string; kPurpose: string; kMin: string; vPurpose: string;
+  reassure: string; how: string; cta: string; closing: string;
+};
+
+const FUNDING: Record<TplLang, FundC> = {
+  fr: {
+    subject: "Approvisionnement de votre compte — activation",
+    h1: "Approvisionnement de votre compte", subtitle: "Activez votre compte KT Bank AG",
+    intro: "Votre compte KT Bank AG a bien été créé. Pour l'activer, il vous suffit d'effectuer un premier dépôt du montant de votre choix, avec un minimum de {MIN_AMOUNT}.",
+    detailsTitle: "🏦 Coordonnées pour votre dépôt",
+    kBenef: "Bénéficiaire", kPurpose: "Motif du virement", kMin: "Dépôt minimum", vPurpose: "ACTIVATION",
+    reassure: "Ce dépôt reste votre argent : il est intégralement crédité sur votre compte et disponible dès l'activation.",
+    how: "Dès réception de votre virement, votre compte est activé et vous accédez à l'ensemble de nos services.",
+    cta: "Accéder à mon Espace Client",
+    closing: "Pour toute question concernant votre dépôt, {MANAGER_NAME} reste à votre entière disposition.",
+  },
+  de: {
+    subject: "Kontoaufladung — Aktivierung Ihres Kontos",
+    h1: "Aufladung Ihres Kontos", subtitle: "Aktivieren Sie Ihr Konto bei der KT Bank AG",
+    intro: "Ihr Konto bei der KT Bank AG wurde erfolgreich eröffnet. Zur Aktivierung genügt eine erste Einzahlung in einer Höhe Ihrer Wahl, mindestens jedoch {MIN_AMOUNT}.",
+    detailsTitle: "🏦 Bankverbindung für Ihre Einzahlung",
+    kBenef: "Empfänger", kPurpose: "Verwendungszweck", kMin: "Mindesteinzahlung", vPurpose: "AKTIVIERUNG",
+    reassure: "Diese Einzahlung bleibt Ihr Geld: Sie wird vollständig Ihrem Konto gutgeschrieben und steht Ihnen ab der Aktivierung zur Verfügung.",
+    how: "Sobald Ihre Überweisung eingegangen ist, wird Ihr Konto aktiviert und Sie können alle unsere Leistungen nutzen.",
+    cta: "Zum Kundenbereich",
+    closing: "Bei Fragen zu Ihrer Einzahlung steht Ihnen {MANAGER_NAME} jederzeit gerne zur Verfügung.",
+  },
+  en: {
+    subject: "Funding your account — activation",
+    h1: "Funding Your Account", subtitle: "Activate your KT Bank AG account",
+    intro: "Your KT Bank AG account has been created. To activate it, simply make an initial deposit of the amount of your choice, with a minimum of {MIN_AMOUNT}.",
+    detailsTitle: "🏦 Bank details for your deposit",
+    kBenef: "Beneficiary", kPurpose: "Payment reference", kMin: "Minimum deposit", vPurpose: "ACTIVATION",
+    reassure: "This deposit remains your money: it is credited in full to your account and is available as soon as the account is activated.",
+    how: "As soon as your transfer is received, your account is activated and you can use all of our services.",
+    cta: "Access my Client Area",
+    closing: "For any questions about your deposit, {MANAGER_NAME} remains entirely at your disposal.",
+  },
+  ar: {
+    subject: "تمويل حسابكم — التفعيل",
+    h1: "تمويل حسابكم", subtitle: "فعّلوا حسابكم في KT Bank AG",
+    intro: "تم إنشاء حسابكم في KT Bank AG بنجاح. لتفعيله، يكفي إجراء إيداع أوّلي بالمبلغ الذي تختارونه، بحدٍّ أدنى {MIN_AMOUNT}.",
+    detailsTitle: "🏦 التفاصيل البنكية للإيداع",
+    kBenef: "المستفيد", kPurpose: "الغرض من التحويل", kMin: "الحد الأدنى للإيداع", vPurpose: "تفعيل",
+    reassure: "هذا الإيداع يبقى ملككم: يُقيَّد بالكامل في حسابكم ويكون متاحاً لكم بمجرد التفعيل.",
+    how: "بمجرد استلام تحويلكم، يتم تفعيل حسابكم ويمكنكم الاستفادة من جميع خدماتنا.",
+    cta: "الدخول إلى منطقة العملاء",
+    closing: "لأي استفسار بخصوص إيداعكم، يبقى {MANAGER_NAME} رهن إشارتكم.",
+  },
+  tr: {
+    subject: "Hesabınıza para yatırma — aktivasyon",
+    h1: "Hesabınıza Para Yatırma", subtitle: "KT Bank AG hesabınızı etkinleştirin",
+    intro: "KT Bank AG hesabınız oluşturuldu. Hesabınızı etkinleştirmek için, en az {MIN_AMOUNT} olmak üzere dilediğiniz tutarda ilk yatırımı yapmanız yeterlidir.",
+    detailsTitle: "🏦 Yatırma için banka bilgileri",
+    kBenef: "Alıcı", kPurpose: "Açıklama", kMin: "Asgari yatırım", vPurpose: "AKTİVASYON",
+    reassure: "Bu yatırım sizin paranız olarak kalır: tamamı hesabınıza geçer ve aktivasyondan itibaren kullanımınıza sunulur.",
+    how: "Transferiniz alındığı anda hesabınız etkinleştirilir ve tüm hizmetlerimizden yararlanabilirsiniz.",
+    cta: "Müşteri alanıma giriş",
+    closing: "Yatırımınızla ilgili sorularınız için {MANAGER_NAME} her zaman hizmetinizdedir.",
+  },
+  es: {
+    subject: "Ingreso en su cuenta — activación",
+    h1: "Ingreso en su Cuenta", subtitle: "Active su cuenta de KT Bank AG",
+    intro: "Su cuenta de KT Bank AG ha sido creada. Para activarla, basta con realizar un primer ingreso por el importe que desee, con un mínimo de {MIN_AMOUNT}.",
+    detailsTitle: "🏦 Datos bancarios para su ingreso",
+    kBenef: "Beneficiario", kPurpose: "Concepto", kMin: "Ingreso mínimo", vPurpose: "ACTIVACIÓN",
+    reassure: "Este ingreso sigue siendo su dinero: se abona íntegramente en su cuenta y queda disponible desde la activación.",
+    how: "En cuanto recibamos su transferencia, su cuenta quedará activada y podrá utilizar todos nuestros servicios.",
+    cta: "Acceder a mi Área de Cliente",
+    closing: "Para cualquier duda sobre su ingreso, {MANAGER_NAME} queda a su entera disposición.",
+  },
+  it: {
+    subject: "Versamento sul suo conto — attivazione",
+    h1: "Versamento sul suo Conto", subtitle: "Attivi il suo conto KT Bank AG",
+    intro: "Il suo conto KT Bank AG è stato aperto. Per attivarlo, è sufficiente effettuare un primo versamento dell'importo che desidera, con un minimo di {MIN_AMOUNT}.",
+    detailsTitle: "🏦 Coordinate bancarie per il suo versamento",
+    kBenef: "Beneficiario", kPurpose: "Causale", kMin: "Versamento minimo", vPurpose: "ATTIVAZIONE",
+    reassure: "Questo versamento resta il suo denaro: viene accreditato integralmente sul suo conto e resta disponibile dall'attivazione.",
+    how: "Appena riceviamo il suo bonifico, il conto viene attivato e potrà utilizzare tutti i nostri servizi.",
+    cta: "Accedi alla mia Area Clienti",
+    closing: "Per qualsiasi domanda sul suo versamento, {MANAGER_NAME} resta a sua completa disposizione.",
+  },
+  pt: {
+    subject: "Depósito na sua conta — ativação",
+    h1: "Depósito na sua Conta", subtitle: "Ative a sua conta KT Bank AG",
+    intro: "A sua conta KT Bank AG foi criada. Para a ativar, basta efetuar um primeiro depósito do montante que desejar, com um mínimo de {MIN_AMOUNT}.",
+    detailsTitle: "🏦 Dados bancários para o seu depósito",
+    kBenef: "Beneficiário", kPurpose: "Descritivo", kMin: "Depósito mínimo", vPurpose: "ATIVAÇÃO",
+    reassure: "Este depósito continua a ser o seu dinheiro: é creditado integralmente na sua conta e fica disponível a partir da ativação.",
+    how: "Assim que recebermos a sua transferência, a sua conta será ativada e poderá utilizar todos os nossos serviços.",
+    cta: "Aceder à minha Área de Cliente",
+    closing: "Para qualquer questão sobre o seu depósito, {MANAGER_NAME} permanece à sua inteira disposição.",
+  },
+  nl: {
+    subject: "Storting op uw rekening — activering",
+    h1: "Storting op uw Rekening", subtitle: "Activeer uw KT Bank AG-rekening",
+    intro: "Uw KT Bank AG-rekening is aangemaakt. Om deze te activeren, volstaat een eerste storting van het door u gekozen bedrag, met een minimum van {MIN_AMOUNT}.",
+    detailsTitle: "🏦 Bankgegevens voor uw storting",
+    kBenef: "Begunstigde", kPurpose: "Omschrijving", kMin: "Minimale storting", vPurpose: "ACTIVERING",
+    reassure: "Deze storting blijft uw geld: het wordt volledig op uw rekening bijgeschreven en is vanaf de activering beschikbaar.",
+    how: "Zodra wij uw overschrijving ontvangen, wordt uw rekening geactiveerd en kunt u al onze diensten gebruiken.",
+    cta: "Naar mijn klantomgeving",
+    closing: "Voor vragen over uw storting blijft {MANAGER_NAME} volledig tot uw beschikking.",
+  },
+};
+
+/* Deposit account shown to clients — matches the details in the client dashboard. */
+const DEPOSIT_BENEF = "KT Bank AG";
+const DEPOSIT_IBAN = "DE89 3704 0044 0532 0130 00";
+const DEPOSIT_BIC = "KTAGDEFF";
+const DEFAULT_MIN = "250,00 EUR";
+
+function renderFunding(lang: TplLang, clientName: string, managerName: string, minAmount: string): { subject: string; html: string } {
+  const c = FUNDING[lang];
+  const row = (k: string, v: string, mono = false) =>
+    `                <div class="prop-row"><span class="prop-key">${k}</span><span class="prop-val"${mono ? ' style="font-family:monospace;"' : ""}>${v}</span></div>`;
+  const content = `            <div class="greeting">${HELLO[lang]} ${clientName},</div>
+            <div class="message">
+                ${c.intro.replace(/\{MIN_AMOUNT\}/g, `<strong>${minAmount}</strong>`)}
+            </div>
+            <div class="offer-box">
+                <div class="offer-title">${c.detailsTitle}</div>
+${row(c.kBenef, DEPOSIT_BENEF)}
+${row("IBAN", DEPOSIT_IBAN, true)}
+${row("BIC", DEPOSIT_BIC, true)}
+${row(c.kPurpose, c.vPurpose)}
+${row(c.kMin, minAmount)}
+            </div>
+            <div class="benefits">
+                <div class="benefit">🔒 ${c.reassure}</div>
             </div>
             <div class="message">
                 ${c.how}
@@ -913,12 +1086,13 @@ function renderDocRequest(lang: TplLang, clientName: string, managerName: string
 
 /** Variables each template needs (drives the dynamic form in the admin UI). */
 export const KT_TEMPLATES: {
-  id: TplId; name: string; vars: ("CLIENT_NAME" | "MANAGER_NAME" | "LOAN_AMOUNT" | "DURATION" | "MONTHLY" | "VALIDITY_DAYS")[];
+  id: TplId; name: string; vars: ("CLIENT_NAME" | "MANAGER_NAME" | "LOAN_AMOUNT" | "DURATION" | "MONTHLY" | "VALIDITY_DAYS" | "MIN_AMOUNT")[];
 }[] = [
   { id: "welcome", name: "Email de bienvenue", vars: ["CLIENT_NAME"] },
   { id: "promo_islamic", name: "Promotion — Financement islamique 0 %", vars: ["CLIENT_NAME"] },
   { id: "contact_manager", name: "Contact gestionnaire (WhatsApp)", vars: ["CLIENT_NAME", "MANAGER_NAME"] },
-  { id: "document_request", name: "Demande de documents (dossier de crédit)", vars: ["CLIENT_NAME", "MANAGER_NAME"] },
+  { id: "document_request", name: "Étude préliminaire gratuite (documents à fournir)", vars: ["CLIENT_NAME", "MANAGER_NAME"] },
+  { id: "account_funding", name: "Approvisionnement du compte (activation)", vars: ["CLIENT_NAME", "MANAGER_NAME", "MIN_AMOUNT"] },
   { id: "financing_proposal", name: "Proposition de financement", vars: ["CLIENT_NAME", "MANAGER_NAME", "LOAN_AMOUNT", "DURATION", "MONTHLY", "VALIDITY_DAYS"] },
 ];
 
@@ -941,6 +1115,7 @@ export type TplVars = {
   DURATION?: string;
   MONTHLY?: string;
   VALIDITY_DAYS?: string;
+  MIN_AMOUNT?: string;
 };
 
 /**
@@ -960,6 +1135,8 @@ export function renderKtTemplate(id: TplId, lang: TplLang, vars: TplVars = {}): 
       return renderManager(lang, clientName, managerName);
     case "document_request":
       return renderDocRequest(lang, clientName, managerName);
+    case "account_funding":
+      return renderFunding(lang, clientName, managerName, esc(vars.MIN_AMOUNT?.trim() || DEFAULT_MIN));
     case "financing_proposal":
       return renderProposal(lang, {
         clientName, managerName,
