@@ -97,7 +97,7 @@ function shell(opts: {
 ${content}
         </div>
         <div class="footer">
-            © 2026 KT Bank AG | BIC: KTAGDEFF | ${footer}
+            © 2026 KT Bank AG | ${footer}
         </div>
     </div>
 </body>
