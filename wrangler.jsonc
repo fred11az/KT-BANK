@@ -13,5 +13,11 @@
   },
   "images": {
     "binding": "IMAGES"
-  }
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "kt-bank"
+    }
+  ]
 }
