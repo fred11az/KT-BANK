@@ -29,8 +29,28 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## Déploiement sur Cloudflare (Workers + OpenNext)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Le projet est déployé avec [`@opennextjs/cloudflare`](https://opennext.js.org/cloudflare) (config : `wrangler.jsonc`, `open-next.config.ts`).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm ci
+npx wrangler login            # ou export CLOUDFLARE_API_TOKEN=... (en CI)
+```
+
+Secrets à définir (une fois) :
+
+```bash
+for k in KT_ADMIN_KEY SUPABASE_SERVICE_ROLE_KEY RESEND_API_KEY RESEND_ADMIN_EMAIL CF_WEBHOOK_SECRET; do
+  npx wrangler secret put $k
+done
+```
+
+Les variables `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_ANON_KEY` sont inlinées au build : les mettre dans `.env.local` (ou dans les variables de build Cloudflare) avant de déployer.
+
+```bash
+npm run preview   # test local dans workerd
+npm run deploy    # build + déploiement
+```
+
+Le worker d'email (`cloudflare-worker/`) se déploie séparément : `cd cloudflare-worker && npx wrangler deploy`.
