@@ -15,13 +15,23 @@ function LoginScreen({ onLogin }: { onLogin: (t: string) => void }) {
   async function tryLogin() {
     if (!pw) return;
     setLoading(true); setErr("");
-    const res = await fetch("/api/kt/admin/clients", {
-      headers: { Authorization: `Bearer ${pw}` },
-    });
-    setLoading(false);
-    if (res.status === 401) { setErr("Mot de passe incorrect"); return; }
-    sessionStorage.setItem("kt_admin_token", pw);
-    onLogin(pw);
+    try {
+      const res = await fetch("/api/kt/admin/ping", {
+        headers: { Authorization: `Bearer ${pw}` },
+      });
+      if (res.status === 429) {
+        const secs = Number(res.headers.get("Retry-After")) || 900;
+        setErr(`Trop de tentatives. Réessayez dans ${Math.ceil(secs / 60)} min.`);
+        return;
+      }
+      if (!res.ok) { setErr("Mot de passe incorrect"); return; }
+      sessionStorage.setItem("kt_admin_token", pw);
+      onLogin(pw);
+    } catch {
+      setErr("Erreur réseau, réessayez.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -124,9 +134,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [isMobile, setIsMobile] = useState(true); // start mobile-first to avoid flash
 
   useEffect(() => {
+    // Verify a stored token once before rendering the admin pages, so a stale
+    // token cannot fire several failing requests (each counts toward the
+    // 3-attempt IP limit).
     const stored = sessionStorage.getItem("kt_admin_token");
-    setToken(stored);
-    setChecked(true);
+    if (!stored) { setChecked(true); return; }
+    fetch("/api/kt/admin/ping", { headers: { Authorization: `Bearer ${stored}` } })
+      .then((r) => {
+        if (r.ok) setToken(stored);
+        else sessionStorage.removeItem("kt_admin_token");
+      })
+      .catch(() => {})
+      .finally(() => setChecked(true));
   }, []);
 
   useEffect(() => {

@@ -2,14 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 import { send as sendEmail } from "@/lib/email/send";
 import { bankAdminMessageEmail } from "@/lib/email/templates";
-
-function auth(req: NextRequest) {
-  const key = process.env.KT_ADMIN_KEY;
-  return key && req.headers.get("Authorization") === `Bearer ${key}`;
-}
+import { adminGuard } from "@/lib/adminAuth";
 
 export async function GET(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
   const supabase = getSupabase();
   const threadId = new URL(req.url).searchParams.get("thread_id");
 
@@ -38,7 +35,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
   const supabase = getSupabase();
   const body = await req.json();
   const { thread_id, status } = body;
@@ -55,7 +53,8 @@ export async function PATCH(req: NextRequest) {
 type AttachmentMeta = { url: string; name: string; type: string };
 
 export async function POST(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
   const supabase = getSupabase();
   const { to, subject, body, body_html, thread_id, client_name, attachments, raw, from_email, from_role } = await req.json() as {
     to: string; subject: string; body?: string; body_html?: string;
@@ -148,7 +147,8 @@ export async function POST(req: NextRequest) {
 // Delete a single message (?message_id=) or a whole thread (?thread_id=).
 // Only removes the local inbox record — the already-sent email is not recalled.
 export async function DELETE(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
   const supabase = getSupabase();
   const url = new URL(req.url);
   const messageId = url.searchParams.get("message_id");

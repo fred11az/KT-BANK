@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
-
-function auth(req: NextRequest) {
-  const key = process.env.KT_ADMIN_KEY;
-  return key && req.headers.get("Authorization") === `Bearer ${key}`;
-}
+import { adminGuard } from "@/lib/adminAuth";
 
 export async function GET(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
   const supabase = getSupabase();
   const { searchParams } = new URL(req.url);
   const q = searchParams.get("q") ?? "";

@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
+import { adminGuard } from "@/lib/adminAuth";
 
 const SENDER_DOMAIN = "kt-bank-ag.com";
 
-function auth(req: NextRequest) {
-  const key = process.env.KT_ADMIN_KEY;
-  return key && req.headers.get("Authorization") === `Bearer ${key}`;
-}
-
 // List sender identities
 export async function GET(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
   const supabase = getSupabase();
   const { data } = await supabase
     .from("kt_sender_identities")
@@ -21,7 +18,8 @@ export async function GET(req: NextRequest) {
 
 // Add a sender identity
 export async function POST(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
   const supabase = getSupabase();
   const body = await req.json().catch(() => ({}));
   const email = String(body.email ?? "").trim().toLowerCase();
@@ -43,7 +41,8 @@ export async function POST(req: NextRequest) {
 
 // Toggle active / rename
 export async function PATCH(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
   const supabase = getSupabase();
   const body = await req.json().catch(() => ({}));
   if (!body.id) return NextResponse.json({ error: "id requis" }, { status: 400 });
@@ -56,7 +55,8 @@ export async function PATCH(req: NextRequest) {
 
 // Remove a sender identity
 export async function DELETE(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
   const supabase = getSupabase();
   const id = new URL(req.url).searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id requis" }, { status: 400 });

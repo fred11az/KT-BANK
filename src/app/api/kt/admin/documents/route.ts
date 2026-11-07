@@ -6,14 +6,11 @@ import {
 } from "@/lib/document-templates";
 import type { SignatureOptions } from "@/lib/document-templates";
 import { sendDocumentToClient } from "@/lib/email/send";
-
-function auth(req: NextRequest) {
-  const key = process.env.KT_ADMIN_KEY;
-  return key && req.headers.get("Authorization") === `Bearer ${key}`;
-}
+import { adminGuard } from "@/lib/adminAuth";
 
 export async function GET(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
 
   const supabase = getSupabase();
   const url = new URL(req.url);
@@ -38,7 +35,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
 
   const body = await req.json();
   const { client_id, type, title, description, loan, body_html, signature_options } = body as {
@@ -131,7 +129,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
   const { id } = await req.json();
   if (!id) return NextResponse.json({ error: "id requis" }, { status: 400 });
   const supabase = getSupabaseAdmin();

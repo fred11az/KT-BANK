@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 import { sendTransferStatus } from "@/lib/email/send";
-
-function auth(req: NextRequest) {
-  const key = process.env.KT_ADMIN_KEY;
-  return key && req.headers.get("Authorization") === `Bearer ${key}`;
-}
+import { adminGuard } from "@/lib/adminAuth";
 
 export async function GET(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
   const supabase = getSupabase();
 
   const url = new URL(req.url);
@@ -30,7 +27,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
   const supabase = getSupabase();
   const { transfer_id, transfer_status } = await req.json();
 

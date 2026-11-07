@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { adminGuard } from "@/lib/adminAuth";
 
 const BUCKET = "admin-strategy";
 const MAX_MB = 25;
@@ -13,11 +14,6 @@ const ALLOWED_EXACT = new Set([
   "text/plain",
 ]);
 
-function auth(req: NextRequest) {
-  const key = process.env.KT_ADMIN_KEY;
-  return key && req.headers.get("Authorization") === `Bearer ${key}`;
-}
-
 async function ensureBucket() {
   const admin = getSupabaseAdmin();
   // Idempotent: createBucket errors if it already exists — ignore that.
@@ -26,7 +22,8 @@ async function ensureBucket() {
 }
 
 export async function POST(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
 
   const formData = await req.formData();
   const file = formData.get("file") as File | null;

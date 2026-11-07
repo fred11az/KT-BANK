@@ -6,11 +6,7 @@ import {
   sendBusinessApproved, sendBusinessRejected,
 } from "@/lib/email/send";
 import { createNotification } from "@/lib/notify";
-
-function auth(req: NextRequest) {
-  const key = process.env.KT_ADMIN_KEY;
-  return key && req.headers.get("Authorization") === `Bearer ${key}`;
-}
+import { adminGuard } from "@/lib/adminAuth";
 
 function generateIban() {
   const bban = Array.from({ length: 18 }, () => Math.floor(Math.random() * 10)).join("");
@@ -36,7 +32,8 @@ function bizNotif(lang: string, approved: boolean, company?: string) {
 }
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
   const { id } = await params;
   const supabase = getSupabase();
 
@@ -70,7 +67,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
   const { id } = await params;
   const supabase = getSupabase();
   const body = await req.json();
@@ -322,7 +320,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
   const { id } = await params;
   const adminDb = getSupabaseAdmin();
 

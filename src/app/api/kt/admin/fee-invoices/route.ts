@@ -2,13 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { sendFeeInvoice } from "@/lib/email/send";
 import { createNotification } from "@/lib/notify";
+import { adminGuard } from "@/lib/adminAuth";
 
 const DASH = "https://kt-bank-ag.com/client/dashboard";
-
-function auth(req: NextRequest) {
-  const key = process.env.KT_ADMIN_KEY;
-  return key && req.headers.get("Authorization") === `Bearer ${key}`;
-}
 
 // Localized in-app notification copy for a new fee invoice
 function notifCopy(lang: string, amount: number, currency: string) {
@@ -29,7 +25,8 @@ function notifCopy(lang: string, amount: number, currency: string) {
 
 // List invoices (optionally filtered by profile_id)
 export async function GET(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
   const admin = getSupabaseAdmin();
   const profileId = new URL(req.url).searchParams.get("profile_id");
 
@@ -46,7 +43,8 @@ export async function GET(req: NextRequest) {
 
 // Create a fee invoice for a client
 export async function POST(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
   const admin = getSupabaseAdmin();
   const body = await req.json().catch(() => ({}));
   const { profile_id, title, description, amount, currency, methods } = body as Record<string, unknown>;
@@ -112,7 +110,8 @@ export async function POST(req: NextRequest) {
 
 // Update an invoice: mark paid/cancelled, or edit amount/title/description
 export async function PATCH(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
   const admin = getSupabaseAdmin();
   const body = await req.json().catch(() => ({}));
   const { id, status, title, description, amount, methods } = body as Record<string, unknown>;
@@ -134,7 +133,8 @@ export async function PATCH(req: NextRequest) {
 
 // Delete an invoice
 export async function DELETE(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
   const admin = getSupabaseAdmin();
   const id = new URL(req.url).searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id requis" }, { status: 400 });

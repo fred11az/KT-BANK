@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { adminGuard } from "@/lib/adminAuth";
 
 const BUCKET = "admin-strategy";
 const SIGNED_TTL = 3600; // 1h
-
-function auth(req: NextRequest) {
-  const key = process.env.KT_ADMIN_KEY;
-  return key && req.headers.get("Authorization") === `Bearer ${key}`;
-}
 
 type Row = {
   id: string; code_name: string; kind: string; body: string | null;
@@ -17,7 +13,8 @@ type Row = {
 
 // List messages (oldest → newest) with fresh signed media URLs.
 export async function GET(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
   const admin = getSupabaseAdmin();
 
   const sinceId = new URL(req.url).searchParams.get("since"); // optional: only newer than a created_at
@@ -53,7 +50,8 @@ export async function GET(req: NextRequest) {
 
 // Post a message (text, image, file or voice note).
 export async function POST(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
   const admin = getSupabaseAdmin();
   const body = await req.json().catch(() => ({}));
   const { code_name, kind, body: text, media_path, media_name, media_mime, duration_ms } = body as Record<string, unknown>;
@@ -81,7 +79,8 @@ export async function POST(req: NextRequest) {
 
 // Delete a message (and its media file).
 export async function DELETE(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
   const admin = getSupabaseAdmin();
   const id = new URL(req.url).searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id requis" }, { status: 400 });

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 import { send } from "@/lib/email/send";
+import { adminGuard } from "@/lib/adminAuth";
 
 type Lang = "de" | "fr" | "en" | "ar" | "tr" | "es" | "it" | "pt" | "nl";
 const LOCALE_MAP: Record<Lang, string> = {
@@ -12,13 +13,9 @@ function L<T>(lang: string, variants: Partial<Record<Lang, T>> & { de: T }): T {
   return (variants[lang as Lang] ?? variants.de) as T;
 }
 
-function auth(req: NextRequest) {
-  const key = process.env.KT_ADMIN_KEY;
-  return key && req.headers.get("Authorization") === `Bearer ${key}`;
-}
-
 export async function GET(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
   const supabase = getSupabase();
   const url = new URL(req.url);
   const status = url.searchParams.get("status");
@@ -38,7 +35,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const denied = await adminGuard(req);
+  if (denied) return denied;
   const supabase = getSupabase();
   const body = await req.json();
   const { id, status, rejection_reason, admin_notes } = body;
