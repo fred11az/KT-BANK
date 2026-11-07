@@ -231,6 +231,10 @@ export async function POST(req: NextRequest) {
       bic: "KTAGDEFF",
       account_id: account.id,
     };
+    const docLang = lang ?? "de";
+    const kontoHtml = genKontoeröffnung(clientInfo, {}, docLang);
+    const willkommenHtml = genWillkommen(clientInfo, {}, docLang);
+
     const adminDb = getSupabaseAdmin();
     await adminDb.from("kt_documents").insert([
       {
@@ -238,7 +242,7 @@ export async function POST(req: NextRequest) {
         type: "kontoeroeffnung",
         title: "Kontoeröffnungsbestätigung",
         description: "Automatisch generiert bei Kontoeröffnung",
-        content_html: genKontoeröffnung(clientInfo),
+        content_html: kontoHtml,
         status: "active",
       },
       {
@@ -246,15 +250,22 @@ export async function POST(req: NextRequest) {
         type: "willkommen",
         title: "Willkommensschreiben",
         description: "Ihr Willkommensschreiben von KT Bank AG",
-        content_html: genWillkommen(clientInfo),
+        content_html: willkommenHtml,
         status: "active",
       },
     ]).then(({ error: docErr }) => { if (docErr) console.error("[register docs]", docErr); });
 
     const prenom = profile.prenom ?? "Kunde";
 
+    // Attach the two generated documents to the welcome email so clients
+    // have them even if they never open the Documents tab in-app.
+    const docAttachments = [
+      { filename: "Kontoeroeffnungsbestaetigung.html", content: Buffer.from(kontoHtml, "utf-8").toString("base64") },
+      { filename: "Willkommensschreiben.html", content: Buffer.from(willkommenHtml, "utf-8").toString("base64") },
+    ];
+
     await Promise.all([
-      sendWelcome(email, prenom, iban, lang ?? "de"),
+      sendWelcome(email, prenom, iban, docLang, docAttachments),
       sendAdminNewClient({
         prenom: profile.prenom ?? "",
         nom: profile.nom ?? "",

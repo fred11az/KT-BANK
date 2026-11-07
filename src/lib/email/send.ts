@@ -43,7 +43,7 @@ export function safeFrom(from?: string | null): string {
   return from.includes("<") ? from : `KT Bank AG <${email}>`;
 }
 
-type Attachment = { filename: string; path: string };
+type Attachment = { filename: string; path: string } | { filename: string; content: string };
 
 export async function send(to: string, subject: string, html: string, attachments?: Attachment[], from?: string) {
   try {
@@ -69,9 +69,9 @@ export async function sendOtpLogin(email: string, code: string, lang: Lang = "de
   return send(email, subject, html);
 }
 
-export async function sendWelcome(email: string, prenom: string, iban: string, lang: Lang = "de") {
+export async function sendWelcome(email: string, prenom: string, iban: string, lang: Lang = "de", attachments?: Attachment[]) {
   const { subject, html } = welcomeEmail(prenom, iban, lang);
-  return send(email, subject, html);
+  return send(email, subject, html, attachments);
 }
 
 export async function sendTransactionNotification(
@@ -214,7 +214,13 @@ export async function sendDocumentToClient(
   opts: { prenom: string; docTitle: string; docType: string; lang?: Lang; contentHtml?: string }
 ) {
   const { subject, html } = documentNotificationEmail(opts);
-  return send(email, subject, html);
+  const attachments: Attachment[] | undefined = opts.contentHtml
+    ? [{
+        filename: `${(opts.docTitle || opts.docType || "Dokument").replace(/[^\w\- ]+/g, "").trim() || "Dokument"}.html`,
+        content: Buffer.from(opts.contentHtml, "utf-8").toString("base64"),
+      }]
+    : undefined;
+  return send(email, subject, html, attachments);
 }
 
 export async function sendBusinessApproved(email: string, opts: { prenom: string; companyName?: string; iban?: string; lang?: Lang }) {
