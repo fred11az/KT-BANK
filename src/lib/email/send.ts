@@ -214,12 +214,19 @@ export async function sendDocumentToClient(
   opts: { prenom: string; docTitle: string; docType: string; lang?: Lang; contentHtml?: string }
 ) {
   const { subject, html } = documentNotificationEmail(opts);
-  const attachments: Attachment[] | undefined = opts.contentHtml
-    ? [{
-        filename: `${(opts.docTitle || opts.docType || "Dokument").replace(/[^\w\- ]+/g, "").trim() || "Dokument"}.html`,
-        content: Buffer.from(opts.contentHtml, "utf-8").toString("base64"),
-      }]
-    : undefined;
+  const name = (opts.docTitle || opts.docType || "Dokument").replace(/[^\w\- ]+/g, "").trim() || "Dokument";
+
+  let attachments: Attachment[] | undefined;
+  if (opts.contentHtml) {
+    try {
+      const { htmlToPdf } = await import("@/lib/pdf");
+      const pdf = await htmlToPdf(opts.contentHtml);
+      attachments = [{ filename: `${name}.pdf`, content: Buffer.from(pdf).toString("base64") }];
+    } catch (err) {
+      console.error("[sendDocumentToClient] PDF generation failed, falling back to HTML:", err);
+      attachments = [{ filename: `${name}.html`, content: Buffer.from(opts.contentHtml, "utf-8").toString("base64") }];
+    }
+  }
   return send(email, subject, html, attachments);
 }
 

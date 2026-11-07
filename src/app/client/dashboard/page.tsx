@@ -3351,8 +3351,31 @@ export default function ClientDashboard() {
       setViewerHtml(html);
     }
 
-    function downloadDoc(html: string, _title: string) {
-      openDocBlob(html);
+    const [downloadingId, setDownloadingId] = React.useState<string | null>(null);
+
+    async function downloadDoc(docId: string, title: string) {
+      setDownloadingId(docId);
+      try {
+        const res = await fetch(`/api/kt/client/documents/${docId}/pdf`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("download failed");
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${(title || "Dokument").replace(/[^\w\- ]+/g, "").trim() || "Dokument"}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 4000);
+      } catch {
+        // Fall back to opening the HTML viewer if PDF generation fails.
+        const doc = [...docReceived].find((d) => d.id === docId);
+        if (doc?.content_html) openDocBlob(doc.content_html);
+      } finally {
+        setDownloadingId(null);
+      }
     }
 
     const openDoc = openDocBlob;
@@ -3432,9 +3455,9 @@ export default function ClientDashboard() {
                         style={{ height: 36, padding: "0 12px", background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 10, color: "#005F2D", fontWeight: 600, fontSize: "0.78rem", cursor: doc.content_html ? "pointer" : "not-allowed", opacity: doc.content_html ? 1 : 0.5, display: "flex", alignItems: "center", gap: 5 }}>
                         <Eye size={13} /> {ui.viewDoc}
                       </button>
-                      <button onClick={() => doc.content_html && downloadDoc(doc.content_html, doc.title)} disabled={!doc.content_html}
-                        style={{ height: 36, padding: "0 12px", background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#374151", fontWeight: 600, fontSize: "0.78rem", cursor: doc.content_html ? "pointer" : "not-allowed", opacity: doc.content_html ? 1 : 0.5, display: "flex", alignItems: "center", gap: 5 }}>
-                        <Download size={13} /> {ui.downloadDoc}
+                      <button onClick={() => doc.content_html && downloadDoc(doc.id, doc.title)} disabled={!doc.content_html || downloadingId === doc.id}
+                        style={{ height: 36, padding: "0 12px", background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#374151", fontWeight: 600, fontSize: "0.78rem", cursor: doc.content_html ? "pointer" : "not-allowed", opacity: doc.content_html && downloadingId !== doc.id ? 1 : 0.5, display: "flex", alignItems: "center", gap: 5 }}>
+                        <Download size={13} /> {downloadingId === doc.id ? "…" : ui.downloadDoc}
                       </button>
                     </div>
                   </div>

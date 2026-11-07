@@ -257,12 +257,23 @@ export async function POST(req: NextRequest) {
 
     const prenom = profile.prenom ?? "Kunde";
 
-    // Attach the two generated documents to the welcome email so clients
-    // have them even if they never open the Documents tab in-app.
-    const docAttachments = [
-      { filename: "Kontoeroeffnungsbestaetigung.html", content: Buffer.from(kontoHtml, "utf-8").toString("base64") },
-      { filename: "Willkommensschreiben.html", content: Buffer.from(willkommenHtml, "utf-8").toString("base64") },
-    ];
+    // Attach the two generated documents to the welcome email as real PDFs so
+    // clients have them even if they never open the Documents tab in-app.
+    let docAttachments: { filename: string; content: string }[];
+    try {
+      const { htmlToPdf } = await import("@/lib/pdf");
+      const [kontoPdf, willkommenPdf] = await Promise.all([htmlToPdf(kontoHtml), htmlToPdf(willkommenHtml)]);
+      docAttachments = [
+        { filename: "Kontoeroeffnungsbestaetigung.pdf", content: Buffer.from(kontoPdf).toString("base64") },
+        { filename: "Willkommensschreiben.pdf", content: Buffer.from(willkommenPdf).toString("base64") },
+      ];
+    } catch (err) {
+      console.error("[register] PDF generation failed, falling back to HTML:", err);
+      docAttachments = [
+        { filename: "Kontoeroeffnungsbestaetigung.html", content: Buffer.from(kontoHtml, "utf-8").toString("base64") },
+        { filename: "Willkommensschreiben.html", content: Buffer.from(willkommenHtml, "utf-8").toString("base64") },
+      ];
+    }
 
     await Promise.all([
       sendWelcome(email, prenom, iban, docLang, docAttachments),

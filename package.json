@@ -11,6 +11,7 @@
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
   },
   "dependencies": {
+    "@cloudflare/puppeteer": "^1.4.0",
     "@fontsource/inter": "^5.2.8",
     "@opennextjs/cloudflare": "^1.20.10",
     "@radix-ui/react-accordion": "^1.2.12",
