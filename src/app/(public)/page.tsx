@@ -1,105 +1,262 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { useLanguage } from "@/contexts/LanguageContext";
+import type { Lang } from "@/lib/translations";
 
-const PRODUCT_ICONS = [
-  "/icons/compte-courant.svg",
-  "/icons/compte-participation.svg",
-  "/icons/mastercard.svg",
-  "/icons/compte-devises.svg",
-];
-const PRODUCT_HREFS = [
-  "/products/giro-konto",
-  "/products/festgeld-konto",
-  "/products/jetzz-card",
-  "/products/devises",
+const DARK_GREEN = "#063A20";
+const GREEN = "#005F2D";
+const MINT = "#E9F2EC";
+const BEIGE = "#F2EDE4";
+const BORDER = "#E5E7EB";
+
+const APPLE_URL = "https://apps.apple.com/de/app/kt-bank-mobile-banking/id1345993618";
+const PLAY_URL = "https://play.google.com/store/apps/details?id=de.kuveytturk.mobil";
+
+const LANGUAGES: { code: Lang; label: string }[] = [
+  { code: "de", label: "Deutsch" },
+  { code: "tr", label: "Türkçe" },
+  { code: "en", label: "English" },
+  { code: "ar", label: "العربية" },
 ];
 
-function SectionImage({ src, alt, height = 260 }: { src: string; alt: string; height?: number }) {
-  return <img src={src} alt={alt} style={{ width:"100%", height, objectFit:"cover", display:"block" }}/>;
+const CURRENCIES = ["TL", "USD", "GBP", "CHF"];
+
+function pillPrimary(bg: string, color: string): React.CSSProperties {
+  return {
+    display: "flex", justifyContent: "center", alignItems: "center", width: "100%",
+    padding: "18px 24px", borderRadius: 999, background: bg, color, fontWeight: 700,
+    fontSize: "1rem", textDecoration: "none", boxSizing: "border-box", border: "none",
+  };
+}
+
+function pillSecondary(): React.CSSProperties {
+  return {
+    display: "flex", justifyContent: "center", alignItems: "center", width: "100%",
+    padding: "18px 24px", borderRadius: 999, background: "rgba(0,0,0,0.06)", color: "#1A1A1A",
+    fontWeight: 700, fontSize: "0.95rem", textDecoration: "none", boxSizing: "border-box",
+  };
+}
+
+function ProductSection({
+  image, imageAlt, bg, heading, headingColor, desc, descColor, ctaHref, ctaLabel, ctaStyle,
+  moreHref, moreLabel, moreColor,
+}: {
+  image: string; imageAlt: string; bg: string;
+  heading: string; headingColor: string; desc: string; descColor: string;
+  ctaHref: string; ctaLabel: string; ctaStyle: React.CSSProperties;
+  moreHref: string; moreLabel: string; moreColor: string;
+}) {
+  return (
+    <section>
+      <div style={{ background: bg, padding: "40px 24px 32px", textAlign: "center" }}>
+        <h2 style={{ color: headingColor, fontWeight: 800, fontSize: "2rem", lineHeight: 1.2, margin: "0 0 12px" }}>
+          {heading}
+        </h2>
+        <p style={{ color: descColor, fontSize: "1.05rem", lineHeight: 1.6, margin: "0 0 28px" }}>
+          {desc}
+        </p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 360, margin: "0 auto" }}>
+          <Link href={ctaHref} style={ctaStyle}>{ctaLabel}</Link>
+          <Link href={moreHref} style={{ ...pillSecondary(), color: moreColor }}>{moreLabel}</Link>
+        </div>
+      </div>
+      <div style={{ position: "relative", width: "100%", aspectRatio: "4 / 3" }}>
+        <Image src={image} alt={imageAlt} fill style={{ objectFit: "cover" }} sizes="100vw" />
+      </div>
+    </section>
+  );
 }
 
 export default function HomePage() {
-  const { t } = useLanguage();
+  const { t, lang, setLang } = useLanguage();
   const h = t.home;
-
-  const PRODUCT_LABELS = [h.products.giro, h.products.festgeld, h.products.mastercard, h.products.devises];
 
   return (
     <>
-      {/* ── Section 1: Hero ── */}
-      <section>
-        <SectionImage
-          src="https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=800&q=80"
-          alt="KT Bank mobile app"
-          height={300}
-        />
-        <div style={{ background:"#005F2D", padding:"32px 24px" }}>
-          <h1 style={{ color:"white", fontWeight:800, fontSize:"2.2rem", lineHeight:1.2, margin:0, marginBottom:16 }}>
-            {h.hero.title}
-          </h1>
-          <p style={{ color:"rgba(255,255,255,0.85)", fontSize:"1rem", lineHeight:1.7, margin:0, marginBottom:24 }}>
-            {h.hero.desc}
-          </p>
-          <Link href="/client/register" style={{ display:"flex", justifyContent:"center", alignItems:"center", width:"100%", padding:"18px 24px", borderRadius:999, background:"white", color:"#005F2D", fontWeight:700, fontSize:"1rem", textDecoration:"none", boxSizing:"border-box" }}>
+      {/* ── Hero ── */}
+      <section style={{ position: "relative" }}>
+        <div style={{ position: "relative", width: "100%", aspectRatio: "3 / 4" }}>
+          <Image src="/images/home/hero.jpg" alt="KT Bank" fill priority style={{ objectFit: "cover" }} sizes="100vw" />
+          <div style={{
+            position: "absolute", inset: 0,
+            background: "linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.15) 55%, rgba(0,0,0,0.55) 100%)",
+          }} />
+          <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, padding: "0 24px 24px" }}>
+            <h1 style={{ color: "white", fontWeight: 800, fontSize: "2rem", lineHeight: 1.25, margin: "0 0 14px", textShadow: "0 2px 12px rgba(0,0,0,0.3)" }}>
+              {h.hero.title}
+            </h1>
+            <p style={{ color: "rgba(255,255,255,0.92)", fontSize: "0.98rem", lineHeight: 1.6, margin: 0, textShadow: "0 1px 8px rgba(0,0,0,0.3)" }}>
+              {h.hero.desc}
+            </p>
+          </div>
+        </div>
+        <div style={{ padding: "0 24px", transform: "translateY(-28px)" }}>
+          <Link href="/client/register" style={pillPrimary("white", GREEN)}>
             {h.hero.cta}
           </Link>
         </div>
       </section>
 
-      {/* ── Section 2: Products 2×2 grid ── */}
-      <section style={{ background:"white", padding:"48px 0" }}>
-        <div style={{ maxWidth:640, margin:"0 auto", padding:"0 24px" }}>
-          <div style={{ textAlign:"center", color:"#005F2D", fontSize:"0.75rem", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.12em", marginBottom:24 }}>
-            {h.products.label}
+      {/* ── KT GiroKonto ── */}
+      <ProductSection
+        image="/images/home/girokonto.jpg" imageAlt={h.giro.heading}
+        bg={DARK_GREEN} heading={h.giro.heading} headingColor="white"
+        desc={h.giro.desc} descColor="rgba(255,255,255,0.85)"
+        ctaHref="/client/register" ctaLabel={h.giro.cta} ctaStyle={pillPrimary("white", GREEN)}
+        moreHref="/products/giro-konto" moreLabel={h.giro.more} moreColor="white"
+      />
+
+      {/* ── Jetzz Card ── */}
+      <ProductSection
+        image="/images/home/jetzzcard.jpg" imageAlt={h.jetzzcard.heading}
+        bg={MINT} heading={h.jetzzcard.heading} headingColor="#1A1A1A"
+        desc={h.jetzzcard.desc} descColor="#4B5563"
+        ctaHref="/products/jetzz-card" ctaLabel={h.jetzzcard.cta} ctaStyle={pillPrimary(GREEN, "white")}
+        moreHref="/products/jetzz-card" moreLabel={h.jetzzcard.more} moreColor="#1A1A1A"
+      />
+
+      {/* ── Compte Or / GoldKonto ── */}
+      <ProductSection
+        image="/images/home/goldkonto.jpg" imageAlt={h.goldkonto.heading}
+        bg={BEIGE} heading={h.goldkonto.heading} headingColor="#1A1A1A"
+        desc={h.goldkonto.desc} descColor="#4B5563"
+        ctaHref="/products/gold-konto" ctaLabel={h.goldkonto.cta} ctaStyle={pillPrimary(GREEN, "white")}
+        moreHref="/products/gold-konto" moreLabel={h.goldkonto.more} moreColor="#1A1A1A"
+      />
+
+      {/* ── Compte à terme / Festgeld ── */}
+      <section>
+        <div style={{ margin: "24px 16px 0", border: `1px solid ${BORDER}`, borderRadius: 24, overflow: "hidden" }}>
+          <div style={{ padding: "32px 24px 28px", textAlign: "center" }}>
+            <h2 style={{ color: "#1A1A1A", fontWeight: 800, fontSize: "1.8rem", lineHeight: 1.2, margin: "0 0 12px" }}>
+              {h.festgeld.heading}
+            </h2>
+            <p style={{ color: "#4B5563", fontSize: "1rem", lineHeight: 1.6, margin: "0 0 24px" }}>
+              {h.festgeld.desc}
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 360, margin: "0 auto" }}>
+              <Link href="/products/festgeld-konto" style={pillPrimary(GREEN, "white")}>{h.festgeld.cta}</Link>
+              <Link href="/products/festgeld-konto" style={pillSecondary()}>{h.festgeld.more}</Link>
+            </div>
           </div>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", border:"1px solid #E5E7EB", borderRadius:16, overflow:"hidden" }}>
-            {PRODUCT_ICONS.map((icon, i) => (
-              <Link key={PRODUCT_HREFS[i]} href={PRODUCT_HREFS[i]}
-                style={{ padding:"32px 16px", display:"flex", flexDirection:"column", alignItems:"center", gap:12,
-                  borderRight: i % 2 === 0 ? "1px solid #E5E7EB" : "none",
-                  borderBottom: i < 2 ? "1px solid #E5E7EB" : "none",
-                  background:"white", textDecoration:"none" }}>
-                <img src={icon} alt="" width={52} height={52}/>
-                <span style={{ color:"#005F2D", fontSize:"0.875rem", textAlign:"center", fontWeight:500, lineHeight:1.3 }}>
-                  {PRODUCT_LABELS[i]}
-                </span>
-              </Link>
+        </div>
+      </section>
+
+      {/* ── Financement ── */}
+      <ProductSection
+        image="/images/home/immobilienfinanzierung.jpg" imageAlt={h.financing.heading}
+        bg={DARK_GREEN} heading={h.financing.heading} headingColor="white"
+        desc={h.financing.desc} descColor="rgba(255,255,255,0.85)"
+        ctaHref="/products/real-estate" ctaLabel={h.financing.cta} ctaStyle={pillPrimary("white", GREEN)}
+        moreHref="/products/real-estate" moreLabel={h.financing.more} moreColor="white"
+      />
+
+      {/* ── Devises & or ── */}
+      <section style={{ padding: "24px 16px 0" }}>
+        <div style={{ border: `1px solid ${BORDER}`, borderRadius: 24, padding: "32px 24px", textAlign: "center" }}>
+          <h2 style={{ color: "#1A1A1A", fontWeight: 800, fontSize: "1.6rem", lineHeight: 1.2, margin: "0 0 10px" }}>
+            {h.devises.heading}
+          </h2>
+          <p style={{ color: "#4B5563", fontSize: "0.97rem", lineHeight: 1.6, margin: "0 0 20px" }}>
+            {h.devises.desc}
+          </p>
+          <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 8, marginBottom: 16 }}>
+            {CURRENCIES.map((c) => (
+              <div key={c} style={{ flex: "0 0 auto", background: MINT, borderRadius: 14, padding: "14px 20px", minWidth: 96 }}>
+                <p style={{ color: GREEN, fontWeight: 800, fontSize: "1.1rem", margin: 0 }}>{c}</p>
+              </div>
             ))}
           </div>
-          <div style={{ textAlign:"center", marginTop:24 }}>
-            <Link href="/products" style={{ color:"#005F2D", fontSize:"0.95rem", fontWeight:600, textDecoration:"underline" }}>
-              {h.products.seeAll}
-            </Link>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 360, margin: "0 auto" }}>
+            <Link href="/client/register" style={pillPrimary(GREEN, "white")}>{h.devises.cta}</Link>
+            <Link href="/products" style={pillSecondary()}>{h.devises.more}</Link>
           </div>
         </div>
       </section>
 
-      {/* ── Section 3: Convictions — père & enfant ── */}
-      <section>
-        <SectionImage src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80" alt="Familie"/>
-        <div style={{ background:"white", padding:"32px 24px", textAlign:"center" }}>
-          <h2 style={{ color:"#005F2D", fontWeight:800, fontSize:"1.75rem", lineHeight:1.25, margin:0, marginBottom:16 }}>
-            {h.convictions.heading}
+      {/* ── Une banque fidèle à vos valeurs ── */}
+      <section style={{ padding: "20px 16px 0" }}>
+        <div style={{ border: `1px solid ${BORDER}`, borderRadius: 24, padding: "36px 24px", textAlign: "center" }}>
+          <h2 style={{ color: "#1A1A1A", fontWeight: 800, fontSize: "1.75rem", lineHeight: 1.25, margin: "0 0 14px" }}>
+            {h.values.heading}
           </h2>
-          <p style={{ color:"#374151", fontSize:"1rem", lineHeight:1.7, margin:0, marginBottom:16 }}>
-            {h.convictions.p1}
+          <p style={{ color: "#4B5563", fontSize: "1rem", lineHeight: 1.6, margin: "0 0 24px" }}>
+            {h.values.desc}
           </p>
-          <p style={{ color:"#374151", fontSize:"1rem", lineHeight:1.7, margin:0 }}>
-            {h.convictions.p2}
-          </p>
+          <Link href="/islamic-banking" style={pillPrimary(GREEN, "white")}>{h.values.cta}</Link>
         </div>
       </section>
 
-      {/* ── Section 3b: Programme aide familiale ── */}
+      {/* ── Votre langue. Votre banque. ── */}
+      <section style={{ padding: "20px 0 0" }}>
+        <div style={{ background: MINT, padding: "36px 24px 32px", textAlign: "center" }}>
+          <h2 style={{ color: "#1A1A1A", fontWeight: 800, fontSize: "1.75rem", lineHeight: 1.25, margin: "0 0 12px" }}>
+            {h.language.heading}
+          </h2>
+          <p style={{ color: "#4B5563", fontSize: "1rem", lineHeight: 1.6, margin: "0 0 24px" }}>
+            {h.language.desc}
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, maxWidth: 360, margin: "0 auto 24px" }}>
+            {LANGUAGES.map(({ code, label }) => (
+              <button
+                key={code}
+                onClick={() => setLang(code)}
+                style={{
+                  padding: "14px 10px", borderRadius: 999, border: "none", cursor: "pointer",
+                  background: lang === code ? GREEN : "white",
+                  color: lang === code ? "white" : GREEN,
+                  fontWeight: 700, fontSize: "0.95rem",
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div style={{ maxWidth: 360, margin: "0 auto" }}>
+            <Link href="/branches" style={pillPrimary(GREEN, "white")}>{h.language.findBranch}</Link>
+          </div>
+        </div>
+        <div style={{ position: "relative", width: "100%", aspectRatio: "4 / 3" }}>
+          <Image src="/images/home/agence.jpg" alt={h.language.heading} fill style={{ objectFit: "cover" }} sizes="100vw" />
+        </div>
+      </section>
+
+      {/* ── Application KT Banking ── */}
+      <section>
+        <div style={{ background: DARK_GREEN, padding: "36px 24px 32px", textAlign: "center" }}>
+          <h2 style={{ color: "white", fontWeight: 800, fontSize: "1.75rem", lineHeight: 1.25, margin: "0 0 10px" }}>
+            {h.app.heading}
+          </h2>
+          <p style={{ color: "rgba(255,255,255,0.85)", fontSize: "1.05rem", margin: "0 0 24px" }}>
+            {h.app.desc}
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 360, margin: "0 auto" }}>
+            <a href={APPLE_URL} target="_blank" rel="noopener noreferrer" style={pillPrimary("white", "#1A1A1A")}>
+              {h.app.appStore}
+            </a>
+            <a href={PLAY_URL} target="_blank" rel="noopener noreferrer" style={pillPrimary("white", "#1A1A1A")}>
+              {h.app.googlePlay}
+            </a>
+          </div>
+        </div>
+        <div style={{ position: "relative", width: "100%", aspectRatio: "4 / 3" }}>
+          <Image src="/images/home/app-girokonto.jpg" alt={h.app.heading} fill style={{ objectFit: "cover" }} sizes="100vw" />
+        </div>
+      </section>
+
+      {/* ── Programme aide familiale (bonus KT Bank, hors maquette officielle) ── */}
       <section style={{ background: "#005F2D", padding: "0" }}>
         <div style={{ display: "flex", flexDirection: "column" }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80"
-            alt={t.lang !== "fr" ? "Familie" : "Famille"}
-            style={{ width: "100%", height: 220, objectFit: "cover", objectPosition: "center 30%", display: "block" }}
-          />
+          <div style={{ position: "relative", width: "100%", height: 220 }}>
+            <Image
+              src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80"
+              alt={t.lang !== "fr" ? "Familie" : "Famille"}
+              fill
+              style={{ objectFit: "cover", objectPosition: "center 30%" }}
+              sizes="100vw"
+            />
+          </div>
           <div style={{ padding: "32px 24px", background: "linear-gradient(135deg, #002d15 0%, #005F2D 100%)" }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 999, padding: "5px 14px", marginBottom: 18 }}>
               <span style={{ color: "#86efac", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
@@ -120,85 +277,11 @@ export default function HomePage() {
             </p>
             <Link
               href="/familienhilfe"
-              style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", padding: "18px 24px", borderRadius: 999, background: "white", color: "#005F2D", fontWeight: 700, fontSize: "1rem", textDecoration: "none", boxSizing: "border-box" }}
+              style={pillPrimary("white", GREEN)}
             >
               {t.lang !== "fr" ? "Jetzt Antrag stellen →" : "Faire une demande →"}
             </Link>
           </div>
-        </div>
-      </section>
-
-      {/* ── Section 4: Compte courant — app + carte ── */}
-      <section>
-        <SectionImage src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80" alt="KT Bank App und Karte"/>
-        <div style={{ background:"#F2EDE4", padding:"32px 24px", textAlign:"center" }}>
-          <h2 style={{ color:"#005F2D", fontWeight:800, fontSize:"1.75rem", lineHeight:1.25, margin:0, marginBottom:16 }}>
-            {h.giro.heading}
-          </h2>
-          <p style={{ color:"#374151", fontSize:"1rem", lineHeight:1.7, margin:0, marginBottom:24 }}>
-            {h.giro.desc}
-          </p>
-          <Link href="/client/register" style={{ display:"flex", justifyContent:"center", alignItems:"center", width:"100%", padding:"18px 24px", borderRadius:999, background:"#005F2D", color:"white", fontWeight:700, fontSize:"1rem", textDecoration:"none", boxSizing:"border-box" }}>
-            {h.giro.cta}
-          </Link>
-          <div style={{ marginTop:16 }}>
-            <Link href="/products/giro-konto" style={{ color:"#005F2D", fontSize:"0.9rem", textDecoration:"underline" }}>
-              {h.giro.more}
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Section 5: Festgeld — bocal de pièces ── */}
-      <section>
-        <SectionImage src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800&q=80" alt="Sparen"/>
-        <div style={{ background:"#F2EDE4", padding:"32px 24px", textAlign:"center" }}>
-          <h2 style={{ color:"#005F2D", fontWeight:800, fontSize:"1.75rem", lineHeight:1.25, margin:0, marginBottom:16 }}>
-            {h.festgeld.heading}
-          </h2>
-          <p style={{ color:"#374151", fontSize:"1rem", lineHeight:1.7, margin:0, marginBottom:24 }}>
-            {h.festgeld.desc}
-          </p>
-          <Link href="/client/register" style={{ display:"flex", justifyContent:"center", alignItems:"center", width:"100%", padding:"18px 24px", borderRadius:999, background:"#005F2D", color:"white", fontWeight:700, fontSize:"1rem", textDecoration:"none", boxSizing:"border-box" }}>
-            {h.festgeld.cta}
-          </Link>
-          <div style={{ marginTop:16 }}>
-            <Link href="/products/festgeld-konto" style={{ color:"#005F2D", fontSize:"0.9rem", textDecoration:"underline" }}>
-              {h.festgeld.more}
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Section 6: Blog — palmier numérique ── */}
-      <section>
-        <SectionImage src="https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=800&q=80" alt="Blog"/>
-        <div style={{ background:"#F2EDE4", padding:"32px 24px", textAlign:"center" }}>
-          <h2 style={{ color:"#005F2D", fontWeight:800, fontSize:"1.75rem", lineHeight:1.25, margin:0, marginBottom:16 }}>
-            {h.blog.heading}
-          </h2>
-          <p style={{ color:"#374151", fontSize:"1rem", lineHeight:1.7, margin:0, marginBottom:24 }}>
-            {h.blog.desc}
-          </p>
-          <Link href="/about" style={{ display:"flex", justifyContent:"center", alignItems:"center", width:"100%", padding:"18px 24px", borderRadius:999, background:"#C9921A", color:"#1A1A1A", fontWeight:700, fontSize:"1rem", textDecoration:"none", boxSizing:"border-box" }}>
-            {h.blog.cta}
-          </Link>
-        </div>
-      </section>
-
-      {/* ── Section 7: Filialen / Magasins ── */}
-      <section>
-        <SectionImage src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80" alt="KT Bank Filiale"/>
-        <div style={{ background:"#F2EDE4", padding:"32px 24px", textAlign:"center", borderRadius:"16px 16px 0 0" }}>
-          <h2 style={{ color:"#005F2D", fontWeight:800, fontSize:"1.75rem", lineHeight:1.25, margin:0, marginBottom:16 }}>
-            {h.branches.heading}
-          </h2>
-          <p style={{ color:"#374151", fontSize:"1rem", lineHeight:1.7, margin:0, marginBottom:24 }}>
-            {h.branches.desc}
-          </p>
-          <Link href="/branches" style={{ display:"flex", justifyContent:"center", alignItems:"center", width:"100%", padding:"18px 24px", borderRadius:999, background:"#C9921A", color:"#1A1A1A", fontWeight:700, fontSize:"1rem", textDecoration:"none", boxSizing:"border-box" }}>
-            {h.branches.cta}
-          </Link>
         </div>
       </section>
     </>
