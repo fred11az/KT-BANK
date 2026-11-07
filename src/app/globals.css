@@ -46,10 +46,18 @@
   --cream-dark: #E8E0D4;
 }
 
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* Scoped in Tailwind's "base" layer (not left unlayered) so utility classes
+   like mb-6/ml-auto/mt-3 — which Tailwind v4 emits in the "utilities" layer —
+   can still override this reset. An unlayered rule here would otherwise beat
+   every margin/padding utility on the site regardless of order or
+   specificity, per the CSS cascade-layers spec, which is what was silently
+   zeroing out spacing everywhere. */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 }
 
 html {

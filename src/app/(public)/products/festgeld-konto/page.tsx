@@ -48,7 +48,7 @@ export default function FestgeldKontoPage() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="animate-fade-up">
               <span className="badge badge-green mb-6" style={{ background: "rgba(6,95,70,0.5)", color: "#6ee7b7", border: "1px solid rgba(52,211,153,0.35)" }}>
-                {fg.heading}
+                {t.nav.categories.save}
               </span>
               <h1 className="text-display text-white mb-6">{fg.heading}</h1>
               <p className="text-body-lg mb-8" style={{ color: "rgba(255,255,255,0.78)" }}>

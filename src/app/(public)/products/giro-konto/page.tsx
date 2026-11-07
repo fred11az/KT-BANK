@@ -55,7 +55,7 @@ export default function GiroKontoPage() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="animate-fade-up">
               <span className="section-label" style={{ background: "rgba(201,146,26,0.2)", border: "1px solid rgba(201,146,26,0.4)", color: "var(--gold-200)" }}>
-                {g.heading}
+                {t.nav.categories.accountsCards}
               </span>
               <h1 className="text-display text-white mt-2 mb-6">{g.heading}</h1>
               <p className="text-body-lg mb-8" style={{ color: "rgba(255,255,255,0.8)" }}>

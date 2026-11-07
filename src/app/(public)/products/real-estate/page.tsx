@@ -41,7 +41,7 @@ export default function RealEstatePage() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="animate-fade-up">
               <span className="badge mb-6" style={{ background: "rgba(251,146,60,0.2)", color: "#fed7aa", border: "1px solid rgba(251,146,60,0.35)" }}>
-                {fin.heading}
+                {t.nav.categories.financing}
               </span>
               <h1 className="text-display text-white mb-6">{fin.heading}</h1>
               <p className="text-body-lg mb-10" style={{ color: "rgba(255,255,255,0.78)" }}>

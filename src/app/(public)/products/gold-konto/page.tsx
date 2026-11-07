@@ -30,7 +30,7 @@ export default function GoldKontoPage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="animate-fade-up">
-              <span className="badge badge-gold mb-6">{go.heading}</span>
+              <span className="badge badge-gold mb-6">{t.nav.categories.save}</span>
               <h1 className="text-display text-white mb-6">{go.heading}</h1>
               <p className="text-body-lg mb-8" style={{ color: "rgba(255,255,255,0.78)" }}>
                 {go.desc}
@@ -53,49 +53,6 @@ export default function GoldKontoPage() {
           </div>
         </div>
         <div className="absolute bottom-0 inset-x-0 h-10" style={{ background: "linear-gradient(to top, #FAFAFA, transparent)" }} />
-      </section>
-
-      {/* Performance table */}
-      <section className="py-20 lg:py-24 bg-white">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <span className="section-label">Performance</span>
-            <h2 className="text-heading" style={{ color: "var(--gray-900)" }}>Historique des rendements</h2>
-            <p className="text-body mt-3" style={{ color: "var(--gray-500)" }}>
-              Données basées sur le cours LBMA (London Bullion Market Association).
-            </p>
-          </div>
-          <div className="card overflow-hidden p-0">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Période</th>
-                  <th>Performance</th>
-                  <th>€100 → valeur</th>
-                  <th>Tendance</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  { p: "3 mois", perf: "+1.2%", val: "€101.20", t: "Stable" },
-                  { p: "6 mois", perf: "+2.8%", val: "€102.80", t: "Hausse" },
-                  { p: "12 mois", perf: "+4.2%", val: "€104.20", t: "Forte hausse" },
-                  { p: "3 ans", perf: "+18.6%", val: "€118.60", t: "Croissance" },
-                ].map((row) => (
-                  <tr key={row.p}>
-                    <td className="font-semibold">{row.p}</td>
-                    <td><span className="font-bold" style={{ color: "var(--green-600)" }}>{row.perf}</span></td>
-                    <td style={{ color: "var(--gray-700)" }}>{row.val}</td>
-                    <td><span className="badge badge-gold">{row.t}</span></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="text-small mt-3 text-center" style={{ color: "var(--gray-400)" }}>
-            * Les performances passées ne préjugent pas des performances futures.
-          </p>
-        </div>
       </section>
 
       {/* LBMA section */}

@@ -55,7 +55,7 @@ export default function JetzzCardPage() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="animate-fade-up">
               <span className="badge mb-6" style={{ background: "rgba(99,102,241,0.2)", color: "#a5b4fc", border: "1px solid rgba(99,102,241,0.35)" }}>
-                ✦ {j.heading}
+                ✦ {t.nav.categories.accountsCards}
               </span>
               <h1 className="text-display text-white mb-6">{j.heading}</h1>
               <p className="text-body-lg mb-10" style={{ color: "rgba(255,255,255,0.72)" }}>
