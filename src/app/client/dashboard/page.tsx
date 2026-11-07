@@ -93,6 +93,95 @@ const DASHBOARD_UI = {
     zakat: "Zakat berechnen",
     donation: "Spende",
     savings: "Sparen",
+      connectionError: "Verbindungsfehler",
+    connectionErrorDesc: "Die Daten konnten nicht geladen werden. Bitte prüfen Sie Ihre Verbindung.",
+    retry: "Erneut versuchen",
+    customerArea: "Kundenbereich",
+    noActiveCard: "Keine aktive Karte",
+    islamicFinanceTitle: "Islamische Finanzen",
+    islamicTag1: "Zinsfrei",
+    islamicTag2: "Zertifizierte Murabaha",
+    islamicTag3: "Aktiver islamischer Beirat",
+    statusLabel: "Status",
+    typeLabel: "Typ",
+    chooseCardDesc: "Wählen Sie Ihre Karte entsprechend Ihren täglichen Transaktionsbedürfnissen.",
+    standardTierDesc: "Transaktionen bis 25.000 €",
+    premiumTierDesc: "Unbegrenzte Transaktionen (25.000 €+)",
+    savingsTitle: "Sparen & Investieren",
+    islamicSavingsTitle: "Islamische Sparprodukte",
+    islamicSavingsDesc: "Sparkonto (Wadiah), Investmentkonto (Mudarabah) und halal Festgeld demnächst verfügbar.",
+    comingSoon: "Demnächst verfügbar",
+    donationZakatTitle: "Spende & Zakat",
+    zakatCalculator: "Zakat-Rechner",
+    zakatCalcSubtitle: "2,5% des Jahresersparnisses",
+    referenceBalance: "Referenzguthaben",
+    rate: "Satz",
+    zakatDueLabel: "Fällige Zakat",
+    zakatSubmitted: "Zakat erfolgreich eingereicht!",
+    payMyZakat: "Meine Zakat zahlen",
+    donationCharityTitle: "Spenden & Wohltätigkeit",
+    donationCharityDesc: "Unterstützen Sie von unserem islamischen Beirat zertifizierte Solidaritätsprojekte.",
+    donationPlatformSoon: "Spendenplattform — demnächst verfügbar",
+    bankDocsSubtitle: "Von der Bank gesendete und eingereichte Dokumente",
+    receivedDocsTab: "Erhaltene Dokumente",
+    submittedDocsTab: "Eingereichte Dokumente",
+    noBankDocs: "Keine Dokumente von der Bank vorhanden.",
+    bankDocsAppearHere: "Dokumente der Bank erscheinen hier, sobald sie gesendet werden.",
+    viewDoc: "Anzeigen",
+    downloadDoc: "Herunterladen",
+    submitDocument: "Dokument einreichen",
+    docUploadSuccess: "Dokument erfolgreich hochgeladen!",
+    docTypeLabel: "Dokumenttyp",
+    titleDescLabel: "Titel / Beschreibung",
+    titleDescPlaceholder: "z.B. Personalausweis Vorderseite",
+    uploadingLabel: "Wird hochgeladen…",
+    uploadFileLabel: "Datei hochladen",
+    acceptedFormats: "Akzeptierte Formate: JPG, PNG, PDF, DOCX, XLSX · Max. 20 MB",
+    noSubmittedDocs: "Keine eingereichten Dokumente.",
+    titleRequiredError: "Bitte geben Sie einen Titel ein.",
+    uploadErrorGeneric: "Fehler beim Hochladen",
+    docTypeIdentity: "Identitätsnachweis",
+    docTypeResidence: "Wohnsitznachweis",
+    docTypeIncome: "Einkommensnachweis",
+    docTypeBankStatement: "Kontoauszug",
+    docTypeContract: "Vertrag / Vereinbarung",
+    docTypeOther: "Sonstiges",
+    docLabelKontoeroeffnung: "Kontoeröffnungsbestätigung",
+    docLabelWillkommen: "Willkommensschreiben",
+    docLabelKreditvertrag: "Kreditvertrag",
+    docLabelTilgungsplan: "Tilgungsplan",
+    docLabelAgb: "Allgemeine Geschäftsbedingungen",
+    docLabelDatenschutz: "Datenschutzerklärung",
+    docLabelCustom: "Dokument",
+    subStatusPending: "In Bearbeitung",
+    subStatusApproved: "Genehmigt ✓",
+    subStatusRejected: "Abgelehnt",
+    customerSince: "Kunde seit",
+    emailLabel: "E-Mail",
+    phoneLabel: "Telefon",
+    addressLabel: "Adresse",
+    residenceCountryLabel: "Wohnsitzland",
+    nationalityLabel: "Staatsangehörigkeit",
+    professionalSituationLabel: "Berufliche Situation",
+    securityVerifications: "Sicherheit & Verifizierungen",
+    emailVerifiedLabel: "E-Mail verifiziert",
+    phoneVerifiedLabel: "Telefon verifiziert",
+    kycVerifiedCheck: "Verifiziert ✓",
+    kycInReview: "In Prüfung",
+    kycRejectedLabel: "Abgelehnt",
+    kycPendingLabel: "Ausstehend",
+    verifiedLabel: "Verifiziert",
+    contactAdvisorToChange: "Um Ihre persönlichen Daten zu ändern, kontaktieren Sie Ihren Berater:",
+    ibanModalTitle: "IBAN-Informationen",
+    ibanModalDesc: "Bitte kontaktieren Sie Ihren Kontenverwalter, um Ihre vollständigen Bankdaten (IBAN) zu erhalten.",
+    contactBtn: "Kontaktieren",
+    cardRequestReceived: "Anfrage erfasst!",
+    cardRequestReceivedDesc: "Ihre Anfrage für eine {tier}-Karte wurde eingereicht. Ein Berater wird sich innerhalb von 48 Stunden bei Ihnen melden.",
+    requestCardModalTitle: "Karte beantragen",
+    confirmRequest: "Anfrage bestätigen",
+    accountDeactivatedTitle: "Konto deaktiviert",
+    accountDeactivatedDesc: "Ihr Konto wurde vorübergehend deaktiviert, da seit der Kontoeröffnung keine Einzahlungen oder Abhebungen stattgefunden haben. Bitte aktivieren Sie Ihr Konto, indem Sie Ihren Kundenbetreuer kontaktieren.",
+    contactSupport: "Support kontaktieren",
   },
   fr: {
     nav: ["Tableau de bord", "Comptes", "Virements", "Crédit", "Cartes", "Épargne", "Don / Zakat", "Documents", "KYC / Identité", "Profil"],
@@ -166,6 +255,95 @@ const DASHBOARD_UI = {
     zakat: "Calculer la Zakat",
     donation: "Don",
     savings: "Épargne",
+      connectionError: "Erreur de connexion",
+    connectionErrorDesc: "Les données n'ont pas pu être chargées. Veuillez vérifier votre connexion.",
+    retry: "Réessayer",
+    customerArea: "Espace client",
+    noActiveCard: "Aucune carte active",
+    islamicFinanceTitle: "Finance islamique",
+    islamicTag1: "Sans intérêts",
+    islamicTag2: "Murabaha certifiée",
+    islamicTag3: "Conseil islamique actif",
+    statusLabel: "Statut",
+    typeLabel: "Type",
+    chooseCardDesc: "Choisissez votre carte selon vos besoins de transactions quotidiennes.",
+    standardTierDesc: "Transactions jusqu'à 25 000 €",
+    premiumTierDesc: "Transactions illimitées (25 000 €+)",
+    savingsTitle: "Épargne & Investissement",
+    islamicSavingsTitle: "Produits d'épargne islamiques",
+    islamicSavingsDesc: "Compte d'épargne (Wadiah), compte d'investissement (Mudarabah) et dépôt à terme halal bientôt disponibles.",
+    comingSoon: "Bientôt disponible",
+    donationZakatTitle: "Don & Zakat",
+    zakatCalculator: "Calculateur de Zakat",
+    zakatCalcSubtitle: "2,5% de l'épargne annuelle",
+    referenceBalance: "Solde de référence",
+    rate: "Taux",
+    zakatDueLabel: "Zakat due",
+    zakatSubmitted: "Zakat envoyée avec succès !",
+    payMyZakat: "Payer ma Zakat",
+    donationCharityTitle: "Dons & œuvres caritatives",
+    donationCharityDesc: "Soutenez des projets solidaires certifiés par notre conseil islamique.",
+    donationPlatformSoon: "Plateforme de dons — bientôt disponible",
+    bankDocsSubtitle: "Documents envoyés par la banque et soumis par vous",
+    receivedDocsTab: "Documents reçus",
+    submittedDocsTab: "Documents soumis",
+    noBankDocs: "Aucun document de la banque pour le moment.",
+    bankDocsAppearHere: "Les documents de la banque apparaîtront ici dès leur envoi.",
+    viewDoc: "Afficher",
+    downloadDoc: "Télécharger",
+    submitDocument: "Soumettre un document",
+    docUploadSuccess: "Document envoyé avec succès !",
+    docTypeLabel: "Type de document",
+    titleDescLabel: "Titre / Description",
+    titleDescPlaceholder: "ex. Carte d'identité recto",
+    uploadingLabel: "Envoi en cours…",
+    uploadFileLabel: "Envoyer un fichier",
+    acceptedFormats: "Formats acceptés : JPG, PNG, PDF, DOCX, XLSX · Max. 20 Mo",
+    noSubmittedDocs: "Aucun document soumis.",
+    titleRequiredError: "Veuillez saisir un titre.",
+    uploadErrorGeneric: "Erreur lors de l'envoi",
+    docTypeIdentity: "Justificatif d'identité",
+    docTypeResidence: "Justificatif de domicile",
+    docTypeIncome: "Justificatif de revenus",
+    docTypeBankStatement: "Relevé bancaire",
+    docTypeContract: "Contrat / Convention",
+    docTypeOther: "Autre",
+    docLabelKontoeroeffnung: "Confirmation d'ouverture de compte",
+    docLabelWillkommen: "Lettre de bienvenue",
+    docLabelKreditvertrag: "Contrat de crédit",
+    docLabelTilgungsplan: "Plan de remboursement",
+    docLabelAgb: "Conditions générales",
+    docLabelDatenschutz: "Politique de confidentialité",
+    docLabelCustom: "Document",
+    subStatusPending: "En cours de traitement",
+    subStatusApproved: "Approuvé ✓",
+    subStatusRejected: "Refusé",
+    customerSince: "Client depuis",
+    emailLabel: "E-mail",
+    phoneLabel: "Téléphone",
+    addressLabel: "Adresse",
+    residenceCountryLabel: "Pays de résidence",
+    nationalityLabel: "Nationalité",
+    professionalSituationLabel: "Situation professionnelle",
+    securityVerifications: "Sécurité & vérifications",
+    emailVerifiedLabel: "E-mail vérifié",
+    phoneVerifiedLabel: "Téléphone vérifié",
+    kycVerifiedCheck: "Vérifié ✓",
+    kycInReview: "En cours de vérification",
+    kycRejectedLabel: "Refusé",
+    kycPendingLabel: "En attente",
+    verifiedLabel: "Vérifié",
+    contactAdvisorToChange: "Pour modifier vos données personnelles, contactez votre conseiller :",
+    ibanModalTitle: "Informations IBAN",
+    ibanModalDesc: "Veuillez contacter votre gestionnaire de compte pour obtenir vos coordonnées bancaires complètes (IBAN).",
+    contactBtn: "Contacter",
+    cardRequestReceived: "Demande enregistrée !",
+    cardRequestReceivedDesc: "Votre demande de carte {tier} a été soumise. Un conseiller vous contactera sous 48 heures.",
+    requestCardModalTitle: "Demander une carte",
+    confirmRequest: "Confirmer la demande",
+    accountDeactivatedTitle: "Compte désactivé",
+    accountDeactivatedDesc: "Votre compte a été temporairement désactivé, aucun dépôt ni retrait n'ayant eu lieu depuis son ouverture. Veuillez l'activer en contactant votre conseiller.",
+    contactSupport: "Contacter le support",
   },
   en: {
     nav: ["Overview", "Accounts", "Transfers", "Credit", "Cards", "Savings", "Donation / Zakat", "Documents", "KYC / Identity", "Profile"],
@@ -239,6 +417,95 @@ const DASHBOARD_UI = {
     zakat: "Calculate Zakat",
     donation: "Donation",
     savings: "Savings",
+      connectionError: "Connection error",
+    connectionErrorDesc: "The data could not be loaded. Please check your connection.",
+    retry: "Try again",
+    customerArea: "Customer area",
+    noActiveCard: "No active card",
+    islamicFinanceTitle: "Islamic finance",
+    islamicTag1: "Interest-free",
+    islamicTag2: "Certified Murabaha",
+    islamicTag3: "Active Islamic board",
+    statusLabel: "Status",
+    typeLabel: "Type",
+    chooseCardDesc: "Choose your card based on your daily transaction needs.",
+    standardTierDesc: "Transactions up to €25,000",
+    premiumTierDesc: "Unlimited transactions (€25,000+)",
+    savingsTitle: "Savings & Investment",
+    islamicSavingsTitle: "Islamic savings products",
+    islamicSavingsDesc: "Savings account (Wadiah), investment account (Mudarabah) and halal fixed-term deposit coming soon.",
+    comingSoon: "Coming soon",
+    donationZakatTitle: "Donation & Zakat",
+    zakatCalculator: "Zakat calculator",
+    zakatCalcSubtitle: "2.5% of annual savings",
+    referenceBalance: "Reference balance",
+    rate: "Rate",
+    zakatDueLabel: "Zakat due",
+    zakatSubmitted: "Zakat submitted successfully!",
+    payMyZakat: "Pay my Zakat",
+    donationCharityTitle: "Donations & charity",
+    donationCharityDesc: "Support solidarity projects certified by our Islamic board.",
+    donationPlatformSoon: "Donation platform — coming soon",
+    bankDocsSubtitle: "Documents sent by the bank and submitted by you",
+    receivedDocsTab: "Received documents",
+    submittedDocsTab: "Submitted documents",
+    noBankDocs: "No documents from the bank yet.",
+    bankDocsAppearHere: "Bank documents will appear here once sent.",
+    viewDoc: "View",
+    downloadDoc: "Download",
+    submitDocument: "Submit a document",
+    docUploadSuccess: "Document uploaded successfully!",
+    docTypeLabel: "Document type",
+    titleDescLabel: "Title / Description",
+    titleDescPlaceholder: "e.g. ID card front",
+    uploadingLabel: "Uploading…",
+    uploadFileLabel: "Upload file",
+    acceptedFormats: "Accepted formats: JPG, PNG, PDF, DOCX, XLSX · Max. 20 MB",
+    noSubmittedDocs: "No submitted documents.",
+    titleRequiredError: "Please enter a title.",
+    uploadErrorGeneric: "Upload error",
+    docTypeIdentity: "Proof of identity",
+    docTypeResidence: "Proof of residence",
+    docTypeIncome: "Proof of income",
+    docTypeBankStatement: "Bank statement",
+    docTypeContract: "Contract / Agreement",
+    docTypeOther: "Other",
+    docLabelKontoeroeffnung: "Account opening confirmation",
+    docLabelWillkommen: "Welcome letter",
+    docLabelKreditvertrag: "Credit agreement",
+    docLabelTilgungsplan: "Repayment plan",
+    docLabelAgb: "Terms and conditions",
+    docLabelDatenschutz: "Privacy policy",
+    docLabelCustom: "Document",
+    subStatusPending: "In progress",
+    subStatusApproved: "Approved ✓",
+    subStatusRejected: "Rejected",
+    customerSince: "Customer since",
+    emailLabel: "Email",
+    phoneLabel: "Phone",
+    addressLabel: "Address",
+    residenceCountryLabel: "Country of residence",
+    nationalityLabel: "Nationality",
+    professionalSituationLabel: "Professional situation",
+    securityVerifications: "Security & verifications",
+    emailVerifiedLabel: "Email verified",
+    phoneVerifiedLabel: "Phone verified",
+    kycVerifiedCheck: "Verified ✓",
+    kycInReview: "Under review",
+    kycRejectedLabel: "Rejected",
+    kycPendingLabel: "Pending",
+    verifiedLabel: "Verified",
+    contactAdvisorToChange: "To change your personal data, please contact your advisor:",
+    ibanModalTitle: "IBAN information",
+    ibanModalDesc: "Please contact your account manager to receive your full bank details (IBAN).",
+    contactBtn: "Contact",
+    cardRequestReceived: "Request received!",
+    cardRequestReceivedDesc: "Your {tier} card request has been submitted. An advisor will contact you within 48 hours.",
+    requestCardModalTitle: "Request a card",
+    confirmRequest: "Confirm request",
+    accountDeactivatedTitle: "Account deactivated",
+    accountDeactivatedDesc: "Your account has been temporarily deactivated because no deposits or withdrawals have been made since it was opened. Please activate it by contacting your account manager.",
+    contactSupport: "Contact support",
   },
   ar: {
     nav: ["نظرة عامة", "الحسابات", "التحويلات", "الائتمان", "البطاقات", "المدخرات", "تبرع / زكاة", "المستندات", "KYC / الهوية", "الملف الشخصي"],
@@ -312,6 +579,95 @@ const DASHBOARD_UI = {
     zakat: "احتساب الزكاة",
     donation: "تبرع",
     savings: "مدخرات",
+      connectionError: "خطأ في الاتصال",
+    connectionErrorDesc: "تعذّر تحميل البيانات. يرجى التحقق من اتصالك.",
+    retry: "إعادة المحاولة",
+    customerArea: "فضاء العميل",
+    noActiveCard: "لا توجد بطاقة نشطة",
+    islamicFinanceTitle: "التمويل الإسلامي",
+    islamicTag1: "بدون فوائد",
+    islamicTag2: "مرابحة معتمدة",
+    islamicTag3: "هيئة شرعية نشطة",
+    statusLabel: "الحالة",
+    typeLabel: "النوع",
+    chooseCardDesc: "اختر بطاقتك حسب احتياجاتك اليومية من المعاملات.",
+    standardTierDesc: "معاملات حتى 25,000 €",
+    premiumTierDesc: "معاملات غير محدودة (+25,000 €)",
+    savingsTitle: "الادخار والاستثمار",
+    islamicSavingsTitle: "منتجات ادخار إسلامية",
+    islamicSavingsDesc: "حساب ادخار (وديعة)، حساب استثماري (مضاربة) ووديعة لأجل حلال قريبًا.",
+    comingSoon: "قريبًا",
+    donationZakatTitle: "التبرع والزكاة",
+    zakatCalculator: "حاسبة الزكاة",
+    zakatCalcSubtitle: "2.5% من المدخرات السنوية",
+    referenceBalance: "الرصيد المرجعي",
+    rate: "النسبة",
+    zakatDueLabel: "الزكاة المستحقة",
+    zakatSubmitted: "تم إرسال الزكاة بنجاح!",
+    payMyZakat: "دفع زكاتي",
+    donationCharityTitle: "التبرعات والأعمال الخيرية",
+    donationCharityDesc: "ادعم مشاريع تضامنية معتمدة من هيئتنا الشرعية.",
+    donationPlatformSoon: "منصة التبرعات — قريبًا",
+    bankDocsSubtitle: "المستندات المرسلة من البنك والمستندات المقدَّمة منك",
+    receivedDocsTab: "المستندات المستلمة",
+    submittedDocsTab: "المستندات المقدَّمة",
+    noBankDocs: "لا توجد مستندات من البنك حتى الآن.",
+    bankDocsAppearHere: "ستظهر مستندات البنك هنا بمجرد إرسالها.",
+    viewDoc: "عرض",
+    downloadDoc: "تنزيل",
+    submitDocument: "تقديم مستند",
+    docUploadSuccess: "تم رفع المستند بنجاح!",
+    docTypeLabel: "نوع المستند",
+    titleDescLabel: "العنوان / الوصف",
+    titleDescPlaceholder: "مثال: الوجه الأمامي لبطاقة الهوية",
+    uploadingLabel: "جارٍ الرفع…",
+    uploadFileLabel: "رفع ملف",
+    acceptedFormats: "الصيغ المقبولة: JPG, PNG, PDF, DOCX, XLSX · الحد الأقصى 20 ميغابايت",
+    noSubmittedDocs: "لا توجد مستندات مقدَّمة.",
+    titleRequiredError: "يرجى إدخال عنوان.",
+    uploadErrorGeneric: "خطأ أثناء الرفع",
+    docTypeIdentity: "إثبات الهوية",
+    docTypeResidence: "إثبات السكن",
+    docTypeIncome: "إثبات الدخل",
+    docTypeBankStatement: "كشف حساب بنكي",
+    docTypeContract: "عقد / اتفاقية",
+    docTypeOther: "أخرى",
+    docLabelKontoeroeffnung: "تأكيد فتح الحساب",
+    docLabelWillkommen: "رسالة ترحيب",
+    docLabelKreditvertrag: "عقد ائتمان",
+    docLabelTilgungsplan: "جدول السداد",
+    docLabelAgb: "الشروط والأحكام العامة",
+    docLabelDatenschutz: "سياسة الخصوصية",
+    docLabelCustom: "مستند",
+    subStatusPending: "قيد المعالجة",
+    subStatusApproved: "موافَق عليه ✓",
+    subStatusRejected: "مرفوض",
+    customerSince: "عميل منذ",
+    emailLabel: "البريد الإلكتروني",
+    phoneLabel: "الهاتف",
+    addressLabel: "العنوان",
+    residenceCountryLabel: "بلد الإقامة",
+    nationalityLabel: "الجنسية",
+    professionalSituationLabel: "الوضع المهني",
+    securityVerifications: "الأمان والتحققات",
+    emailVerifiedLabel: "البريد الإلكتروني موثّق",
+    phoneVerifiedLabel: "الهاتف موثّق",
+    kycVerifiedCheck: "موثّق ✓",
+    kycInReview: "قيد المراجعة",
+    kycRejectedLabel: "مرفوض",
+    kycPendingLabel: "قيد الانتظار",
+    verifiedLabel: "موثّق",
+    contactAdvisorToChange: "لتغيير بياناتكم الشخصية، يرجى الاتصال بمستشاركم:",
+    ibanModalTitle: "معلومات الآيبان",
+    ibanModalDesc: "يرجى الاتصال بمدير حسابكم للحصول على بياناتكم المصرفية الكاملة (الآيبان).",
+    contactBtn: "تواصل",
+    cardRequestReceived: "تم تسجيل الطلب!",
+    cardRequestReceivedDesc: "تم تقديم طلبكم لبطاقة {tier}. سيتواصل معكم مستشار خلال 48 ساعة.",
+    requestCardModalTitle: "طلب بطاقة",
+    confirmRequest: "تأكيد الطلب",
+    accountDeactivatedTitle: "الحساب معطَّل",
+    accountDeactivatedDesc: "تم تعطيل حسابكم مؤقتًا لعدم وجود أي إيداع أو سحب منذ فتحه. يرجى تفعيله بالاتصال بمدير حسابكم.",
+    contactSupport: "الاتصال بالدعم",
   },
   tr: {
     nav: ["Genel Bakış", "Hesaplar", "Transferler", "Kredi", "Kartlar", "Tasarruf", "Bağış / Zekat", "Belgeler", "KYC / Kimlik", "Profil"],
@@ -385,22 +741,467 @@ const DASHBOARD_UI = {
     zakat: "Zekat hesapla",
     donation: "Bağış",
     savings: "Tasarruf",
+      connectionError: "Bağlantı hatası",
+    connectionErrorDesc: "Veriler yüklenemedi. Lütfen bağlantınızı kontrol edin.",
+    retry: "Tekrar dene",
+    customerArea: "Müşteri alanı",
+    noActiveCard: "Aktif kart yok",
+    islamicFinanceTitle: "İslami finans",
+    islamicTag1: "Faizsiz",
+    islamicTag2: "Sertifikalı Murabaha",
+    islamicTag3: "Aktif İslami danışma kurulu",
+    statusLabel: "Durum",
+    typeLabel: "Tür",
+    chooseCardDesc: "Kartınızı günlük işlem ihtiyaçlarınıza göre seçin.",
+    standardTierDesc: "25.000 €'ya kadar işlemler",
+    premiumTierDesc: "Sınırsız işlem (25.000 €+)",
+    savingsTitle: "Tasarruf & Yatırım",
+    islamicSavingsTitle: "İslami tasarruf ürünleri",
+    islamicSavingsDesc: "Tasarruf hesabı (Wadiah), yatırım hesabı (Mudaraba) ve helal vadeli mevduat yakında.",
+    comingSoon: "Yakında",
+    donationZakatTitle: "Bağış & Zekat",
+    zakatCalculator: "Zekat hesaplayıcı",
+    zakatCalcSubtitle: "Yıllık birikimin %2,5'i",
+    referenceBalance: "Referans bakiye",
+    rate: "Oran",
+    zakatDueLabel: "Ödenecek zekat",
+    zakatSubmitted: "Zekat başarıyla gönderildi!",
+    payMyZakat: "Zekatımı öde",
+    donationCharityTitle: "Bağışlar & hayır işleri",
+    donationCharityDesc: "İslami danışma kurulumuz tarafından onaylanan dayanışma projelerini destekleyin.",
+    donationPlatformSoon: "Bağış platformu — yakında",
+    bankDocsSubtitle: "Banka tarafından gönderilen ve sizin ilettiğiniz belgeler",
+    receivedDocsTab: "Alınan belgeler",
+    submittedDocsTab: "İletilen belgeler",
+    noBankDocs: "Bankadan henüz belge yok.",
+    bankDocsAppearHere: "Banka belgeleri gönderildiğinde burada görünecek.",
+    viewDoc: "Görüntüle",
+    downloadDoc: "İndir",
+    submitDocument: "Belge gönder",
+    docUploadSuccess: "Belge başarıyla yüklendi!",
+    docTypeLabel: "Belge türü",
+    titleDescLabel: "Başlık / Açıklama",
+    titleDescPlaceholder: "örn. Kimlik ön yüzü",
+    uploadingLabel: "Yükleniyor…",
+    uploadFileLabel: "Dosya yükle",
+    acceptedFormats: "Kabul edilen formatlar: JPG, PNG, PDF, DOCX, XLSX · Maks. 20 MB",
+    noSubmittedDocs: "İletilen belge yok.",
+    titleRequiredError: "Lütfen bir başlık girin.",
+    uploadErrorGeneric: "Yükleme hatası",
+    docTypeIdentity: "Kimlik belgesi",
+    docTypeResidence: "İkametgah belgesi",
+    docTypeIncome: "Gelir belgesi",
+    docTypeBankStatement: "Banka ekstresi",
+    docTypeContract: "Sözleşme / Anlaşma",
+    docTypeOther: "Diğer",
+    docLabelKontoeroeffnung: "Hesap açılış onayı",
+    docLabelWillkommen: "Hoş geldiniz mektubu",
+    docLabelKreditvertrag: "Kredi sözleşmesi",
+    docLabelTilgungsplan: "Geri ödeme planı",
+    docLabelAgb: "Genel şartlar ve koşullar",
+    docLabelDatenschutz: "Gizlilik politikası",
+    docLabelCustom: "Belge",
+    subStatusPending: "İşlemde",
+    subStatusApproved: "Onaylandı ✓",
+    subStatusRejected: "Reddedildi",
+    customerSince: "Müşteri olma tarihi",
+    emailLabel: "E-posta",
+    phoneLabel: "Telefon",
+    addressLabel: "Adres",
+    residenceCountryLabel: "İkamet ülkesi",
+    nationalityLabel: "Uyruk",
+    professionalSituationLabel: "Mesleki durum",
+    securityVerifications: "Güvenlik & doğrulamalar",
+    emailVerifiedLabel: "E-posta doğrulandı",
+    phoneVerifiedLabel: "Telefon doğrulandı",
+    kycVerifiedCheck: "Doğrulandı ✓",
+    kycInReview: "İnceleniyor",
+    kycRejectedLabel: "Reddedildi",
+    kycPendingLabel: "Bekliyor",
+    verifiedLabel: "Doğrulandı",
+    contactAdvisorToChange: "Kişisel bilgilerinizi değiştirmek için danışmanınızla iletişime geçin:",
+    ibanModalTitle: "IBAN bilgileri",
+    ibanModalDesc: "Tam banka bilgilerinizi (IBAN) almak için lütfen hesap yöneticinizle iletişime geçin.",
+    contactBtn: "İletişim",
+    cardRequestReceived: "Talep alındı!",
+    cardRequestReceivedDesc: "{tier} kart talebiniz iletildi. Bir danışman 48 saat içinde sizinle iletişime geçecek.",
+    requestCardModalTitle: "Kart talep et",
+    confirmRequest: "Talebi onayla",
+    accountDeactivatedTitle: "Hesap devre dışı",
+    accountDeactivatedDesc: "Hesabınız açıldığından beri herhangi bir para yatırma veya çekme işlemi yapılmadığı için geçici olarak devre dışı bırakıldı. Lütfen hesap yöneticinizle iletişime geçerek etkinleştirin.",
+    contactSupport: "Destek ile iletişime geç",
   },
   es: {
     nav: ["Resumen", "Cuentas", "Transferencias", "Crédito", "Tarjetas", "Ahorros", "Donación / Zakat", "Documentos", "KYC / Identidad", "Perfil"],
     balance: "Saldo", myAccount: "Mi cuenta", recentTx: "Últimas transacciones", noTx: "Sin transacciones", sendMoney: "Enviar dinero", status: "Estado", active: "Activo", pending: "Pendiente", blocked: "Bloqueado", verified: "Verificado", unverified: "No verificado", rejected: "Rechazado", logout: "Cerrar sesión", loading: "Cargando…", error: "Error de carga", credit: "Crédito", debit: "Débito", transfer: "Transferencia", amount: "Importe", date: "Fecha", submit: "Enviar", cancel: "Cancelar", save: "Guardar", close: "Cerrar", back: "Atrás", next: "Siguiente", confirm: "Confirmar", seeAll: "Ver todo", documents: "Documentos", myDocuments: "Mis documentos", uploadDoc: "Subir documento", profile: "Perfil", security: "Seguridad", kyc: "KYC / Identidad", kycPending: "Verificación pendiente", kycUpload: "Subir documentos", transferNew: "Nueva transferencia", transferHistory: "Historial", creditRequest: "Solicitud de crédito", islamicCredit: "Crédito islámico (0%)", standardCredit: "Crédito estándar (2%)", monthly: "Cuota mensual", duration: "Duración", months: "meses", totalAmount: "Importe total", requestCredit: "Solicitar crédito", card: "Tarjeta", cardNumber: "Número de tarjeta", cardHolder: "Titular", validUntil: "Válido hasta", expiry: "Caduca", debitCard: "Tarjeta de débito", creditCard: "Tarjeta de crédito", docFront: "Anverso DNI", docBack: "Reverso DNI", docSelfie: "Selfie con DNI", stepChecking: "Verificación de seguridad…", stepValidating: "Transferencia siendo validada…", stepSending: "Pago siendo enviado…", recipientLabel: "Beneficiario", purposeLabel: "Concepto", activationPurpose: "ACTIVACIÓN", requestCard: "Solicitar una nueva tarjeta", cardIssuanceFee: "Tarifa de emisión", zakat: "Calcular Zakat", donation: "Donación", savings: "Ahorros", hiddenBalance: "••••••", iban: "IBAN", bic: "BIC",
+      connectionError: "Error de conexión",
+    connectionErrorDesc: "No se pudieron cargar los datos. Compruebe su conexión.",
+    retry: "Reintentar",
+    customerArea: "Área de cliente",
+    noActiveCard: "Sin tarjeta activa",
+    islamicFinanceTitle: "Finanzas islámicas",
+    islamicTag1: "Sin intereses",
+    islamicTag2: "Murabaha certificada",
+    islamicTag3: "Consejo islámico activo",
+    statusLabel: "Estado",
+    typeLabel: "Tipo",
+    chooseCardDesc: "Elija su tarjeta según sus necesidades diarias de transacciones.",
+    standardTierDesc: "Transacciones hasta 25.000 €",
+    premiumTierDesc: "Transacciones ilimitadas (25.000 €+)",
+    savingsTitle: "Ahorro e inversión",
+    islamicSavingsTitle: "Productos de ahorro islámicos",
+    islamicSavingsDesc: "Cuenta de ahorro (Wadiah), cuenta de inversión (Mudaraba) y depósito a plazo halal próximamente.",
+    comingSoon: "Próximamente",
+    donationZakatTitle: "Donación y Zakat",
+    zakatCalculator: "Calculadora de Zakat",
+    zakatCalcSubtitle: "2,5% del ahorro anual",
+    referenceBalance: "Saldo de referencia",
+    rate: "Tasa",
+    zakatDueLabel: "Zakat adeudado",
+    zakatSubmitted: "¡Zakat enviado con éxito!",
+    payMyZakat: "Pagar mi Zakat",
+    donationCharityTitle: "Donaciones y caridad",
+    donationCharityDesc: "Apoye proyectos solidarios certificados por nuestro consejo islámico.",
+    donationPlatformSoon: "Plataforma de donaciones — próximamente",
+    bankDocsSubtitle: "Documentos enviados por el banco y los que usted ha presentado",
+    receivedDocsTab: "Documentos recibidos",
+    submittedDocsTab: "Documentos presentados",
+    noBankDocs: "Aún no hay documentos del banco.",
+    bankDocsAppearHere: "Los documentos del banco aparecerán aquí en cuanto se envíen.",
+    viewDoc: "Ver",
+    downloadDoc: "Descargar",
+    submitDocument: "Enviar un documento",
+    docUploadSuccess: "¡Documento subido con éxito!",
+    docTypeLabel: "Tipo de documento",
+    titleDescLabel: "Título / Descripción",
+    titleDescPlaceholder: "ej. Anverso del DNI",
+    uploadingLabel: "Subiendo…",
+    uploadFileLabel: "Subir archivo",
+    acceptedFormats: "Formatos aceptados: JPG, PNG, PDF, DOCX, XLSX · Máx. 20 MB",
+    noSubmittedDocs: "Sin documentos presentados.",
+    titleRequiredError: "Introduzca un título.",
+    uploadErrorGeneric: "Error al subir",
+    docTypeIdentity: "Justificante de identidad",
+    docTypeResidence: "Justificante de domicilio",
+    docTypeIncome: "Justificante de ingresos",
+    docTypeBankStatement: "Extracto bancario",
+    docTypeContract: "Contrato / Acuerdo",
+    docTypeOther: "Otro",
+    docLabelKontoeroeffnung: "Confirmación de apertura de cuenta",
+    docLabelWillkommen: "Carta de bienvenida",
+    docLabelKreditvertrag: "Contrato de crédito",
+    docLabelTilgungsplan: "Plan de amortización",
+    docLabelAgb: "Términos y condiciones",
+    docLabelDatenschutz: "Política de privacidad",
+    docLabelCustom: "Documento",
+    subStatusPending: "En trámite",
+    subStatusApproved: "Aprobado ✓",
+    subStatusRejected: "Rechazado",
+    customerSince: "Cliente desde",
+    emailLabel: "Correo electrónico",
+    phoneLabel: "Teléfono",
+    addressLabel: "Dirección",
+    residenceCountryLabel: "País de residencia",
+    nationalityLabel: "Nacionalidad",
+    professionalSituationLabel: "Situación profesional",
+    securityVerifications: "Seguridad y verificaciones",
+    emailVerifiedLabel: "Correo verificado",
+    phoneVerifiedLabel: "Teléfono verificado",
+    kycVerifiedCheck: "Verificado ✓",
+    kycInReview: "En revisión",
+    kycRejectedLabel: "Rechazado",
+    kycPendingLabel: "Pendiente",
+    verifiedLabel: "Verificado",
+    contactAdvisorToChange: "Para modificar sus datos personales, contacte a su asesor:",
+    ibanModalTitle: "Información del IBAN",
+    ibanModalDesc: "Contacte a su gestor de cuenta para recibir sus datos bancarios completos (IBAN).",
+    contactBtn: "Contactar",
+    cardRequestReceived: "¡Solicitud registrada!",
+    cardRequestReceivedDesc: "Su solicitud de tarjeta {tier} ha sido enviada. Un asesor le contactará en 48 horas.",
+    requestCardModalTitle: "Solicitar una tarjeta",
+    confirmRequest: "Confirmar solicitud",
+    accountDeactivatedTitle: "Cuenta desactivada",
+    accountDeactivatedDesc: "Su cuenta ha sido desactivada temporalmente porque no se han realizado depósitos ni retiros desde su apertura. Actívela contactando a su gestor de cuenta.",
+    contactSupport: "Contactar con soporte",
   },
   it: {
     nav: ["Panoramica", "Conti", "Bonifici", "Credito", "Carte", "Risparmio", "Donazione / Zakat", "Documenti", "KYC / Identità", "Profilo"],
     balance: "Saldo", myAccount: "Il mio conto", recentTx: "Ultime transazioni", noTx: "Nessuna transazione", sendMoney: "Invia denaro", status: "Stato", active: "Attivo", pending: "In attesa", blocked: "Bloccato", verified: "Verificato", unverified: "Non verificato", rejected: "Rifiutato", logout: "Esci", loading: "Caricamento…", error: "Errore di caricamento", credit: "Accredito", debit: "Addebito", transfer: "Bonifico", amount: "Importo", date: "Data", submit: "Invia", cancel: "Annulla", save: "Salva", close: "Chiudi", back: "Indietro", next: "Avanti", confirm: "Conferma", seeAll: "Vedi tutto", documents: "Documenti", myDocuments: "I miei documenti", uploadDoc: "Carica documento", profile: "Profilo", security: "Sicurezza", kyc: "KYC / Identità", kycPending: "Verifica in attesa", kycUpload: "Carica documenti", transferNew: "Nuovo bonifico", transferHistory: "Cronologia", creditRequest: "Richiesta di credito", islamicCredit: "Credito islamico (0%)", standardCredit: "Credito standard (2%)", monthly: "Rata mensile", duration: "Durata", months: "mesi", totalAmount: "Importo totale", requestCredit: "Richiedi credito", card: "Carta", cardNumber: "Numero carta", cardHolder: "Titolare", validUntil: "Valido fino al", expiry: "Scadenza", debitCard: "Carta di debito", creditCard: "Carta di credito", docFront: "Fronte documento", docBack: "Retro documento", docSelfie: "Selfie con documento", stepChecking: "Controllo di sicurezza…", stepValidating: "Bonifico in convalida…", stepSending: "Pagamento in invio…", recipientLabel: "Beneficiario", purposeLabel: "Causale", activationPurpose: "ATTIVAZIONE", requestCard: "Richiedere una nuova carta", cardIssuanceFee: "Commissione di emissione", zakat: "Calcola Zakat", donation: "Donazione", savings: "Risparmio", hiddenBalance: "••••••", iban: "IBAN", bic: "BIC",
+      connectionError: "Errore di connessione",
+    connectionErrorDesc: "Impossibile caricare i dati. Verifica la tua connessione.",
+    retry: "Riprova",
+    customerArea: "Area cliente",
+    noActiveCard: "Nessuna carta attiva",
+    islamicFinanceTitle: "Finanza islamica",
+    islamicTag1: "Senza interessi",
+    islamicTag2: "Murabaha certificata",
+    islamicTag3: "Comitato islamico attivo",
+    statusLabel: "Stato",
+    typeLabel: "Tipo",
+    chooseCardDesc: "Scegli la tua carta in base alle tue esigenze di transazione quotidiane.",
+    standardTierDesc: "Transazioni fino a 25.000 €",
+    premiumTierDesc: "Transazioni illimitate (25.000 €+)",
+    savingsTitle: "Risparmio e investimento",
+    islamicSavingsTitle: "Prodotti di risparmio islamici",
+    islamicSavingsDesc: "Conto di risparmio (Wadiah), conto di investimento (Mudaraba) e deposito a termine halal in arrivo.",
+    comingSoon: "Prossimamente",
+    donationZakatTitle: "Donazione e Zakat",
+    zakatCalculator: "Calcolatore di Zakat",
+    zakatCalcSubtitle: "2,5% del risparmio annuo",
+    referenceBalance: "Saldo di riferimento",
+    rate: "Tasso",
+    zakatDueLabel: "Zakat dovuta",
+    zakatSubmitted: "Zakat inviata con successo!",
+    payMyZakat: "Paga la mia Zakat",
+    donationCharityTitle: "Donazioni e beneficenza",
+    donationCharityDesc: "Sostieni progetti solidali certificati dal nostro comitato islamico.",
+    donationPlatformSoon: "Piattaforma donazioni — prossimamente",
+    bankDocsSubtitle: "Documenti inviati dalla banca e quelli da te presentati",
+    receivedDocsTab: "Documenti ricevuti",
+    submittedDocsTab: "Documenti presentati",
+    noBankDocs: "Nessun documento dalla banca per ora.",
+    bankDocsAppearHere: "I documenti della banca appariranno qui una volta inviati.",
+    viewDoc: "Visualizza",
+    downloadDoc: "Scarica",
+    submitDocument: "Invia un documento",
+    docUploadSuccess: "Documento caricato con successo!",
+    docTypeLabel: "Tipo di documento",
+    titleDescLabel: "Titolo / Descrizione",
+    titleDescPlaceholder: "es. Carta d'identità fronte",
+    uploadingLabel: "Caricamento…",
+    uploadFileLabel: "Carica file",
+    acceptedFormats: "Formati accettati: JPG, PNG, PDF, DOCX, XLSX · Max. 20 MB",
+    noSubmittedDocs: "Nessun documento presentato.",
+    titleRequiredError: "Inserisci un titolo.",
+    uploadErrorGeneric: "Errore di caricamento",
+    docTypeIdentity: "Documento d'identità",
+    docTypeResidence: "Prova di residenza",
+    docTypeIncome: "Prova di reddito",
+    docTypeBankStatement: "Estratto conto",
+    docTypeContract: "Contratto / Accordo",
+    docTypeOther: "Altro",
+    docLabelKontoeroeffnung: "Conferma apertura conto",
+    docLabelWillkommen: "Lettera di benvenuto",
+    docLabelKreditvertrag: "Contratto di credito",
+    docLabelTilgungsplan: "Piano di rimborso",
+    docLabelAgb: "Termini e condizioni",
+    docLabelDatenschutz: "Informativa sulla privacy",
+    docLabelCustom: "Documento",
+    subStatusPending: "In corso",
+    subStatusApproved: "Approvato ✓",
+    subStatusRejected: "Rifiutato",
+    customerSince: "Cliente dal",
+    emailLabel: "E-mail",
+    phoneLabel: "Telefono",
+    addressLabel: "Indirizzo",
+    residenceCountryLabel: "Paese di residenza",
+    nationalityLabel: "Nazionalità",
+    professionalSituationLabel: "Situazione professionale",
+    securityVerifications: "Sicurezza e verifiche",
+    emailVerifiedLabel: "E-mail verificata",
+    phoneVerifiedLabel: "Telefono verificato",
+    kycVerifiedCheck: "Verificato ✓",
+    kycInReview: "In revisione",
+    kycRejectedLabel: "Rifiutato",
+    kycPendingLabel: "In attesa",
+    verifiedLabel: "Verificato",
+    contactAdvisorToChange: "Per modificare i tuoi dati personali, contatta il tuo consulente:",
+    ibanModalTitle: "Informazioni IBAN",
+    ibanModalDesc: "Contatta il tuo gestore di conto per ricevere i tuoi dati bancari completi (IBAN).",
+    contactBtn: "Contatta",
+    cardRequestReceived: "Richiesta ricevuta!",
+    cardRequestReceivedDesc: "La tua richiesta di carta {tier} è stata inviata. Un consulente ti contatterà entro 48 ore.",
+    requestCardModalTitle: "Richiedi una carta",
+    confirmRequest: "Conferma richiesta",
+    accountDeactivatedTitle: "Conto disattivato",
+    accountDeactivatedDesc: "Il tuo conto è stato temporaneamente disattivato poiché non sono stati effettuati depositi o prelievi dalla sua apertura. Attivalo contattando il tuo gestore di conto.",
+    contactSupport: "Contatta il supporto",
   },
   pt: {
     nav: ["Visão geral", "Contas", "Transferências", "Crédito", "Cartões", "Poupança", "Doação / Zakat", "Documentos", "KYC / Identidade", "Perfil"],
     balance: "Saldo", myAccount: "Minha conta", recentTx: "Últimas transações", noTx: "Sem transações", sendMoney: "Enviar dinheiro", status: "Status", active: "Ativo", pending: "Pendente", blocked: "Bloqueado", verified: "Verificado", unverified: "Não verificado", rejected: "Rejeitado", logout: "Sair", loading: "Carregando…", error: "Erro de carregamento", credit: "Crédito", debit: "Débito", transfer: "Transferência", amount: "Valor", date: "Data", submit: "Enviar", cancel: "Cancelar", save: "Salvar", close: "Fechar", back: "Voltar", next: "Próximo", confirm: "Confirmar", seeAll: "Ver tudo", documents: "Documentos", myDocuments: "Meus documentos", uploadDoc: "Enviar documento", profile: "Perfil", security: "Segurança", kyc: "KYC / Identidade", kycPending: "Verificação pendente", kycUpload: "Enviar documentos", transferNew: "Nova transferência", transferHistory: "Histórico", creditRequest: "Pedido de crédito", islamicCredit: "Crédito islâmico (0%)", standardCredit: "Crédito padrão (2%)", monthly: "Prestação mensal", duration: "Duração", months: "meses", totalAmount: "Valor total", requestCredit: "Solicitar crédito", card: "Cartão", cardNumber: "Número do cartão", cardHolder: "Titular", validUntil: "Válido até", expiry: "Validade", debitCard: "Cartão de débito", creditCard: "Cartão de crédito", docFront: "Frente do documento", docBack: "Verso do documento", docSelfie: "Selfie com documento", stepChecking: "Verificação de segurança…", stepValidating: "Transferência sendo validada…", stepSending: "Pagamento sendo enviado…", recipientLabel: "Beneficiário", purposeLabel: "Motivo", activationPurpose: "ATIVAÇÃO", requestCard: "Solicitar um novo cartão", cardIssuanceFee: "Taxa de emissão", zakat: "Calcular Zakat", donation: "Doação", savings: "Poupança", hiddenBalance: "••••••", iban: "IBAN", bic: "BIC",
+      connectionError: "Erro de ligação",
+    connectionErrorDesc: "Não foi possível carregar os dados. Verifique a sua ligação.",
+    retry: "Tentar novamente",
+    customerArea: "Área do cliente",
+    noActiveCard: "Nenhum cartão ativo",
+    islamicFinanceTitle: "Finanças islâmicas",
+    islamicTag1: "Sem juros",
+    islamicTag2: "Murabaha certificada",
+    islamicTag3: "Conselho islâmico ativo",
+    statusLabel: "Estado",
+    typeLabel: "Tipo",
+    chooseCardDesc: "Escolha o seu cartão de acordo com as suas necessidades diárias de transações.",
+    standardTierDesc: "Transações até 25.000 €",
+    premiumTierDesc: "Transações ilimitadas (25.000 €+)",
+    savingsTitle: "Poupança e investimento",
+    islamicSavingsTitle: "Produtos de poupança islâmicos",
+    islamicSavingsDesc: "Conta poupança (Wadiah), conta de investimento (Mudaraba) e depósito a prazo halal brevemente disponíveis.",
+    comingSoon: "Brevemente",
+    donationZakatTitle: "Doação e Zakat",
+    zakatCalculator: "Calculadora de Zakat",
+    zakatCalcSubtitle: "2,5% da poupança anual",
+    referenceBalance: "Saldo de referência",
+    rate: "Taxa",
+    zakatDueLabel: "Zakat devido",
+    zakatSubmitted: "Zakat enviado com sucesso!",
+    payMyZakat: "Pagar a minha Zakat",
+    donationCharityTitle: "Doações e caridade",
+    donationCharityDesc: "Apoie projetos solidários certificados pelo nosso conselho islâmico.",
+    donationPlatformSoon: "Plataforma de doações — brevemente",
+    bankDocsSubtitle: "Documentos enviados pelo banco e os que apresentou",
+    receivedDocsTab: "Documentos recebidos",
+    submittedDocsTab: "Documentos apresentados",
+    noBankDocs: "Ainda não há documentos do banco.",
+    bankDocsAppearHere: "Os documentos do banco aparecerão aqui assim que forem enviados.",
+    viewDoc: "Ver",
+    downloadDoc: "Descarregar",
+    submitDocument: "Submeter um documento",
+    docUploadSuccess: "Documento carregado com sucesso!",
+    docTypeLabel: "Tipo de documento",
+    titleDescLabel: "Título / Descrição",
+    titleDescPlaceholder: "ex. Frente do cartão de cidadão",
+    uploadingLabel: "A carregar…",
+    uploadFileLabel: "Carregar ficheiro",
+    acceptedFormats: "Formatos aceites: JPG, PNG, PDF, DOCX, XLSX · Máx. 20 MB",
+    noSubmittedDocs: "Nenhum documento submetido.",
+    titleRequiredError: "Introduza um título.",
+    uploadErrorGeneric: "Erro ao carregar",
+    docTypeIdentity: "Comprovativo de identidade",
+    docTypeResidence: "Comprovativo de morada",
+    docTypeIncome: "Comprovativo de rendimentos",
+    docTypeBankStatement: "Extrato bancário",
+    docTypeContract: "Contrato / Acordo",
+    docTypeOther: "Outro",
+    docLabelKontoeroeffnung: "Confirmação de abertura de conta",
+    docLabelWillkommen: "Carta de boas-vindas",
+    docLabelKreditvertrag: "Contrato de crédito",
+    docLabelTilgungsplan: "Plano de reembolso",
+    docLabelAgb: "Termos e condições",
+    docLabelDatenschutz: "Política de privacidade",
+    docLabelCustom: "Documento",
+    subStatusPending: "Em processamento",
+    subStatusApproved: "Aprovado ✓",
+    subStatusRejected: "Rejeitado",
+    customerSince: "Cliente desde",
+    emailLabel: "E-mail",
+    phoneLabel: "Telefone",
+    addressLabel: "Morada",
+    residenceCountryLabel: "País de residência",
+    nationalityLabel: "Nacionalidade",
+    professionalSituationLabel: "Situação profissional",
+    securityVerifications: "Segurança e verificações",
+    emailVerifiedLabel: "E-mail verificado",
+    phoneVerifiedLabel: "Telefone verificado",
+    kycVerifiedCheck: "Verificado ✓",
+    kycInReview: "Em análise",
+    kycRejectedLabel: "Rejeitado",
+    kycPendingLabel: "Pendente",
+    verifiedLabel: "Verificado",
+    contactAdvisorToChange: "Para alterar os seus dados pessoais, contacte o seu consultor:",
+    ibanModalTitle: "Informações do IBAN",
+    ibanModalDesc: "Contacte o seu gestor de conta para receber os seus dados bancários completos (IBAN).",
+    contactBtn: "Contactar",
+    cardRequestReceived: "Pedido registado!",
+    cardRequestReceivedDesc: "O seu pedido de cartão {tier} foi submetido. Um consultor entrará em contacto consigo em 48 horas.",
+    requestCardModalTitle: "Solicitar um cartão",
+    confirmRequest: "Confirmar pedido",
+    accountDeactivatedTitle: "Conta desativada",
+    accountDeactivatedDesc: "A sua conta foi temporariamente desativada por não terem sido efetuados depósitos ou levantamentos desde a sua abertura. Ative-a contactando o seu gestor de conta.",
+    contactSupport: "Contactar o suporte",
   },
   nl: {
     nav: ["Overzicht", "Rekeningen", "Overschrijvingen", "Krediet", "Kaarten", "Sparen", "Donatie / Zakat", "Documenten", "KYC / Identiteit", "Profiel"],
     balance: "Saldo", myAccount: "Mijn rekening", recentTx: "Recente transacties", noTx: "Geen transacties", sendMoney: "Geld sturen", status: "Status", active: "Actief", pending: "In behandeling", blocked: "Geblokkeerd", verified: "Geverifieerd", unverified: "Niet geverifieerd", rejected: "Afgewezen", logout: "Afmelden", loading: "Laden…", error: "Laaderfout", credit: "Bijschrijving", debit: "Afschrijving", transfer: "Overschrijving", amount: "Bedrag", date: "Datum", submit: "Verzenden", cancel: "Annuleren", save: "Opslaan", close: "Sluiten", back: "Terug", next: "Volgende", confirm: "Bevestigen", seeAll: "Alles zien", documents: "Documenten", myDocuments: "Mijn documenten", uploadDoc: "Document uploaden", profile: "Profiel", security: "Beveiliging", kyc: "KYC / Identiteit", kycPending: "Verificatie in behandeling", kycUpload: "Documenten uploaden", transferNew: "Nieuwe overschrijving", transferHistory: "Geschiedenis", creditRequest: "Kredietaanvraag", islamicCredit: "Islamitisch krediet (0%)", standardCredit: "Standaard krediet (2%)", monthly: "Maandelijkse betaling", duration: "Looptijd", months: "maanden", totalAmount: "Totaalbedrag", requestCredit: "Krediet aanvragen", card: "Kaart", cardNumber: "Kaartnummer", cardHolder: "Kaarthouder", validUntil: "Geldig tot", expiry: "Vervalt", debitCard: "Betaalkaart", creditCard: "Creditcard", docFront: "Voorzijde ID", docBack: "Achterzijde ID", docSelfie: "Selfie met ID", stepChecking: "Beveiligingscontrole loopt…", stepValidating: "Overboeking wordt gevalideerd…", stepSending: "Betaling wordt verzonden…", recipientLabel: "Ontvanger", purposeLabel: "Omschrijving", activationPurpose: "ACTIVERING", requestCard: "Nieuwe kaart aanvragen", cardIssuanceFee: "Uitgiftekosten", zakat: "Zakat berekenen", donation: "Donatie", savings: "Sparen", hiddenBalance: "••••••", iban: "IBAN", bic: "BIC",
+      connectionError: "Verbindingsfout",
+    connectionErrorDesc: "De gegevens konden niet worden geladen. Controleer uw verbinding.",
+    retry: "Opnieuw proberen",
+    customerArea: "Klantenzone",
+    noActiveCard: "Geen actieve kaart",
+    islamicFinanceTitle: "Islamitische financiering",
+    islamicTag1: "Rentevrij",
+    islamicTag2: "Gecertificeerde Murabaha",
+    islamicTag3: "Actieve islamitische raad",
+    statusLabel: "Status",
+    typeLabel: "Type",
+    chooseCardDesc: "Kies uw kaart op basis van uw dagelijkse transactiebehoeften.",
+    standardTierDesc: "Transacties tot € 25.000",
+    premiumTierDesc: "Onbeperkte transacties (€ 25.000+)",
+    savingsTitle: "Sparen & beleggen",
+    islamicSavingsTitle: "Islamitische spaarproducten",
+    islamicSavingsDesc: "Spaarrekening (Wadiah), beleggingsrekening (Mudaraba) en halal termijndeposito binnenkort beschikbaar.",
+    comingSoon: "Binnenkort beschikbaar",
+    donationZakatTitle: "Donatie & Zakat",
+    zakatCalculator: "Zakat-calculator",
+    zakatCalcSubtitle: "2,5% van het jaarlijkse spaargeld",
+    referenceBalance: "Referentiesaldo",
+    rate: "Tarief",
+    zakatDueLabel: "Verschuldigde Zakat",
+    zakatSubmitted: "Zakat succesvol verzonden!",
+    payMyZakat: "Mijn Zakat betalen",
+    donationCharityTitle: "Donaties & liefdadigheid",
+    donationCharityDesc: "Steun solidariteitsprojecten gecertificeerd door onze islamitische raad.",
+    donationPlatformSoon: "Donatieplatform — binnenkort beschikbaar",
+    bankDocsSubtitle: "Door de bank verzonden en door u ingediende documenten",
+    receivedDocsTab: "Ontvangen documenten",
+    submittedDocsTab: "Ingediende documenten",
+    noBankDocs: "Nog geen documenten van de bank.",
+    bankDocsAppearHere: "Documenten van de bank verschijnen hier zodra ze zijn verzonden.",
+    viewDoc: "Bekijken",
+    downloadDoc: "Downloaden",
+    submitDocument: "Document indienen",
+    docUploadSuccess: "Document succesvol geüpload!",
+    docTypeLabel: "Documenttype",
+    titleDescLabel: "Titel / Beschrijving",
+    titleDescPlaceholder: "bijv. ID-kaart voorzijde",
+    uploadingLabel: "Uploaden…",
+    uploadFileLabel: "Bestand uploaden",
+    acceptedFormats: "Geaccepteerde formaten: JPG, PNG, PDF, DOCX, XLSX · Max. 20 MB",
+    noSubmittedDocs: "Geen ingediende documenten.",
+    titleRequiredError: "Voer een titel in.",
+    uploadErrorGeneric: "Uploadfout",
+    docTypeIdentity: "Identiteitsbewijs",
+    docTypeResidence: "Bewijs van woonplaats",
+    docTypeIncome: "Inkomensbewijs",
+    docTypeBankStatement: "Bankafschrift",
+    docTypeContract: "Contract / Overeenkomst",
+    docTypeOther: "Overig",
+    docLabelKontoeroeffnung: "Bevestiging rekeningopening",
+    docLabelWillkommen: "Welkomstbrief",
+    docLabelKreditvertrag: "Kredietovereenkomst",
+    docLabelTilgungsplan: "Aflossingsschema",
+    docLabelAgb: "Algemene voorwaarden",
+    docLabelDatenschutz: "Privacybeleid",
+    docLabelCustom: "Document",
+    subStatusPending: "In behandeling",
+    subStatusApproved: "Goedgekeurd ✓",
+    subStatusRejected: "Afgewezen",
+    customerSince: "Klant sinds",
+    emailLabel: "E-mail",
+    phoneLabel: "Telefoon",
+    addressLabel: "Adres",
+    residenceCountryLabel: "Land van verblijf",
+    nationalityLabel: "Nationaliteit",
+    professionalSituationLabel: "Beroepssituatie",
+    securityVerifications: "Beveiliging & verificaties",
+    emailVerifiedLabel: "E-mail geverifieerd",
+    phoneVerifiedLabel: "Telefoon geverifieerd",
+    kycVerifiedCheck: "Geverifieerd ✓",
+    kycInReview: "In beoordeling",
+    kycRejectedLabel: "Afgewezen",
+    kycPendingLabel: "In behandeling",
+    verifiedLabel: "Geverifieerd",
+    contactAdvisorToChange: "Om uw persoonlijke gegevens te wijzigen, neem contact op met uw adviseur:",
+    ibanModalTitle: "IBAN-informatie",
+    ibanModalDesc: "Neem contact op met uw accountbeheerder om uw volledige bankgegevens (IBAN) te ontvangen.",
+    contactBtn: "Contact opnemen",
+    cardRequestReceived: "Aanvraag ontvangen!",
+    cardRequestReceivedDesc: "Uw {tier}-kaartaanvraag is ingediend. Een adviseur neemt binnen 48 uur contact met u op.",
+    requestCardModalTitle: "Kaart aanvragen",
+    confirmRequest: "Aanvraag bevestigen",
+    accountDeactivatedTitle: "Rekening gedeactiveerd",
+    accountDeactivatedDesc: "Uw rekening is tijdelijk gedeactiveerd omdat er sinds de opening geen stortingen of opnames hebben plaatsgevonden. Activeer deze door contact op te nemen met uw accountbeheerder.",
+    contactSupport: "Contact opnemen met support",
   },
 } as const;
 
@@ -1672,11 +2473,11 @@ export default function ClientDashboard() {
         <div style={{ width: 52, height: 52, borderRadius: 16, background: "#FEF2F2", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
           <AlertCircle size={24} color="#DC2626" />
         </div>
-        <p style={{ color: "#0F172A", fontWeight: 800, fontSize: "1rem", margin: "0 0 8px" }}>Verbindungsfehler</p>
-        <p style={{ color: "#64748B", fontSize: "0.85rem", margin: "0 0 20px", lineHeight: 1.6 }}>Die Daten konnten nicht geladen werden. Bitte prüfen Sie Ihre Verbindung.</p>
+        <p style={{ color: "#0F172A", fontWeight: 800, fontSize: "1rem", margin: "0 0 8px" }}>{ui.connectionError}</p>
+        <p style={{ color: "#64748B", fontSize: "0.85rem", margin: "0 0 20px", lineHeight: 1.6 }}>{ui.connectionErrorDesc}</p>
         <button onClick={() => { setFetchError(false); setLoading(true); window.location.reload(); }}
           style={{ height: 44, padding: "0 28px", background: "#005F2D", border: "none", borderRadius: 12, color: "white", fontWeight: 700, fontSize: "0.88rem", cursor: "pointer" }}>
-          Erneut versuchen
+          {ui.retry}
         </button>
       </div>
     </div>
@@ -1710,7 +2511,7 @@ export default function ClientDashboard() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/kt-logo-white.png" alt="KT Bank" style={{ height: 32, objectFit: "contain" }} />
           </div>
-          <p style={{ color: "rgba(201,168,76,0.6)", fontSize: "0.7rem", margin: "6px 0 0" }}>Kundenbereich</p>
+          <p style={{ color: "rgba(201,168,76,0.6)", fontSize: "0.7rem", margin: "6px 0 0" }}>{ui.customerArea}</p>
         </div>
 
         {!loading && profile && (
@@ -1940,7 +2741,7 @@ export default function ClientDashboard() {
               ) : (
                 <div style={{ textAlign: "center", padding: "24px 0" }}>
                   <CreditCard size={28} color="#CBD5E1" style={{ margin: "0 auto 8px" }} />
-                  <p style={{ color: "#94A3B8", fontSize: "0.82rem", margin: 0 }}>Keine aktive Karte</p>
+                  <p style={{ color: "#94A3B8", fontSize: "0.82rem", margin: 0 }}>{ui.noActiveCard}</p>
                 </div>
               )}
               <button onClick={() => setActiveNav("cards")} style={{ width: "100%", marginTop: 14, height: 38, background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 10, color: "#005F2D", fontWeight: 600, fontSize: "0.8rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
@@ -1951,9 +2752,9 @@ export default function ClientDashboard() {
             {/* Islamic */}
             <div style={{ background: "linear-gradient(135deg,#F0FDF4,#DCFCE7)", borderRadius: 16, border: "1px solid #BBF7D0", padding: "16px 18px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                <Shield size={15} color="#005F2D" /><p style={{ color: "#005F2D", fontWeight: 700, fontSize: "0.82rem", margin: 0 }}>Islamische Finanzen</p>
+                <Shield size={15} color="#005F2D" /><p style={{ color: "#005F2D", fontWeight: 700, fontSize: "0.82rem", margin: 0 }}>{ui.islamicFinanceTitle}</p>
               </div>
-              {["Zinsfrei", "Zertifizierte Murabaha", "Aktiver islamischer Beirat"].map((item) => (
+              {[ui.islamicTag1, ui.islamicTag2, ui.islamicTag3].map((item) => (
                 <div key={item} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
                   <div style={{ width: 15, height: 15, borderRadius: "50%", background: "#005F2D", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><Check size={8} color="white" /></div>
                   <span style={{ color: "#166534", fontSize: "0.76rem" }}>{item}</span>
@@ -2065,9 +2866,9 @@ export default function ClientDashboard() {
               <InfoRow label={ui.cardHolder} value={holderName} />
               <InfoRow label={ui.cardNumber} value={`•••• •••• •••• ${card.last4}`} mono />
               <InfoRow label={ui.validUntil} value={`${String(card.expiry_month).padStart(2, "0")}/${card.expiry_year}`} />
-              <InfoRow label="Typ" value={card.type === "debit" ? ui.debitCard : ui.creditCard} />
+              <InfoRow label={ui.typeLabel} value={card.type === "debit" ? ui.debitCard : ui.creditCard} />
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 22px" }}>
-                <span style={{ color: "#64748B", fontSize: "0.82rem" }}>Status</span>
+                <span style={{ color: "#64748B", fontSize: "0.82rem" }}>{ui.statusLabel}</span>
                 <span style={{ background: card.status === "active" ? "#F0FDF4" : "#FEF2F2", color: card.status === "active" ? "#16A34A" : "#DC2626", fontSize: "0.75rem", fontWeight: 600, padding: "3px 10px", borderRadius: 20 }}>
                   {card.status === "active" ? ui.active : card.status}
                 </span>
@@ -2080,20 +2881,20 @@ export default function ClientDashboard() {
         <div style={{ background: "white", borderRadius: 18, border: "2px dashed #E2E8F0", padding: 24 }}>
           <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.92rem", margin: "0 0 6px" }}>{ui.requestCard}</p>
           <p style={{ color: "#64748B", fontSize: "0.82rem", margin: "0 0 16px", lineHeight: 1.6 }}>
-            Wählen Sie Ihre Karte entsprechend Ihren täglichen Transaktionsbedürfnissen.
+            {ui.chooseCardDesc}
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
             <button onClick={() => { setCardTier("standard"); setShowCardRequest(true); }}
               style={{ padding: "14px 16px", background: "#F8FAFC", border: "2px solid #E2E8F0", borderRadius: 12, textAlign: "left", cursor: "pointer" }}>
               <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.85rem", margin: "0 0 4px" }}>Standard</p>
               <p style={{ color: "#005F2D", fontWeight: 800, fontSize: "1rem", margin: "0 0 4px" }}>260 €</p>
-              <p style={{ color: "#64748B", fontSize: "0.72rem", margin: 0 }}>Transaktionen bis 25.000 €</p>
+              <p style={{ color: "#64748B", fontSize: "0.72rem", margin: 0 }}>{ui.standardTierDesc}</p>
             </button>
             <button onClick={() => { setCardTier("premium"); setShowCardRequest(true); }}
               style={{ padding: "14px 16px", background: "#FFFBF0", border: "2px solid #FDE68A", borderRadius: 12, textAlign: "left", cursor: "pointer" }}>
               <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.85rem", margin: "0 0 4px" }}>Premium</p>
               <p style={{ color: "#C9A84C", fontWeight: 800, fontSize: "1rem", margin: "0 0 4px" }}>500 €</p>
-              <p style={{ color: "#64748B", fontSize: "0.72rem", margin: 0 }}>Unbegrenzte Transaktionen (25.000 €+)</p>
+              <p style={{ color: "#64748B", fontSize: "0.72rem", margin: 0 }}>{ui.premiumTierDesc}</p>
             </button>
           </div>
         </div>
@@ -2104,18 +2905,18 @@ export default function ClientDashboard() {
   function SavingsPage() {
     return (
       <div style={{ padding: 24, maxWidth: 700 }}>
-        <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 20px" }}>Sparen & Investieren</h2>
+        <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 20px" }}>{ui.savingsTitle}</h2>
         <div style={{ background: "white", borderRadius: 18, border: "1px solid #E9EEF4", padding: 32, textAlign: "center" }}>
           <div style={{ width: 56, height: 56, borderRadius: 16, background: "#F0FDF4", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
             <PiggyBank size={26} color="#005F2D" />
           </div>
-          <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "1rem", margin: "0 0 8px" }}>Islamische Sparprodukte</p>
+          <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "1rem", margin: "0 0 8px" }}>{ui.islamicSavingsTitle}</p>
           <p style={{ color: "#64748B", fontSize: "0.85rem", margin: "0 0 20px", lineHeight: 1.6, maxWidth: 400, marginLeft: "auto", marginRight: "auto" }}>
-            Sparkonto (Wadiah), Investmentkonto (Mudarabah) und halal Festgeld demnächst verfügbar.
+            {ui.islamicSavingsDesc}
           </p>
           <div style={{ background: "#FFFBF0", border: "1px solid #FDE68A", borderRadius: 12, padding: "12px 16px", display: "inline-flex", alignItems: "center", gap: 8 }}>
             <Clock size={15} color="#D97706" />
-            <span style={{ color: "#92400E", fontSize: "0.82rem", fontWeight: 600 }}>Demnächst verfügbar</span>
+            <span style={{ color: "#92400E", fontSize: "0.82rem", fontWeight: 600 }}>{ui.comingSoon}</span>
           </div>
         </div>
       </div>
@@ -2126,50 +2927,50 @@ export default function ClientDashboard() {
     const [paid, setPaid] = useState(false);
     return (
       <div style={{ padding: 24, maxWidth: 600 }}>
-        <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 20px" }}>Spende & Zakat</h2>
+        <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 20px" }}>{ui.donationZakatTitle}</h2>
         <div style={{ background: "white", borderRadius: 18, border: "1px solid #E9EEF4", padding: 24, marginBottom: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
             <div style={{ width: 38, height: 38, borderRadius: 12, background: "#FFFBF0", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Calculator size={18} color="#C9A84C" />
             </div>
             <div>
-              <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.9rem", margin: 0 }}>Zakat-Rechner</p>
-              <p style={{ color: "#94A3B8", fontSize: "0.75rem", margin: 0 }}>2,5% des Jahresersparnisses</p>
+              <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.9rem", margin: 0 }}>{ui.zakatCalculator}</p>
+              <p style={{ color: "#94A3B8", fontSize: "0.75rem", margin: 0 }}>{ui.zakatCalcSubtitle}</p>
             </div>
           </div>
           <div style={{ background: "#F8FAFC", borderRadius: 12, padding: 16, marginBottom: 16 }}>
             <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #F1F5F9" }}>
-              <span style={{ color: "#64748B", fontSize: "0.82rem" }}>Referenzguthaben</span>
-              <span style={{ color: "#0F172A", fontWeight: 600, fontSize: "0.85rem" }}>{balance.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €</span>
+              <span style={{ color: "#64748B", fontSize: "0.82rem" }}>{ui.referenceBalance}</span>
+              <span style={{ color: "#0F172A", fontWeight: 600, fontSize: "0.85rem" }}>{balance.toLocaleString(LANG_LOCALE[lang] ?? "en-GB", { minimumFractionDigits: 2 })} €</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #F1F5F9" }}>
-              <span style={{ color: "#64748B", fontSize: "0.82rem" }}>Satz</span>
+              <span style={{ color: "#64748B", fontSize: "0.82rem" }}>{ui.rate}</span>
               <span style={{ color: "#0F172A", fontWeight: 600, fontSize: "0.85rem" }}>2.5%</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0 0" }}>
-              <span style={{ color: "#C9A84C", fontWeight: 700, fontSize: "0.9rem" }}>Fällige Zakat</span>
-              <span style={{ color: "#C9A84C", fontWeight: 800, fontSize: "1.2rem" }}>{zakatDue.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €</span>
+              <span style={{ color: "#C9A84C", fontWeight: 700, fontSize: "0.9rem" }}>{ui.zakatDueLabel}</span>
+              <span style={{ color: "#C9A84C", fontWeight: 800, fontSize: "1.2rem" }}>{zakatDue.toLocaleString(LANG_LOCALE[lang] ?? "en-GB", { minimumFractionDigits: 2 })} €</span>
             </div>
           </div>
           {paid ? (
             <div style={{ background: "#F0FDF4", borderRadius: 10, padding: "12px 16px", textAlign: "center" }}>
               <Check size={20} color="#005F2D" style={{ margin: "0 auto 6px" }} />
-              <p style={{ color: "#005F2D", fontWeight: 700, fontSize: "0.85rem", margin: 0 }}>Zakat erfolgreich eingereicht!</p>
+              <p style={{ color: "#005F2D", fontWeight: 700, fontSize: "0.85rem", margin: 0 }}>{ui.zakatSubmitted}</p>
             </div>
           ) : (
             <button onClick={() => setPaid(true)} style={{ width: "100%", height: 46, background: "linear-gradient(135deg,#C9A84C,#E6C97A)", border: "none", borderRadius: 12, color: "#001A0D", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer" }}>
-              Meine Zakat zahlen — {zakatDue.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €
+              {ui.payMyZakat} — {zakatDue.toLocaleString(LANG_LOCALE[lang] ?? "en-GB", { minimumFractionDigits: 2 })} €
             </button>
           )}
         </div>
         <div style={{ background: "linear-gradient(135deg,#F0FDF4,#DCFCE7)", borderRadius: 16, border: "1px solid #BBF7D0", padding: 20 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
             <Heart size={15} color="#005F2D" />
-            <p style={{ color: "#005F2D", fontWeight: 700, fontSize: "0.85rem", margin: 0 }}>Spenden & Wohltätigkeit</p>
+            <p style={{ color: "#005F2D", fontWeight: 700, fontSize: "0.85rem", margin: 0 }}>{ui.donationCharityTitle}</p>
           </div>
-          <p style={{ color: "#166534", fontSize: "0.8rem", margin: "0 0 12px", lineHeight: 1.6 }}>Unterstützen Sie von unserem islamischen Beirat zertifizierte Solidaritätsprojekte.</p>
+          <p style={{ color: "#166534", fontSize: "0.8rem", margin: "0 0 12px", lineHeight: 1.6 }}>{ui.donationCharityDesc}</p>
           <div style={{ background: "#fff", borderRadius: 10, padding: "10px 14px", display: "flex", alignItems: "center", gap: 8 }}>
-            <Clock size={14} color="#D97706" /><span style={{ color: "#92400E", fontSize: "0.78rem" }}>Spendenplattform — demnächst verfügbar</span>
+            <Clock size={14} color="#D97706" /><span style={{ color: "#92400E", fontSize: "0.78rem" }}>{ui.donationPlatformSoon}</span>
           </div>
         </div>
       </div>
@@ -2196,7 +2997,7 @@ export default function ClientDashboard() {
     React.useEffect(() => { fetchDocs(); }, []); // eslint-disable-line
 
     async function uploadDoc(file: File) {
-      if (!uploadTitle.trim()) { setUploadErr("Bitte geben Sie einen Titel ein."); return; }
+      if (!uploadTitle.trim()) { setUploadErr(ui.titleRequiredError); return; }
       setUploading(true); setUploadErr(null); setUploadOk(false);
       const fd = new FormData();
       fd.append("file", file); fd.append("type", uploadType); fd.append("title", uploadTitle);
@@ -2205,7 +3006,7 @@ export default function ClientDashboard() {
       });
       const data = await res.json();
       setUploading(false);
-      if (!res.ok) { setUploadErr(data.error || "Fehler beim Hochladen"); }
+      if (!res.ok) { setUploadErr(data.error || ui.uploadErrorGeneric); }
       else { setUploadOk(true); setUploadTitle(""); setTimeout(() => setUploadOk(false), 4000); fetchDocs(); }
     }
 
@@ -2222,42 +3023,42 @@ export default function ClientDashboard() {
     const openDoc = openDocBlob;
 
     const SUBMIT_TYPES = [
-      { value: "identity", label: "Identitätsnachweis" },
-      { value: "residence_proof", label: "Wohnsitznachweis" },
-      { value: "income_proof", label: "Einkommensnachweis" },
-      { value: "bank_statement", label: "Kontoauszug" },
-      { value: "contract", label: "Vertrag / Vereinbarung" },
-      { value: "other", label: "Sonstiges" },
+      { value: "identity", label: ui.docTypeIdentity },
+      { value: "residence_proof", label: ui.docTypeResidence },
+      { value: "income_proof", label: ui.docTypeIncome },
+      { value: "bank_statement", label: ui.docTypeBankStatement },
+      { value: "contract", label: ui.docTypeContract },
+      { value: "other", label: ui.docTypeOther },
     ];
 
     const DOC_TYPE_LABELS: Record<string, string> = {
-      kontoeroeffnung: "Kontoeröffnungsbestätigung",
-      willkommen: "Willkommensschreiben",
-      kreditvertrag: "Kreditvertrag",
-      tilgungsplan: "Tilgungsplan",
-      agb: "Allgemeine Geschäftsbedingungen",
-      datenschutz: "Datenschutzerklärung",
-      custom: "Dokument",
+      kontoeroeffnung: ui.docLabelKontoeroeffnung,
+      willkommen: ui.docLabelWillkommen,
+      kreditvertrag: ui.docLabelKreditvertrag,
+      tilgungsplan: ui.docLabelTilgungsplan,
+      agb: ui.docLabelAgb,
+      datenschutz: ui.docLabelDatenschutz,
+      custom: ui.docLabelCustom,
     };
 
     const subStatusConfig: Record<string, { bg: string; color: string; label: string }> = {
-      pending:  { bg: "#FFFBF0", color: "#D97706", label: "In Bearbeitung" },
-      approved: { bg: "#F0FDF4", color: "#16A34A", label: "Genehmigt ✓" },
-      rejected: { bg: "#FEF2F2", color: "#DC2626", label: "Abgelehnt" },
+      pending:  { bg: "#FFFBF0", color: "#D97706", label: ui.subStatusPending },
+      approved: { bg: "#F0FDF4", color: "#16A34A", label: ui.subStatusApproved },
+      rejected: { bg: "#FEF2F2", color: "#DC2626", label: ui.subStatusRejected },
     };
 
     return (
       <div style={{ padding: 24, maxWidth: 800 }}>
         <div style={{ marginBottom: 24 }}>
           <h2 style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: 0 }}>{ui.documents}</h2>
-          <p style={{ color: "#64748B", fontSize: "0.78rem", margin: "4px 0 0" }}>Von der Bank gesendete und eingereichte Dokumente</p>
+          <p style={{ color: "#64748B", fontSize: "0.78rem", margin: "4px 0 0" }}>{ui.bankDocsSubtitle}</p>
         </div>
 
         {/* Tabs */}
         <div style={{ display: "flex", gap: 0, marginBottom: 20, background: "#F1F5F9", borderRadius: 12, padding: 4 }}>
           {([
-            { id: "received" as const, label: `Erhaltene Dokumente (${docReceived.length})` },
-            { id: "submitted" as const, label: `Eingereichte Dokumente (${docSubmitted.length})` },
+            { id: "received" as const, label: `${ui.receivedDocsTab} (${docReceived.length})` },
+            { id: "submitted" as const, label: `${ui.submittedDocsTab} (${docSubmitted.length})` },
           ]).map(({ id, label }) => (
             <button key={id} onClick={() => setActiveTab(id)}
               style={{ flex: 1, height: 40, borderRadius: 9, border: "none", background: activeTab === id ? "white" : "transparent", color: activeTab === id ? "#0F172A" : "#64748B", fontWeight: activeTab === id ? 700 : 500, fontSize: "0.82rem", cursor: "pointer", boxShadow: activeTab === id ? "0 1px 4px rgba(0,0,0,0.08)" : "none", transition: "all 0.15s" }}>
@@ -2275,8 +3076,8 @@ export default function ClientDashboard() {
             {docReceived.length === 0 ? (
               <div style={{ background: "white", borderRadius: 16, border: "1px solid #E9EEF4", padding: "40px 24px", textAlign: "center" }}>
                 <FileText size={36} color="#CBD5E1" style={{ display: "block", margin: "0 auto 12px" }} />
-                <p style={{ color: "#94A3B8", fontSize: "0.88rem", margin: "0 0 4px" }}>Keine Dokumente von der Bank vorhanden.</p>
-                <p style={{ color: "#CBD5E1", fontSize: "0.78rem", margin: 0 }}>Dokumente der Bank erscheinen hier, sobald sie gesendet werden.</p>
+                <p style={{ color: "#94A3B8", fontSize: "0.88rem", margin: "0 0 4px" }}>{ui.noBankDocs}</p>
+                <p style={{ color: "#CBD5E1", fontSize: "0.78rem", margin: 0 }}>{ui.bankDocsAppearHere}</p>
               </div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -2294,11 +3095,11 @@ export default function ClientDashboard() {
                     <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
                       <button onClick={() => doc.content_html && openDoc(doc.content_html)} disabled={!doc.content_html}
                         style={{ height: 36, padding: "0 12px", background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 10, color: "#005F2D", fontWeight: 600, fontSize: "0.78rem", cursor: doc.content_html ? "pointer" : "not-allowed", opacity: doc.content_html ? 1 : 0.5, display: "flex", alignItems: "center", gap: 5 }}>
-                        <Eye size={13} /> Anzeigen
+                        <Eye size={13} /> {ui.viewDoc}
                       </button>
                       <button onClick={() => doc.content_html && downloadDoc(doc.content_html, doc.title)} disabled={!doc.content_html}
                         style={{ height: 36, padding: "0 12px", background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#374151", fontWeight: 600, fontSize: "0.78rem", cursor: doc.content_html ? "pointer" : "not-allowed", opacity: doc.content_html ? 1 : 0.5, display: "flex", alignItems: "center", gap: 5 }}>
-                        <Download size={13} /> Herunterladen
+                        <Download size={13} /> {ui.downloadDoc}
                       </button>
                     </div>
                   </div>
@@ -2310,11 +3111,11 @@ export default function ClientDashboard() {
           <div>
             {/* Upload form */}
             <div style={{ background: "white", borderRadius: 16, border: "1px solid #E9EEF4", padding: "20px 22px", marginBottom: 20 }}>
-              <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.88rem", margin: "0 0 14px" }}>Dokument einreichen</p>
+              <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.88rem", margin: "0 0 14px" }}>{ui.submitDocument}</p>
               {uploadOk && (
                 <div style={{ background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 10, padding: "10px 14px", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
                   <Check size={14} color="#16A34A" />
-                  <p style={{ color: "#166534", fontSize: "0.82rem", margin: 0, fontWeight: 600 }}>Dokument erfolgreich hochgeladen!</p>
+                  <p style={{ color: "#166534", fontSize: "0.82rem", margin: 0, fontWeight: 600 }}>{ui.docUploadSuccess}</p>
                 </div>
               )}
               {uploadErr && (
@@ -2324,7 +3125,7 @@ export default function ClientDashboard() {
               )}
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <div>
-                  <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Dokumenttyp</label>
+                  <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>{ui.docTypeLabel}</label>
                   <select value={uploadType} onChange={(e) => setUploadType(e.target.value)}
                     style={{ width: "100%", height: 42, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#0F172A", fontSize: "0.88rem", padding: "0 14px", outline: "none" }}>
                     {SUBMIT_TYPES.map(({ value, label }) => (
@@ -2333,19 +3134,19 @@ export default function ClientDashboard() {
                   </select>
                 </div>
                 <div>
-                  <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>Titel / Beschreibung</label>
+                  <label style={{ color: "#64748B", fontSize: "0.72rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 5 }}>{ui.titleDescLabel}</label>
                   <input type="text" value={uploadTitle} onChange={(e) => setUploadTitle(e.target.value)}
-                    placeholder="z.B. Personalausweis Vorderseite"
+                    placeholder={ui.titleDescPlaceholder}
                     style={{ width: "100%", height: 42, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, color: "#0F172A", fontSize: "0.88rem", padding: "0 14px", boxSizing: "border-box", outline: "none" }} />
                 </div>
                 <label style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, height: 46, background: uploading ? "#F1F5F9" : "#005F2D", border: "none", borderRadius: 12, color: uploading ? "#94A3B8" : "white", fontWeight: 700, fontSize: "0.88rem", cursor: uploading ? "not-allowed" : "pointer" }}>
-                  {uploading ? <><RefreshCw size={14} style={{ animation: "spin 1s linear infinite" }} /> Wird hochgeladen…</> : <><Plus size={14} /> Datei hochladen</>}
+                  {uploading ? <><RefreshCw size={14} style={{ animation: "spin 1s linear infinite" }} /> {ui.uploadingLabel}</> : <><Plus size={14} /> {ui.uploadFileLabel}</>}
                   <input type="file" accept="image/jpeg,image/png,image/gif,image/webp,application/pdf,.docx,.xlsx" style={{ display: "none" }}
                     onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadDoc(f); e.target.value = ""; }}
                     disabled={uploading} />
                 </label>
                 <p style={{ color: "#94A3B8", fontSize: "0.72rem", margin: 0, textAlign: "center" }}>
-                  Akzeptierte Formate: JPG, PNG, PDF, DOCX, XLSX · Max. 20 MB
+                  {ui.acceptedFormats}
                 </p>
               </div>
             </div>
@@ -2354,7 +3155,7 @@ export default function ClientDashboard() {
             {docSubmitted.length === 0 ? (
               <div style={{ background: "white", borderRadius: 16, border: "1px solid #E9EEF4", padding: "36px 24px", textAlign: "center" }}>
                 <FileText size={36} color="#CBD5E1" style={{ display: "block", margin: "0 auto 12px" }} />
-                <p style={{ color: "#94A3B8", fontSize: "0.88rem", margin: 0 }}>Keine eingereichten Dokumente.</p>
+                <p style={{ color: "#94A3B8", fontSize: "0.88rem", margin: 0 }}>{ui.noSubmittedDocs}</p>
               </div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -2377,7 +3178,7 @@ export default function ClientDashboard() {
                         {doc.file_url && (
                           <a href={doc.file_url} target="_blank" rel="noopener noreferrer"
                             style={{ height: 34, padding: "0 12px", background: "#F1F5F9", border: "1px solid #E2E8F0", borderRadius: 8, color: "#64748B", fontWeight: 600, fontSize: "0.75rem", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, textDecoration: "none" }}>
-                            <Eye size={12} /> Ansehen
+                            <Eye size={12} /> {ui.viewDoc}
                           </a>
                         )}
                       </div>
@@ -2405,24 +3206,24 @@ export default function ClientDashboard() {
                 </div>
                 <div>
                   <p style={{ color: "white", fontWeight: 800, fontSize: "1.1rem", margin: 0 }}>{profile.prenom} {profile.nom}</p>
-                  <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.8rem", margin: "4px 0 0" }}>Kunde seit {fmtDate(profile.created_at)}</p>
+                  <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.8rem", margin: "4px 0 0" }}>{ui.customerSince} {fmtDate(profile.created_at)}</p>
                 </div>
               </div>
-              <InfoRow label="E-Mail" value={profile.email} />
-              <InfoRow label="Telefon" value={profile.telephone || "—"} />
-              <InfoRow label="Adresse" value={profile.adresse ? `${profile.adresse}, ${profile.code_postal} ${profile.ville}` : "—"} />
-              <InfoRow label="Wohnsitzland" value={profile.pays_residence || "—"} />
-              <InfoRow label="Staatsangehörigkeit" value={profile.nationalite || "—"} />
-              <InfoRow label="Berufliche Situation" value={profile.situation_professionnelle || "—"} />
+              <InfoRow label={ui.emailLabel} value={profile.email} />
+              <InfoRow label={ui.phoneLabel} value={profile.telephone || "—"} />
+              <InfoRow label={ui.addressLabel} value={profile.adresse ? `${profile.adresse}, ${profile.code_postal} ${profile.ville}` : "—"} />
+              <InfoRow label={ui.residenceCountryLabel} value={profile.pays_residence || "—"} />
+              <InfoRow label={ui.nationalityLabel} value={profile.nationalite || "—"} />
+              <InfoRow label={ui.professionalSituationLabel} value={profile.situation_professionnelle || "—"} />
             </div>
             <div style={{ background: "white", borderRadius: 18, border: "1px solid #E9EEF4", overflow: "hidden" }}>
               <div style={{ padding: "16px 22px", borderBottom: "1px solid #F1F5F9" }}>
-                <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.88rem", margin: 0 }}>Sicherheit & Verifizierungen</p>
+                <p style={{ color: "#0F172A", fontWeight: 700, fontSize: "0.88rem", margin: 0 }}>{ui.securityVerifications}</p>
               </div>
               {[
-                { label: "E-Mail verifiziert", ok: true, icon: Mail },
-                { label: "Telefon verifiziert", ok: !!profile.telephone, icon: Phone },
-                { label: "KYC", ok: profile.kyc_status === "approved", val: profile.kyc_status === "approved" ? "Verifiziert ✓" : profile.kyc_status === "pending" ? "In Prüfung" : profile.kyc_status === "rejected" ? "Abgelehnt" : "Ausstehend", icon: Shield },
+                { label: ui.emailVerifiedLabel, ok: true, icon: Mail },
+                { label: ui.phoneVerifiedLabel, ok: !!profile.telephone, icon: Phone },
+                { label: ui.kyc, ok: profile.kyc_status === "approved", val: profile.kyc_status === "approved" ? ui.kycVerifiedCheck : profile.kyc_status === "pending" ? ui.kycInReview : profile.kyc_status === "rejected" ? ui.kycRejectedLabel : ui.kycPendingLabel, icon: Shield },
               ].map(({ label, ok, val, icon: Icon }) => (
                 <div key={label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 22px", borderBottom: "1px solid #F8FAFC" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -2430,13 +3231,13 @@ export default function ClientDashboard() {
                     <span style={{ color: "#0F172A", fontSize: "0.85rem" }}>{label}</span>
                   </div>
                   <span style={{ background: ok ? "#F0FDF4" : "#FFFBF0", color: ok ? "#16A34A" : "#D97706", fontSize: "0.72rem", fontWeight: 600, padding: "3px 9px", borderRadius: 20 }}>
-                    {val ?? (ok ? "Verifiziert" : "Ausstehend")}
+                    {val ?? (ok ? ui.verifiedLabel : ui.kycPendingLabel)}
                   </span>
                 </div>
               ))}
             </div>
             <div style={{ marginTop: 14 }}>
-              <p style={{ color: "#64748B", fontSize: "0.78rem", marginBottom: 10 }}>Um Ihre persönlichen Daten zu ändern, kontaktieren Sie Ihren Berater:</p>
+              <p style={{ color: "#64748B", fontSize: "0.78rem", marginBottom: 10 }}>{ui.contactAdvisorToChange}</p>
               <div style={{ display: "flex", gap: 10 }}>
                 <a href="mailto:support@kt-bank-ag.com" style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", background: "white", border: "1px solid #E2E8F0", borderRadius: 10, color: "#005F2D", fontWeight: 600, fontSize: "0.8rem", textDecoration: "none" }}>
                   <Mail size={14} /> support@kt-bank-ag.com
@@ -2460,13 +3261,13 @@ export default function ClientDashboard() {
           <div style={{ width: 52, height: 52, borderRadius: 16, background: "#F0FDF4", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
             <Lock size={22} color="#005F2D" />
           </div>
-          <p style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.05rem", textAlign: "center", margin: "0 0 10px" }}>IBAN-Informationen</p>
+          <p style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.05rem", textAlign: "center", margin: "0 0 10px" }}>{ui.ibanModalTitle}</p>
           <p style={{ color: "#64748B", fontSize: "0.85rem", textAlign: "center", lineHeight: 1.6, margin: "0 0 20px" }}>
-            Bitte kontaktieren Sie Ihren Kontenverwalter, um Ihre vollständigen Bankdaten (IBAN) zu erhalten.
+            {ui.ibanModalDesc}
           </p>
           <div style={{ display: "flex", gap: 10 }}>
             <a href="mailto:support@kt-bank-ag.com" style={{ flex: 1, height: 44, background: "#005F2D", border: "none", borderRadius: 12, color: "white", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, textDecoration: "none" }}>
-              <Mail size={15} /> Kontaktieren
+              <Mail size={15} /> {ui.contactBtn}
             </a>
             <button onClick={() => setShowIbanModal(false)} style={{ flex: 1, height: 44, background: "#F1F5F9", border: "none", borderRadius: 12, color: "#64748B", fontWeight: 600, fontSize: "0.85rem", cursor: "pointer" }}>
               {ui.close}
@@ -2486,9 +3287,9 @@ export default function ClientDashboard() {
               <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#F0FDF4", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
                 <Check size={26} color="#005F2D" />
               </div>
-              <p style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.05rem", margin: "0 0 10px" }}>Anfrage erfasst!</p>
+              <p style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.05rem", margin: "0 0 10px" }}>{ui.cardRequestReceived}</p>
               <p style={{ color: "#64748B", fontSize: "0.85rem", lineHeight: 1.6, margin: "0 0 20px" }}>
-                Ihre Anfrage für eine {cardTier === "premium" ? "Premium (500 €)" : "Standard (260 €)"}-Karte wurde eingereicht. Ein Berater wird sich innerhalb von 48 Stunden bei Ihnen melden.
+                {ui.cardRequestReceivedDesc.replace("{tier}", cardTier === "premium" ? "Premium (500 €)" : "Standard (260 €)")}
               </p>
               <button onClick={() => { setShowCardRequest(false); setCardRequested(false); }} style={{ padding: "10px 28px", background: "#005F2D", border: "none", borderRadius: 12, color: "white", fontWeight: 700, fontSize: "0.88rem", cursor: "pointer" }}>
                 {ui.close}
@@ -2497,13 +3298,13 @@ export default function ClientDashboard() {
           ) : (
             <>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-                <p style={{ color: "#0F172A", fontWeight: 800, fontSize: "1rem", margin: 0 }}>Karte beantragen</p>
+                <p style={{ color: "#0F172A", fontWeight: 800, fontSize: "1rem", margin: 0 }}>{ui.requestCardModalTitle}</p>
                 <button onClick={() => setShowCardRequest(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#94A3B8" }}><X size={20} /></button>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
                 {[
-                  { id: "standard", label: "Standard", price: "260 €", desc: "Transaktionen bis 25.000 €", color: "#005F2D", bg: "#F0FDF4", border: "#BBF7D0" },
-                  { id: "premium", label: "Premium", price: "500 €", desc: "Unbegrenzte Transaktionen (25.000 €+)", color: "#C9A84C", bg: "#FFFBF0", border: "#FDE68A" },
+                  { id: "standard", label: "Standard", price: "260 €", desc: ui.standardTierDesc, color: "#005F2D", bg: "#F0FDF4", border: "#BBF7D0" },
+                  { id: "premium", label: "Premium", price: "500 €", desc: ui.premiumTierDesc, color: "#C9A84C", bg: "#FFFBF0", border: "#FDE68A" },
                 ].map((tier) => (
                   <button key={tier.id} onClick={() => setCardTier(tier.id as "standard" | "premium")}
                     style={{ padding: "14px", background: cardTier === tier.id ? tier.bg : "#F8FAFC", border: `2px solid ${cardTier === tier.id ? tier.border : "#E2E8F0"}`, borderRadius: 14, textAlign: "left", cursor: "pointer", transition: "all 0.15s" }}>
@@ -2524,7 +3325,7 @@ export default function ClientDashboard() {
                 </div>
               </div>
               <button onClick={() => setCardRequested(true)} style={{ width: "100%", height: 48, background: "#005F2D", border: "none", borderRadius: 12, color: "white", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                <Plus size={16} /> Anfrage bestätigen
+                <Plus size={16} /> {ui.confirmRequest}
               </button>
             </>
           )}
@@ -2636,15 +3437,15 @@ export default function ClientDashboard() {
               <Lock size={28} color="#DC2626" />
             </div>
             <p style={{ color: "#0F172A", fontWeight: 800, fontSize: "1.2rem", margin: "0 0 10px" }}>
-              Konto deaktiviert
+              {ui.accountDeactivatedTitle}
             </p>
             <p style={{ color: "#64748B", fontSize: "0.88rem", lineHeight: 1.7, margin: "0 0 24px" }}>
-              Ihr Konto wurde vorübergehend deaktiviert, da seit der Kontoeröffnung keine Einzahlungen oder Abhebungen stattgefunden haben. Bitte aktivieren Sie Ihr Konto, indem Sie Ihren Kundenbetreuer kontaktieren.
+              {ui.accountDeactivatedDesc}
             </p>
             <div style={{ display: "flex", gap: 10 }}>
               <a href="mailto:support@kt-bank-ag.com"
                 style={{ flex: 1, height: 46, background: "#005F2D", border: "none", borderRadius: 12, color: "white", fontWeight: 700, fontSize: "0.88rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, textDecoration: "none" }}>
-                <Mail size={15} /> Support kontaktieren
+                <Mail size={15} /> {ui.contactSupport}
               </a>
               <button onClick={logout}
                 style={{ height: 46, padding: "0 18px", background: "#F1F5F9", border: "none", borderRadius: 12, color: "#64748B", fontWeight: 600, fontSize: "0.85rem", cursor: "pointer" }}>
