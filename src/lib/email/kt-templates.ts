@@ -17,7 +17,7 @@ export type TplLang = "de" | "fr" | "en" | "ar" | "tr" | "es" | "it" | "pt" | "n
 export type TplId = "welcome" | "promo_islamic" | "contact_manager" | "financing_proposal" | "document_request" | "account_funding" | "signup_reminder";
 
 /* ── Brand constants ── */
-const LOGO_URL = "https://www.kt-bank-ag.com/kt-logo.png";
+const LOGO_URL = "https://www.kt-bank-ag.com/kt-logo-white.png";
 const PORTAL_URL = "https://www.kt-bank-ag.com/client/login";
 const PORTAL_LABEL = "kt-bank-ag.com/client/login";
 const REGISTER_URL = "https://www.kt-bank-ag.com/client/register";

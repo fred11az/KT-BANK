@@ -1,4 +1,4 @@
-const LOGO_URL = "https://kt-bank-ag.com/kt-logo.png";
+const LOGO_URL = "https://kt-bank-ag.com/kt-logo-white.png";
 const DASHBOARD_URL = "https://kt-bank-ag.com/client/dashboard";
 const CONTACT_URL = "https://kt-bank-ag.com/contact";
 

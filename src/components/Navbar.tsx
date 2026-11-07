@@ -10,11 +10,11 @@ function Logo({ white }: { white?: boolean }) {
   return (
     <div className="flex items-center">
       <Image
-        src="/kt-logo.png"
+        src={white ? "/kt-logo-white.png" : "/kt-logo.png"}
         alt="KT Bank"
         width={120}
         height={34}
-        style={{ objectFit: "contain", filter: white ? "brightness(0) invert(1)" : "none" }}
+        style={{ objectFit: "contain" }}
         priority
       />
     </div>

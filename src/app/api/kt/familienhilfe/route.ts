@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
   const confirmHtml = `
 <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
   <div style="background:#005F2D;padding:28px 32px;">
-    <img src="https://www.kt-bank-ag.com/kt-logo.png" alt="KT Bank AG" style="height:28px;filter:brightness(0) invert(1);display:block;margin-bottom:16px;" />
+    <img src="https://www.kt-bank-ag.com/kt-logo-white.png" alt="KT Bank AG" style="height:28px;display:block;margin-bottom:16px;" />
     <h1 style="color:white;margin:0;font-size:20px;font-weight:700;">
       ${isFr ? "Votre demande a bien été reçue" : "Ihre Anfrage ist eingegangen"}
     </h1>

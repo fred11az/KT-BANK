@@ -164,7 +164,7 @@ function Bordereau({ transfer, profile, feeFree = false, lang = "de" }: { transf
           <div style={{ background: "linear-gradient(135deg, #002d15 0%, #005F2D 100%)", padding: "24px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/kt-logo.png" alt="KT Bank AG" style={{ height: 26, filter: "brightness(0) invert(1)", display: "block", marginBottom: 8 }} />
+              <img src="/kt-logo-white.png" alt="KT Bank AG" style={{ height: 26, display: "block", marginBottom: 8 }} />
               <p style={{ color: "rgba(201,168,76,0.9)", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", margin: 0 }}>ORDRE DE VIREMENT SEPA</p>
             </div>
             <div style={{ textAlign: "right" }}>

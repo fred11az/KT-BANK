@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
   const clientHtml = `
 <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
   <div style="background:linear-gradient(135deg,#002d15,#005F2D);padding:28px 32px;">
-    <img src="https://www.kt-bank-ag.com/kt-logo.png" alt="KT Bank AG" style="height:28px;filter:brightness(0) invert(1);display:block;margin-bottom:16px;" />
+    <img src="https://www.kt-bank-ag.com/kt-logo-white.png" alt="KT Bank AG" style="height:28px;display:block;margin-bottom:16px;" />
     <h1 style="color:white;margin:0;font-size:20px;font-weight:700;">${isFr ? "Demande de crédit reçue" : "Kreditanfrage eingegangen"}</h1>
     <p style="color:rgba(255,255,255,0.75);margin:6px 0 0;font-size:14px;">${isFr ? "Programme de crédit · KT Bank AG" : "Kreditprogramm · KT Bank AG"}</p>
   </div>

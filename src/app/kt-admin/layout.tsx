@@ -97,7 +97,7 @@ function Sidebar({ open, onClose, isMobile, logout }: { open: boolean; onClose: 
     }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 8px", marginBottom: 4 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/kt-logo.png" alt="KT Bank" style={{ height: 28, objectFit: "contain", filter: "brightness(0) invert(1)", display: "block" }} />
+        <img src="/kt-logo-white.png" alt="KT Bank" style={{ height: 28, objectFit: "contain", display: "block" }} />
         {isMobile && (
           <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.5)", cursor: "pointer", padding: 4 }}>
             <X size={20} />
@@ -187,7 +187,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Menu size={22} />
               </button>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/kt-logo.png" alt="KT Bank" style={{ height: 22, objectFit: "contain", filter: "brightness(0) invert(1)" }} />
+              <img src="/kt-logo-white.png" alt="KT Bank" style={{ height: 22, objectFit: "contain" }} />
               <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.7rem" }}>Admin</span>
             </div>
           )}

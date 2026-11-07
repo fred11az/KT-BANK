@@ -1708,7 +1708,7 @@ export default function ClientDashboard() {
         <div style={{ padding: "22px 18px 16px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/kt-logo.png" alt="KT Bank" style={{ height: 32, objectFit: "contain", filter: "brightness(0) invert(1)" }} />
+            <img src="/kt-logo-white.png" alt="KT Bank" style={{ height: 32, objectFit: "contain" }} />
           </div>
           <p style={{ color: "rgba(201,168,76,0.6)", fontSize: "0.7rem", margin: "6px 0 0" }}>Kundenbereich</p>
         </div>
