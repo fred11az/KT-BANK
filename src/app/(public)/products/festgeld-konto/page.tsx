@@ -1,7 +1,9 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, TrendingUp, Shield, Lock, CheckCircle } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const rateTable = [
   { duration: "3 mois", rate: "3.5%", minAmount: "1 000 €", note: "Profit fixe trimestriel" },
@@ -24,6 +26,8 @@ const featureCards = [
 ];
 
 export default function FestgeldKontoPage() {
+  const { t } = useLanguage();
+  const fg = t.home.festgeld;
   const [amount, setAmount] = useState(10000);
   const [durationIdx, setDurationIdx] = useState(1);
 
@@ -44,43 +48,26 @@ export default function FestgeldKontoPage() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="animate-fade-up">
               <span className="badge badge-green mb-6" style={{ background: "rgba(6,95,70,0.5)", color: "#6ee7b7", border: "1px solid rgba(52,211,153,0.35)" }}>
-                Épargne à terme · Wakala
+                {fg.heading}
               </span>
-              <h1 className="text-display text-white mb-6">
-                KT FestGeld<br />
-                <span style={{ color: "#6ee7b7" }}>jusqu&apos;à 4.5% / an</span>
-              </h1>
+              <h1 className="text-display text-white mb-6">{fg.heading}</h1>
               <p className="text-body-lg mb-8" style={{ color: "rgba(255,255,255,0.78)" }}>
-                Faites fructifier votre épargne avec un profit fixe et garanti. Contrat Wakala conforme Sharia, capital protégé par la BaFin.
+                {fg.desc}
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link href="#calculator" className="btn btn-xl flex items-center gap-2 text-white"
                   style={{ background: "linear-gradient(135deg, #059669, #047857)", boxShadow: "0 8px 30px rgba(5,150,105,0.4)" }}>
-                  Calculer mon profit <ArrowRight size={20} />
+                  {fg.cta} <ArrowRight size={20} />
                 </Link>
-                <Link href="#rates" className="btn btn-outline-white btn-xl">Voir les taux</Link>
+                <Link href="#rates" className="btn btn-outline-white btn-xl">{fg.more}</Link>
               </div>
             </div>
 
-            {/* Rate preview */}
+            {/* Official KT Bank photo */}
             <div className="animate-fade-up delay-200">
-              <div className="space-y-3">
-                {DURATIONS.map((d, i) => (
-                  <div key={d.label} className="flex items-center justify-between p-5 rounded-2xl"
-                    style={{ background: i === 2 ? "rgba(52,211,153,0.15)" : "rgba(255,255,255,0.07)", border: `1px solid ${i === 2 ? "rgba(52,211,153,0.4)" : "rgba(255,255,255,0.12)"}` }}>
-                    <div>
-                      <p className="font-bold text-white">{d.label}</p>
-                      <p className="text-small" style={{ color: "rgba(255,255,255,0.55)" }}>Durée de blocage</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-black text-2xl" style={{ color: i === 2 ? "#6ee7b7" : "#a7f3d0" }}>
-                        {(d.rate * 100).toFixed(1)}%
-                      </p>
-                      <p className="text-small" style={{ color: "rgba(255,255,255,0.5)" }}>/ an</p>
-                    </div>
-                    {i === 2 && <span className="badge ml-3" style={{ background: "#059669", color: "white" }}>Meilleur</span>}
-                  </div>
-                ))}
+              <div className="relative w-full aspect-[4/5] sm:aspect-[4/3] rounded-2xl overflow-hidden"
+                style={{ border: "1px solid rgba(52,211,153,0.35)" }}>
+                <Image src="/images/home/beteiligungskonto.jpg" alt={fg.heading} fill style={{ objectFit: "cover" }} sizes="(min-width: 1024px) 50vw, 100vw" priority />
               </div>
             </div>
           </div>

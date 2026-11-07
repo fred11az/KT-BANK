@@ -1,7 +1,9 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, CheckCircle, Home, TrendingDown, Percent, Users } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const processSteps = [
   { num: "01", title: "Évaluation du projet", desc: "Analyse de votre capacité financière et du bien immobilier ciblé." },
@@ -13,6 +15,8 @@ const processSteps = [
 ];
 
 export default function RealEstatePage() {
+  const { t } = useLanguage();
+  const fin = t.home.financing;
   const [price, setPrice] = useState(300000);
   const [downPct, setDownPct] = useState(20);
   const [years, setYears] = useState(20);
@@ -34,25 +38,30 @@ export default function RealEstatePage() {
         <div className="absolute inset-0 pointer-events-none"
           style={{ background: "radial-gradient(ellipse at 70% 25%, rgba(251,191,36,0.15) 0%, transparent 55%)" }} />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="max-w-3xl animate-fade-up">
-            <span className="badge mb-6" style={{ background: "rgba(251,146,60,0.2)", color: "#fed7aa", border: "1px solid rgba(251,146,60,0.35)" }}>
-              Immobilier islamique · Halal
-            </span>
-            <h1 className="text-display text-white mb-6">
-              Votre maison,<br />
-              <span style={{ background: "linear-gradient(135deg, #fb923c, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                sans Riba
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="animate-fade-up">
+              <span className="badge mb-6" style={{ background: "rgba(251,146,60,0.2)", color: "#fed7aa", border: "1px solid rgba(251,146,60,0.35)" }}>
+                {fin.heading}
               </span>
-            </h1>
-            <p className="text-body-lg mb-10" style={{ color: "rgba(255,255,255,0.78)" }}>
-              Financez votre propriété avec Murabaha ou Diminishing Musharaka. Zéro intérêt, contrat halal certifié, propriété progressive.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <a href="#calculator" className="btn btn-xl flex items-center gap-2 text-white"
-                style={{ background: "linear-gradient(135deg, #ea580c, #c2410c)", boxShadow: "0 8px 30px rgba(234,88,12,0.4)" }}>
-                Calculer ma mensualité <ArrowRight size={20} />
-              </a>
-              <a href="#products" className="btn btn-outline-white btn-xl">Nos structures</a>
+              <h1 className="text-display text-white mb-6">{fin.heading}</h1>
+              <p className="text-body-lg mb-10" style={{ color: "rgba(255,255,255,0.78)" }}>
+                {fin.desc}
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <a href="#calculator" className="btn btn-xl flex items-center gap-2 text-white"
+                  style={{ background: "linear-gradient(135deg, #ea580c, #c2410c)", boxShadow: "0 8px 30px rgba(234,88,12,0.4)" }}>
+                  {fin.cta} <ArrowRight size={20} />
+                </a>
+                <a href="#products" className="btn btn-outline-white btn-xl">{fin.more}</a>
+              </div>
+            </div>
+
+            {/* Official KT Bank photo */}
+            <div className="flex justify-center lg:justify-end animate-fade-up delay-200">
+              <div className="relative w-full sm:w-[380px] aspect-[4/5] rounded-2xl overflow-hidden"
+                style={{ border: "1px solid rgba(251,146,60,0.35)" }}>
+                <Image src="/images/home/immobilienfinanzierung.jpg" alt={fin.heading} fill style={{ objectFit: "cover" }} sizes="(min-width: 1024px) 380px, 100vw" priority />
+              </div>
             </div>
           </div>
         </div>

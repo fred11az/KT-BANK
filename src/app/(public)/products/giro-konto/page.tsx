@@ -1,6 +1,16 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, CheckCircle, CreditCard, Smartphone, Shield, Zap, Globe, Banknote, Check, X } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+
+const BADGES: Record<string, string[]> = {
+  de: ["Kostenlos", "Null Riba", "BaFin", "Sofort-IBAN"],
+  fr: ["Gratuit à vie", "Zéro Riba", "BaFin", "IBAN instantané"],
+  en: ["Free for life", "Zero Riba", "BaFin", "Instant IBAN"],
+  tr: ["Ömür boyu ücretsiz", "Sıfır faiz", "BaFin", "Anında IBAN"],
+  ar: ["مجاني مدى الحياة", "بدون ربا", "BaFin", "آيبان فوري"],
+};
 
 const features = [
   { icon: Banknote, title: "Sans frais", desc: "Aucun frais de gestion mensuel, aucune commission cachée. Gratuit à vie." },
@@ -28,6 +38,10 @@ const comparison = [
 ];
 
 export default function GiroKontoPage() {
+  const { t } = useLanguage();
+  const g = t.home.giro;
+  const badges = BADGES[t.lang] ?? BADGES.en;
+
   return (
     <>
       {/* Hero */}
@@ -41,57 +55,33 @@ export default function GiroKontoPage() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="animate-fade-up">
               <span className="section-label" style={{ background: "rgba(201,146,26,0.2)", border: "1px solid rgba(201,146,26,0.4)", color: "var(--gold-200)" }}>
-                Compte courant
+                {g.heading}
               </span>
-              <h1 className="text-display text-white mt-2 mb-6">
-                KT GiroKonto<br />
-                <span style={{ color: "var(--gold-300)" }}>Sans frais. Halal.</span>
-              </h1>
+              <h1 className="text-display text-white mt-2 mb-6">{g.heading}</h1>
               <p className="text-body-lg mb-8" style={{ color: "rgba(255,255,255,0.8)" }}>
-                Le premier compte courant islamique d'Allemagne. Gérez votre quotidien sans intérêts, sans compromis — certifié Sharia, réglementé BaFin.
+                {g.desc}
               </p>
               <div className="flex flex-wrap gap-3 mb-10">
-                {["Gratuit à vie", "Zéro Riba", "BaFin", "IBAN instantané"].map((t) => (
-                  <span key={t} className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold"
+                {badges.map((b) => (
+                  <span key={b} className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold"
                     style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)" }}>
-                    <Check size={14} /> {t}
+                    <Check size={14} /> {b}
                   </span>
                 ))}
               </div>
               <div className="flex flex-wrap gap-4">
                 <Link href="/client/register" className="btn btn-gold btn-lg flex items-center gap-2">
-                  Ouvrir mon compte <ArrowRight size={18} />
+                  {g.cta} <ArrowRight size={18} />
                 </Link>
-                <Link href="#comparison" className="btn btn-outline-white btn-lg">En savoir plus</Link>
+                <Link href="#comparison" className="btn btn-outline-white btn-lg">{g.more}</Link>
               </div>
             </div>
 
-            {/* Card visual */}
+            {/* Official KT Bank photo */}
             <div className="flex justify-center lg:justify-end animate-fade-up delay-200">
-              <div className="relative w-full sm:w-auto">
-                <div className="w-full sm:w-[340px] h-[200px] rounded-2xl p-5 sm:p-7 flex flex-col justify-between shadow-2xl"
-                  style={{ background: "linear-gradient(135deg, var(--green-800), #007A3D)", border: "1px solid rgba(201,146,26,0.4)" }}>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="text-xs mb-1" style={{ color: "var(--green-400)" }}>KT Bank AG</p>
-                      <p className="font-black text-white text-xl">GiroKonto</p>
-                    </div>
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center"
-                      style={{ background: "rgba(201,146,26,0.25)" }}>
-                      <span style={{ color: "var(--gold-300)" }}>☽</span>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-xs mb-1" style={{ color: "rgba(255,255,255,0.5)" }}>IBAN</p>
-                    <p className="text-white font-mono text-sm tracking-wider">DE89 3704 0044 0532 0130 00</p>
-                  </div>
-                  <div className="flex justify-between items-end">
-                    <span className="badge badge-gold text-xs">✓ Halal Certified</span>
-                    <span className="text-white font-black text-lg tracking-widest">VISA</span>
-                  </div>
-                </div>
-                <div className="hidden sm:block absolute -bottom-3 -right-3 w-[320px] h-[185px] rounded-2xl -z-10"
-                  style={{ background: "linear-gradient(135deg, var(--gold-400), var(--gold-200))", opacity: 0.18 }} />
+              <div className="relative w-full sm:w-[380px] aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl"
+                style={{ border: "1px solid rgba(201,146,26,0.4)" }}>
+                <Image src="/images/home/girokonto.jpg" alt={g.heading} fill style={{ objectFit: "cover" }} sizes="(min-width: 1024px) 380px, 100vw" priority />
               </div>
             </div>
           </div>

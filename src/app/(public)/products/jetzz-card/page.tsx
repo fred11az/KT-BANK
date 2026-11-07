@@ -1,7 +1,9 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, CheckCircle, Shield, Zap, Globe, Gift, CreditCard, Bell, RefreshCw } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const installments = [
   { months: 3, rate: 0.5, label: "3 mois" },
@@ -28,6 +30,8 @@ interface FormState {
 }
 
 export default function JetzzCardPage() {
+  const { t } = useLanguage();
+  const j = t.home.jetzzcard;
   const [form, setForm] = useState<FormState>({ name: "", email: "", income: "" });
   const [submitted, setSubmitted] = useState(false);
 
@@ -51,69 +55,26 @@ export default function JetzzCardPage() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="animate-fade-up">
               <span className="badge mb-6" style={{ background: "rgba(99,102,241,0.2)", color: "#a5b4fc", border: "1px solid rgba(99,102,241,0.35)" }}>
-                ✦ Carte Premium
+                ✦ {j.heading}
               </span>
-              <h1 className="text-display text-white mb-6">
-                Jetzz Card<br />
-                <span style={{ background: "linear-gradient(135deg, #818cf8, #c084fc)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                  Paiements halal
-                </span>
-              </h1>
+              <h1 className="text-display text-white mb-6">{j.heading}</h1>
               <p className="text-body-lg mb-10" style={{ color: "rgba(255,255,255,0.72)" }}>
-                La première carte de crédit islamique d&apos;Allemagne. Paiements en plusieurs fois sans intérêts — en accord avec vos valeurs.
+                {j.desc}
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link href="#apply" className="btn btn-xl flex items-center gap-2 text-white"
                   style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", boxShadow: "0 8px 30px rgba(99,102,241,0.4)" }}>
-                  Demander la carte <ArrowRight size={20} />
+                  {j.cta} <ArrowRight size={20} />
                 </Link>
-                <Link href="#plans" className="btn btn-outline-white btn-xl">Voir les plans</Link>
+                <Link href="#plans" className="btn btn-outline-white btn-xl">{j.more}</Link>
               </div>
             </div>
 
-            {/* Card CSS visual */}
+            {/* Official KT Bank photo */}
             <div className="flex justify-center lg:justify-end animate-fade-up delay-200">
-              <div className="relative animate-float w-full sm:w-auto">
-                <div className="w-full sm:w-[360px] h-[220px] rounded-3xl p-5 sm:p-8 flex flex-col justify-between relative overflow-hidden"
-                  style={{ background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%)", boxShadow: "0 30px 80px rgba(99,102,241,0.5), 0 0 0 1px rgba(255,255,255,0.1)" }}>
-                  {/* Sheen */}
-                  <div className="absolute inset-0 rounded-3xl pointer-events-none"
-                    style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%)" }} />
-                  <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full pointer-events-none"
-                    style={{ background: "radial-gradient(circle, rgba(139,92,246,0.4), transparent)" }} />
-
-                  <div className="relative flex justify-between items-start">
-                    <div>
-                      <p className="text-xs font-semibold mb-0.5" style={{ color: "rgba(255,255,255,0.6)" }}>KT Bank AG</p>
-                      <p className="font-black text-white text-xl tracking-wide">JETZZ</p>
-                    </div>
-                    <div className="flex gap-1">
-                      <div className="w-8 h-8 rounded-full opacity-80" style={{ background: "#FF5F00" }} />
-                      <div className="w-8 h-8 rounded-full -ml-3 opacity-80" style={{ background: "#EB001B" }} />
-                    </div>
-                  </div>
-
-                  <div className="relative">
-                    <div className="w-12 h-9 rounded-md mb-4"
-                      style={{ background: "linear-gradient(135deg, #fbbf24, #f59e0b)", boxShadow: "0 2px 8px rgba(251,191,36,0.4)" }} />
-                    <p className="text-white font-mono text-lg tracking-[0.25em]">4582  ••••  ••••  7731</p>
-                  </div>
-
-                  <div className="relative flex justify-between items-end">
-                    <div>
-                      <p className="text-xs mb-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>Titulaire</p>
-                      <p className="text-white font-semibold text-sm">MOHAMMED AL-RASHID</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs mb-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>Expire</p>
-                      <p className="text-white font-semibold text-sm">12/28</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Shadow card below */}
-                <div className="absolute -bottom-4 left-4 right-4 h-[220px] rounded-3xl -z-10 opacity-40"
-                  style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }} />
+              <div className="relative w-full sm:w-[380px] aspect-[4/5] rounded-3xl overflow-hidden"
+                style={{ boxShadow: "0 30px 80px rgba(99,102,241,0.5), 0 0 0 1px rgba(255,255,255,0.1)" }}>
+                <Image src="/images/home/jetzzcard.jpg" alt={j.heading} fill style={{ objectFit: "cover" }} sizes="(min-width: 1024px) 380px, 100vw" priority />
               </div>
             </div>
           </div>

@@ -1,6 +1,8 @@
 "use client";
 import Link from "next/link";
-import { ArrowRight, TrendingUp, Shield, CheckCircle, Award, Banknote, RefreshCw, Lock, Star } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, Shield, CheckCircle, Award, Banknote, RefreshCw, Lock, Star } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const features = [
   { icon: Banknote, title: "Dès 1 €", desc: "Commencez à investir dans l'or physique avec seulement 1 €." },
@@ -11,13 +13,9 @@ const features = [
   { icon: Star, title: "Halal certifié", desc: "Conformité Sharia — pas de spéculation, actif tangible réel." },
 ];
 
-const periods = [
-  { label: "3 mois", perf: "+1.2%", trend: "Stable" },
-  { label: "6 mois", perf: "+2.8%", trend: "Hausse" },
-  { label: "12 mois", perf: "+4.2%", trend: "Forte hausse" },
-];
-
 export default function GoldKontoPage() {
+  const { t } = useLanguage();
+  const go = t.home.goldkonto;
   return (
     <>
       {/* Hero */}
@@ -32,51 +30,24 @@ export default function GoldKontoPage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="animate-fade-up">
-              <span className="badge badge-gold mb-6">Or Physique · Halal</span>
-              <h1 className="text-display text-white mb-6">
-                Investissez dans l&apos;or<br />
-                <span className="text-gradient-gold">physique dès 1 €</span>
-              </h1>
+              <span className="badge badge-gold mb-6">{go.heading}</span>
+              <h1 className="text-display text-white mb-6">{go.heading}</h1>
               <p className="text-body-lg mb-8" style={{ color: "rgba(255,255,255,0.78)" }}>
-                Protégez votre patrimoine avec de l&apos;or certifié LBMA, stocké en coffre suisse. Un investissement halal, tangible, sans intérêts.
+                {go.desc}
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link href="/client/register" className="btn btn-gold btn-lg flex items-center gap-2">
-                  Investir maintenant <ArrowRight size={18} />
+                  {go.cta} <ArrowRight size={18} />
                 </Link>
-                <Link href="#features" className="btn btn-outline-white btn-lg">Découvrir</Link>
+                <Link href="#features" className="btn btn-outline-white btn-lg">{go.more}</Link>
               </div>
             </div>
 
-            {/* Gold price card */}
+            {/* Official KT Bank photo */}
             <div className="animate-fade-up delay-200">
-              <div className="p-8 rounded-2xl" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(201,146,26,0.35)", backdropFilter: "blur(20px)" }}>
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <p className="text-small mb-1" style={{ color: "var(--gold-200)" }}>Cours actuel (XAU/g)</p>
-                    <p className="font-black text-white" style={{ fontSize: "3rem", lineHeight: 1 }}>€62.30</p>
-                  </div>
-                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl"
-                    style={{ background: "linear-gradient(135deg, var(--gold-400), var(--gold-300))", boxShadow: "var(--shadow-gold)" }}>
-                    ✦
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 mb-8">
-                  <TrendingUp size={18} style={{ color: "var(--gold-300)" }} />
-                  <span className="font-bold" style={{ color: "var(--gold-300)" }}>+4.2% sur 12 mois</span>
-                  <span className="text-small" style={{ color: "rgba(255,255,255,0.5)" }}>vs. dépôt bancaire 0%</span>
-                </div>
-                <div className="divider-gold" style={{ margin: "0 0 24px" }} />
-                <div className="grid grid-cols-3 gap-4">
-                  {periods.map((p) => (
-                    <div key={p.label} className="text-center p-3 rounded-xl"
-                      style={{ background: "rgba(201,146,26,0.12)", border: "1px solid rgba(201,146,26,0.2)" }}>
-                      <p className="text-small mb-1" style={{ color: "rgba(255,255,255,0.6)" }}>{p.label}</p>
-                      <p className="font-black" style={{ color: "var(--gold-300)" }}>{p.perf}</p>
-                      <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.7rem" }}>{p.trend}</p>
-                    </div>
-                  ))}
-                </div>
+              <div className="relative w-full aspect-[4/5] sm:aspect-[4/3] rounded-2xl overflow-hidden"
+                style={{ border: "1px solid rgba(201,146,26,0.35)" }}>
+                <Image src="/images/home/goldkonto.jpg" alt={go.heading} fill style={{ objectFit: "cover" }} sizes="(min-width: 1024px) 50vw, 100vw" priority />
               </div>
             </div>
           </div>

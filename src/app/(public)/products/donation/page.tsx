@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import Link from "next/link";
 import { Heart, CheckCircle } from "lucide-react";
 
 const DONATION_TYPES = [
@@ -32,7 +31,13 @@ export default function DonationPage() {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(25);
   const [customAmount, setCustomAmount] = useState("");
   const [project, setProject] = useState(PROJECTS[0]);
+  const [prenom, setPrenom] = useState("");
+  const [nom, setNom] = useState("");
+  const [email, setEmail] = useState("");
+  const [telephone, setTelephone] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
 
   function calcZakat() {
     const val = parseFloat(savings);
@@ -43,9 +48,32 @@ export default function DonationPage() {
     }
   }
 
-  function handleDonate(e: React.FormEvent) {
+  async function handleDonate(e: React.FormEvent) {
     e.preventDefault();
-    setSubmitted(true);
+    setLoading(true);
+    setApiError("");
+    const typeLabel = DONATION_TYPES.find((t) => t.id === donationType)?.label ?? donationType;
+    try {
+      const res = await fetch("/api/kt/offers/interest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          offer: "donation",
+          prenom,
+          nom,
+          email,
+          telephone,
+          message: `Type : ${typeLabel}\nMontant : ${finalAmount} €\nProjet : ${project}`,
+          lang: "fr",
+        }),
+      });
+      if (!res.ok) throw new Error();
+      setSubmitted(true);
+    } catch {
+      setApiError("Une erreur est survenue. Réessayez ou écrivez-nous à support@kt-bank-ag.com.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   const finalAmount = selectedAmount ?? (parseFloat(customAmount) || 0);
@@ -66,7 +94,7 @@ export default function DonationPage() {
               🌙
             </div>
             <span className="badge mb-4" style={{ background: "rgba(251,191,36,0.2)", color: "#fde68a", border: "1px solid rgba(251,191,36,0.35)" }}>
-              Don islamique · Zakat · Sadaqa
+              Campagne 2026/2027 · Don islamique · Zakat · Sadaqa
             </span>
             <h1 className="text-display text-white mb-5">
               Donnez avec <span style={{ color: "#fde68a" }}>intention</span>
@@ -161,9 +189,9 @@ export default function DonationPage() {
               <div className="text-5xl mb-4">🌙</div>
               <h3 className="font-black text-2xl mb-3" style={{ color: "var(--gray-900)" }}>JazakAllah Khairan !</h3>
               <p className="text-body mb-2" style={{ color: "var(--gray-600)" }}>
-                Votre don de <strong>{finalAmount} €</strong> pour <em>{project}</em> a été reçu.
+                Votre demande de don de <strong>{finalAmount} €</strong> pour <em>{project}</em> a bien été enregistrée.
               </p>
-              <p className="text-small" style={{ color: "var(--gray-400)" }}>Que Allah accepte votre sadaqa et vous récompense.</p>
+              <p className="text-small" style={{ color: "var(--gray-400)" }}>Notre équipe vous recontactera à {email} pour finaliser votre don. Que Allah accepte votre sadaqa et vous récompense.</p>
             </div>
           ) : (
             <form onSubmit={handleDonate} className="card p-8 space-y-6">
@@ -210,11 +238,27 @@ export default function DonationPage() {
                 </select>
               </div>
 
-              <button type="submit" disabled={finalAmount <= 0}
+              {/* Contact */}
+              <div>
+                <label className="label">Vos coordonnées</label>
+                <div className="grid sm:grid-cols-2 gap-3 mb-3">
+                  <input required className="input" placeholder="Prénom" value={prenom} onChange={(e) => setPrenom(e.target.value)} />
+                  <input required className="input" placeholder="Nom" value={nom} onChange={(e) => setNom(e.target.value)} />
+                </div>
+                <input required className="input mb-3" type="email" placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} />
+                <input className="input" type="tel" placeholder="Téléphone (optionnel)" value={telephone} onChange={(e) => setTelephone(e.target.value)} />
+              </div>
+
+              {apiError && <p className="text-small" style={{ color: "#DC2626" }}>{apiError}</p>}
+
+              <button type="submit" disabled={finalAmount <= 0 || loading}
                 className="btn btn-xl w-full flex items-center justify-center gap-2 text-white disabled:opacity-50"
                 style={{ background: "linear-gradient(135deg, #d97706, #b45309)", boxShadow: "0 8px 24px rgba(217,119,6,0.35)" }}>
-                <Heart size={20} /> Donner {finalAmount > 0 ? `${finalAmount} €` : ""}
+                <Heart size={20} /> {loading ? "Envoi…" : `Donner ${finalAmount > 0 ? `${finalAmount} €` : ""}`}
               </button>
+              <p className="text-small text-center" style={{ color: "var(--gray-400)" }}>
+                Votre demande est transmise à notre équipe, qui vous recontactera pour finaliser le don.
+              </p>
             </form>
           )}
         </div>
