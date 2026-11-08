@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useAdmin } from "../layout";
 import { FileText, Send, Trash2, Check, X, Eye, RefreshCw, ChevronDown, User, Plus, Download, ArrowLeft } from "lucide-react";
 import { DOC_TYPES, SUBMISSION_TYPES } from "@/lib/document-templates";
+import { prepareViewerHtml } from "@/lib/doc-viewer";
 
 type Client = { id: string; prenom: string; nom: string; email: string; created_at: string };
 type KtDoc = { id: string; client_id: string; type: string; title: string; description?: string; content_html?: string; file_url?: string; status: string; created_at: string };
@@ -475,7 +476,7 @@ export default function AdminDocumentsPage() {
               <Download size={15} /> PDF
             </button>
           </div>
-          <iframe ref={docIframeRef} srcDoc={viewerHtml} title="Document"
+          <iframe ref={docIframeRef} srcDoc={prepareViewerHtml(viewerHtml)} title="Document"
             style={{ flex: 1, width: "100%", border: "none", background: "white" }} />
         </div>
       )}

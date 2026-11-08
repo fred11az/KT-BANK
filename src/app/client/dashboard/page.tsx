@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { genTilgungsplan } from "@/lib/document-templates";
+import { prepareViewerHtml } from "@/lib/doc-viewer";
 import { useLanguage } from "@/contexts/LanguageContext";
 import BusinessAccountForm from "@/components/client/BusinessAccountForm";
 import NotificationsBell from "@/components/client/NotificationsBell";
@@ -3782,7 +3783,7 @@ export default function ClientDashboard() {
               <Download size={15} /> PDF
             </button>
           </div>
-          <iframe ref={docIframeRef} srcDoc={viewerHtml} title="Document"
+          <iframe ref={docIframeRef} srcDoc={prepareViewerHtml(viewerHtml)} title="Document"
             style={{ flex: 1, width: "100%", border: "none", background: "white" }} />
         </div>
       )}
